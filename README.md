@@ -1,1 +1,1 @@
-# project
+- SaCas9 모델 예측 실행시 가중치파일을 해당 위치(https://drive.google.com/drive/folders/1k0rX6jWNjIstAEIxn_0nxlC9XViqSH8O?usp=drive_link)에서 다운받아 data 폴더에 넣어 사용하여야 합니다.
