@@ -1,0 +1,14 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Virtual Environments
+crispr_env/
+venv/
+env/
+
+# Deep Learning Weights & Data
+*.pth
+*.pt
+dataset/
+data/
