@@ -8,7 +8,7 @@ venv/
 env/
 
 # Deep Learning Weights & Data
-
+*.pth
 *.pt
 dataset/
-spcas9_pretrained_weight.pth
+data/
