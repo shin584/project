@@ -2,6 +2,7 @@
 * 시뮬레이션 모델이 pam 서열 차이를 구분하는지 확인
 * 의도적으로 pam 서열을 파괴한 타겟 서열(nagative) 입력
 
+```text
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] protein|SpCas9_True_Tier2.3_REC3_Half 847
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] rna|EMX1_sgRNA 99
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] dna|Negative_EMX1_Non_Target_Strand 30
@@ -48,7 +49,7 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=2.000000, mean=0.125000
 (chai1) shin@TeamB511105:~$ ./parsing.sh
 [INFO] Chai-1 ipTM (신뢰도) 추출 완료: 0.6305
 [INFO] 물리적 접촉 점수(Contact Score) 연산 완료: 1141 points
-
+```
 
 ## 결론
 * pam을 의도적으로 파괴한 음성실험군에서 contact score와 ipTM의 변화가 관찰되지 않음.
