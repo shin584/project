@@ -2,7 +2,7 @@
 
 ## Cas 단백질 도메인 구성 : N말단 WED / C말단 WED / PI도메인 / RuvC,Nuc 엽
 
-'''fasta
+```fasta
 >protein|AsCas12a_WED_Fusion_837aa
 MTQFEGFTNLYQVSKTLRFELIPQGKTLKHIQEQGFIEEDKARNDHYKELKPIIDRIYKTYADQCLQLVQLDWWDVNKEK
 NNGAILFVKNGLYYLGIMPKQKGRYKALSFEPTEKTSEGFDKMYYDYFPDAAKMIPKCSTQLKAVTAHFQTHTTPILLSN
@@ -21,12 +21,12 @@ UAAUUUCUACUCUUGUAGAUCUGGGGCAGGGACUCCACCA
 TTGATTTCCTGGGGCAGGGACTCCACCAGCTTCT
 >dna|Target_DNA_Target_Strand
 AGAAGCTGGTGGAGTCCCTGCCCCAGGAAATCAA
-'''
+```
 
 ---
 ## 테스트 결과
 
-'''
+```text
 ========== 2) NPZ Contents (keys/shape/dtype) ==========
 file: /home/shin/chai1_test/output/scores.model_idx_0.npz
 keys: ['aggregate_score', 'ptm', 'iptm', 'per_chain_ptm', 'per_chain_pair_iptm', 'has_inter_chain_clashes', 'chain_chain_clashes']
@@ -52,5 +52,4 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=8.000000, mean=1.000000
 
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 1306, 'iptm': 0.49529239535331726}
-
-'''
+```
