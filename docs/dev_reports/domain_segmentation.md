@@ -28,18 +28,20 @@ PAAFKYFDTTIDRKRYTSTKEVLDATLIHQSITGLYETRIDLSQLGGD
 ATGCGTACGTAGCTAGCTAGNNGRRT
 ```
 
-##결과	
-vram 초과 발생
+## 결과	
+* vram 초과 발생
+
 ---
 
 # tier 1 PI 도메인(약 230aa)
-##결과
+## 결과
 * contact score : 812
 *	ipTM : 0.0974
 *	점수가 저조할 뿐만 아니라 편차도 매우 큼.
 
 
 # Tier 2 (WED + PI + sgRNA + dsDNA)
+
 ```fasta
 >protein|SpCas9_WED_PI IKKYPKLESEFVYGDYKVYDVRKMIAKSEQEIGKATAKYFFYSNIMNFFKTEITLANGEIRKRPLIETNGETGEIVWDKGRDFATVRKVLSMPQVNIVKKTEVQTGGFSKESILPKRNSDKLIARKKDWDPKKYGGFDSPTVAYSVLVVAKVEKGKSKKLKSVKELLGITIMERSSFEKNPIDFLEAKGYKEVKKDLIIKLPKYSLFELENGRKRMLASAGELQKGNELALPSKYVNFLYLASHYEKLKGSPEDNEQKQLFVEQHKHYLDEIIEQISEFSKRVILADANLDKVLSAYNKHRDKPIREQAENIIHLFTLTNLGAPAAFKYFDTTIDRKRYTSTKEVLDATLIHQSITGLYETRIDLSQLGGD >rna|EMX1_sgRNA GAGUCCGAGCAGAAGAAGAAGUUUUAGAGCUAGAAAUAGCAAGUUAAAAUAAGGCUAGUCCGUUAUCAACUUGAAAAAGUGGCACCGAGUCGGUGCUUU >dna|EMX1_Target_Strand TCAGCCCTTCTTCTTCTGCTCGGACTCGGC >dna|EMX1_Non_Target_Strand GCCGAGTCCGAGCAGAAGAAGAAGGGCTGA
 
@@ -80,7 +82,8 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=6.000000, mean=1.375000
 ```
 
 *	**2차 시기**
-```fasta
+*	
+```text
 ========== 1) CIF Summary ==========
 file: /home/shin/chai1_test/output/pred.model_idx_0.cif
 models: 1
@@ -116,14 +119,19 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=2.000000, mean=0.562500
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 996, 'iptm': 0.3167475759983063}
 ```
+
 ## 결과
-여전히 분산이 큼
+* 여전히 분산이 큼
+
 ---
+
 # Tier 3 RuvC II & III, HNH, WED, PI 도메인
 ```fasta
 >protein|SpCas9_Tier2_NUC DKDFLDNEENEDILEDIVLTLTLFEDREMIEERLKTYAHLFDDKVMKQLKRRRYTGWGRLSRKLINGIRDKQSGKTILDFLKSDGFANRNFMQLIHDDSLTFKEDIQKAQVSGQGDSLHEHIANLAGSPAIKKGILQTVKVVDELVKVMGRHKPENIVIEMARENQTTQKGQKNSRERMKRIEEGIKELGSQILKEHPVENTQLQNEKLYLYYLQNGRDMYVDQELDINRLSDYDVDHIVPQSFLKDDSIDNKVLTRSDKNRGKSDNVPSEEVVKKMKNYWRQLLNAKLITQRKFDNLTKAERGGLSELDKAGFIKRQLVETRQITKHVAQILDSRMNTKYDENDKLIREVKVITLKSKLVSDFRKDFQFYKVREINNYHHAHDAYLNAVVGTALIKKYPKLESEFVYGDYKVYDVRKMIAKSEQEIGKATAKYFFYSNIMNFFKTEITLANGEIRKRPLIETNGETGEIVWDKGRDFATVRKVLSMPQVNIVKKTEVQTGGFSKESILPKRNSDKLIARKKDWDPKKYGGFDSPTVAYSVLVVAKVEKGKSKKLKSVKELLGITIMERSSFEKNPIDFLEAKGYKEVKKDLIIKLPKYSLFELENGRKRMLASAGELQKGNELALPSKYVNFLYLASHYEKLKGSPEDNEQKQLFVEQHKHYLDEIIEQISEFSKRVILADANLDKVLSAYNKHRDKPIREQAENIIHLFTLTNLGAPAAFKYFDTTIDRKRYTSTKEVLDATLIHQSITGLYETRIDLSQLGGD >rna|EMX1_sgRNA GAGUCCGAGCAGAAGAAGAAGUUUUAGAGCUAGAAAUAGCAAGUUAAAAUAAGGCUAGUCCGUUAUCAACUUGAAAAAGUGGCACCGAGUCGGUGCUUU >dna|EMX1_Target_Strand TCAGCCCTTCTTCTTCTGCTCGGACTCGGC >dna|EMX1_Non_Target_Strand GCCGAGTCCGAGCAGAAGAAGAAGGGCTGA
+```
 
--	1차 시기
+* **1차 시기**
+```text
 ========== 2) NPZ Contents (keys/shape/dtype) ==========
 file: /home/shin/chai1_test/output/scores.model_idx_0.npz
 keys: ['aggregate_score', 'ptm', 'iptm', 'per_chain_ptm', 'per_chain_pair_iptm', 'has_inter_chain_clashes', 'chain_chain_clashes']
@@ -150,9 +158,12 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=5.000000, mean=1.000000
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 1461, 'iptm': 0.526336133480072}
 ```
-* **결과:** contact score의 큰 상승은 없지만, iptm의 유의미한 상승이 관찰됨
+
+## 결과
+* contact score의 큰 상승은 없지만, iptm의 유의미한 상승이 관찰됨
 
 * **2차 시기**
+```text
 ========== 1) CIF Summary ==========
 file: /home/shin/chai1_test/output/pred.model_idx_0.cif
 models: 1
@@ -189,8 +200,10 @@ bash: ./parsin.sh: No such file or directory
 
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 1164, 'iptm': 0.5073719024658203}
+```
 
 * **3차 시기**
+```text
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] protein|SpCas9_Tier2_NUC 766
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] rna|EMX1_sgRNA 99
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] dna|EMX1_Target_Strand 30
@@ -240,7 +253,7 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=10.000000, mean=1.687500
 
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 1095, 'iptm': 0.5120094418525696}
-
+```
 
 ## 결과
 contact score의 편차는 여전히 존재하나 iptm은 비교적 안정된 모습을 보임.
@@ -258,7 +271,10 @@ to avoid fragmentation.  See documentation for Memory Management
 ## 결과
 vram 초과 발생
 
+---
+
 # tier 3.3 
+
 ```fasta
 >protein|SpCas9_True_Tier2.3_REC3_Half
 NELTKVKYVTEGMRKPAFLSGEQKKAIVDLLFKTNRKVTVKQLKEDYFKKIECFDSVEISGVEDRFNASLGTYHDLLKIIKDKDFLDNEENEDILEDIVLTLTLFEDREMIEERLKTYAHLFDDKVMKQLKRRRYTGWGRLSRKLINGIRDKQSGKTILDFLKSDGFANRNFMQLIHDDSLTFKEDIQKAQVSGQGDSLHEHIANLAGSPAIKKGILQTVKVVDELVKVMGRHKPENIVIEMARENQTTQKGQKNSRERMKRIEEGIKELGSQILKEHPVENTQLQNEKLYLYYLQNGRDMYVDQELDINRLSDYDVDHIVPQSFLKDDSIDNKVLTRSDKNRGKSDNVPSEEVVKKMKNYWRQLLNAKLITQRKFDNLTKAERGGLSELDKAGFIKRQLVETRQITKHVAQILDSRMNTKYDENDKLIREVKVITLKSKLVSDFRKDFQFYKVREINNYHHAHDAYLNAVVGTALIKKYPKLESEFVYGDYKVYDVRKMIAKSEQEIGKATAKYFFYSNIMNFFKTEITLANGEIRKRPLIETNGETGEIVWDKGRDFATVRKVLSMPQVNIVKKTEVQTGGFSKESILPKRNSDKLIARKKDWDPKKYGGFDSPTVAYSVLVVAKVEKGKSKKLKSVKELLGITIMERSSFEKNPIDFLEAKGYKEVKKDLIIKLPKYSLFELENGRKRMLASAGELQKGNELALPSKYVNFLYLASHYEKLKGSPEDNEQKQLFVEQHKHYLDEIIEQISEFSKRVILADANLDKVLSAYNKHRDKPIREQAENIIHLFTLTNLGAPAAFKYFDTTIDRKRYTSTKEVLDATLIHQSITGLYETRIDLSQLGGD
@@ -268,7 +284,10 @@ GAGUCCGAGCAGAAGAAGAAGUUUUAGAGCUAGAAAUAGCAAGUUAAAAUAAGGCUAGUCCGUUAUCAACUUGAAAAAGU
 TCAGCCCTTCTTCTTCTGCTCGGACTCGGC
 >dna|EMX1_Non_Target_Strand
 GCCGAGTCCGAGCAGAAGAAGAAGGGCTGA
--	1차 시기
+```
+* **1차 시기**
+
+```text
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] protein|SpCas9_True_Tier2.3_REC3_Half 847
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] rna|EMX1_sgRNA 99
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] dna|EMX1_Target_Strand 30
@@ -322,7 +341,7 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=10.000000, mean=3.125000
 
 *	**2차시기**
 
-```fasta
+```text
 9_True_Tier2.3_REC3_Half 847
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] rna|EMX1_sgRNA 99
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] dna|EMX1_Target_Strand 30
@@ -372,10 +391,11 @@ chain_chain_clashes: shape=(1, 4, 4), min=0.000000, max=10.000000, mean=3.125000
 
 [SUCCESS] 최종 추출된 1차원 피처 데이터:
 {'contact_score': 1909, 'iptm': 0.5798485279083252}
+```
 
 * **3차시기**
 
-```
+```text
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] protein|SpCas9_True_Tier2.3_REC3_Half 847
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] rna|EMX1_sgRNA 99
 INFO:chai_lab.data.dataset.inference_dataset:[fasta] [/home/shin/chai1_test/input.fasta] dna|EMX1_Target_Strand 30
