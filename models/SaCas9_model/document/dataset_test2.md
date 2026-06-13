@@ -2,6 +2,7 @@
 
 * SaCas9의 원본 데이터셋(약 7000여개)를 모두 사용
 
+```text
 (crispr_env) C:\project\MC_project\SaCas9\crispr-cleavage-predictor>python main.py --mode finetune --data_path "dataset/Supplementary_Table_1_Saureus_model_input.xlsx" --epochs 100 --batch_size 64 --weight_path "data/spcas9_pretrained_weight.pth"
 Loading sequence data from: dataset/Supplementary_Table_1_Saureus_model_input.xlsx
 Dataset successfully loaded. Feature shape: torch.Size([7465, 36, 4])
@@ -49,5 +50,6 @@ Epoch 35/100 ━━━━━━━━━━━━━━━━━━━━ loss: 
 Epoch 36/100 ━━━━━━━━━━━━━━━━━━━━ loss: 0.0388 - mae: 0.1541 - val_loss: 0.0701 - val_mae: 0.2060 - learning_rate: 0.0000
 Epoch 37/100 ━━━━━━━━━━━━━━━━━━━━ loss: 0.0384 - mae: 0.1536 - val_loss: 0.0697 - val_mae: 0.2052 - learning_rate: 0.0000
 Learning rate reduced: 0.000025 -> 0.000013
+```
 
 * 성능이 오히려 하락함(val_mae: 0.1812 -> val_mae: 0.2052)
