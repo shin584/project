@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/cmino/Desktop/2026_1학기/컴그/기말/예제/GL_ex9_2_Lighting_1/GL_ex9_2_win",
+      "program": "c:/Users/cmino/Desktop/2026_1학기/컴그/기말/예제/GL_ex9_2_Lighting_1/GL_ex9_2_win/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
