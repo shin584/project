@@ -31,7 +31,7 @@ def load_models():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     
     model_path = os.path.join(BASE_DIR, "models", "Multi-Cas_1IN_9Hydra_Divide_Testset.keras")
-    cas12a_path = os.path.join(BASE_DIR, "models", "Cas12a_Only.keras")
+    cas12a_path = os.path.join(BASE_DIR, "models", "cas12a_model_fold_4.keras")
     
     model = tf.keras.models.load_model(model_path, compile=False)
     model_cas12a = tf.keras.models.load_model(cas12a_path, compile=False)
@@ -63,6 +63,29 @@ def one_hot_encode_dna(sequence: str) -> np.ndarray:
         'G': [0,0,1,0], 'T': [0,0,0,1],
     }
     return np.array([mapping.get(b, [0,0,0,0]) for b in sequence.upper()])
+
+
+def extract_seq_features(seq: str) -> tuple[np.ndarray, np.ndarray]:
+    protospacer = seq[8:31]
+    gc_total = (protospacer.count('G') + protospacer.count('C')) / 23
+    gc_seed  = (protospacer[-8:].count('G') + protospacer[-8:].count('C')) / 8
+    dinuc_map = {
+        a + b: i
+        for i, (a, b) in enumerate([(x, y) for x in 'ACGT' for y in 'ACGT'])
+    }
+    dinuc_features = np.zeros(22 * 16, dtype=np.float32)
+    for i in range(22):
+        pair = protospacer[i:i + 2]
+        if pair in dinuc_map:
+            dinuc_features[i * 16 + dinuc_map[pair]] = 1.0
+    return np.array([gc_total, gc_seed], dtype=np.float32), dinuc_features
+
+
+def build_cas12a_inputs(sequence: str) -> tuple[np.ndarray, np.ndarray]:
+    seq_input = np.expand_dims(one_hot_encode_dna(sequence).astype(np.float32), axis=0)
+    gc_feat, dinuc_feat = extract_seq_features(sequence)
+    feat_input = np.expand_dims(np.concatenate([gc_feat, dinuc_feat]), axis=0)
+    return seq_input, feat_input
 
 
 def run_prediction(all_results: ScanResult, model, models_sa, model_cas12a) -> ScanResult:
@@ -129,7 +152,8 @@ def run_prediction(all_results: ScanResult, model, models_sa, model_cas12a) -> S
 
         # ── Cas12a ───────────────────────────────────────────────────
         elif site.cas_type == 'Cas12a':
-            raw         = float(model_cas12a.predict(X_np, verbose=0)[0][0])
+            cas12a_seq_input, cas12a_feat_input = build_cas12a_inputs(site.model_input_seq)
+            raw         = float(model_cas12a.predict([cas12a_seq_input, cas12a_feat_input], verbose=0)[0][0])
             final_score = raw * penalty * MODEL_SCORE_SCALE['Cas12a']
 
             site.raw_score   = raw

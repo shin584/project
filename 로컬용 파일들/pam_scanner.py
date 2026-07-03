@@ -56,7 +56,7 @@ CAS_CONFIGS: list[CasConfig] = [
         guide_len       = 23,
         pam_position    = "5prime",
         cut_offset      = 20,
-        model_path      = "models/Cas12a_Only.keras",
+        model_path      = "models/cas12a_model_fold_4.keras",
         model_input_len = 34,
     ),
 ]
