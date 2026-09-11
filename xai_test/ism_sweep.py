@@ -52,15 +52,33 @@ def generate_ism_mutants(sequence: str) -> list[str]:
     return mutants
 
 
+def dispatch_in_batches(
+    fn, items: list[str], batch_size: int, stack=np.concatenate
+) -> np.ndarray:
+    """Call `fn()` in bounded chunks and combine the results with `stack`.
+
+    Generic version of the chunking `predict_in_batches` needs for 1D score
+    arrays; `step4_ablation.py` reuses this directly (with `stack=np.vstack`)
+    to batch `Model_B_Predictor.extract_nt_embeddings()`'s 2D output the same
+    way, instead of re-deriving the chunk loop.
+    """
+    if not items:
+        return np.array([])
+    chunks = [fn(items[i : i + batch_size]) for i in range(0, len(items), batch_size)]
+    return stack(chunks)
+
+
 def predict_in_batches(predictor, sequences: list[str], batch_size: int) -> np.ndarray:
     """Dispatch `predictor.predict()` in bounded chunks (shared with mismatch_profiling.py)."""
     if not sequences:
         return np.array([], dtype=np.float64)
-    score_chunks = [
-        np.asarray(predictor.predict(sequences[i : i + batch_size]), dtype=np.float64)
-        for i in range(0, len(sequences), batch_size)
-    ]
-    return np.concatenate(score_chunks)
+
+    def _predict_chunk(chunk):
+        return np.asarray(predictor.predict(chunk), dtype=np.float64)
+
+    return dispatch_in_batches(
+        _predict_chunk, sequences, batch_size, stack=np.concatenate
+    )
 
 
 def relative_delta(

@@ -41,7 +41,7 @@ class Model_B_Predictor:
                 model.load_model(path)
                 return model
 
-    def _extract_nt_embeddings(self, sequences: list[str]) -> np.ndarray:
+    def extract_nt_embeddings(self, sequences: list[str]) -> np.ndarray:
         inputs = self.tokenizer(
             sequences, return_tensors="pt", padding=True, truncation=True
         ).to(self.device)
@@ -117,7 +117,7 @@ class Model_B_Predictor:
             energies.extend(float(m) for m in matches)
         return energies
 
-    def _compute_physical_features(self, sequences: list[str]) -> np.ndarray:
+    def compute_physical_features(self, sequences: list[str]) -> np.ndarray:
         # 1. MFE (RNAfold.exe), batched across all sequences
         mfe_values = self._calc_mfe_batch(sequences)
 
@@ -137,8 +137,8 @@ class Model_B_Predictor:
         return np.array(features, dtype=np.float32)
 
     def predict(self, sequences: list[str]) -> np.ndarray:
-        embeddings = self._extract_nt_embeddings(sequences)
-        physical_feats = self._compute_physical_features(sequences)
+        embeddings = self.extract_nt_embeddings(sequences)
+        physical_feats = self.compute_physical_features(sequences)
 
         final_features = np.hstack([embeddings, physical_feats])
         assert final_features.shape[1] == 8964, (
