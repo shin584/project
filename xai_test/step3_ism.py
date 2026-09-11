@@ -2,9 +2,14 @@ import os
 
 import numpy as np
 import pandas as pd
-from ism_sweep import run_ism_sweep
+from ism_sweep import DEFAULT_PREDICT_BATCH_SIZE, run_ism_sweep
 from model_a_wrapper import Model_A_Predictor
 from model_b_wrapper import Model_B_Predictor
+
+# Lower this if predict() still runs out of memory (GPU or CPU) - neither
+# predictor batches internally, so this is what bounds how many sequences
+# hit a single forward pass.
+PREDICT_BATCH_SIZE = DEFAULT_PREDICT_BATCH_SIZE
 
 
 def main():
@@ -36,7 +41,9 @@ def main():
         f"\nRunning ISM sweep: {len(sequences)} sequences x 36 positions x 3 alt bases "
         f"({len(sequences) * 36 * 3} mutants per model)..."
     )
-    ism_result = run_ism_sweep(sequences, predictor_a, predictor_b)
+    ism_result = run_ism_sweep(
+        sequences, predictor_a, predictor_b, predict_batch_size=PREDICT_BATCH_SIZE
+    )
 
     for name, ism_delta in ism_result.items():
         print(

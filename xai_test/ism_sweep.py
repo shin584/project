@@ -20,6 +20,15 @@ BASES = ("A", "C", "G", "T")
 # below this magnitude are masked to NaN instead of producing a spurious ratio.
 RELATIVE_DELTA_NAN_THRESHOLD = 1e-4
 
+# Neither Model_A_Predictor nor Model_B_Predictor batches internally - predict()
+# runs whatever list it's given as one forward pass. An ISM sweep can hand it
+# tens of thousands of mutants at once, which is large enough to exhaust GPU
+# memory (observed: CUDA OOM inside Model A's LSTM forward pass on a 14.56GB
+# T4 trying to allocate 20.71 GiB for one such call). Chunking dispatch here
+# keeps peak memory bounded regardless of sweep size, without changing either
+# predictor's own predict() contract.
+DEFAULT_PREDICT_BATCH_SIZE = 256
+
 
 def alt_bases_for(wt_base: str) -> list[str]:
     """The 3 non-wild-type bases, in fixed lexicographic order."""
@@ -43,30 +52,43 @@ def generate_ism_mutants(sequence: str) -> list[str]:
     return mutants
 
 
+def _predict_in_batches(predictor, sequences: list[str], batch_size: int) -> np.ndarray:
+    if not sequences:
+        return np.array([], dtype=np.float64)
+    score_chunks = [
+        np.asarray(predictor.predict(sequences[i : i + batch_size]), dtype=np.float64)
+        for i in range(0, len(sequences), batch_size)
+    ]
+    return np.concatenate(score_chunks)
+
+
 def compute_ism_delta(
     sequences: Sequence[str],
     predictor,
     nan_threshold: float = RELATIVE_DELTA_NAN_THRESHOLD,
+    predict_batch_size: int = DEFAULT_PREDICT_BATCH_SIZE,
 ) -> np.ndarray:
     """Run the full ISM sweep for one predictor.
 
     Returns `ism_delta`, shape `(len(sequences), seq_len, 3)`: the relative
     score delta `(Score_mutant - Score_WT) / |Score_WT|` per position x
     lexicographic alternative base, NaN-masked wherever `|Score_WT| <=
-    nan_threshold`.
+    nan_threshold`. `predict_batch_size` bounds how many sequences reach
+    `predictor.predict()` per call; lower it if you still hit an
+    out-of-memory error.
     """
     sequences = list(sequences)
     seq_len = len(sequences[0])
     if any(len(seq) != seq_len for seq in sequences):
         raise ValueError("All sequences must share the same length for the ISM sweep.")
 
-    wt_scores = np.asarray(predictor.predict(sequences), dtype=np.float64)
+    wt_scores = _predict_in_batches(predictor, sequences, predict_batch_size)
 
     mutants: list[str] = []
     for sequence in sequences:
         mutants.extend(generate_ism_mutants(sequence))
 
-    mutant_scores = np.asarray(predictor.predict(mutants), dtype=np.float64)
+    mutant_scores = _predict_in_batches(predictor, mutants, predict_batch_size)
     mutant_scores = mutant_scores.reshape(len(sequences), seq_len, 3)
 
     wt_scores_broadcast = wt_scores[:, None, None]
@@ -79,10 +101,17 @@ def compute_ism_delta(
 
 
 def run_ism_sweep(
-    sequences: Sequence[str], predictor_a, predictor_b
+    sequences: Sequence[str],
+    predictor_a,
+    predictor_b,
+    predict_batch_size: int = DEFAULT_PREDICT_BATCH_SIZE,
 ) -> dict[str, np.ndarray]:
     """Run the ISM sweep for both models over the same Testset sequences."""
     return {
-        "ism_delta_model_a": compute_ism_delta(sequences, predictor_a),
-        "ism_delta_model_b": compute_ism_delta(sequences, predictor_b),
+        "ism_delta_model_a": compute_ism_delta(
+            sequences, predictor_a, predict_batch_size=predict_batch_size
+        ),
+        "ism_delta_model_b": compute_ism_delta(
+            sequences, predictor_b, predict_batch_size=predict_batch_size
+        ),
     }

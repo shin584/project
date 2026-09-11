@@ -125,6 +125,38 @@ def test_compute_ism_delta_rejects_mismatched_sequence_lengths():
         compute_ism_delta(["ACGT", "ACG"], predictor)
 
 
+def test_compute_ism_delta_batches_predict_calls_to_bound_memory():
+    # 3 x 36bp sequences -> 3 WT + 324 mutants.
+    sequences = ["ACGT" * 9, "TGCA" * 9, "GATC" * 9]
+    predictor = FakePredictor()
+
+    compute_ism_delta(sequences, predictor, predict_batch_size=50)
+
+    wt_call, *mutant_calls = predictor.calls
+    # The 3-sequence WT batch fits in one chunk...
+    assert len(wt_call) == 3
+    # ...but neither predictor batches internally, so a predict() call sized
+    # to the full 324-mutant sweep would risk exhausting GPU memory (this is
+    # what produced the reported CUDA OOM inside Model A's LSTM forward
+    # pass) - the 324 mutants must be split into bounded chunks instead.
+    assert len(mutant_calls) > 1
+    assert all(len(chunk) <= 50 for chunk in mutant_calls)
+    assert sum(len(chunk) for chunk in mutant_calls) == 324
+
+
+def test_compute_ism_delta_batch_size_does_not_change_values():
+    sequences = ["ACGT" * 9]
+    predictor_one_shot = FakePredictor()
+    predictor_batched = FakePredictor()
+
+    one_shot = compute_ism_delta(
+        sequences, predictor_one_shot, predict_batch_size=10_000
+    )
+    batched = compute_ism_delta(sequences, predictor_batched, predict_batch_size=7)
+
+    np.testing.assert_allclose(one_shot, batched)
+
+
 def test_run_ism_sweep_returns_both_model_arrays():
     sequences = ["ACGT" * 9]
     predictor_a = FakePredictor()
@@ -137,3 +169,16 @@ def test_run_ism_sweep_returns_both_model_arrays():
     assert result["ism_delta_model_b"].shape == (1, 36, 3)
     # Each model is queried independently against its own predictor.
     assert predictor_a.calls and predictor_b.calls
+
+
+def test_run_ism_sweep_forwards_predict_batch_size_to_both_models():
+    sequences = ["ACGT" * 9]  # 36 positions x 3 alt bases = 108 mutants
+    predictor_a = FakePredictor()
+    predictor_b = FakePredictor()
+
+    run_ism_sweep(sequences, predictor_a, predictor_b, predict_batch_size=40)
+
+    for predictor in (predictor_a, predictor_b):
+        mutant_calls = predictor.calls[1:]
+        assert len(mutant_calls) > 1
+        assert all(len(chunk) <= 40 for chunk in mutant_calls)
