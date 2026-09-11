@@ -52,7 +52,8 @@ def generate_ism_mutants(sequence: str) -> list[str]:
     return mutants
 
 
-def _predict_in_batches(predictor, sequences: list[str], batch_size: int) -> np.ndarray:
+def predict_in_batches(predictor, sequences: list[str], batch_size: int) -> np.ndarray:
+    """Dispatch `predictor.predict()` in bounded chunks (shared with mismatch_profiling.py)."""
     if not sequences:
         return np.array([], dtype=np.float64)
     score_chunks = [
@@ -60,6 +61,24 @@ def _predict_in_batches(predictor, sequences: list[str], batch_size: int) -> np.
         for i in range(0, len(sequences), batch_size)
     ]
     return np.concatenate(score_chunks)
+
+
+def relative_delta(
+    wt_scores: np.ndarray, mutant_scores: np.ndarray, nan_threshold: float
+) -> np.ndarray:
+    """`(mutant - wt) / |wt|` per sample, NaN-masked wherever `|wt| <= nan_threshold`.
+
+    `wt_scores` is 1D (one value per sample); `mutant_scores` broadcasts against
+    it along its leading axis - shape `(n, positions, alt_bases)` for the ISM
+    sweep, `(n, scenarios)` for complex mismatch profiling. Shared so both
+    modules apply the exact same guardrail (see `RELATIVE_DELTA_NAN_THRESHOLD`).
+    """
+    broadcast_shape = (wt_scores.shape[0],) + (1,) * (mutant_scores.ndim - 1)
+    wt_broadcast = wt_scores.reshape(broadcast_shape)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        delta = (mutant_scores - wt_broadcast) / np.abs(wt_broadcast)
+    delta[np.abs(wt_scores) <= nan_threshold] = np.nan
+    return delta
 
 
 def compute_ism_delta(
@@ -82,22 +101,16 @@ def compute_ism_delta(
     if any(len(seq) != seq_len for seq in sequences):
         raise ValueError("All sequences must share the same length for the ISM sweep.")
 
-    wt_scores = _predict_in_batches(predictor, sequences, predict_batch_size)
+    wt_scores = predict_in_batches(predictor, sequences, predict_batch_size)
 
     mutants: list[str] = []
     for sequence in sequences:
         mutants.extend(generate_ism_mutants(sequence))
 
-    mutant_scores = _predict_in_batches(predictor, mutants, predict_batch_size)
+    mutant_scores = predict_in_batches(predictor, mutants, predict_batch_size)
     mutant_scores = mutant_scores.reshape(len(sequences), seq_len, 3)
 
-    wt_scores_broadcast = wt_scores[:, None, None]
-    with np.errstate(divide="ignore", invalid="ignore"):
-        ism_delta = (mutant_scores - wt_scores_broadcast) / np.abs(wt_scores_broadcast)
-
-    ism_delta[np.abs(wt_scores) <= nan_threshold] = np.nan
-
-    return ism_delta
+    return relative_delta(wt_scores, mutant_scores, nan_threshold)
 
 
 def run_ism_sweep(
