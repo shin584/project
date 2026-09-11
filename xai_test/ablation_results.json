@@ -1,0 +1,40 @@
+{
+  "ablation_results": {
+    "embedding_only": {
+      "spearman": 0.842677558647375,
+      "pearson": 0.8572618246219668,
+      "mae": 0.09291645931861066,
+      "mse": 0.01424816924746864
+    },
+    "physical_only": {
+      "spearman": 0.7478865678083167,
+      "pearson": 0.7568236816115321,
+      "mae": 0.12872237032039285,
+      "mse": 0.023842994110606492
+    },
+    "full_model": {
+      "spearman": 0.8446779406613999,
+      "pearson": 0.8588170261567746,
+      "mae": 0.09333881018350741,
+      "mse": 0.014164738225030353
+    }
+  },
+  "paired_bootstrap_95ci": {
+    "delta_spearman_full_vs_embedding_only": [
+      -0.0008909753137296879,
+      0.0049939228896864266
+    ],
+    "delta_mse_full_vs_embedding_only": [
+      -0.0002482970026351754,
+      7.712774027199252e-05
+    ],
+    "delta_spearman_full_vs_physical_only": [
+      0.07108462437662663,
+      0.12357935184518305
+    ],
+    "delta_mse_full_vs_physical_only": [
+      -0.011677489358858132,
+      -0.007734495740726099
+    ]
+  }
+}
