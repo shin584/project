@@ -59,6 +59,16 @@ class Model_B_XAIPredictor:
 
         return embeddings
 
+    def classify_from_embeddings(self, embeddings: torch.Tensor) -> torch.Tensor:
+        """Run only the classification head on a `(batch, 7, 1280)` embedding tensor.
+
+        Lets a caller (e.g. Integrated Gradients) backprop from a chosen
+        embedding tensor through just the head, instead of replaying the
+        full encoder - or reaching into `nt_model`'s internals itself - for
+        every interpolation step.
+        """
+        return self.nt_model.classifier(embeddings).squeeze(-1)
+
     def get_attentions(self, sequences: list[str]) -> tuple[torch.Tensor, ...]:
         """Return per-layer attention matrices, `<cls>` still included.
 
