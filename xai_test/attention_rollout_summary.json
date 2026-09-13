@@ -1,0 +1,12 @@
+{
+  "token_matrix_dim": [
+    6,
+    6
+  ],
+  "projected_nucleotide_matrix_dim": [
+    36,
+    36
+  ],
+  "num_samples": 514,
+  "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+}
