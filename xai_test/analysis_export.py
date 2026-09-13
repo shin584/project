@@ -232,20 +232,38 @@ def build_model_analysis_summary(
     }
 
 
+def _is_leaked_array_value(value) -> bool:
+    """Whether `value` looks like actual leaked tensor data, not descriptive metadata.
+
+    An `ndarray` is always a leak. A `list`/`tuple` is only a leak if it
+    isn't purely made of strings - real array data (or its post-
+    `to_jsonable` nested-list form) is numbers/further nesting, whereas
+    `metadata.array_axis_definitions` legitimately holds plain lists of
+    human-readable axis-label strings under these same key names (per
+    plan_realize.md section 4's schema) and must not be flagged.
+    """
+    if isinstance(value, np.ndarray):
+        return True
+    if isinstance(value, (list, tuple)):
+        return not all(isinstance(item, str) for item in value)
+    return False
+
+
 def _find_large_array_keys(obj) -> set:
     """Recursively collect any `LARGE_ARRAY_KEYS` name whose *array-shaped* value appears anywhere in `obj`.
 
     A `LARGE_ARRAY_KEYS` name used as a key is only a violation when its
-    value is array-like (an `ndarray`, or a list/tuple - the shape a leaked
-    array takes after JSON conversion). It is legitimate for a Case Study
-    entry's small `attention_rollout` *metadata* dict (dims + note, no
-    matrix data - see `build_case_study_entry`) to reuse that same name, so
-    a `dict`-valued match is not itself a violation.
+    value actually looks like leaked array data (see
+    `_is_leaked_array_value`). It is legitimate for a Case Study entry's
+    small `attention_rollout` *metadata* dict (dims + note, no matrix data -
+    see `build_case_study_entry`) and for `metadata.array_axis_definitions`'s
+    axis-label-string lists to reuse these same names, so neither is itself
+    a violation.
     """
     found = set()
     if isinstance(obj, dict):
         for key, value in obj.items():
-            if key in LARGE_ARRAY_KEYS and isinstance(value, (np.ndarray, list, tuple)):
+            if key in LARGE_ARRAY_KEYS and _is_leaked_array_value(value):
                 found.add(key)
             found |= _find_large_array_keys(value)
     elif isinstance(obj, (list, tuple)):

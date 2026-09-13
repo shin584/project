@@ -220,6 +220,20 @@ def test_validate_summary_schema_rejects_a_leaked_large_array_key():
         validate_summary_schema(summary)
 
 
+def test_validate_summary_schema_allows_array_axis_definitions_name_collision():
+    # metadata.array_axis_definitions (plan_realize.md section 4) legitimately
+    # reuses LARGE_ARRAY_KEYS names as keys, but its values are plain lists of
+    # axis-label strings, not real tensor data - must not be flagged as a leak.
+    summary = _minimal_valid_summary()
+    summary["metadata"]["array_axis_definitions"] = {
+        "ism_delta_model_a": ["sample_id (0~513)", "position (0~35)"],
+        "shap_values": ["sample_id (0~513)", "feature_index (0~8963)"],
+        "attention_rollout": ["sample_id (0~513)", "row (0~35)", "column (0~35)"],
+    }
+
+    validate_summary_schema(summary)  # must not raise
+
+
 def test_validate_summary_schema_rejects_non_jsonable_numpy_leakage():
     summary = _minimal_valid_summary()
     summary["global_evaluation"]["stray_array"] = np.array([1, 2, 3])

@@ -1,0 +1,1572 @@
+{
+  "metadata": {
+    "testset_version": "SaCas9_v4_independent_10pct",
+    "total_samples": 514,
+    "sha256_checksum": "758811b00a3001f0a560754450acbdca5b4eff2741fa101727246802f1a2bb6f",
+    "model_b_architecture": {
+      "tokenizer": "6-mer",
+      "tokens": 7,
+      "hidden_dim": 1280,
+      "flattened_dim": 8960,
+      "physical_dim": 4,
+      "total_feature_dim": 8964
+    },
+    "array_axis_definitions": {
+      "ism_delta_model_a": [
+        "sample_id (0~513)",
+        "position (0~35)",
+        "alternative_base (lexicographical 3 bases)"
+      ],
+      "ism_delta_model_b": [
+        "sample_id (0~513)",
+        "position (0~35)",
+        "alternative_base (lexicographical 3 bases)"
+      ],
+      "mismatch_single_delta_model_a": [
+        "sample_id (0~513)",
+        "position (0~35)",
+        "alternative_base (3 bases)"
+      ],
+      "mismatch_single_delta_model_b": [
+        "sample_id (0~513)",
+        "position (0~35)",
+        "alternative_base (3 bases)"
+      ],
+      "mismatch_single_min_model_a": [
+        "sample_id (0~513)",
+        "position (0~35)"
+      ],
+      "mismatch_single_min_model_b": [
+        "sample_id (0~513)",
+        "position (0~35)"
+      ],
+      "mismatch_complex_model_a": [
+        "sample_id (0~513)",
+        "scenario_id (0~14)"
+      ],
+      "mismatch_complex_model_b": [
+        "sample_id (0~513)",
+        "scenario_id (0~14)"
+      ],
+      "shap_values": [
+        "sample_id (0~513)",
+        "feature_index (0~8963, embedding then physical)"
+      ],
+      "attention_rollout": [
+        "sample_id (0~513)",
+        "row_position (0~35)",
+        "column_position (0~35)"
+      ]
+    }
+  },
+  "global_evaluation": {
+    "ablation_results": {
+      "embedding_only": {
+        "spearman": 0.842677558647375,
+        "pearson": 0.8572618246219668,
+        "mae": 0.09291645931861066,
+        "mse": 0.01424816924746864
+      },
+      "physical_only": {
+        "spearman": 0.7478865678083167,
+        "pearson": 0.7568236816115321,
+        "mae": 0.12872237032039285,
+        "mse": 0.023842994110606492
+      },
+      "full_model": {
+        "spearman": 0.8446779406613999,
+        "pearson": 0.8588170261567746,
+        "mae": 0.09333881018350741,
+        "mse": 0.014164738225030353
+      },
+      "paired_bootstrap_95ci": {
+        "delta_spearman_full_vs_embedding_only": [
+          -0.0008909753137296879,
+          0.0049939228896864266
+        ],
+        "delta_mse_full_vs_embedding_only": [
+          -0.0002482970026351754,
+          7.712774027199252e-05
+        ],
+        "delta_spearman_full_vs_physical_only": [
+          0.07108462437662663,
+          0.12357935184518305
+        ],
+        "delta_mse_full_vs_physical_only": [
+          -0.011677489358858132,
+          -0.007734495740726099
+        ]
+      }
+    },
+    "aggregate_physical_shap_contribution_ratio": 0.00011732960410881788
+  },
+  "complex_mismatch_metadata": [
+    {
+      "scenario_index": 0,
+      "mutation_id": "seed_consecutive_1bp_pos6",
+      "region": "Seed",
+      "positions": [
+        6
+      ],
+      "ref_bases": [
+        "T"
+      ],
+      "alt_bases": [
+        "C"
+      ],
+      "description": "Seed consecutive 1bp mismatch at position(s) [6]"
+    },
+    {
+      "scenario_index": 1,
+      "mutation_id": "seed_consecutive_2bp_pos3_4",
+      "region": "Seed",
+      "positions": [
+        3,
+        4
+      ],
+      "ref_bases": [
+        "G",
+        "G"
+      ],
+      "alt_bases": [
+        "T",
+        "A"
+      ],
+      "description": "Seed consecutive 2bp mismatch at position(s) [3, 4]"
+    },
+    {
+      "scenario_index": 2,
+      "mutation_id": "seed_consecutive_3bp_pos1_2_3",
+      "region": "Seed",
+      "positions": [
+        1,
+        2,
+        3
+      ],
+      "ref_bases": [
+        "C",
+        "C",
+        "G"
+      ],
+      "alt_bases": [
+        "A",
+        "G",
+        "T"
+      ],
+      "description": "Seed consecutive 3bp mismatch at position(s) [1, 2, 3]"
+    },
+    {
+      "scenario_index": 3,
+      "mutation_id": "seed_consecutive_3bp_pos4_5_6",
+      "region": "Seed",
+      "positions": [
+        4,
+        5,
+        6
+      ],
+      "ref_bases": [
+        "G",
+        "C",
+        "T"
+      ],
+      "alt_bases": [
+        "T",
+        "T",
+        "C"
+      ],
+      "description": "Seed consecutive 3bp mismatch at position(s) [4, 5, 6]"
+    },
+    {
+      "scenario_index": 4,
+      "mutation_id": "seed_consecutive_2bp_pos1_2",
+      "region": "Seed",
+      "positions": [
+        1,
+        2
+      ],
+      "ref_bases": [
+        "C",
+        "C"
+      ],
+      "alt_bases": [
+        "T",
+        "T"
+      ],
+      "description": "Seed consecutive 2bp mismatch at position(s) [1, 2]"
+    },
+    {
+      "scenario_index": 5,
+      "mutation_id": "distal_consecutive_2bp_pos30_31",
+      "region": "Distal",
+      "positions": [
+        30,
+        31
+      ],
+      "ref_bases": [
+        "G",
+        "C"
+      ],
+      "alt_bases": [
+        "T",
+        "G"
+      ],
+      "description": "Distal consecutive 2bp mismatch at position(s) [30, 31]"
+    },
+    {
+      "scenario_index": 6,
+      "mutation_id": "distal_consecutive_2bp_pos31_32",
+      "region": "Distal",
+      "positions": [
+        31,
+        32
+      ],
+      "ref_bases": [
+        "C",
+        "T"
+      ],
+      "alt_bases": [
+        "A",
+        "A"
+      ],
+      "description": "Distal consecutive 2bp mismatch at position(s) [31, 32]"
+    },
+    {
+      "scenario_index": 7,
+      "mutation_id": "distal_consecutive_2bp_pos34_35",
+      "region": "Distal",
+      "positions": [
+        34,
+        35
+      ],
+      "ref_bases": [
+        "A",
+        "A"
+      ],
+      "alt_bases": [
+        "C",
+        "T"
+      ],
+      "description": "Distal consecutive 2bp mismatch at position(s) [34, 35]"
+    },
+    {
+      "scenario_index": 8,
+      "mutation_id": "distal_consecutive_3bp_pos29_30_31",
+      "region": "Distal",
+      "positions": [
+        29,
+        30,
+        31
+      ],
+      "ref_bases": [
+        "G",
+        "G",
+        "C"
+      ],
+      "alt_bases": [
+        "C",
+        "A",
+        "T"
+      ],
+      "description": "Distal consecutive 3bp mismatch at position(s) [29, 30, 31]"
+    },
+    {
+      "scenario_index": 9,
+      "mutation_id": "distal_consecutive_3bp_pos30_31_32",
+      "region": "Distal",
+      "positions": [
+        30,
+        31,
+        32
+      ],
+      "ref_bases": [
+        "G",
+        "C",
+        "T"
+      ],
+      "alt_bases": [
+        "A",
+        "T",
+        "C"
+      ],
+      "description": "Distal consecutive 3bp mismatch at position(s) [30, 31, 32]"
+    },
+    {
+      "scenario_index": 10,
+      "mutation_id": "intermittent_nonconsecutive_3bp_pos23_27_35",
+      "region": "Intermittent",
+      "positions": [
+        23,
+        27,
+        35
+      ],
+      "ref_bases": [
+        "T",
+        "G",
+        "A"
+      ],
+      "alt_bases": [
+        "C",
+        "C",
+        "C"
+      ],
+      "description": "Intermittent non-consecutive 3bp mismatch at position(s) [23, 27, 35]"
+    },
+    {
+      "scenario_index": 11,
+      "mutation_id": "intermittent_nonconsecutive_3bp_pos5_24_26",
+      "region": "Intermittent",
+      "positions": [
+        5,
+        24,
+        26
+      ],
+      "ref_bases": [
+        "C",
+        "G",
+        "A"
+      ],
+      "alt_bases": [
+        "G",
+        "T",
+        "G"
+      ],
+      "description": "Intermittent non-consecutive 3bp mismatch at position(s) [5, 24, 26]"
+    },
+    {
+      "scenario_index": 12,
+      "mutation_id": "intermittent_nonconsecutive_2bp_pos13_31",
+      "region": "Intermittent",
+      "positions": [
+        13,
+        31
+      ],
+      "ref_bases": [
+        "C",
+        "C"
+      ],
+      "alt_bases": [
+        "G",
+        "T"
+      ],
+      "description": "Intermittent non-consecutive 2bp mismatch at position(s) [13, 31]"
+    },
+    {
+      "scenario_index": 13,
+      "mutation_id": "intermittent_nonconsecutive_2bp_pos4_16",
+      "region": "Intermittent",
+      "positions": [
+        4,
+        16
+      ],
+      "ref_bases": [
+        "G",
+        "A"
+      ],
+      "alt_bases": [
+        "C",
+        "C"
+      ],
+      "description": "Intermittent non-consecutive 2bp mismatch at position(s) [4, 16]"
+    },
+    {
+      "scenario_index": 14,
+      "mutation_id": "intermittent_nonconsecutive_2bp_pos19_24",
+      "region": "Intermittent",
+      "positions": [
+        19,
+        24
+      ],
+      "ref_bases": [
+        "C",
+        "G"
+      ],
+      "alt_bases": [
+        "G",
+        "A"
+      ],
+      "description": "Intermittent non-consecutive 2bp mismatch at position(s) [19, 24]"
+    }
+  ],
+  "case_studies": [
+    {
+      "case_id": "DISCORDANT_P01",
+      "sample_id": 216,
+      "original_id": 860,
+      "sequence": "TCCCTGCTGGTAGGGGAGAGCCCCACAGAGCTATTC",
+      "true_score": 0.914266577,
+      "model_a": {
+        "pred_raw": 0.5865373611450195,
+        "error": 0.3277292158549805
+      },
+      "model_b": {
+        "pred_raw": 0.8849055171012878,
+        "error": 0.029361059898712183
+      },
+      "case_type": "Primary Discordant",
+      "per_sample_physical_values": {
+        "mfe": -10.899999618530273,
+        "dg": -81.5,
+        "tm": 69.25947570800781,
+        "gc": 61.11111068725586
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 0.00016449742543045431,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.0018605712102726102,
+          0.0005383464740589261,
+          -0.0064660669304430485,
+          -0.005028089042752981,
+          0.006808447185903788,
+          -0.0254722461104393,
+          -0.010054435580968857,
+          0.009521658532321453,
+          -0.007022052071988583,
+          -0.007992475293576717,
+          0.0052727386355400085,
+          0.0011493050260469317,
+          -0.008232458494603634,
+          -0.0067808376625180244,
+          -0.0038516155909746885,
+          -0.006237273570150137,
+          0.0022277124226093292,
+          -0.01638796553015709,
+          -0.012159561738371849,
+          -0.04784511402249336,
+          -0.0009516391437500715,
+          0.01405263040214777,
+          0.001761469873599708,
+          -0.00493732700124383,
+          -0.03151608258485794,
+          -0.008456840179860592,
+          -0.04300437867641449,
+          -0.0077651855535805225,
+          -0.025015944615006447,
+          0.2731488347053528,
+          -0.013632331974804401,
+          0.019560374319553375,
+          -0.1212686151266098,
+          -0.03793144226074219,
+          0.10035523772239685,
+          -0.10573273152112961
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "DISCORDANT_P02",
+      "sample_id": 507,
+      "original_id": 4325,
+      "sequence": "GGAGCTCCCGTGTCCGTCCCTGTGCAGGAAATCCTG",
+      "true_score": 0.293101139,
+      "model_a": {
+        "pred_raw": 0.5416539907455444,
+        "error": 0.24855285174554442
+      },
+      "model_b": {
+        "pred_raw": 0.27460113167762756,
+        "error": 0.018500007322372447
+      },
+      "case_type": "Primary Discordant",
+      "per_sample_physical_values": {
+        "mfe": -7.400000095367432,
+        "dg": -81.0,
+        "tm": 70.71144104003906,
+        "gc": 63.88888931274414
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 6.25959273747867e-06,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          -0.005406070034950972,
+          -0.015829715877771378,
+          -0.0009207742405124009,
+          -0.011409120634198189,
+          -0.006133870221674442,
+          0.004806121811270714,
+          -0.010997653007507324,
+          -0.015609519556164742,
+          -0.0065553877502679825,
+          -0.02145357057452202,
+          0.011328032240271568,
+          -0.037360839545726776,
+          0.0074440715834498405,
+          -0.026826178655028343,
+          -0.011937924660742283,
+          -0.03921572491526604,
+          0.020206166431307793,
+          -0.038967788219451904,
+          -0.02131490409374237,
+          -0.02236306667327881,
+          0.01151825301349163,
+          -0.03467206656932831,
+          -0.0060577900148928165,
+          -0.02377030812203884,
+          -0.04030778631567955,
+          -0.018404899165034294,
+          0.08150994777679443,
+          0.1033087745308876,
+          0.003509514033794403,
+          -0.02315937727689743,
+          -0.08253534138202667,
+          -0.013165151700377464,
+          0.06183893233537674,
+          0.07944657653570175,
+          0.04699086397886276,
+          -0.03371792286634445
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "DISCORDANT_P03",
+      "sample_id": 406,
+      "original_id": 2233,
+      "sequence": "AAAGGCTCTTCCACCAGAAAAGAAACAGAACACTGG",
+      "true_score": 0.880910918,
+      "model_a": {
+        "pred_raw": 0.6407779455184937,
+        "error": 0.24013297248150633
+      },
+      "model_b": {
+        "pred_raw": 0.8530837297439575,
+        "error": 0.027827188256042468
+      },
+      "case_type": "Primary Discordant",
+      "per_sample_physical_values": {
+        "mfe": -2.200000047683716,
+        "dg": -66.0999984741211,
+        "tm": 63.457664489746094,
+        "gc": 44.44444274902344
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 2.6661680749384686e-05,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          -0.0031514018774032593,
+          -0.0004639338585548103,
+          -0.0022373925894498825,
+          -0.001736932434141636,
+          -0.005413143429905176,
+          -0.005186139605939388,
+          0.001435466343536973,
+          -0.0012552764965221286,
+          -0.003947243094444275,
+          -0.002816644497215748,
+          0.006112252827733755,
+          0.0028423434123396873,
+          -0.0001400015753461048,
+          0.0021054456010460854,
+          0.0066365343518555164,
+          0.00276672700420022,
+          -0.04533110186457634,
+          -0.01196304615586996,
+          0.006121442653238773,
+          0.003058377420529723,
+          0.002966267056763172,
+          -0.05575436353683472,
+          -0.009996914304792881,
+          -0.0047064670361578465,
+          -0.00564235495403409,
+          -0.019424663856625557,
+          0.01630539633333683,
+          -0.0646849051117897,
+          -0.055561941117048264,
+          -0.028698474168777466,
+          0.06371200084686279,
+          -0.03595232218503952,
+          0.08648610860109329,
+          -0.16806533932685852,
+          0.19436520338058472,
+          0.07295645028352737
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "DISCORDANT_P04",
+      "sample_id": 325,
+      "original_id": 4223,
+      "sequence": "ATGCAGCCCAGCTGCCTGCACTGTTCCGGGACATCT",
+      "true_score": 0.236570663,
+      "model_a": {
+        "pred_raw": 0.4639495015144348,
+        "error": 0.22737883851443483
+      },
+      "model_b": {
+        "pred_raw": 0.2641667425632477,
+        "error": 0.027596079563247694
+      },
+      "case_type": "Primary Discordant",
+      "per_sample_physical_values": {
+        "mfe": -7.699999809265137,
+        "dg": -80.4000015258789,
+        "tm": 72.12836456298828,
+        "gc": 61.11111068725586
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 6.25959273747867e-06,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction away from the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          -0.004257306456565857,
+          -0.00016694885562174022,
+          -0.005458466242998838,
+          0.004790749866515398,
+          -0.010853265412151814,
+          -0.014059453271329403,
+          0.002647483255714178,
+          0.004320268053561449,
+          0.0013312525115907192,
+          -0.010048441588878632,
+          -0.03930503502488136,
+          0.00946053396910429,
+          0.003510351525619626,
+          -0.025794617831707,
+          0.0007807421498000622,
+          -0.0008987140608951449,
+          0.003555397503077984,
+          -0.021394498646259308,
+          -0.0017803387017920613,
+          -0.017725933343172073,
+          -0.004273581318557262,
+          0.0024146970827132463,
+          0.028491783887147903,
+          0.010682538151741028,
+          -0.0033147293142974377,
+          -0.01714053936302662,
+          -0.04710319638252258,
+          0.0523839145898819,
+          -0.07913623005151749,
+          0.17036131024360657,
+          0.019832808524370193,
+          -0.03383554518222809,
+          -0.06637277454137802,
+          -0.11270173639059067,
+          -0.06879353523254395,
+          0.10102128237485886
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "DISCORDANT_P05",
+      "sample_id": 352,
+      "original_id": 2915,
+      "sequence": "GAGGAAGAAGAGTTTGAGGAAGAATTTGAGGAAGAA",
+      "true_score": 0.734360348,
+      "model_a": {
+        "pred_raw": 0.5309981107711792,
+        "error": 0.20336223722882085
+      },
+      "model_b": {
+        "pred_raw": 0.7218611836433411,
+        "error": 0.012499164356658987
+      },
+      "case_type": "Primary Discordant",
+      "per_sample_physical_values": {
+        "mfe": -1.0,
+        "dg": -62.70000076293945,
+        "tm": 59.92314147949219,
+        "gc": 38.88888931274414
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 3.691183155751787e-05,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.004880998283624649,
+          0.002369658323004842,
+          -0.00945174228399992,
+          -0.018850143998861313,
+          -0.002552017802372575,
+          -0.002037799684330821,
+          -0.012393773533403873,
+          7.110271690180525e-05,
+          -0.004884833004325628,
+          -0.0012651508441194892,
+          -0.004178200848400593,
+          0.008473665453493595,
+          0.006279085297137499,
+          0.006436733063310385,
+          0.009335796348750591,
+          0.0072907558642327785,
+          -0.009237316437065601,
+          0.0006138749304227531,
+          0.028271468356251717,
+          0.007255337201058865,
+          -0.01861293986439705,
+          0.04120979830622673,
+          0.004377878271043301,
+          -0.02751040831208229,
+          0.0169137604534626,
+          0.03509491682052612,
+          0.02897574007511139,
+          0.04716376215219498,
+          -0.023166870698332787,
+          -0.04772447422146797,
+          -0.08926007896661758,
+          -0.13105182349681854,
+          -0.15837088227272034,
+          -0.06503836065530777,
+          0.008918735198676586,
+          0.11048012226819992
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "CONCORDANT_C01",
+      "sample_id": 90,
+      "original_id": 1146,
+      "sequence": "CTCAAGGCTATCTTCTCGCTGGCCGAGGGAGAAGGC",
+      "true_score": 0.374949766,
+      "model_a": {
+        "pred_raw": 0.3716107904911041,
+        "error": 0.0033389755088958917
+      },
+      "model_b": {
+        "pred_raw": 0.37373849749565125,
+        "error": 0.0012112685043487725
+      },
+      "case_type": "Concordant",
+      "per_sample_physical_values": {
+        "mfe": -11.600000381469727,
+        "dg": -79.0999984741211,
+        "tm": 69.13646697998047,
+        "gc": 61.11111068725586
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 6.25959273747867e-06,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          -0.0055087958462536335,
+          0.0015251666773110628,
+          -0.012343233451247215,
+          0.016697682440280914,
+          0.01171861495822668,
+          -0.03879933059215546,
+          -0.060220446437597275,
+          0.00487387552857399,
+          0.010530161671340466,
+          0.01233691070228815,
+          0.00818452425301075,
+          -0.017868025228381157,
+          0.0071025448851287365,
+          0.03422635421156883,
+          -0.03851526603102684,
+          0.012901375070214272,
+          0.00032554377685301006,
+          -0.0012803033459931612,
+          -0.004119839519262314,
+          0.0028789250645786524,
+          -0.01480170525610447,
+          -0.03261803090572357,
+          -0.011300725862383842,
+          -0.017759639769792557,
+          0.0005751538556069136,
+          0.021089475601911545,
+          -0.009740088135004044,
+          -0.021166516467928886,
+          0.076476089656353,
+          0.06403392553329468,
+          0.04966965317726135,
+          0.051281049847602844,
+          -0.004496105946600437,
+          -0.11123986542224884,
+          -0.1469670534133911,
+          -0.06482808291912079
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "CONCORDANT_C02",
+      "sample_id": 388,
+      "original_id": 3528,
+      "sequence": "TCCAAAGGCGTAGAACCGACCTTTGTCGGAGGTTGG",
+      "true_score": 0.567849967,
+      "model_a": {
+        "pred_raw": 0.5652130842208862,
+        "error": 0.0026368827791137806
+      },
+      "model_b": {
+        "pred_raw": 0.565525233745575,
+        "error": 0.00232473325442506
+      },
+      "case_type": "Concordant",
+      "per_sample_physical_values": {
+        "mfe": -10.0,
+        "dg": -73.5,
+        "tm": 68.11351013183594,
+        "gc": 55.55555725097656
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 6.25959273747867e-06,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.00481112627312541,
+          -0.002941850805655122,
+          -0.009763434529304504,
+          0.01465334091335535,
+          0.011614739894866943,
+          0.0034987255930900574,
+          -0.022869974374771118,
+          -0.030635079368948936,
+          -0.008829044178128242,
+          -0.01932658441364765,
+          -0.0013980375370010734,
+          0.0014131265925243497,
+          -0.016837546601891518,
+          0.008167571388185024,
+          0.009798653423786163,
+          -0.002054625190794468,
+          -0.003410771256312728,
+          -0.0014331369893625379,
+          0.016970790922641754,
+          0.00024256418691948056,
+          0.0038181301206350327,
+          -0.0036095445975661278,
+          -0.0038139212410897017,
+          -0.014276785776019096,
+          0.008589651435613632,
+          -0.011764618568122387,
+          0.007201412692666054,
+          -0.10146083682775497,
+          -0.07504253834486008,
+          -0.02297886274755001,
+          -0.009841646999120712,
+          0.09372632950544357,
+          0.0033773155882954597,
+          -0.0765693411231041,
+          0.2586011290550232,
+          -0.11465714126825333
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "CONCORDANT_C03",
+      "sample_id": 169,
+      "original_id": 3602,
+      "sequence": "TTTCAGTGCATCATCGAGGAGTCGGGAGAGCATATC",
+      "true_score": 0.549229739,
+      "model_a": {
+        "pred_raw": 0.5528510808944702,
+        "error": 0.0036213418944701647
+      },
+      "model_b": {
+        "pred_raw": 0.5452896356582642,
+        "error": 0.00394010334173589
+      },
+      "case_type": "Concordant",
+      "per_sample_physical_values": {
+        "mfe": -8.0,
+        "dg": -71.5,
+        "tm": 64.9390869140625,
+        "gc": 50.0
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 6.25959273747867e-06,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.0016769533976912498,
+          0.00781979225575924,
+          0.007851912640035152,
+          -0.006728577893227339,
+          0.002209685742855072,
+          0.008014003746211529,
+          0.0020921961404383183,
+          0.003840445773676038,
+          -0.0066553824581205845,
+          -0.011865819804370403,
+          0.006763129495084286,
+          -0.0008422218961641192,
+          -0.009594414383172989,
+          0.01155337505042553,
+          -0.01189455296844244,
+          0.024801433086395264,
+          0.006489183753728867,
+          -0.011305454187095165,
+          -0.004691814072430134,
+          -0.0038735803682357073,
+          0.011654635891318321,
+          0.020163318142294884,
+          -0.026757026091217995,
+          0.009901400655508041,
+          -0.013121615163981915,
+          -0.016499536111950874,
+          -0.032315317541360855,
+          -0.01957789435982704,
+          -0.09220938384532928,
+          0.021315038204193115,
+          -0.027015896514058113,
+          -0.02751000225543976,
+          0.013075485825538635,
+          0.09396006911993027,
+          0.18115395307540894,
+          -0.24320553243160248
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "CONCORDANT_C04",
+      "sample_id": 335,
+      "original_id": 1039,
+      "sequence": "GGGTGCAGGTTTGTGGGGCCTCGGCGGGAATGCTTC",
+      "true_score": 0.855458808,
+      "model_a": {
+        "pred_raw": 0.8540777564048767,
+        "error": 0.0013810515951232505
+      },
+      "model_b": {
+        "pred_raw": 0.862457811832428,
+        "error": 0.006999003832428019
+      },
+      "case_type": "Concordant",
+      "per_sample_physical_values": {
+        "mfe": -7.5,
+        "dg": -82.5999984741211,
+        "tm": 73.22663116455078,
+        "gc": 66.66666412353516
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": 0.00016449742543045431,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction away from the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.004551937337964773,
+          -0.002342131920158863,
+          -0.008361912332475185,
+          0.0038997004739940166,
+          -0.017484843730926514,
+          -0.0026067188009619713,
+          0.0057397023774683475,
+          -0.021877849474549294,
+          -0.021762289106845856,
+          0.0037311140913516283,
+          0.0007619800744578242,
+          0.006502265576273203,
+          0.0028193481266498566,
+          0.00813327357172966,
+          0.0015188480028882623,
+          -0.00559608917683363,
+          -0.009708244353532791,
+          -0.002870810916647315,
+          -0.018712138757109642,
+          -0.02387496829032898,
+          0.004083425737917423,
+          -0.01202620379626751,
+          -0.04824651777744293,
+          -0.05616902559995651,
+          0.009125505574047565,
+          -0.02456558123230934,
+          0.011068196035921574,
+          -0.049883000552654266,
+          -0.007271712180227041,
+          -0.05635930597782135,
+          0.0683242529630661,
+          -0.03265265375375748,
+          0.12664620578289032,
+          0.15422917902469635,
+          0.11114975810050964,
+          -0.05534324795007706
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    },
+    {
+      "case_id": "CONCORDANT_C05",
+      "sample_id": 238,
+      "original_id": 4966,
+      "sequence": "ACTCAAGAAATAACTCACATGTCCAAAGAATGAAAG",
+      "true_score": 0.702344273,
+      "model_a": {
+        "pred_raw": 0.714788019657135,
+        "error": 0.01244374665713499
+      },
+      "model_b": {
+        "pred_raw": 0.7032208442687988,
+        "error": 0.0008765712687988092
+      },
+      "case_type": "Concordant",
+      "per_sample_physical_values": {
+        "mfe": 0.0,
+        "dg": -57.70000076293945,
+        "tm": 58.241981506347656,
+        "gc": 33.33333206176758
+      },
+      "per_sample_physical_shap": {
+        "mfe": 0.0,
+        "dg": -0.00040833756793290377,
+        "tm": 0.0,
+        "gc": 0.0,
+        "interpretation": "Physical features' SHAP contribution shifted Model B's prediction toward the ground truth."
+      },
+      "integrated_gradients": {
+        "model_a_norm_attr_36bp": [
+          0.006821537856012583,
+          -0.00719039048999548,
+          0.006597718223929405,
+          -0.007864980958402157,
+          -0.00884090643376112,
+          -0.007612401619553566,
+          0.06602399051189423,
+          0.0073408279567956924,
+          -0.010086308233439922,
+          -0.007987620308995247,
+          0.0015226647956296802,
+          -0.015544965863227844,
+          -0.01408435683697462,
+          0.015679942443966866,
+          -0.00094432826153934,
+          -0.0029294046107679605,
+          -0.03158984333276749,
+          0.008156156167387962,
+          -0.039607200771570206,
+          0.00541291618719697,
+          0.0027238251641392708,
+          0.0024633705615997314,
+          0.022302111610770226,
+          0.017638210207223892,
+          -0.04558980092406273,
+          -0.005333804525434971,
+          -0.0012915459228679538,
+          0.08152996748685837,
+          0.004954698029905558,
+          -0.06922189891338348,
+          0.0034371542278677225,
+          0.23902425169944763,
+          0.00039210307295434177,
+          -0.005303990561515093,
+          -0.09060284495353699,
+          -0.13635195791721344
+        ],
+        "model_b_phase4_projected_norm_attr_36bp": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "attention_rollout": {
+        "token_matrix_dim": [
+          6,
+          6
+        ],
+        "projected_nucleotide_matrix_dim": [
+          36,
+          36
+        ],
+        "note": "Represents internal information dependency within the NT transformer's attention structure, not a physical DNA/protein binding claim."
+      }
+    }
+  ]
+}

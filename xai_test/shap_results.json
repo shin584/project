@@ -1,0 +1,109 @@
+{
+  "top_embedding_features": [
+    {
+      "feature_index": 956,
+      "mean_abs_shap": 0.04676470905542374
+    },
+    {
+      "feature_index": 31,
+      "mean_abs_shap": 0.028355233371257782
+    },
+    {
+      "feature_index": 1024,
+      "mean_abs_shap": 0.02788354456424713
+    },
+    {
+      "feature_index": 707,
+      "mean_abs_shap": 0.017118945717811584
+    },
+    {
+      "feature_index": 1146,
+      "mean_abs_shap": 0.01144345011562109
+    },
+    {
+      "feature_index": 1105,
+      "mean_abs_shap": 0.009357260540127754
+    },
+    {
+      "feature_index": 1178,
+      "mean_abs_shap": 0.008226748555898666
+    },
+    {
+      "feature_index": 993,
+      "mean_abs_shap": 0.0034474029671400785
+    },
+    {
+      "feature_index": 235,
+      "mean_abs_shap": 0.002803637646138668
+    },
+    {
+      "feature_index": 862,
+      "mean_abs_shap": 0.00276048481464386
+    },
+    {
+      "feature_index": 570,
+      "mean_abs_shap": 0.002690589753910899
+    },
+    {
+      "feature_index": 168,
+      "mean_abs_shap": 0.0021672178991138935
+    },
+    {
+      "feature_index": 144,
+      "mean_abs_shap": 0.002038719365373254
+    },
+    {
+      "feature_index": 65,
+      "mean_abs_shap": 0.0017445805715397
+    },
+    {
+      "feature_index": 736,
+      "mean_abs_shap": 0.0016410623211413622
+    },
+    {
+      "feature_index": 1053,
+      "mean_abs_shap": 0.0016217050142586231
+    },
+    {
+      "feature_index": 471,
+      "mean_abs_shap": 0.001568114385008812
+    },
+    {
+      "feature_index": 499,
+      "mean_abs_shap": 0.0012780361576005816
+    },
+    {
+      "feature_index": 1107,
+      "mean_abs_shap": 0.0012711765011772513
+    },
+    {
+      "feature_index": 879,
+      "mean_abs_shap": 0.0012689422583207488
+    }
+  ],
+  "physical_feature_shap": [
+    {
+      "feature_name": "MFE",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature_name": "delta_G",
+      "mean_abs_shap": 3.4905344364233315e-05
+    },
+    {
+      "feature_name": "Tm",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature_name": "GC",
+      "mean_abs_shap": 0.0
+    }
+  ],
+  "physical_contribution_ratio": 0.00011732960410881788,
+  "dependence_plot_paths": {
+    "MFE": "shap_dependence_plots/dependence_MFE.png",
+    "delta_G": "shap_dependence_plots/dependence_delta_G.png",
+    "Tm": "shap_dependence_plots/dependence_Tm.png",
+    "GC": "shap_dependence_plots/dependence_GC.png"
+  }
+}
