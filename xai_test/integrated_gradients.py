@@ -2,12 +2,18 @@
 
 Model A is attributed directly against its one-hot input layer with an
 all-zero one-hot baseline. Model B is attributed against
-`Model_B_XAIPredictor`'s `(batch, 7, 1280)` last-hidden-state embedding
+`Model_B_XAIPredictor`'s `(batch, 7, 1280)` pre-encoder input-embedding
 tensor (see ADR-0001 / issue #10) with a fixed zero-embedding baseline of
-the same shape, running the integration only through `nt_model.classifier`
-(the ESM sequence-classification head that consumes this exact tensor - see
-`EsmForSequenceClassification.forward`) rather than re-deriving gradients
-through the whole encoder.
+the same shape, running the integration through the *whole* encoder +
+classification head (`classify_from_input_embeddings`). Attributing against
+the *post-encoder* last hidden state instead (an earlier version of this
+module did) is a dead end: `EsmClassificationHead` pools only the CLS
+token's final hidden state (`features[:, 0, :]`), so every non-CLS
+post-encoder embedding's gradient is exactly zero by construction - not
+just small - regardless of the actual sequence. Attributing against the
+pre-encoder embeddings and replaying the full encoder instead lets
+gradients flow back through every self-attention layer, where non-CLS
+tokens do influence the CLS token's final representation.
 
 Model B's 6-mer token attributions are projected back to the 36bp sequence
 via the Deterministic Projection Rule (CONTEXT.md): each token's attribution
@@ -23,6 +29,8 @@ PAM boundaries (25-30bp inclusive) are this dataset's confirmed fixed
 sequence-construction alignment (36bp = ... + 6bp PAM at 25-30 + 5bp 3'
 flank at 31-35).
 """
+
+import contextlib
 
 import numpy as np
 import torch
@@ -49,6 +57,33 @@ TOKEN_NT_SPAN = (
 PAM_REGION_START, PAM_REGION_END = 25, 31
 
 
+@contextlib.contextmanager
+def _frozen_parameters(module: torch.nn.Module):
+    """Temporarily disable `requires_grad` on every parameter in `module`.
+
+    Integrated Gradients only needs a gradient w.r.t. the interpolated
+    *input* tensor - `backward()` still populates that regardless of
+    whether `module`'s own weights require grad, since autograd tracks any
+    graph touching a requires_grad leaf. Without this, backprop through
+    Model B's ~500M-parameter NT encoder (unlike Model A's ~140K-parameter
+    CNN+RNN) allocates a same-sized `.grad` buffer for every one of those
+    weights at every interpolation step - pure waste that was enough to
+    exhaust this machine's RAM once IG started replaying the full encoder
+    (see `integrated_gradients_model_b_tokens`) instead of just its small
+    classification head. Restores each parameter's original
+    `requires_grad` afterward so other callers (e.g. `get_token_embeddings`'s
+    gradient-flow assertion, Attention Rollout) see the model unchanged.
+    """
+    originally_required = [p.requires_grad for p in module.parameters()]
+    for p in module.parameters():
+        p.requires_grad_(False)
+    try:
+        yield
+    finally:
+        for p, required in zip(module.parameters(), originally_required):
+            p.requires_grad_(required)
+
+
 def _integrated_gradients(
     forward_fn, inputs: torch.Tensor, baseline: torch.Tensor, steps: int
 ) -> torch.Tensor:
@@ -61,15 +96,27 @@ def _integrated_gradients(
     Model B's per-token classifier head) - the batch-summed gradient still
     equals each sample's own gradient, so one backward pass per step covers
     the whole batch instead of one per sample.
+
+    Runs with cuDNN's fused RNN kernel disabled: that kernel only supports
+    a backward pass when the forward ran in training mode, so Model A's
+    eval-mode LSTM raises "cudnn RNN backward can only be called in
+    training mode" on GPU otherwise (dropout=0 here makes train/eval mode
+    otherwise identical, so this changes nothing except which kernel runs).
+    Falls back to a slower, generic RNN backward that works in eval mode
+    regardless - a no-op for Model B (no RNN involved) and on CPU (cuDNN
+    never applies there), so this is safe to apply unconditionally.
     """
     diff = inputs - baseline
     accumulated_grad = torch.zeros_like(inputs)
-    for step in range(1, steps + 1):
-        alpha = step / steps
-        interpolated = (baseline + alpha * diff).detach().clone().requires_grad_(True)
-        output = forward_fn(interpolated)
-        output.sum().backward()
-        accumulated_grad += interpolated.grad
+    with torch.backends.cudnn.flags(enabled=False):
+        for step in range(1, steps + 1):
+            alpha = step / steps
+            interpolated = (
+                (baseline + alpha * diff).detach().clone().requires_grad_(True)
+            )
+            output = forward_fn(interpolated)
+            output.sum().backward()
+            accumulated_grad += interpolated.grad
     avg_grad = accumulated_grad / steps
     return (diff * avg_grad).detach()
 
@@ -109,22 +156,30 @@ def integrated_gradients_model_b_tokens(
 ) -> np.ndarray:
     """Raw per-token IG attribution for Model B, shape `(batch, 7, 1280)`, CLS included.
 
-    Attributes against the `(batch, 7, 1280)` last-hidden-state embedding
-    tensor `Model_B_XAIPredictor` exposes, using a fixed zero-embedding
-    baseline of the same shape, backpropagating only through
-    `classify_from_embeddings` (the head that consumes this exact tensor -
-    see `EsmForSequenceClassification.forward`) rather than replaying the
-    whole encoder. The shape is validated before attribution runs; a
-    mismatch raises here rather than silently attributing against a
-    differently-shaped tensor. `get_token_embeddings` already asserts this
+    Attributes against the `(batch, 7, 1280)` *pre-encoder* input-embedding
+    tensor `Model_B_XAIPredictor.get_input_embeddings` exposes, using a
+    fixed zero-embedding baseline of the same shape, backpropagating
+    through `classify_from_input_embeddings` - the full encoder + head,
+    not the head alone (see this module's docstring for why attributing
+    against the *post-encoder* embedding instead would make every non-CLS
+    token's attribution exactly zero by construction). `attention_mask` is
+    fixed per sequence (padding structure, not a differentiable quantity)
+    and passed through unchanged at every interpolation step. The
+    embedding shape is validated before attribution runs; a mismatch
+    raises here rather than silently attributing against a
+    differently-shaped tensor. `get_input_embeddings` already asserts this
     on its own, but that assertion compiles out entirely under Python's
     `-O` flag - this check does not, so the guarantee holds independent of
     how the caller runs. `sequences` is dispatched in `batch_size`-sized
-    chunks for the same reason `integrated_gradients_model_a` is.
+    chunks for the same reason `integrated_gradients_model_a` is. The
+    actual backward loop runs under `_frozen_parameters` (see its
+    docstring) so backprop through the full encoder doesn't allocate a
+    `.grad` buffer for the encoder's own ~500M parameters at every step.
     """
 
     def _attribute_chunk(chunk: list[str]) -> np.ndarray:
-        embeddings = xai_predictor.get_token_embeddings(chunk).detach()
+        embeddings, attention_mask = xai_predictor.get_input_embeddings(chunk)
+        embeddings = embeddings.detach()
 
         expected_shape = (
             len(chunk),
@@ -139,9 +194,18 @@ def integrated_gradients_model_b_tokens(
             )
 
         baseline = torch.zeros_like(embeddings)
-        attributions = _integrated_gradients(
-            xai_predictor.classify_from_embeddings, embeddings, baseline, steps
-        )
+
+        def _forward(interpolated: torch.Tensor) -> torch.Tensor:
+            return xai_predictor.classify_from_input_embeddings(
+                interpolated, attention_mask
+            )
+
+        # Frozen only around the actual backward loop, not `get_input_embeddings`
+        # above - that's a single forward pass (never calls `.backward()`, so
+        # frozen-or-not costs nothing there) whose own internal assertion
+        # requires a normal, grad-enabled parameter state to pass.
+        with _frozen_parameters(xai_predictor.nt_model):
+            attributions = _integrated_gradients(_forward, embeddings, baseline, steps)
         return attributions.cpu().numpy()
 
     return dispatch_in_batches(_attribute_chunk, list(sequences), batch_size)

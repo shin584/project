@@ -59,15 +59,51 @@ class Model_B_XAIPredictor:
 
         return embeddings
 
-    def classify_from_embeddings(self, embeddings: torch.Tensor) -> torch.Tensor:
-        """Run only the classification head on a `(batch, 7, 1280)` embedding tensor.
+    def get_input_embeddings(
+        self, sequences: list[str]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return (pre-encoder input embeddings, attention_mask), gradients enabled.
 
-        Lets a caller (e.g. Integrated Gradients) backprop from a chosen
-        embedding tensor through just the head, instead of replaying the
-        full encoder - or reaching into `nt_model`'s internals itself - for
-        every interpolation step.
+        This - not `get_token_embeddings`'s *post-encoder* last hidden
+        state - is the point Integrated Gradients must attribute against:
+        `EsmClassificationHead` pools only the CLS token's final hidden
+        state (`features[:, 0, :]`), so every non-CLS post-encoder
+        embedding is a dead end the head never reads - its IG attribution
+        would be exactly zero by construction, not just small. Attributing
+        against the embedding-lookup output instead lets gradients flow
+        back through every self-attention layer, where non-CLS tokens do
+        influence the CLS token's final representation.
         """
-        return self.nt_model.classifier(embeddings).squeeze(-1)
+        inputs = self._tokenize(sequences)
+        embeddings = self.nt_model.esm.embeddings(
+            input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]
+        )
+
+        _batch_size, seq_len, hidden_dim = embeddings.shape
+        assert seq_len == self.EXPECTED_SEQ_LEN, (
+            f"Expected {self.EXPECTED_SEQ_LEN} tokens, got {seq_len}"
+        )
+        assert hidden_dim == self.EXPECTED_HIDDEN_DIM, (
+            f"Expected {self.EXPECTED_HIDDEN_DIM} hidden dim, got {hidden_dim}"
+        )
+        assert embeddings.requires_grad, (
+            "Embeddings must carry gradients for Integrated Gradients to run"
+        )
+
+        return embeddings, inputs["attention_mask"]
+
+    def classify_from_input_embeddings(
+        self, embeddings: torch.Tensor, attention_mask: torch.Tensor
+    ) -> torch.Tensor:
+        """Run the full encoder + classification head from pre-encoder embeddings.
+
+        Unlike a head-only shortcut, this replays every self-attention
+        layer so gradients reach every token position, not just CLS - see
+        `get_input_embeddings`.
+        """
+        return self.nt_model(
+            inputs_embeds=embeddings, attention_mask=attention_mask
+        ).logits.squeeze(-1)
 
     def get_attentions(self, sequences: list[str]) -> tuple[torch.Tensor, ...]:
         """Return per-layer attention matrices, `<cls>` still included.

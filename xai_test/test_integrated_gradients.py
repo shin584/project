@@ -124,8 +124,10 @@ def test_integrated_gradients_model_a_zero_sequence_yields_zero_attribution(
     # A sequence whose one-hot encoding *is* the baseline (all-zero) has no
     # (x - baseline) term anywhere, so attribution must be exactly zero -
     # this exercises the actual encoder path, unlike the pure-tensor tests
-    # above which build the zero input directly.
-    inputs = torch.zeros(1, 36, 4)
+    # above which build the zero input directly. Must live on the model's
+    # own device (cuda on a GPU runtime) - a bare CPU tensor only happened
+    # to work locally because this machine's device is always CPU anyway.
+    inputs = torch.zeros(1, 36, 4, device=model_a_predictor.device)
     baseline = torch.zeros_like(inputs)
 
     attributions = _integrated_gradients(
@@ -154,17 +156,23 @@ def test_integrated_gradients_model_a_batch_size_does_not_change_values(
 
 
 class _WrongShapeXAIPredictor:
-    """Stand-in exposing only `get_token_embeddings`, returning a
+    """Stand-in exposing only `get_input_embeddings`, returning a
     deliberately mis-shaped tensor without raising - proves
     `integrated_gradients_model_b_tokens`'s own explicit shape check fires
-    independently of `Model_B_XAIPredictor.get_token_embeddings`'s internal
+    independently of `Model_B_XAIPredictor.get_input_embeddings`'s internal
     `assert` (which would otherwise always fire first against a real
     predictor, per `test_integrated_gradients_model_b_tokens_malformed_input_raises`
     below, and which compiles out entirely under Python's `-O` flag).
     """
 
-    def get_token_embeddings(self, sequences: list[str]) -> torch.Tensor:
-        return torch.zeros(len(sequences), 5, 1280, requires_grad=True)
+    def get_input_embeddings(
+        self, sequences: list[str]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        batch = len(sequences)
+        return (
+            torch.zeros(batch, 5, 1280, requires_grad=True),
+            torch.ones(batch, 5),
+        )
 
 
 @pytest.fixture(scope="module")
@@ -218,24 +226,26 @@ def test_integrated_gradients_model_b_tokens_approximately_satisfies_completenes
         xai_predictor, sequences, steps=100
     )
 
-    embeddings = xai_predictor.get_token_embeddings(sequences).detach()
+    embeddings, attention_mask = xai_predictor.get_input_embeddings(sequences)
+    embeddings = embeddings.detach()
     baseline = torch.zeros_like(embeddings)
     with torch.no_grad():
         expected_delta = (
             (
-                xai_predictor.classify_from_embeddings(embeddings)
-                - xai_predictor.classify_from_embeddings(baseline)
+                xai_predictor.classify_from_input_embeddings(embeddings, attention_mask)
+                - xai_predictor.classify_from_input_embeddings(baseline, attention_mask)
             )
             .cpu()
             .numpy()
         )
 
-    # Looser tolerance than Model A's completeness check: the classifier
-    # head's tanh nonlinearity curves over this path (zero embedding -> a
-    # real, large-magnitude NT embedding), so a finite-step Riemann sum
-    # leaves a small residual even at steps=100.
+    # Much looser tolerance than Model A's completeness check: this path
+    # curves through 24 full transformer layers' worth of nonlinearities
+    # (zero embedding -> a real, large-magnitude NT embedding), not just a
+    # 2-layer head, so a finite-step Riemann sum leaves a larger residual
+    # even at steps=100 (empirically ~9% relative here).
     np.testing.assert_allclose(
-        attributions.sum(axis=(-1, -2)), expected_delta, atol=5e-3, rtol=1e-2
+        attributions.sum(axis=(-1, -2)), expected_delta, atol=0.06, rtol=0.15
     )
 
 
