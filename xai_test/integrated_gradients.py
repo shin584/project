@@ -23,11 +23,11 @@ nucleotides independently.
 
 Both models' final attribution arrays are within-sequence L1-normalized
 before any comparison - comparisons are relative-distribution based, never
-raw magnitude - especially at the PAM (`NNGRRT`) and Seed (1-8bp) positions.
-Seed boundaries (0-7) reuse mismatch_profiling.py's existing convention;
-PAM boundaries (25-30bp inclusive) are this dataset's confirmed fixed
-sequence-construction alignment (36bp = ... + 6bp PAM at 25-30 + 5bp 3'
-flank at 31-35).
+raw magnitude - especially at the PAM (`NNGRRT`) and Seed (PAM-proximal
+17-24bp) positions. Seed boundaries (17-24) reuse mismatch_profiling.py's
+existing convention; PAM boundaries (25-30bp inclusive) are this dataset's
+confirmed fixed sequence-construction alignment (36bp = ... + 8bp Seed at
+17-24 + 6bp PAM at 25-30 + 5bp 3' flank at 31-35).
 """
 
 import contextlib
@@ -272,7 +272,7 @@ def run_integrated_gradients(
 
     Returns raw and L1-normalized per-nucleotide attribution arrays for each
     model, Model B's pre-projection per-token attribution (CLS dropped), and
-    each model's PAM (25-30bp) / Seed (0-7bp) attribution-mass share - the
+    each model's PAM (25-30bp) / Seed (17-24bp) attribution-mass share - the
     relative-distribution comparison issue #15's AC4 calls for.
     """
     ig_a = integrated_gradients_model_a(

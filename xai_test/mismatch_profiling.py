@@ -13,10 +13,20 @@ sequence. Substitutions stay self-relative to each sequence's own base at
 each position (the same convention `ism_sweep` uses), which guarantees every
 substitution is a genuine mismatch regardless of the underlying sequence,
 while keeping one scenario definition comparable ("profiled") across the
-whole population. Region boundaries: Seed = positions 0-7 (PAM-adjacent
-1-8bp per plan.md/plan_realize.md), Distal = positions 28-35 (the farthest
-8bp from the seed end), Intermittent = non-consecutive positions scattered
-across the full 0-35 span.
+whole population. Region boundaries: Seed = positions 17-24 (the 8bp of the
+protospacer immediately 5' of - i.e. PAM-proximal to - the confirmed PAM at
+25-30, see integrated_gradients.py's PAM_REGION_START/END), Distal =
+positions 0-7 (the farthest 8bp from the PAM), Intermittent = non-consecutive
+positions scattered across the full 0-35 span.
+
+Earlier versions of this module (issue #12) fixed Seed at positions 0-7,
+before the PAM's exact position was pinned down (issue #15 confirmed
+25-30). That range was mislabeled "PAM-adjacent" - positions 0-7 are in fact
+the farthest possible point from the PAM - and the old "Distal" range
+(28-35) actually overlapped the PAM itself. Corrected here so "Seed" is
+biologically PAM-proximal and "Distal" is biologically PAM-distal, matching
+plan.md/plan_realize.md's stated hypothesis that cleavage sensitivity rises
+closer to the PAM.
 
 `ref_bases`/`alt_bases` in a scenario's exported metadata are illustrative:
 computed against one `example_sequence` (by convention, Testset sample_id 0)
@@ -39,8 +49,10 @@ from ism_sweep import (
 )
 
 SEQ_LEN = 36
-SEED_REGION_START, SEED_REGION_END = 0, 8  # positions 0-7, PAM-adjacent 1-8bp
-DISTAL_REGION_START, DISTAL_REGION_END = 28, 36  # positions 28-35
+# PAM-proximal 8bp of the protospacer, immediately 5' of the confirmed PAM
+# (25-30, see integrated_gradients.PAM_REGION_START/END).
+SEED_REGION_START, SEED_REGION_END = 17, 25  # positions 17-24
+DISTAL_REGION_START, DISTAL_REGION_END = 0, 8  # positions 0-7, farthest from the PAM
 SCENARIOS_PER_REGION = 5
 COMPLEX_MISMATCH_SEED = 42
 
