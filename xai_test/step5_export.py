@@ -12,7 +12,7 @@ artifact (issues #11-#16). Requires (in the working directory):
 - `attention_rollout_matrix.npz` + `attention_rollout_summary.json` (issue #16, `step4_attention_rollout.py`)
 
 Integrated Gradients (issue #15) has no standalone runner/artifact of its
-own - it is only ever needed for the (at most 10) selected Case Study
+own - it is only ever needed for the (at most 15) selected Case Study
 samples here, so this script computes it directly for just those sequences
 rather than requiring a full-Testset IG artifact no other step produces.
 """
@@ -234,7 +234,10 @@ def main():
     error_a = np.abs(true_scores - pred_a)
     error_b = np.abs(true_scores - pred_b)
 
-    print("\nSelecting Case Studies (Primary -> Secondary fallback -> Concordant)...")
+    print(
+        "\nSelecting Case Studies (Primary -> Secondary fallback -> "
+        "Reverse Primary -> Reverse Secondary fallback -> Concordant)..."
+    )
     selection = select_case_studies(error_a, error_b)
     print(
         f" - Selected {len(selection)} Case Studies: "

@@ -2,7 +2,7 @@
 
 This is the pipeline's final assembly step (see plan_realize.md section 4 /
 issue #9's Implementation Decisions): it does not compute new explainability
-signal itself (that's Steps 2-4, issues #11-#16) - it selects the 10
+signal itself (that's Steps 2-4, issues #11-#16) - it selects the 15
 representative Case Study samples (`case_study_selection.py`), bundles each
 with its per-sample detail, and assembles the standard two-artifact export:
 
@@ -37,7 +37,7 @@ REQUIRED_TOP_LEVEL_KEYS = (
     "case_studies",
 )
 
-MAX_CASE_STUDIES = 10
+MAX_CASE_STUDIES = 15
 
 # Large multi-dimensional arrays that must live only in the .npz - never
 # embedded as a JSON key anywhere in the summary (issue #9 AC24/#17 AC5).
@@ -181,7 +181,7 @@ def assemble_case_studies(
     `PHYSICAL_FEATURE_KEYS`-ordered array-like, and an
     `{"model_a_norm_attr_36bp": ..., "model_b_phase4_projected_norm_attr_36bp": ...}`
     dict, respectively) - physical values/SHAP/Integrated Gradients are only
-    ever computed for the (at most 10) selected Case Study samples, never
+    ever computed for the (at most 15) selected Case Study samples, never
     the full Testset, since that's all this export needs (issue #17's AC3
     scopes IG/attention detail to the Case Studies themselves), so there is
     no full-population array to index into for these three.

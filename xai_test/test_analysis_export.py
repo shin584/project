@@ -205,8 +205,8 @@ def test_validate_summary_schema_rejects_missing_top_level_keys():
         validate_summary_schema(summary)
 
 
-def test_validate_summary_schema_rejects_more_than_ten_case_studies():
-    summary = _minimal_valid_summary(n_case_studies=11)
+def test_validate_summary_schema_rejects_more_than_fifteen_case_studies():
+    summary = _minimal_valid_summary(n_case_studies=16)
 
     with pytest.raises(ValueError, match="exceeding the cap"):
         validate_summary_schema(summary)
@@ -286,7 +286,7 @@ def test_export_artifacts_writes_json_and_npz_and_keeps_large_arrays_out_of_json
 
 
 def test_export_artifacts_does_not_write_files_when_schema_invalid(tmp_path):
-    summary = _minimal_valid_summary(n_case_studies=11)  # invalid: > 10
+    summary = _minimal_valid_summary(n_case_studies=16)  # invalid: > 15
     json_path = str(tmp_path / "model_analysis_summary.json")
     npz_path = str(tmp_path / "model_analysis_arrays.npz")
 
