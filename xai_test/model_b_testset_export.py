@@ -12,6 +12,8 @@ it straight into Pandas.
 Integrated Gradients stays limited to the Case Studies (out of scope here).
 """
 
+import os
+
 import numpy as np
 import pandas as pd
 from analysis_export import PHYSICAL_FEATURE_KEYS
@@ -19,7 +21,10 @@ from analysis_export import PHYSICAL_FEATURE_KEYS
 EXPORT_COLUMNS = ("sample_id", "pred_raw", *PHYSICAL_FEATURE_KEYS)
 
 # Case Study values were produced by an earlier Colab GPU run; a fresh NT
-# forward pass can differ by float32/cuDNN noise, never by a real amount.
+# forward pass on the same setup should match to float32/cuDNN noise. A
+# different GPU type/torch version can nudge an embedding across an XGBoost
+# split and move `pred_raw` by more than this - the check then fails loudly
+# (listing every mismatch) rather than writing a silently different file.
 CASE_STUDY_MATCH_ATOL = 1e-4
 
 
@@ -86,9 +91,9 @@ def check_case_studies_match(
         )
 
 
-def write_model_b_testset_table(table: pd.DataFrame, path) -> None:
+def write_model_b_testset_table(table: pd.DataFrame, path: str | os.PathLike) -> None:
     table.to_csv(path, index=False, columns=list(EXPORT_COLUMNS))
 
 
-def load_model_b_testset_table(path) -> pd.DataFrame:
+def load_model_b_testset_table(path: str | os.PathLike) -> pd.DataFrame:
     return pd.read_csv(path, dtype={"sample_id": np.int64})[list(EXPORT_COLUMNS)]

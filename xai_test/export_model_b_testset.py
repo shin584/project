@@ -6,7 +6,9 @@ working directory):
 
 - `test_metadata.csv` (issue #1, `test_dataset_verifier.py`)
 - `NT_sacas9_fintuned_model/` + `hybrid_xgb_model.json` (Model B)
-- `final_analysis_result/model_analysis_summary.json` (issue #17, `step5_export.py`)
+- `final_analysis_result/model_analysis_summary.json` - the committed copy of
+  `step5_export.py`'s output (issue #17; step5 itself writes it to the
+  working directory)
 
 Writes `final_analysis_result/model_b_testset_predictions.csv` only after its
 15 Case Study rows are confirmed to match the values already in
@@ -32,7 +34,7 @@ OUTPUT_PATH = os.path.join("final_analysis_result", "model_b_testset_predictions
 
 
 def _require(path: str, produced_by: str) -> str:
-    # Same phrasing as every other stepN_*.py runner in this repo.
+    # Same phrasing as step5_export.py's `_require`.
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"{path} not found. {produced_by}를 먼저 실행해 주세요."
