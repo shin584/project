@@ -1,0 +1,6 @@
+streamlit>=1.51
+pandas
+numpy
+matplotlib
+logomaker>=0.8
+shap>=0.52
