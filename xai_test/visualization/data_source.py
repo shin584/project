@@ -11,12 +11,30 @@ Gradients available".
 """
 
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
 import numpy as np
 import pandas as pd
+
+_XAI_TEST_ROOT = Path(__file__).resolve().parent.parent
+# Token-grouped SHAP lives in the shared core (`xai_test/shap_grouping.py`)
+# so the dashboard and the CLI compute identical groups from the same code.
+# Unused names are re-exported: charts.py and the tests import them from here.
+sys.path.append(str(_XAI_TEST_ROOT))
+from shap_grouping import (  # noqa: F401
+    CLS_GROUP_NAME,
+    HIDDEN_DIM,
+    N_TOKENS,
+    PHYSICAL_FEATURE_KEYS,
+    PHYSICAL_FEATURE_LABELS,
+    SHAP_GROUP_COUNT,
+    TOKEN_NT_SPAN,
+    ShapGroup,
+    token_grouped_shap,
+)
 
 SEQ_LEN = 36
 BASES = ("A", "C", "G", "T")
@@ -29,33 +47,8 @@ PAM_REGION = (25, 30)
 SEED_REGION = (17, 24)
 DISTAL_REGION = (0, 7)
 
-# Model B's embedding is NT's last hidden state (7 tokens x 1280) flattened
-# token-major (`model_b_wrapper.extract_nt_embeddings`), followed by the 4
-# physical features in `analysis_export.PHYSICAL_FEATURE_KEYS` order.
-N_TOKENS = 7
-HIDDEN_DIM = 1280
-TOKEN_NT_SPAN = 6
-PHYSICAL_FEATURE_KEYS = ("mfe", "dg", "tm", "gc")
-PHYSICAL_FEATURE_LABELS = {"mfe": "MFE", "dg": "ΔG", "tm": "Tm", "gc": "GC"}
-SHAP_GROUP_COUNT = N_TOKENS + len(PHYSICAL_FEATURE_KEYS)
-CLS_GROUP_NAME = "[CLS] (global sequence context)"
-
-_XAI_TEST_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_RESULT_DIR = _XAI_TEST_ROOT / "final_analysis_result"
 DEFAULT_METADATA_PATH = _XAI_TEST_ROOT / "test_metadata.csv"
-
-
-@dataclass(frozen=True)
-class ShapGroup:
-    """One Token-grouped SHAP bar: a signed contribution plus the input it summarizes."""
-
-    name: str
-    shap_value: float
-    feature_value: str  # the 6-mer / physical value; "" for [CLS]
-
-    @property
-    def label(self) -> str:
-        return f"{self.name}: {self.feature_value}" if self.feature_value else self.name
 
 
 @dataclass(frozen=True)
@@ -104,38 +97,6 @@ class XAIDataSource(Protocol):
 def alt_bases(wt_base: str) -> tuple[str, str, str]:
     """ISM's 3 alternative bases at a position, in the export's lexicographic order."""
     return tuple(sorted(set(BASES) - {wt_base}))
-
-
-def token_grouped_shap(
-    shap_row: np.ndarray, sequence: str, physical_features: dict[str, float]
-) -> tuple[ShapGroup, ...]:
-    """Collapse one 8,964-wide SHAP row into the 11 Token-grouped SHAP groups.
-
-    Each token's 1,280 embedding dimensions are summed with sign, so the group
-    keeps its push-up/push-down direction; physical features stay individual.
-    """
-    n_embedding = N_TOKENS * HIDDEN_DIM
-    per_token = shap_row[:n_embedding].reshape(N_TOKENS, HIDDEN_DIM).sum(axis=1)
-    groups = [ShapGroup(CLS_GROUP_NAME, float(per_token[0]), "")]
-    for k in range(1, N_TOKENS):
-        start = (k - 1) * TOKEN_NT_SPAN
-        kmer = sequence[start : start + TOKEN_NT_SPAN]
-        groups.append(
-            ShapGroup(
-                f"Token {k} (pos {start}-{start + TOKEN_NT_SPAN - 1})",
-                float(per_token[k]),
-                kmer,
-            )
-        )
-    for j, key in enumerate(PHYSICAL_FEATURE_KEYS):
-        groups.append(
-            ShapGroup(
-                PHYSICAL_FEATURE_LABELS[key],
-                float(shap_row[n_embedding + j]),
-                f"{physical_features[key]:.2f}",
-            )
-        )
-    return tuple(groups)
 
 
 class PrecomputedDataSource:
