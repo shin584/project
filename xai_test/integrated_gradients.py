@@ -35,7 +35,12 @@ import contextlib
 import numpy as np
 import torch
 from ism_sweep import dispatch_in_batches
-from mismatch_profiling import SEED_REGION_END, SEED_REGION_START
+from mismatch_profiling import (
+    PAM_REGION_END,
+    PAM_REGION_START,
+    SEED_REGION_END,
+    SEED_REGION_START,
+)
 from model_a_wrapper import Model_A_Predictor
 from model_b_xai_wrapper import Model_B_XAIPredictor
 
@@ -52,9 +57,6 @@ CLS_TOKEN_COUNT = 1
 TOKEN_NT_SPAN = (
     6  # 6-mer tokenizer: each non-CLS token covers 6 consecutive nucleotides
 )
-
-# PAM (NNGRRT), confirmed dataset alignment: 25-30 inclusive (25:31 as a slice).
-PAM_REGION_START, PAM_REGION_END = 25, 31
 
 
 @contextlib.contextmanager

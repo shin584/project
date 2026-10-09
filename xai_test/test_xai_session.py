@@ -1,4 +1,4 @@
-"""Tests for the XAI demo session (issue #23).
+"""Tests for the XAI demo session (issues #23, #24).
 
 Drives only the session's public operations against a small synthetic
 export directory built in the test - no real model or real export is read.
@@ -9,6 +9,15 @@ import json
 import numpy as np
 import pandas as pd
 import pytest
+from mismatch_profiling import (
+    DISTAL_REGION_END,
+    DISTAL_REGION_START,
+    PAM_REGION_END,
+    PAM_REGION_START,
+    SEED_REGION_END,
+    SEED_REGION_START,
+)
+from shap_grouping import HIDDEN_DIM, SHAP_GROUP_COUNT
 from xai_session import XAISession, XAISessionError
 
 SEQ = "ACGTACGTACGTACGTACGTACGTACGGAGTACGTA"
@@ -21,6 +30,21 @@ CASES = [
     ("CONCORDANT_C01", "Concordant", 0, 0.37, 0.371, 0.372),
 ]
 
+# DISCORDANT_P01 (sample_id 3) carries hand-picked explanation values below.
+P01_SAMPLE = 3
+
+# Integrated Gradients (already L1-normalized, as exported).
+IG_A = np.zeros(36)
+IG_A[3], IG_A[20], IG_A[26] = 0.25, -0.25, 0.5  # Distal / Seed / PAM
+IG_B = np.zeros(36)
+IG_B[18], IG_B[33] = 0.4, -0.6  # Seed / unlabelled 3' flank
+
+PHYSICAL_VALUES = {"mfe": -10.9, "dg": -81.5, "tm": 69.26, "gc": 61.11}
+
+COMPLEX_REGIONS = ["Seed"] * 5 + ["Distal"] * 5 + ["Intermittent"] * 5
+COMPLEX_A = np.array([-0.5] * 5 + [-0.1] * 5 + [-0.3] * 5)
+COMPLEX_B = np.array([-0.7] * 5 + [-0.05] * 5 + [-0.2] * 5)
+
 
 def _case_entry(case_id, case_type, sample_id, true, pred_a, pred_b):
     return {
@@ -32,6 +56,47 @@ def _case_entry(case_id, case_type, sample_id, true, pred_a, pred_b):
         "model_a": {"pred_raw": pred_a, "error": abs(true - pred_a)},
         "model_b": {"pred_raw": pred_b, "error": abs(true - pred_b)},
         "case_type": case_type,
+        "per_sample_physical_values": PHYSICAL_VALUES,
+        "integrated_gradients": {
+            "model_a_norm_attr_36bp": IG_A.tolist(),
+            "model_b_phase4_projected_norm_attr_36bp": IG_B.tolist(),
+        },
+    }
+
+
+def _complex_metadata():
+    return [
+        {
+            "scenario_index": i,
+            "mutation_id": f"{region.lower()}_scenario_{i}",
+            "region": region,
+            "positions": [i],
+            "description": f"{region} scenario {i}",
+        }
+        for i, region in enumerate(COMPLEX_REGIONS)
+    ]
+
+
+def _arrays(n):
+    ism_a = np.zeros((n, 36, 3))
+    ism_a[P01_SAMPLE, 22, 1] = -0.8
+    ism_a[P01_SAMPLE, 5, 0] = 0.3
+    ism_b = np.zeros((n, 36, 3))
+    ism_b[P01_SAMPLE, 27, 2] = -0.9
+    complex_a = np.zeros((n, 15))
+    complex_a[P01_SAMPLE] = COMPLEX_A
+    complex_b = np.zeros((n, 15))
+    complex_b[P01_SAMPLE] = COMPLEX_B
+    shap = np.zeros((n, 8964), dtype=np.float32)
+    shap[P01_SAMPLE, :HIDDEN_DIM] = 0.05 / HIDDEN_DIM  # [CLS]
+    shap[P01_SAMPLE, 2 * HIDDEN_DIM] = -0.2  # Token 2 (pos 6-11)
+    shap[P01_SAMPLE, 8960 + 3] = 0.1  # GC
+    return {
+        "ism_delta_model_a": ism_a,
+        "ism_delta_model_b": ism_b,
+        "mismatch_complex_model_a": complex_a,
+        "mismatch_complex_model_b": complex_b,
+        "shap_values": shap,
     }
 
 
@@ -41,11 +106,11 @@ def export_dir(tmp_path):
     summary = {
         "metadata": {"total_samples": n},
         "global_evaluation": {},
-        "complex_mismatch_metadata": [],
+        "complex_mismatch_metadata": _complex_metadata(),
         "case_studies": [_case_entry(*c) for c in CASES],
     }
     (tmp_path / "model_analysis_summary.json").write_text(json.dumps(summary))
-    np.savez(tmp_path / "model_analysis_arrays.npz", shap_values=np.zeros((n, 8964)))
+    np.savez(tmp_path / "model_analysis_arrays.npz", **_arrays(n))
     pd.DataFrame({"sample_id": range(n), "pred_raw": np.linspace(0.1, 0.9, n)}).to_csv(
         tmp_path / "model_b_testset_predictions.csv", index=False
     )
@@ -91,9 +156,9 @@ def test_explain_resolves_short_and_full_case_ids(session, query):
 
 
 def test_explain_labels_scores_as_cached(session):
-    text = session.explain("P01")
+    header = session.explain("P01").split("\n== ")[0]  # scores, before the sections
     model_lines = [
-        ln for ln in text.splitlines() if ln.startswith(("Model A", "Model B"))
+        ln for ln in header.splitlines() if ln.startswith(("Model A", "Model B"))
     ]
     assert model_lines
     assert all("cached" in ln for ln in model_lines)
@@ -119,3 +184,100 @@ def test_explain_prints_a_case_type_line(session, query, case_type, marker):
 def test_explain_unknown_case_id_raises_clear_error(session, query):
     with pytest.raises(XAISessionError, match="Case Study"):
         session.explain(query)
+
+
+def _section(text, title):
+    """The lines of one `explain` section, from its `== title` header to the next."""
+    lines = text.splitlines()
+    start = next(i for i, ln in enumerate(lines) if ln.startswith(f"== {title}"))
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].startswith("== ")),
+        len(lines),
+    )
+    return lines[start + 1 : end]
+
+
+def _position_row(section, pos):
+    return next(ln for ln in section if ln.split()[:1] == [str(pos)])
+
+
+def test_explain_renders_all_four_sections_in_cached_only_mode(session):
+    assert session.cached_only
+    text = session.explain("P01")
+    for title in (
+        "Integrated Gradients",
+        "Token-grouped SHAP",
+        "ISM",
+        "Complex mismatch",
+    ):
+        assert _section(text, title), title
+
+
+def test_ig_table_has_every_position_with_base_and_region(session):
+    section = _section(session.explain("P01"), "Integrated Gradients")
+    for pos in range(36):
+        row = _position_row(section, pos).split()
+        assert row[1] == SEQ[pos]
+        if DISTAL_REGION_START <= pos < DISTAL_REGION_END:
+            assert row[2] == "Distal"
+        elif SEED_REGION_START <= pos < SEED_REGION_END:
+            assert row[2] == "Seed"
+        elif PAM_REGION_START <= pos < PAM_REGION_END:
+            assert row[2] == "PAM"
+        else:
+            assert row[2] == "-"
+    assert _position_row(section, 26).split()[3:] == ["+0.500", "+0.000"]
+    assert _position_row(section, 33).split()[3:] == ["+0.000", "-0.600"]
+
+
+def test_ig_region_shares_per_model(session):
+    section = _section(session.explain("P01"), "Integrated Gradients")
+    line_a = next(ln for ln in section if ln.startswith("Model A share"))
+    line_b = next(ln for ln in section if ln.startswith("Model B share"))
+    for region, share in (("Distal", 0.25), ("Seed", 0.25), ("PAM", 0.5)):
+        assert f"{region} {share:.3f}" in line_a
+    for region, share in (("Distal", 0.0), ("Seed", 0.4), ("PAM", 0.0)):
+        assert f"{region} {share:.3f}" in line_b
+
+
+def test_ig_section_states_the_deterministic_projection_rule(session):
+    section = _section(session.explain("P01"), "Integrated Gradients")
+    note = next(ln for ln in section if "Deterministic Projection Rule" in ln)
+    assert "Model B" in note
+
+
+def test_token_grouped_shap_has_eleven_groups_sorted_by_magnitude(session):
+    section = _section(session.explain("P01"), "Token-grouped SHAP")
+    rows = [ln for ln in section if ln.lstrip()[:1] in "+-" and ln.strip()]
+    assert len(rows) == SHAP_GROUP_COUNT
+    values = [float(ln.split()[0]) for ln in rows]
+    assert values == sorted(values, key=abs, reverse=True)
+    assert rows[0].startswith("-0.2000") and "Token 2 (pos 6-11): GTACGT" in rows[0]
+    assert rows[1].startswith("+0.1000") and "GC: 61.11" in rows[1]
+    assert rows[2].startswith("+0.0500") and "[CLS]" in rows[2]
+
+
+def test_ism_summary_lists_most_sensitive_positions_per_model(session):
+    section = _section(session.explain("P01"), "ISM")
+    split = next(i for i, ln in enumerate(section) if ln.startswith("Model B"))
+    a_rows = [ln for ln in section[:split] if ln.split()[:1] != ["Model"]]
+    b_rows = [ln for ln in section[split:] if ln.split()[:1] != ["Model"]]
+    # Ranked by |relative delta|. pos 22 wt G -> alts (A, C, T): index 1 is C;
+    # pos 27 wt G -> index 2 is T.
+    a_pos = [ln.split()[0] for ln in a_rows if ln.split()[:1] != ["pos"]]
+    assert a_pos[:2] == ["22", "5"]
+    row_22 = next(ln for ln in a_rows if ln.split()[:1] == ["22"])
+    assert "Seed" in row_22 and "G>C" in row_22 and "-0.800" in row_22
+    row_27 = next(ln for ln in b_rows if ln.split()[:1] == ["27"])
+    assert "PAM" in row_27 and "G>T" in row_27 and "-0.900" in row_27
+
+
+def test_complex_mismatch_results_by_region_for_both_models(session):
+    section = _section(session.explain("P01"), "Complex mismatch")
+    for region, a, b in (
+        ("Seed", -0.5, -0.7),
+        ("Distal", -0.1, -0.05),
+        ("Intermittent", -0.3, -0.2),
+    ):
+        line = next(ln for ln in section if ln.split()[:1] == [region])
+        assert f"{a:+.3f}" in line and f"{b:+.3f}" in line

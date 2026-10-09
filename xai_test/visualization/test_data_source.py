@@ -170,9 +170,8 @@ def test_regions_match_the_pipeline_constants():
     # The dashboard keeps its own copy (it is a standalone app); guard drift
     # against the half-open boundaries the analysis pipeline uses.
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    import integrated_gradients as ig
     import mismatch_profiling as mp
 
     assert SEED_REGION == (mp.SEED_REGION_START, mp.SEED_REGION_END - 1)
     assert DISTAL_REGION == (mp.DISTAL_REGION_START, mp.DISTAL_REGION_END - 1)
-    assert PAM_REGION == (ig.PAM_REGION_START, ig.PAM_REGION_END - 1)
+    assert PAM_REGION == (mp.PAM_REGION_START, mp.PAM_REGION_END - 1)

@@ -15,7 +15,7 @@ substitution is a genuine mismatch regardless of the underlying sequence,
 while keeping one scenario definition comparable ("profiled") across the
 whole population. Region boundaries: Seed = positions 17-24 (the 8bp of the
 protospacer immediately 5' of - i.e. PAM-proximal to - the confirmed PAM at
-25-30, see integrated_gradients.py's PAM_REGION_START/END), Distal =
+25-30, see PAM_REGION_START/END below), Distal =
 positions 0-7 (the farthest 8bp from the PAM), Intermittent = non-consecutive
 positions scattered across the full 0-35 span.
 
@@ -49,8 +49,11 @@ from ism_sweep import (
 )
 
 SEQ_LEN = 36
-# PAM-proximal 8bp of the protospacer, immediately 5' of the confirmed PAM
-# (25-30, see integrated_gradients.PAM_REGION_START/END).
+# PAM (NNGRRT), confirmed dataset alignment: 25-30 inclusive (25:31 as a slice).
+# Kept here, beside Seed/Distal, so torch-free code (the demo CLI's cached-only
+# mode) can share one set of region constants with integrated_gradients.py.
+PAM_REGION_START, PAM_REGION_END = 25, 31
+# PAM-proximal 8bp of the protospacer, immediately 5' of the confirmed PAM.
 SEED_REGION_START, SEED_REGION_END = 17, 25  # positions 17-24
 DISTAL_REGION_START, DISTAL_REGION_END = 0, 8  # positions 0-7, farthest from the PAM
 SCENARIOS_PER_REGION = 5

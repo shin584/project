@@ -41,8 +41,8 @@ BASES = ("A", "C", "G", "T")
 N_COMPLEX_SCENARIOS = 15
 
 # Region boundaries (0-indexed, inclusive) on the 36bp sequence. Mirrors the
-# half-open constants in mismatch_profiling.py (Seed/Distal) and
-# integrated_gradients.py (PAM); test_data_source.py guards against drift.
+# half-open constants in mismatch_profiling.py; test_data_source.py guards
+# against drift.
 PAM_REGION = (25, 30)
 SEED_REGION = (17, 24)
 DISTAL_REGION = (0, 7)
