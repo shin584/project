@@ -28,7 +28,9 @@ is comparative (ADR 0003).
 
 import hashlib
 import json
+import time
 from pathlib import Path
+from typing import Any, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -48,6 +50,7 @@ from mismatch_profiling import (
     SEED_REGION_END,
     SEED_REGION_START,
 )
+from model_b_testset_export import CASE_STUDY_MATCH_ATOL
 from paired_bootstrap import compute_metrics
 from shap_analysis import EMBEDDING_DIM, aggregate_physical_contribution_ratio
 from shap_grouping import token_grouped_shap
@@ -204,6 +207,20 @@ class XAISessionError(ValueError):
     """A user-facing error: the CLI prints its message instead of a traceback."""
 
 
+class Predictors(NamedTuple):
+    """Model A, Model B and the XAI predictor; the CLI constructs them one at
+    a time.
+
+    `model_a` / `model_b` only need `predict(list[str]) -> np.ndarray`
+    (`Model_A_Predictor`, `Model_B_Predictor`); `model_b_xai` is the
+    `Model_B_XAIPredictor` live IG builds on.
+    """
+
+    model_a: Any
+    model_b: Any
+    model_b_xai: Any
+
+
 class XAISession:
     def __init__(
         self,
@@ -259,8 +276,8 @@ class XAISession:
                 f"{case['case_id']}  (sample_id {case['sample_id']}, {case_type})",
                 f"sequence     {case['sequence']}",
                 f"true score   {case['true_score']:.3f}",
-                f"Model A      pred {a['pred_raw']:.3f}  error {a['error']:.3f}  (cached)",
-                f"Model B      pred {b['pred_raw']:.3f}  error {b['error']:.3f}  (cached)",
+                self._score_line("Model A", a, case["sequence"], "model_a"),
+                self._score_line("Model B", b, case["sequence"], "model_b"),
                 f"{case_type}: {CASE_TYPE_EXPLANATIONS.get(case_type, '설명 없음')}",
             ]
         )
@@ -283,6 +300,30 @@ class XAISession:
             self._handoff_section(),
         )
         return "\n\n".join(sections)
+
+    def _score_line(
+        self, model: str, cached: dict, sequence: str, predictor_field: str
+    ) -> str:
+        """The cached score, plus - when predictors are loaded - the score
+        recomputed live, a match indicator and the elapsed time."""
+        if self.cached_only:
+            return (
+                f"{model:<12} pred {cached['pred_raw']:.3f}"
+                f"  error {cached['error']:.3f}  (cached)"
+            )
+        predictor = getattr(self._predictors, predictor_field)
+        start = time.perf_counter()
+        live = float(predictor.predict([sequence])[0])
+        elapsed = time.perf_counter() - start
+        diff = live - cached["pred_raw"]
+        match = (
+            "[일치]" if abs(diff) <= CASE_STUDY_MATCH_ATOL else f"[불일치 Δ{diff:+.4f}]"
+        )
+        return (
+            f"{model:<12} cached {cached['pred_raw']:.3f}"
+            f"  cached error {cached['error']:.3f}"
+            f"  live {live:.3f} {match} ({elapsed:.2f}s)"
+        )
 
     def _integrity_section(self) -> str:
         lines = ["== Testset integrity (SHA256)"]

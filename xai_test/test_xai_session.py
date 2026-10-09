@@ -6,6 +6,7 @@ export directory built in the test - no real model or real export is read.
 
 import hashlib
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -21,7 +22,7 @@ from mismatch_profiling import (
 from paired_bootstrap import compute_metrics
 from shap_analysis import aggregate_physical_contribution_ratio
 from shap_grouping import HIDDEN_DIM, SHAP_GROUP_COUNT
-from xai_session import XAISession, XAISessionError
+from xai_session import Predictors, XAISession, XAISessionError
 
 SEQ = "ACGTACGTACGTACGTACGTACGTACGGAGTACGTA"
 
@@ -713,3 +714,83 @@ def test_report_closes_with_the_export_handoff(session):
     assert "model_analysis_summary.json" in joined
     assert "model_analysis_arrays.npz" in joined
     assert text.rstrip().endswith(section[-1])  # the report's last section
+
+
+# ---------------------------------------------------------------------------
+# Live-recomputed scores (issue #27)
+# ---------------------------------------------------------------------------
+
+
+class FakePredictor:
+    """Deterministic stand-in for Model_A_Predictor / Model_B_Predictor."""
+
+    def __init__(self, scores_by_sequence):
+        self._scores = scores_by_sequence
+        self.calls = []
+
+    def predict(self, sequences):
+        self.calls.append(list(sequences))
+        return np.array([self._scores[s] for s in sequences])
+
+
+class ExplodingPredictor:
+    def predict(self, sequences):
+        raise AssertionError("cached-only mode must never call a predictor")
+
+
+def _live_session(export_dir, live_a, live_b):
+    predictors = Predictors(
+        model_a=FakePredictor({SEQ: live_a}),
+        model_b=FakePredictor({SEQ: live_b}),
+        model_b_xai=ExplodingPredictor(),
+    )
+    return XAISession(
+        export_dir, export_dir / "test_metadata.csv", predictors
+    ), predictors
+
+
+def _model_line(text, model):
+    return next(ln for ln in text.splitlines() if ln.startswith(model))
+
+
+def test_session_with_predictors_is_live(export_dir):
+    session, _ = _live_session(export_dir, 0.55, 0.88)
+    assert not session.cached_only
+
+
+def test_explain_shows_live_scores_next_to_cached_with_a_match(export_dir):
+    session, predictors = _live_session(export_dir, 0.55, 0.88)  # P01's cached pred_raw
+    text = session.explain("P01")
+    line_a, line_b = _model_line(text, "Model A"), _model_line(text, "Model B")
+    assert "cached 0.550" in line_a and "live 0.550" in line_a
+    assert "cached 0.880" in line_b and "live 0.880" in line_b
+    assert "cached error 0.350" in line_a  # the error is the cached one
+    for line in (line_a, line_b):
+        assert "[일치]" in line
+        assert re.search(r"\d+\.\d+s", line)  # elapsed time
+    assert predictors.model_a.calls == [[SEQ]]
+    assert predictors.model_b.calls == [[SEQ]]
+
+
+def test_explain_flags_a_live_score_that_differs_from_the_cache(export_dir):
+    session, _ = _live_session(export_dir, 0.60, 0.88)
+    text = session.explain("P01")
+    line_a = _model_line(text, "Model A")
+    assert "live 0.600" in line_a
+    assert "[불일치" in line_a and "+0.0500" in line_a
+    assert "[일치]" in _model_line(text, "Model B")
+
+
+def test_live_match_tolerates_float_noise_below_the_tolerance(export_dir):
+    session, _ = _live_session(export_dir, 0.55 + 1e-5, 0.88 - 1e-5)
+    text = session.explain("P01")
+    assert "[일치]" in _model_line(text, "Model A")
+    assert "[일치]" in _model_line(text, "Model B")
+
+
+def test_cached_only_explain_labels_scores_cached_and_shows_no_live_column(session):
+    text = session.explain("P01")
+    for model in ("Model A", "Model B"):
+        line = _model_line(text, model)
+        assert "cached" in line
+        assert "live" not in line

@@ -1,17 +1,129 @@
-"""Demo CLI for the XAI system (issues #21, #23, #25).
+"""Demo CLI for the XAI system (issues #21, #23, #25, #27).
 
-Thin entry point: parses arguments, constructs an `XAISession` and prints.
-All analysis and rendering lives in `xai_session.py`.
+Thin entry point: parses arguments, constructs the predictors (one at a
+time) and an `XAISession`, then prints or loops over stdin. All analysis
+and rendering lives in `xai_session.py`.
 
-    python xai_demo.py --cached cases
-    python xai_demo.py --cached report
+    python xai_demo.py demo             # load models, then interactive prompt
+    python xai_demo.py --cached demo    # interactive prompt, no model load
+    python xai_demo.py cases
+    python xai_demo.py report
     python xai_demo.py --cached explain P01
+
+`cases` and `report` never need a model. `--cached` never constructs a
+predictor, so a memory crash or model-load failure on the presenting laptop
+still leaves a working demo.
 """
 
 import argparse
+import gc
 import sys
+import time
+from pathlib import Path
 
-from xai_session import XAISession, XAISessionError
+from xai_session import Predictors, XAISession, XAISessionError
+
+_XAI_TEST_ROOT = Path(__file__).resolve().parent
+MODEL_A_WEIGHT_PATH = _XAI_TEST_ROOT / "best_model_fold1.pth"
+NT_MODEL_DIR = _XAI_TEST_ROOT / "NT_sacas9_fintuned_model"
+XGB_MODEL_PATH = _XAI_TEST_ROOT / "hybrid_xgb_model.json"
+
+
+# The wrappers import torch/transformers at module level, so each import is
+# deferred into its loader: `--cached` never pays for (or risks) them.
+def _load_model_a():
+    from model_a_wrapper import Model_A_Predictor
+
+    return Model_A_Predictor(weight_path=str(MODEL_A_WEIGHT_PATH))
+
+
+def _load_model_b():
+    from model_b_wrapper import Model_B_Predictor
+
+    return Model_B_Predictor(
+        nt_model_dir=str(NT_MODEL_DIR), xgb_model_path=str(XGB_MODEL_PATH)
+    )
+
+
+def _load_model_b_xai():
+    from model_b_xai_wrapper import Model_B_XAIPredictor
+
+    return Model_B_XAIPredictor(nt_model_dir=str(NT_MODEL_DIR))
+
+
+# (display name, `Predictors` field, loader), in load order.
+PREDICTOR_LOADERS = (
+    ("Model A (CNN+RNN)", "model_a", _load_model_a),
+    ("Model B (NT 500M + 4 Phys + XGBoost)", "model_b", _load_model_b),
+    (
+        "Model B XAI predictor (NT regression checkpoint)",
+        "model_b_xai",
+        _load_model_b_xai,
+    ),
+)
+
+HELP_TEXT = """명령어:
+  <Case Study ID>   예: P01, R01, C01 또는 DISCORDANT_P01 - Case Study 설명
+  cases             Case Study 목록
+  report            Testset integrity check와 global findings
+  help              이 도움말
+  quit              종료 (exit, Ctrl+D/Ctrl+Z도 가능)"""
+
+QUIT_COMMANDS = ("quit", "exit", "q")
+
+
+def load_predictors(loaders=PREDICTOR_LOADERS) -> Predictors:
+    """Construct each predictor strictly after the previous one has finished
+    (7.8GB laptop: never two loads in flight), printing progress."""
+    loaded = {}
+    total = len(loaders)
+    for i, (name, field, load) in enumerate(loaders, start=1):
+        print(f"[{i}/{total}] {name} 로딩 중...", flush=True)
+        start = time.perf_counter()
+        loaded[field] = load()
+        gc.collect()  # release load-time temporaries before the next model
+        print(
+            f"[{i}/{total}] {name} 완료 ({time.perf_counter() - start:.1f}s)",
+            flush=True,
+        )
+    print("모든 모델 로딩 완료 - ready", flush=True)
+    return Predictors(**loaded)
+
+
+def _run_command(session, line: str) -> None:
+    command = line.lower()
+    if command == "help":
+        print(HELP_TEXT)
+    elif command == "cases":
+        print(session.cases())
+    elif command == "report":
+        print(session.report())
+    else:
+        print(session.explain(line))
+
+
+def run_session(session) -> None:
+    """The interactive prompt. One failing command prints an error and
+    returns to the prompt; only `quit` or end of input ends the session."""
+    print("'help'로 명령어 목록을 볼 수 있습니다.")
+    while True:
+        try:
+            line = input("xai> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return
+        if not line:
+            continue
+        if line.lower() in QUIT_COMMANDS:
+            return
+        try:
+            _run_command(session, line)
+        except KeyboardInterrupt:  # Ctrl+C on a slow command, not on the demo
+            print("\n중단됨 - 프롬프트로 돌아갑니다")
+        except XAISessionError as e:
+            print(f"error: {e}")
+        except Exception as e:  # noqa: BLE001 - one bad command must never end the demo
+            print(f"error: {type(e).__name__}: {e}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -25,6 +137,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--cached", action="store_true", default=argparse.SUPPRESS, help=cached_help
     )
     sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser(
+        "demo",
+        parents=[common],
+        help="load the models, then answer commands at an interactive prompt",
+    )
     sub.add_parser("cases", parents=[common], help="list all Case Studies")
     sub.add_parser(
         "report",
@@ -36,23 +153,29 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Subcommands that recompute scores live unless `--cached` is given.
+LIVE_COMMANDS = ("demo", "explain")
+
+
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    if not args.cached:
-        print(
-            "live mode (model loading) is not implemented yet; rerun with --cached",
-            file=sys.stderr,
-        )
-        return 2
-
+    predictors = None
+    if args.command in LIVE_COMMANDS and not args.cached:
+        try:
+            predictors = load_predictors()
+        except Exception as e:  # noqa: BLE001 - e.g. MemoryError on the laptop
+            print(
+                f"error: 모델 로딩 실패 ({type(e).__name__}: {e})"
+                " - --cached로 다시 실행하면 모델 없이 cache로 답합니다",
+                file=sys.stderr,
+            )
+            return 1
     try:
-        session = XAISession()
-        if args.command == "cases":
-            print(session.cases())
-        elif args.command == "report":
-            print(session.report())
-        elif args.command == "explain":
-            print(session.explain(args.query))
+        session = XAISession(predictors=predictors)
+        if args.command == "demo":
+            run_session(session)
+        else:
+            _run_command(session, getattr(args, "query", args.command))
     except (XAISessionError, OSError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
