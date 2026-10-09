@@ -1,4 +1,4 @@
-"""Tests for the XAI demo session (issues #23-#26).
+"""Tests for the XAI demo session (issues #23-#28).
 
 Drives only the session's public operations against a small synthetic
 export directory built in the test - no real model or real export is read.
@@ -11,6 +11,8 @@ import re
 import numpy as np
 import pandas as pd
 import pytest
+import torch
+import xai_session
 from mismatch_profiling import (
     DISTAL_REGION_END,
     DISTAL_REGION_START,
@@ -194,9 +196,10 @@ def export_dir(tmp_path):
     }
     (tmp_path / "model_analysis_summary.json").write_text(json.dumps(summary))
     np.savez(tmp_path / "model_analysis_arrays.npz", **_arrays(n))
-    pd.DataFrame({"sample_id": range(n), "pred_raw": PRED_B}).to_csv(
-        tmp_path / "model_b_testset_predictions.csv", index=False
-    )
+    pd.DataFrame(
+        {"sample_id": range(n), "pred_raw": PRED_B}
+        | {key: [value] * n for key, value in PHYSICAL_VALUES.items()}
+    ).to_csv(tmp_path / "model_b_testset_predictions.csv", index=False)
     pd.DataFrame(
         {
             "sample_id": range(n),
@@ -794,3 +797,328 @@ def test_cached_only_explain_labels_scores_cached_and_shows_no_live_column(sessi
         line = _model_line(text, model)
         assert "cached" in line
         assert "live" not in line
+
+
+# ---------------------------------------------------------------------------
+# Typed 36bp sequences (issue #28)
+# ---------------------------------------------------------------------------
+
+# Testset row 2 is the one non-Case-Study row (see `_sequences`).
+TESTSET_ONLY_SAMPLE = 2
+TESTSET_ONLY_SEQ = _sequences()[TESTSET_ONLY_SAMPLE]
+NOVEL_SEQ = "GGGGACGTACGTACGTACGTACGTACGGAGTACGTA"  # valid PAM, not in the Testset
+
+
+class DifferentiableModelA:
+    """Linear stand-in for Model_A_Predictor: score = sum(w * one_hot)."""
+
+    def __init__(self):
+        self.device = torch.device("cpu")
+        self._weights = torch.linspace(-1.0, 1.0, 36 * 4).reshape(36, 4)
+        self.forward_calls = 0
+        self.predict_calls = []
+
+    def encode_one_hot(self, sequences):
+        index = {"A": 0, "C": 1, "G": 2, "T": 3}
+        one_hot = torch.zeros(len(sequences), 36, 4)
+        for i, seq in enumerate(sequences):
+            for pos, base in enumerate(seq):
+                one_hot[i, pos, index[base]] = 1.0
+        return one_hot
+
+    def model(self, x):
+        self.forward_calls += 1
+        return (x * self._weights).sum(dim=(1, 2))
+
+    def predict(self, sequences):
+        self.predict_calls.append(list(sequences))
+        with torch.no_grad():
+            return (
+                (self.encode_one_hot(sequences) * self._weights).sum(dim=(1, 2)).numpy()
+            )
+
+
+class DifferentiableModelBXAI:
+    """Linear stand-in for Model_B_XAIPredictor over (batch, 7, 1280) embeddings."""
+
+    def __init__(self):
+        self.nt_model = torch.nn.Linear(1, 1)  # IG freezes its parameters
+        self._weights = torch.linspace(-1.0, 1.0, 7 * HIDDEN_DIM).reshape(7, HIDDEN_DIM)
+        self.forward_calls = 0
+
+    def get_input_embeddings(self, sequences):
+        embeddings = torch.ones(len(sequences), 7, HIDDEN_DIM)
+        for i, seq in enumerate(sequences):
+            for token in range(1, 7):
+                kmer = seq[(token - 1) * 6 : token * 6]
+                embeddings[i, token] *= 1 + kmer.count("G")
+        mask = torch.ones(len(sequences), 7, dtype=torch.long)
+        return embeddings.requires_grad_(True), mask
+
+    def classify_from_input_embeddings(self, embeddings, attention_mask):
+        self.forward_calls += 1
+        return (embeddings * self._weights).sum(dim=(1, 2))
+
+
+# Tree SHAP contributions the fake XGBoost returns: Token 3 pushes the score
+# down, GC up; the trailing column is the bias term `compute_tree_shap` drops.
+LIVE_SHAP = np.zeros(8964 + 1, dtype=np.float32)
+LIVE_SHAP[3 * HIDDEN_DIM] = -0.3
+LIVE_SHAP[8960 + 3] = 0.2
+LIVE_SHAP[-1] = 0.5
+LIVE_PHYSICAL = np.array([[-7.5, -70.25, 66.0, 47.0]], dtype=np.float32)
+
+
+class FakeBooster:
+    def predict(self, dmatrix, pred_contribs=False):
+        assert pred_contribs
+        assert dmatrix.num_col() == 8964
+        return LIVE_SHAP[None, :]
+
+
+class FakeXGB:
+    def get_booster(self):
+        return FakeBooster()
+
+
+class FakeModelB:
+    """Stand-in for Model_B_Predictor: predict() plus the feature pipeline
+    live Tree SHAP needs."""
+
+    def __init__(self, score=0.42):
+        self._score = score
+        self.xgb_model = FakeXGB()
+        self.predict_calls = []
+
+    def predict(self, sequences):
+        self.predict_calls.append(list(sequences))
+        return np.full(len(sequences), self._score)
+
+    def extract_nt_embeddings(self, sequences):
+        return np.zeros((len(sequences), 8960), dtype=np.float32)
+
+    def compute_physical_features(self, sequences):
+        return np.repeat(LIVE_PHYSICAL, len(sequences), axis=0)
+
+
+def _typed_session(export_dir, **kwargs):
+    predictors = Predictors(
+        DifferentiableModelA(), FakeModelB(), DifferentiableModelBXAI()
+    )
+    session = XAISession(
+        export_dir, export_dir / "test_metadata.csv", predictors, **kwargs
+    )
+    return session, predictors
+
+
+def _position_row_or_none(section, pos):
+    return next((ln for ln in section if ln.split()[:1] == [str(pos)]), None)
+
+
+@pytest.mark.parametrize(
+    "sequence, message",
+    [
+        (NOVEL_SEQ[:-1], "36"),  # too short
+        (NOVEL_SEQ + "A", "36"),  # too long
+        (NOVEL_SEQ[:5] + "N" + NOVEL_SEQ[6:], "A/C/G/T"),
+        (NOVEL_SEQ[:10] + "U" + NOVEL_SEQ[11:], "A/C/G/T"),
+        (NOVEL_SEQ[:27] + "C" + NOVEL_SEQ[28:], "PAM"),  # N N [G] R R T
+        (NOVEL_SEQ[:28] + "T" + NOVEL_SEQ[29:], "PAM"),  # R must be A/G
+        (NOVEL_SEQ[:30] + "A" + NOVEL_SEQ[31:], "PAM"),  # last PAM base must be T
+    ],
+)
+def test_invalid_typed_sequences_raise_a_clear_error(export_dir, sequence, message):
+    session, predictors = _typed_session(export_dir)
+    with pytest.raises(XAISessionError, match=message):
+        session.explain(sequence)
+    assert predictors.model_a.predict_calls == []
+    assert predictors.model_b.predict_calls == []
+
+
+def test_invalid_typed_sequence_is_rejected_in_cached_only_mode_too(session):
+    with pytest.raises(XAISessionError, match="PAM"):
+        session.explain(NOVEL_SEQ[:27] + "C" + NOVEL_SEQ[28:])
+
+
+@pytest.mark.parametrize(
+    "sequence",
+    [NOVEL_SEQ[:6] + " " + NOVEL_SEQ[7:], NOVEL_SEQ[:6] + "1" + NOVEL_SEQ[7:]],
+)
+def test_a_pasted_sequence_with_a_stray_character_gets_a_sequence_error(
+    session, sequence
+):
+    with pytest.raises(XAISessionError, match="A/C/G/T"):
+        session.explain(sequence)
+
+
+def test_a_wrong_length_error_states_the_typed_length(session):
+    with pytest.raises(XAISessionError, match="35"):
+        session.explain(NOVEL_SEQ[:-1])
+
+
+def test_lowercase_typed_sequence_is_accepted(export_dir):
+    session, predictors = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ.lower())
+    assert NOVEL_SEQ in text
+    assert predictors.model_a.predict_calls == [[NOVEL_SEQ]]
+    assert predictors.model_b.predict_calls == [[NOVEL_SEQ]]
+
+
+def test_typed_sequence_matching_the_testset_shows_sample_id_and_true_score(
+    export_dir,
+):
+    session, _ = _typed_session(export_dir)
+    text = session.explain(TESTSET_ONLY_SEQ)
+    match_line = _line(text.splitlines(), "Testset")
+    assert f"sample_id {TESTSET_ONLY_SAMPLE}" in match_line
+    assert f"true score {TRUE_SCORES[TESTSET_ONLY_SAMPLE]:.3f}" in match_line
+
+
+def test_typed_sequence_without_a_testset_match_states_no_ground_truth(export_dir):
+    session, _ = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    match_line = _line(text.splitlines(), "Testset")
+    assert "ground truth" in match_line
+    assert "sample_id" not in text
+    assert "true score" not in text
+
+
+def test_typed_sequence_scores_are_live_with_elapsed_time(export_dir):
+    session, predictors = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    expected_a = float(predictors.model_a.predict([NOVEL_SEQ])[0])
+    line_a, line_b = _model_line(text, "Model A"), _model_line(text, "Model B")
+    assert f"live {expected_a:.3f}" in line_a
+    assert "live 0.420" in line_b
+    for line in (line_a, line_b):
+        assert "cached" not in line
+        assert re.search(r"\(\d+\.\d+s\)", line)
+
+
+def test_typed_testset_sequence_shows_the_live_error_against_the_true_score(
+    export_dir,
+):
+    session, _ = _typed_session(export_dir)
+    text = session.explain(TESTSET_ONLY_SEQ)
+    error = abs(0.42 - TRUE_SCORES[TESTSET_ONLY_SAMPLE])
+    assert f"error {error:.3f}" in _model_line(text, "Model B")
+
+
+def test_typed_sequence_live_ig_table_matches_the_cached_layout(export_dir):
+    session, _ = _typed_session(export_dir)
+    section = _section(session.explain(NOVEL_SEQ), "Integrated Gradients")
+    for pos in range(36):
+        row = _position_row(section, pos).split()
+        assert row[1] == NOVEL_SEQ[pos]
+    assert _position_row(section, 26).split()[2] == "PAM"
+    assert any(ln.startswith("Model A share") for ln in section)
+    assert any(ln.startswith("Model B share") for ln in section)
+    assert any("Deterministic Projection Rule" in ln for ln in section)
+
+
+def test_typed_sequence_live_ig_is_l1_normalized_and_projected(export_dir):
+    session, _ = _typed_session(export_dir)
+    section = _section(session.explain(NOVEL_SEQ), "Integrated Gradients")
+    rows = [_position_row(section, pos).split() for pos in range(36)]
+    attr_a = np.array([float(r[3]) for r in rows])
+    attr_b = np.array([float(r[4]) for r in rows])
+    assert np.abs(attr_a).sum() == pytest.approx(1.0, abs=0.02)
+    assert np.abs(attr_b).sum() == pytest.approx(1.0, abs=0.02)
+    # Deterministic Projection Rule: constant within each 6-mer token block.
+    for block in attr_b.reshape(6, 6):
+        assert np.all(block == block[0])
+
+
+def test_live_ig_prints_the_default_step_count_and_elapsed_time(export_dir):
+    session, predictors = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    assert "steps=50" in _line(text.splitlines(), "== Integrated Gradients")
+    joined = "\n".join(_section(text, "Integrated Gradients"))
+    assert re.search(r"Model A IG \d+\.\d+s", joined)
+    assert re.search(r"Model B IG \d+\.\d+s", joined)
+    assert predictors.model_a.forward_calls == 50
+    assert predictors.model_b_xai.forward_calls == 50
+
+
+def test_live_ig_honors_a_lowered_step_count(export_dir):
+    session, predictors = _typed_session(export_dir, ig_steps=5)
+    text = session.explain(NOVEL_SEQ)
+    assert "steps=5" in _line(text.splitlines(), "== Integrated Gradients")
+    assert predictors.model_a.forward_calls == 5
+    assert predictors.model_b_xai.forward_calls == 5
+
+
+@pytest.mark.parametrize("steps", [0, -3])
+def test_a_non_positive_ig_step_count_is_rejected(export_dir, steps):
+    with pytest.raises(XAISessionError, match="IG"):
+        _typed_session(export_dir, ig_steps=steps)
+
+
+def test_default_ig_steps_matches_the_ig_module():
+    from integrated_gradients import DEFAULT_IG_STEPS
+
+    assert xai_session.DEFAULT_IG_STEPS == DEFAULT_IG_STEPS
+
+
+def test_typed_sequence_live_token_grouped_shap(export_dir):
+    session, _ = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    header = _line(text.splitlines(), "== Token-grouped SHAP")
+    assert "live" in header
+    assert re.search(r"\d+\.\d+s", header)
+    rows = [
+        ln for ln in _section(text, "Token-grouped SHAP") if ln.startswith(("+", "-"))
+    ]
+    assert len(rows) == SHAP_GROUP_COUNT
+    values = [float(ln.split()[0]) for ln in rows]
+    assert sum(values) == pytest.approx(float(LIVE_SHAP[:-1].sum()), abs=1e-3)
+    assert rows[0].startswith("-0.3000") and NOVEL_SEQ[12:18] in rows[0]  # Token 3
+    assert rows[1].startswith("+0.2000") and "GC: 47.00" in rows[1]
+
+
+def test_typed_sequence_live_explanation_has_no_cached_sections(export_dir):
+    session, _ = _typed_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    assert "== ISM" not in text
+    assert "== Complex mismatch" not in text
+
+
+def test_cached_only_refuses_a_typed_sequence_not_in_the_testset(session):
+    with pytest.raises(XAISessionError, match="cached") as excinfo:
+        session.explain(NOVEL_SEQ)
+    assert "Testset" in str(excinfo.value)
+
+
+def test_cached_only_answers_a_testset_sequence_from_the_cache(session):
+    text = session.explain(TESTSET_ONLY_SEQ.lower())
+    match_line = _line(text.splitlines(), "Testset")
+    assert f"sample_id {TESTSET_ONLY_SAMPLE}" in match_line
+    assert f"true score {TRUE_SCORES[TESTSET_ONLY_SAMPLE]:.3f}" in match_line
+    line_b = _model_line(text, "Model B")
+    assert "cached" in line_b and f"{PRED_B[TESTSET_ONLY_SAMPLE]:.3f}" in line_b
+    assert "live" not in text
+    for title in ("Token-grouped SHAP", "ISM", "Complex mismatch"):
+        assert _section(text, title), title
+
+
+def test_cached_only_testset_sequence_states_ig_exists_only_for_case_studies(
+    session,
+):
+    ig = _section(session.explain(TESTSET_ONLY_SEQ), "Integrated Gradients")
+    assert f"Case Study {len(CASES)}개" in " ".join(ig)
+    assert not any(_position_row_or_none(ig, pos) for pos in range(36))
+
+
+def test_cached_only_testset_sequence_uses_cached_shap_for_its_sample(session):
+    text = session.explain(TESTSET_ONLY_SEQ)
+    rows = [
+        ln for ln in _section(text, "Token-grouped SHAP") if ln.startswith(("+", "-"))
+    ]
+    assert len(rows) == SHAP_GROUP_COUNT
+    assert all(float(ln.split()[0]) == 0 for ln in rows)  # row 2 has zero SHAP
+    assert "MFE: -10.90" in " ".join(rows)  # physical value from the predictions CSV
+
+
+def test_cached_only_testset_sequence_of_a_case_study_points_to_its_case(session):
+    ig = _section(session.explain(SEQ), "Integrated Gradients")
+    assert "CONCORDANT_C01" in " ".join(ig)  # sample_id 0, the first SEQ row

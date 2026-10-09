@@ -1,4 +1,4 @@
-"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#26).
+"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#28).
 
 `XAISession` is the single seam between the export contract and the terminal:
 it is constructed from the standardized export directory
@@ -11,6 +11,14 @@ mode and never touches a model.
 tables: Integrated Gradients (per position, with Distal/Seed/PAM labels and
 region shares), Token-grouped SHAP, an ISM summary and complex-mismatch
 results by region.
+
+`explain <36bp sequence>` validates a typed sequence (length 36, ACGT,
+case-insensitive, PAM `NNGRRT` at positions 25-30) and looks it up in the
+Testset by sequence hash. With predictors loaded it computes Model A / Model B
+scores, Token-grouped SHAP (Tree SHAP on Model B's live features) and
+Integrated Gradients for both models live, timing each computation. In
+cached-only mode a Testset sequence is answered from the cache (IG exists
+only for the Case Studies) and any other sequence is refused.
 
 `report()` opens with a Testset integrity check (the export's whole-column
 SHA256, every row's `sequence_hash`, every Case Study's sequence against its
@@ -34,6 +42,7 @@ from typing import Any, NamedTuple
 
 import numpy as np
 import pandas as pd
+from analysis_export import PHYSICAL_FEATURE_KEYS
 from case_study_selection import (
     CONCORDANT,
     PRIMARY_DISCORDANT,
@@ -52,7 +61,11 @@ from mismatch_profiling import (
 )
 from model_b_testset_export import CASE_STUDY_MATCH_ATOL
 from paired_bootstrap import compute_metrics
-from shap_analysis import EMBEDDING_DIM, aggregate_physical_contribution_ratio
+from shap_analysis import (
+    EMBEDDING_DIM,
+    aggregate_physical_contribution_ratio,
+    compute_tree_shap,
+)
 from shap_grouping import token_grouped_shap
 
 _XAI_TEST_ROOT = Path(__file__).resolve().parent
@@ -97,6 +110,18 @@ DETERMINISTIC_PROJECTION_NOTE = (
     "그 token이 덮는 6개 nucleotide에 균등 분배한 값 "
     "(모델이 nucleotide를 독립적으로 인식한다는 근거가 아님)"
 )
+
+SEQUENCE_LENGTH = 36
+NUCLEOTIDES = "ACGT"
+# Expected bases at PAM_REGION_START..PAM_REGION_END-1, as IUPAC codes.
+PAM_PATTERN = "NNGRRT"
+_IUPAC = {"N": "ACGT", "G": "G", "R": "AG", "T": "T"}
+# A query this long without "_" is read as a sequence, not a Case Study ID.
+MIN_SEQUENCE_QUERY_LENGTH = 10
+
+# Mirrors integrated_gradients.DEFAULT_IG_STEPS (drift-guarded by a test);
+# importing that module would pull torch into cached-only mode.
+DEFAULT_IG_STEPS = 50
 
 # The region the Seed-sensitivity hypothesis predicts mismatches hurt most.
 HYPOTHESIS_REGION = "Seed"
@@ -207,6 +232,38 @@ class XAISessionError(ValueError):
     """A user-facing error: the CLI prints its message instead of a traceback."""
 
 
+def _looks_like_sequence(key: str) -> bool:
+    """Whether an upper-cased query that is no Case Study ID was meant as a
+    sequence, so it gets a validation error rather than an unknown-ID one."""
+    if not key:
+        return False
+    # Case Study IDs are short or contain "_"; a long paste with a stray
+    # space or digit still gets the sequence error that names the bad base.
+    return set(key) <= set(NUCLEOTIDES) or (
+        "_" not in key and len(key) >= MIN_SEQUENCE_QUERY_LENGTH
+    )
+
+
+def _validate_sequence(query: str) -> str:
+    """The upper-cased sequence, or an `XAISessionError` saying what is wrong."""
+    sequence = query.strip().upper()
+    if len(sequence) != SEQUENCE_LENGTH:
+        raise XAISessionError(
+            f"sequence 길이는 {SEQUENCE_LENGTH}bp여야 함 (입력 {len(sequence)}bp)"
+        )
+    invalid = [(pos, b) for pos, b in enumerate(sequence) if b not in NUCLEOTIDES]
+    if invalid:
+        shown = ", ".join(f"{b!r}(위치 {pos})" for pos, b in invalid[:5])
+        raise XAISessionError(f"A/C/G/T 이외 문자: {shown}")
+    pam = sequence[PAM_REGION_START:PAM_REGION_END]
+    if not all(b in _IUPAC[code] for b, code in zip(pam, PAM_PATTERN)):
+        raise XAISessionError(
+            f"PAM(위치 {PAM_REGION_START}-{PAM_REGION_END - 1})이 {PAM_PATTERN}이 "
+            f"아님: {pam} (R = A/G)"
+        )
+    return sequence
+
+
 class Predictors(NamedTuple):
     """Model A, Model B and the XAI predictor; the CLI constructs them one at
     a time.
@@ -227,7 +284,10 @@ class XAISession:
         result_dir: Path | str = DEFAULT_RESULT_DIR,
         metadata_path: Path | str = DEFAULT_METADATA_PATH,
         predictors=None,
+        ig_steps: int = DEFAULT_IG_STEPS,
     ):
+        if ig_steps < 1:
+            raise XAISessionError(f"IG step 수는 1 이상이어야 함 (입력 {ig_steps})")
         result_dir = Path(result_dir)
         with open(result_dir / "model_analysis_summary.json", encoding="utf-8") as f:
             summary = json.load(f)
@@ -243,6 +303,7 @@ class XAISession:
             result_dir / "model_b_testset_predictions.csv"
         )
         self._predictors = predictors
+        self._ig_steps = ig_steps
 
     @property
     def cached_only(self) -> bool:
@@ -268,6 +329,10 @@ class XAISession:
         return "\n".join(lines)
 
     def explain(self, query: str) -> str:
+        """Explain a Case Study (short or full ID) or a typed 36bp sequence."""
+        key = query.strip().upper()
+        if self._find_case(key) is None and _looks_like_sequence(key):
+            return self._explain_sequence(_validate_sequence(key))
         case = self._resolve_case(query)
         a, b = case["model_a"], case["model_b"]
         case_type = case["case_type"]
@@ -281,11 +346,22 @@ class XAISession:
                 f"{case_type}: {CASE_TYPE_EXPLANATIONS.get(case_type, '설명 없음')}",
             ]
         )
+        ig = case["integrated_gradients"]
         sections = (
-            self._ig_section(case),
-            self._shap_section(case),
-            self._ism_section(case),
-            self._complex_mismatch_section(case),
+            self._ig_table(
+                "== Integrated Gradients (cached, L1-normalized, signed)",
+                case["sequence"],
+                np.asarray(ig["model_a_norm_attr_36bp"]),
+                np.asarray(ig["model_b_phase4_projected_norm_attr_36bp"]),
+            ),
+            self._shap_table(
+                "cached",
+                self._arrays["shap_values"][case["sample_id"]],
+                case["sequence"],
+                case["per_sample_physical_values"],
+            ),
+            self._ism_section(case["sample_id"], case["sequence"]),
+            self._complex_mismatch_section(case["sample_id"]),
         )
         return "\n\n".join((header, *sections))
 
@@ -311,10 +387,7 @@ class XAISession:
                 f"{model:<12} pred {cached['pred_raw']:.3f}"
                 f"  error {cached['error']:.3f}  (cached)"
             )
-        predictor = getattr(self._predictors, predictor_field)
-        start = time.perf_counter()
-        live = float(predictor.predict([sequence])[0])
-        elapsed = time.perf_counter() - start
+        live, elapsed = self._live_score(predictor_field, sequence)
         diff = live - cached["pred_raw"]
         match = (
             "[일치]" if abs(diff) <= CASE_STUDY_MATCH_ATOL else f"[불일치 Δ{diff:+.4f}]"
@@ -324,6 +397,139 @@ class XAISession:
             f"  cached error {cached['error']:.3f}"
             f"  live {live:.3f} {match} ({elapsed:.2f}s)"
         )
+
+    def _live_score(self, predictor_field: str, sequence: str) -> tuple[float, float]:
+        """(score, elapsed seconds) from one loaded predictor."""
+        predictor = getattr(self._predictors, predictor_field)
+        start = time.perf_counter()
+        score = float(predictor.predict([sequence])[0])
+        return score, time.perf_counter() - start
+
+    def _explain_sequence(self, sequence: str) -> str:
+        row = self._testset_row(sequence)
+        if not self.cached_only:
+            return self._explain_sequence_live(sequence, row)
+        if row is None:
+            raise XAISessionError(
+                "cached-only 모드(--cached)에서는 Testset에 없는 sequence를 설명할 수 "
+                "없음 - live inference가 필요하므로 --cached 없이 실행해 모델을 로딩할 것"
+            )
+        return self._explain_testset_sequence_cached(sequence, row)
+
+    def _testset_row(self, sequence: str) -> pd.Series | None:
+        """The first Testset row whose `sequence_hash` matches, or None."""
+        hit = self._meta[self._meta["sequence_hash"] == _sequence_sha256(sequence)]
+        return None if hit.empty else hit.iloc[0]
+
+    @staticmethod
+    def _testset_line(row: pd.Series | None) -> str:
+        if row is None:
+            return "Testset match  없음 - 이 sequence의 ground truth(실측 점수)는 없음"
+        return (
+            f"Testset match  sample_id {int(row['sample_id'])} (sequence hash 일치),"
+            f" true score {row['true_score']:.3f}"
+        )
+
+    def _explain_sequence_live(self, sequence: str, row: pd.Series | None) -> str:
+        lines = [f"sequence     {sequence}", self._testset_line(row)]
+        for model, field in (("Model A", "model_a"), ("Model B", "model_b")):
+            score, elapsed = self._live_score(field, sequence)
+            error = (
+                "" if row is None else f"  error {abs(score - row['true_score']):.3f}"
+            )
+            lines.append(f"{model:<12} live {score:.3f}{error} ({elapsed:.2f}s)")
+        sections = (self._live_ig_section(sequence), self._live_shap_section(sequence))
+        return "\n\n".join(("\n".join(lines), *sections))
+
+    def _live_ig_section(self, sequence: str) -> str:
+        # Deferred: the IG module imports torch, which cached-only mode never needs.
+        from integrated_gradients import (
+            integrated_gradients_model_a,
+            integrated_gradients_model_b_tokens,
+            l1_normalize,
+            project_model_b_attributions_to_nucleotides,
+        )
+
+        steps = self._ig_steps
+        start = time.perf_counter()
+        attr_a = integrated_gradients_model_a(
+            self._predictors.model_a, [sequence], steps=steps
+        )
+        elapsed_a = time.perf_counter() - start
+        start = time.perf_counter()
+        attr_b = project_model_b_attributions_to_nucleotides(
+            integrated_gradients_model_b_tokens(
+                self._predictors.model_b_xai, [sequence], steps=steps
+            )
+        )
+        elapsed_b = time.perf_counter() - start
+        return self._ig_table(
+            f"== Integrated Gradients (live, steps={steps}, L1-normalized, signed)",
+            sequence,
+            l1_normalize(attr_a)[0],
+            l1_normalize(attr_b)[0],
+            footer=(
+                f"elapsed  Model A IG {elapsed_a:.2f}s | Model B IG {elapsed_b:.2f}s",
+            ),
+        )
+
+    def _live_shap_section(self, sequence: str) -> str:
+        """Tree SHAP on the same 8,964 features `Model_B_Predictor.predict` builds."""
+        model_b = self._predictors.model_b
+        start = time.perf_counter()
+        physical = model_b.compute_physical_features([sequence])
+        features = np.hstack([model_b.extract_nt_embeddings([sequence]), physical])
+        shap_row = compute_tree_shap(model_b.xgb_model, features)[0]
+        elapsed = time.perf_counter() - start
+        return self._shap_table(
+            f"live, {elapsed:.2f}s",
+            shap_row,
+            sequence,
+            dict(zip(PHYSICAL_FEATURE_KEYS, physical[0].tolist())),
+        )
+
+    def _explain_testset_sequence_cached(self, sequence: str, row: pd.Series) -> str:
+        sample_id = int(row["sample_id"])
+        case = next((c for c in self._cases if c["sample_id"] == sample_id), None)
+        prediction = self._predictions_b.set_index("sample_id").loc[sample_id]
+        cached_b = {
+            "pred_raw": prediction["pred_raw"],
+            "error": abs(prediction["pred_raw"] - row["true_score"]),
+        }
+        if case is None:
+            line_a = f"{'Model A':<12} cached 점수 없음 (Case Study에만 cached)"
+            ig_note = "이 sample의 IG는 --cached 없이 모델을 로딩해야 계산 가능"
+        else:
+            line_a = self._score_line("Model A", case["model_a"], sequence, "model_a")
+            ig_note = (
+                f"이 sequence는 Case Study {case['case_id']} - "
+                f"{_short_id(case['case_id'])}로 cached IG 확인 가능"
+            )
+        header = "\n".join(
+            [
+                f"sequence     {sequence}",
+                self._testset_line(row),
+                line_a,
+                self._score_line("Model B", cached_b, sequence, "model_b"),
+            ]
+        )
+        sections = (
+            "\n".join(
+                [
+                    "== Integrated Gradients (cached)",
+                    f"IG는 Case Study {len(self._cases)}개에만 cached로 존재 - {ig_note}",
+                ]
+            ),
+            self._shap_table(
+                "cached",
+                self._arrays["shap_values"][sample_id],
+                sequence,
+                {key: float(prediction[key]) for key in PHYSICAL_FEATURE_KEYS},
+            ),
+            self._ism_section(sample_id, sequence),
+            self._complex_mismatch_section(sample_id),
+        )
+        return "\n\n".join((header, *sections))
 
     def _integrity_section(self) -> str:
         lines = ["== Testset integrity (SHA256)"]
@@ -560,15 +766,20 @@ class XAISession:
             )
         return by_region
 
-    def _ig_section(self, case: dict) -> str:
-        ig = case["integrated_gradients"]
-        attr_a = np.asarray(ig["model_a_norm_attr_36bp"])
-        attr_b = np.asarray(ig["model_b_phase4_projected_norm_attr_36bp"])
+    @staticmethod
+    def _ig_table(
+        title: str,
+        sequence: str,
+        attr_a: np.ndarray,
+        attr_b: np.ndarray,
+        footer: tuple[str, ...] = (),
+    ) -> str:
+        """The per-position IG table with region shares, cached or live alike."""
         lines = [
-            "== Integrated Gradients (cached, L1-normalized, signed)",
+            title,
             f"{'pos':>3} {'base':<4} {'region':<6} {'Model A':>8} {'Model B':>8}",
         ]
-        for pos, base in enumerate(case["sequence"]):
+        for pos, base in enumerate(sequence):
             lines.append(
                 f"{pos:>3} {base:<4} {_region_of(pos):<6}"
                 f" {attr_a[pos]:>+8.3f} {attr_b[pos]:>+8.3f}"
@@ -577,31 +788,34 @@ class XAISession:
             f"Model A share |attr|  {_format_region_shares(attr_a)}",
             f"Model B share |attr|  {_format_region_shares(attr_b)}",
             DETERMINISTIC_PROJECTION_NOTE,
+            *footer,
         ]
         return "\n".join(lines)
 
-    def _shap_section(self, case: dict) -> str:
-        groups = token_grouped_shap(
-            self._arrays["shap_values"][case["sample_id"]],
-            case["sequence"],
-            case["per_sample_physical_values"],
-        )
+    @staticmethod
+    def _shap_table(
+        provenance: str,
+        shap_row: np.ndarray,
+        sequence: str,
+        physical_values: dict[str, float],
+    ) -> str:
+        """The signed, magnitude-sorted Token-grouped SHAP table."""
+        groups = token_grouped_shap(shap_row, sequence, physical_values)
         lines = [
-            f"== Token-grouped SHAP (Model B, {len(groups)} groups, cached)",
+            f"== Token-grouped SHAP (Model B, {len(groups)} groups, {provenance})",
             "signed SHAP, |값| 큰 순서 (+는 점수를 올림, -는 내림)",
         ]
         for group in sorted(groups, key=lambda g: abs(g.shap_value), reverse=True):
             lines.append(f"{group.shap_value:+.4f}  {group.label}")
         return "\n".join(lines)
 
-    def _ism_section(self, case: dict) -> str:
-        sequence = case["sequence"]
+    def _ism_section(self, sample_id: int, sequence: str) -> str:
         lines = ["== ISM summary (cached, relative delta = (mutant - WT) / |WT|)"]
         for model, key in (
             ("Model A", "ism_delta_model_a"),
             ("Model B", "ism_delta_model_b"),
         ):
-            delta = self._arrays[key][case["sample_id"]]  # (36, 3)
+            delta = self._arrays[key][sample_id]  # (36, 3)
             lines.append(f"{model}: 가장 민감한 위치 {ISM_TOP_POSITIONS}개")
             if np.isnan(delta).all():
                 lines.append(
@@ -621,8 +835,7 @@ class XAISession:
                 )
         return "\n".join(lines)
 
-    def _complex_mismatch_section(self, case: dict) -> str:
-        sample_id = case["sample_id"]
+    def _complex_mismatch_section(self, sample_id: int) -> str:
         delta_a = self._arrays["mismatch_complex_model_a"][sample_id]
         delta_b = self._arrays["mismatch_complex_model_b"][sample_id]
         by_region = self._complex_scenarios_by_region()
@@ -643,13 +856,20 @@ class XAISession:
 
     def _resolve_case(self, query: str) -> dict:
         """Find a Case Study by full `case_id` or its short suffix (`P01` -> `DISCORDANT_P01`)."""
-        key = query.strip().upper()
+        case = self._find_case(query.strip().upper())
+        if case is not None:
+            return case
+        known = ", ".join(_short_id(c["case_id"]) for c in self._cases)
+        raise XAISessionError(
+            f"알 수 없는 Case Study ID: {query!r} "
+            f"(사용 가능: {known}, 또는 {SEQUENCE_LENGTH}bp sequence)"
+        )
+
+    def _find_case(self, key: str) -> dict | None:
+        """The Case Study for an upper-cased full or short ID, or None."""
         if key in self._cases_by_id:
             return self._cases_by_id[key]
         for case_id, case in self._cases_by_id.items():
             if key and _short_id(case_id) == key:
                 return case
-        known = ", ".join(_short_id(c["case_id"]) for c in self._cases)
-        raise XAISessionError(
-            f"알 수 없는 Case Study ID: {query!r} (사용 가능: {known})"
-        )
+        return None

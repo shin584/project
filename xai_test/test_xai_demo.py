@@ -14,7 +14,12 @@ import numpy as np
 import pytest
 import xai_demo
 from model_b_testset_export import CASE_STUDY_MATCH_ATOL
-from test_xai_session import export_dir  # noqa: F401  (synthetic export fixture)
+from test_xai_session import (  # noqa: F401  (synthetic export fixture)
+    NOVEL_SEQ,
+    TESTSET_ONLY_SAMPLE,
+    TESTSET_ONLY_SEQ,
+    export_dir,
+)
 from xai_session import Predictors, XAISession, XAISessionError
 
 
@@ -112,6 +117,19 @@ def test_blank_lines_are_ignored_and_eof_ends_the_session(monkeypatch, capsys):
     assert session.calls == [("explain", "C01")]
 
 
+def test_a_typed_sequence_at_the_prompt_reaches_explain_unchanged(monkeypatch):
+    session = StubSession()
+    _scripted_input(monkeypatch, [NOVEL_SEQ.lower(), "quit"])
+    xai_demo.run_session(session)
+    assert session.calls == [("explain", NOVEL_SEQ.lower())]
+
+
+def test_help_mentions_typed_sequences(monkeypatch, capsys):
+    _scripted_input(monkeypatch, ["help", "quit"])
+    xai_demo.run_session(StubSession())
+    assert "36bp" in capsys.readouterr().out
+
+
 def test_commands_are_case_insensitive(monkeypatch):
     session = StubSession()
     _scripted_input(monkeypatch, ["CASES", "Report", "QUIT", "P01"])
@@ -165,8 +183,9 @@ def stub_cli(monkeypatch):
         state["loads"] += 1
         return Predictors("A", "B", "XAI")
 
-    def fake_session(predictors=None):
+    def fake_session(predictors=None, **kwargs):
         state["predictors"] = predictors
+        state["session_kwargs"] = kwargs
         return state["session"]
 
     monkeypatch.setattr(xai_demo, "load_predictors", fake_load)
@@ -240,6 +259,70 @@ def test_cached_demo_never_calls_a_predictor_end_to_end(
     model_lines = _score_lines(out)
     assert len(model_lines) == 2
     assert all("(cached)" in ln and "live" not in ln for ln in model_lines)
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["--ig-steps", "10", "explain", NOVEL_SEQ],
+        ["explain", NOVEL_SEQ, "--ig-steps", "10"],
+        ["--ig-steps", "10", "demo"],
+    ],
+)
+def test_ig_steps_option_reaches_the_session(stub_cli, monkeypatch, argv):
+    _scripted_input(monkeypatch, ["quit"])
+    assert xai_demo.main(argv) == 0
+    assert stub_cli["session_kwargs"] == {"ig_steps": 10}
+
+
+def test_ig_steps_defaults_to_the_ig_module_default(stub_cli):
+    assert xai_demo.main(["explain", NOVEL_SEQ]) == 0
+    assert stub_cli["session_kwargs"] == {"ig_steps": 50}
+
+
+def _cli_on_synthetic_export(monkeypatch, export_dir):  # noqa: F811
+    def no_load():
+        raise AssertionError("--cached must never construct a predictor")
+
+    monkeypatch.setattr(xai_demo, "load_predictors", no_load)
+    monkeypatch.setattr(
+        xai_demo,
+        "XAISession",
+        functools.partial(XAISession, export_dir, export_dir / "test_metadata.csv"),
+    )
+
+
+def test_cached_explain_of_a_testset_sequence_answers_from_the_cache(
+    export_dir,  # noqa: F811
+    monkeypatch,
+    capsys,
+):
+    _cli_on_synthetic_export(monkeypatch, export_dir)
+    assert xai_demo.main(["--cached", "explain", TESTSET_ONLY_SEQ.lower()]) == 0
+    out = capsys.readouterr().out
+    assert f"sample_id {TESTSET_ONLY_SAMPLE}" in out
+    assert "IG" in out and "Case Study" in out
+
+
+def test_cached_explain_refuses_a_sequence_outside_the_testset(
+    export_dir,  # noqa: F811
+    monkeypatch,
+    capsys,
+):
+    _cli_on_synthetic_export(monkeypatch, export_dir)
+    assert xai_demo.main(["--cached", "explain", NOVEL_SEQ]) == 1
+    err = capsys.readouterr().err
+    assert "error:" in err and "cached" in err
+
+
+def test_an_invalid_sequence_prints_an_error_not_a_traceback(
+    export_dir,  # noqa: F811
+    monkeypatch,
+    capsys,
+):
+    _cli_on_synthetic_export(monkeypatch, export_dir)
+    assert xai_demo.main(["--cached", "explain", NOVEL_SEQ[:-1]]) == 1
+    assert "36bp" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------------------
