@@ -1,4 +1,4 @@
-"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#28).
+"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#29).
 
 `XAISession` is the single seam between the export contract and the terminal:
 it is constructed from the standardized export directory
@@ -16,9 +16,11 @@ results by region.
 case-insensitive, PAM `NNGRRN` at positions 25-30) and looks it up in the
 Testset by sequence hash. With predictors loaded it computes Model A / Model B
 scores, Token-grouped SHAP (Tree SHAP on Model B's live features) and
-Integrated Gradients for both models live, timing each computation. In
+Integrated Gradients for both models live, timing each computation. ISM is
+computed live only on request (`full=True`, the CLI's `--full`), through the
+ISM sweep's own mutant generation and relative-delta reduction. In
 cached-only mode a Testset sequence is answered from the cache (IG exists
-only for the Case Studies) and any other sequence is refused.
+only for the Case Studies), any other sequence is refused, and so is `--full`.
 
 `report()` opens with a Testset integrity check (the export's whole-column
 SHA256, every row's `sequence_hash`, every Case Study's sequence against its
@@ -50,7 +52,7 @@ from case_study_selection import (
     REVERSE_SECONDARY_DISCORDANT,
     SECONDARY_DISCORDANT,
 )
-from ism_sweep import alt_bases_for
+from ism_sweep import alt_bases_for, compute_ism_delta
 from mismatch_profiling import (
     DISTAL_REGION_END,
     DISTAL_REGION_START,
@@ -113,6 +115,8 @@ DETERMINISTIC_PROJECTION_NOTE = (
 
 SEQUENCE_LENGTH = 36
 NUCLEOTIDES = "ACGT"
+# One mutant per position x alternative base (ism_sweep.generate_ism_mutants).
+ISM_MUTANTS_PER_SEQUENCE = SEQUENCE_LENGTH * (len(NUCLEOTIDES) - 1)
 # Expected bases at PAM_REGION_START..PAM_REGION_END-1, as IUPAC codes. The
 # last base is N, not T: see "PAM window" in CONTEXT.md (issue #31).
 PAM_PATTERN = "NNGRRN"
@@ -329,12 +333,27 @@ class XAISession:
             )
         return "\n".join(lines)
 
-    def explain(self, query: str) -> str:
-        """Explain a Case Study (short or full ID) or a typed 36bp sequence."""
+    def explain(self, query: str, full: bool = False) -> str:
+        """Explain a Case Study (short or full ID) or a typed 36bp sequence.
+
+        `full` adds a live ISM summary to a typed sequence's explanation; it
+        needs loaded predictors, so cached-only mode refuses it.
+        """
+        if full and self.cached_only:
+            raise XAISessionError(
+                "cached-only 모드(--cached)에서는 --full(live ISM)을 쓸 수 없음 - "
+                f"ISM은 {ISM_MUTANTS_PER_SEQUENCE}개 mutant를 두 모델로 예측해야 하므로 "
+                "--cached 없이 실행해 모델을 로딩할 것"
+            )
         key = query.strip().upper()
         if self._find_case(key) is None and _looks_like_sequence(key):
-            return self._explain_sequence(_validate_sequence(key))
+            return self._explain_sequence(_validate_sequence(key), full)
         case = self._resolve_case(query)
+        if full:
+            raise XAISessionError(
+                f"--full은 typed sequence에만 적용 - Case Study {case['case_id']}의 "
+                "설명에는 cached ISM summary가 이미 포함됨"
+            )
         a, b = case["model_a"], case["model_b"]
         case_type = case["case_type"]
         header = "\n".join(
@@ -406,10 +425,10 @@ class XAISession:
         score = float(predictor.predict([sequence])[0])
         return score, time.perf_counter() - start
 
-    def _explain_sequence(self, sequence: str) -> str:
+    def _explain_sequence(self, sequence: str, full: bool) -> str:
         row = self._testset_row(sequence)
         if not self.cached_only:
-            return self._explain_sequence_live(sequence, row)
+            return self._explain_sequence_live(sequence, row, full)
         if row is None:
             raise XAISessionError(
                 "cached-only 모드(--cached)에서는 Testset에 없는 sequence를 설명할 수 "
@@ -431,7 +450,9 @@ class XAISession:
             f" true score {row['true_score']:.3f}"
         )
 
-    def _explain_sequence_live(self, sequence: str, row: pd.Series | None) -> str:
+    def _explain_sequence_live(
+        self, sequence: str, row: pd.Series | None, full: bool
+    ) -> str:
         lines = [f"sequence     {sequence}", self._testset_line(row)]
         for model, field in (("Model A", "model_a"), ("Model B", "model_b")):
             score, elapsed = self._live_score(field, sequence)
@@ -439,7 +460,9 @@ class XAISession:
                 "" if row is None else f"  error {abs(score - row['true_score']):.3f}"
             )
             lines.append(f"{model:<12} live {score:.3f}{error} ({elapsed:.2f}s)")
-        sections = (self._live_ig_section(sequence), self._live_shap_section(sequence))
+        sections = [self._live_ig_section(sequence), self._live_shap_section(sequence)]
+        if full:
+            sections.append(self._live_ism_section(sequence))
         return "\n\n".join(("\n".join(lines), *sections))
 
     def _live_ig_section(self, sequence: str) -> str:
@@ -487,6 +510,26 @@ class XAISession:
             shap_row,
             sequence,
             dict(zip(PHYSICAL_FEATURE_KEYS, physical[0].tolist())),
+        )
+
+    def _live_ism_section(self, sequence: str) -> str:
+        """Every single-base mutant scored through each model's own `predict()`
+        and reduced by the ISM sweep's relative-delta convention."""
+        deltas, elapsed = {}, {}
+        for model, field in (("Model A", "model_a"), ("Model B", "model_b")):
+            start = time.perf_counter()
+            deltas[model] = compute_ism_delta(
+                [sequence], getattr(self._predictors, field)
+            )[0]
+            elapsed[model] = time.perf_counter() - start
+        return self._ism_table(
+            f"live, {ISM_MUTANTS_PER_SEQUENCE} mutants/model",
+            sequence,
+            deltas,
+            footer=(
+                "elapsed  "
+                + " | ".join(f"{model} ISM {t:.2f}s" for model, t in elapsed.items()),
+            ),
         )
 
     def _explain_testset_sequence_cached(self, sequence: str, row: pd.Series) -> str:
@@ -811,12 +854,28 @@ class XAISession:
         return "\n".join(lines)
 
     def _ism_section(self, sample_id: int, sequence: str) -> str:
-        lines = ["== ISM summary (cached, relative delta = (mutant - WT) / |WT|)"]
-        for model, key in (
-            ("Model A", "ism_delta_model_a"),
-            ("Model B", "ism_delta_model_b"),
-        ):
-            delta = self._arrays[key][sample_id]  # (36, 3)
+        return self._ism_table(
+            "cached",
+            sequence,
+            {
+                "Model A": self._arrays["ism_delta_model_a"][sample_id],
+                "Model B": self._arrays["ism_delta_model_b"][sample_id],
+            },
+        )
+
+    @staticmethod
+    def _ism_table(
+        provenance: str,
+        sequence: str,
+        deltas: dict[str, np.ndarray],
+        footer: tuple[str, ...] = (),
+    ) -> str:
+        """Each model's most sensitive positions from its (36, 3) relative
+        delta array, cached or live alike."""
+        lines = [
+            f"== ISM summary ({provenance}, relative delta = (mutant - WT) / |WT|)"
+        ]
+        for model, delta in deltas.items():
             lines.append(f"{model}: 가장 민감한 위치 {ISM_TOP_POSITIONS}개")
             if np.isnan(delta).all():
                 lines.append(
@@ -834,6 +893,7 @@ class XAISession:
                     f"{pos:>3} {_region_of(pos):<6} {wt}>{alt:<2}"
                     f" {delta[pos, strongest_alt[pos]]:>+7.3f}"
                 )
+        lines += footer
         return "\n".join(lines)
 
     def _complex_mismatch_section(self, sample_id: int) -> str:

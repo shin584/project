@@ -1,4 +1,4 @@
-"""Demo CLI for the XAI system (issues #21, #23, #25, #27, #28).
+"""Demo CLI for the XAI system (issues #21, #23, #25, #27-#29).
 
 Thin entry point: parses arguments, constructs the predictors (one at a
 time) and an `XAISession`, then prints or loops over stdin. All analysis
@@ -10,6 +10,7 @@ and rendering lives in `xai_session.py`.
     python xai_demo.py report
     python xai_demo.py --cached explain P01
     python xai_demo.py --ig-steps 20 explain <36bp sequence>   # live, fewer IG steps
+    python xai_demo.py explain <36bp sequence> --full          # plus live ISM
 
 `cases` and `report` never need a model. `--cached` never constructs a
 predictor, so a memory crash or model-load failure on the presenting laptop
@@ -22,7 +23,13 @@ import sys
 import time
 from pathlib import Path
 
-from xai_session import DEFAULT_IG_STEPS, Predictors, XAISession, XAISessionError
+from xai_session import (
+    DEFAULT_IG_STEPS,
+    ISM_MUTANTS_PER_SEQUENCE,
+    Predictors,
+    XAISession,
+    XAISessionError,
+)
 
 _XAI_TEST_ROOT = Path(__file__).resolve().parent
 MODEL_A_WEIGHT_PATH = _XAI_TEST_ROOT / "best_model_fold1.pth"
@@ -63,16 +70,19 @@ PREDICTOR_LOADERS = (
     ),
 )
 
-HELP_TEXT = """명령어:
+HELP_TEXT = f"""명령어:
   <Case Study ID>   예: P01, R01, C01 또는 DISCORDANT_P01 - Case Study 설명
   <36bp sequence>   ACGT 36bp (대소문자 무관, PAM NNGRRN at 25-30) - live 설명
                     (--cached에서는 Testset sequence만 cache로 설명)
+  <36bp sequence> --full
+                    위 설명 + 두 모델의 live ISM ({ISM_MUTANTS_PER_SEQUENCE}개 mutant, 느림, --cached 불가)
   cases             Case Study 목록
   report            Testset integrity check와 global findings
   help              이 도움말
   quit              종료 (exit, Ctrl+D/Ctrl+Z도 가능)"""
 
 QUIT_COMMANDS = ("quit", "exit", "q")
+FULL_FLAG = "--full"
 
 
 def load_predictors(loaders=PREDICTOR_LOADERS) -> Predictors:
@@ -93,8 +103,10 @@ def load_predictors(loaders=PREDICTOR_LOADERS) -> Predictors:
     return Predictors(**loaded)
 
 
-def _run_command(session, line: str) -> None:
+def _run_command(session, line: str, full: bool = False) -> None:
     command = line.lower()
+    if full and command in ("help", "cases", "report"):
+        raise XAISessionError(f"{FULL_FLAG}은 sequence 설명에만 쓸 수 있음")
     if command == "help":
         print(HELP_TEXT)
     elif command == "cases":
@@ -102,7 +114,15 @@ def _run_command(session, line: str) -> None:
     elif command == "report":
         print(session.report())
     else:
-        print(session.explain(line))
+        print(session.explain(line, full=full))
+
+
+def _split_full_flag(line: str) -> tuple[str, bool]:
+    """`<query> --full` at the prompt -> (`<query>`, True)."""
+    head, _, last = line.rpartition(" ")
+    if head and last.lower() == FULL_FLAG:
+        return head.strip(), True
+    return line, False
 
 
 def run_session(session) -> None:
@@ -120,7 +140,7 @@ def run_session(session) -> None:
         if line.lower() in QUIT_COMMANDS:
             return
         try:
-            _run_command(session, line)
+            _run_command(session, *_split_full_flag(line))
         except KeyboardInterrupt:  # Ctrl+C on a slow command, not on the demo
             print("\n중단됨 - 프롬프트로 돌아갑니다")
         except XAISessionError as e:
@@ -167,6 +187,11 @@ def build_parser() -> argparse.ArgumentParser:
     explain.add_argument(
         "query", help="Case Study ID (e.g. P01, DISCORDANT_P01) or a 36bp sequence"
     )
+    explain.add_argument(
+        FULL_FLAG,
+        action="store_true",
+        help="also run live ISM for both models on a typed sequence (slow; not with --cached)",
+    )
     return parser
 
 
@@ -192,7 +217,11 @@ def main(argv=None) -> int:
         if args.command == "demo":
             run_session(session)
         else:
-            _run_command(session, getattr(args, "query", args.command))
+            _run_command(
+                session,
+                getattr(args, "query", args.command),
+                getattr(args, "full", False),
+            )
     except (XAISessionError, OSError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1

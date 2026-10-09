@@ -59,8 +59,8 @@ class StubSession:
         self.calls.append("report")
         return "REPORT-TEXT"
 
-    def explain(self, query):
-        self.calls.append(("explain", query))
+    def explain(self, query, full=False):
+        self.calls.append(("explain", query, "full") if full else ("explain", query))
         if query == "BOOM":
             raise RuntimeError("predictor crashed")
         if query == "SLOW":
@@ -122,6 +122,29 @@ def test_a_typed_sequence_at_the_prompt_reaches_explain_unchanged(monkeypatch):
     _scripted_input(monkeypatch, [NOVEL_SEQ.lower(), "quit"])
     xai_demo.run_session(session)
     assert session.calls == [("explain", NOVEL_SEQ.lower())]
+
+
+@pytest.mark.parametrize("suffix", [" --full", " --FULL", "   --full  "])
+def test_a_trailing_full_flag_at_the_prompt_requests_live_ism(monkeypatch, suffix):
+    session = StubSession()
+    _scripted_input(monkeypatch, [NOVEL_SEQ + suffix, "quit"])
+    xai_demo.run_session(session)
+    assert session.calls == [("explain", NOVEL_SEQ, "full")]
+
+
+@pytest.mark.parametrize("command", ["cases", "report", "help"])
+def test_full_on_a_non_explain_command_is_refused(monkeypatch, capsys, command):
+    session = StubSession()
+    _scripted_input(monkeypatch, [f"{command} --full", "quit"])
+    xai_demo.run_session(session)
+    assert session.calls == []
+    assert "error:" in capsys.readouterr().out
+
+
+def test_help_mentions_full(monkeypatch, capsys):
+    _scripted_input(monkeypatch, ["help", "quit"])
+    xai_demo.run_session(StubSession())
+    assert "--full" in capsys.readouterr().out
 
 
 def test_help_mentions_typed_sequences(monkeypatch, capsys):
@@ -280,6 +303,19 @@ def test_ig_steps_defaults_to_the_ig_module_default(stub_cli):
     assert stub_cli["session_kwargs"] == {"ig_steps": 50}
 
 
+@pytest.mark.parametrize(
+    "argv", [["explain", NOVEL_SEQ, "--full"], ["explain", "--full", NOVEL_SEQ]]
+)
+def test_explain_full_option_reaches_the_session(stub_cli, argv):
+    assert xai_demo.main(argv) == 0
+    assert stub_cli["session"].calls == [("explain", NOVEL_SEQ, "full")]
+
+
+def test_explain_without_full_does_not_request_ism(stub_cli):
+    assert xai_demo.main(["explain", NOVEL_SEQ]) == 0
+    assert stub_cli["session"].calls == [("explain", NOVEL_SEQ)]
+
+
 def _cli_on_synthetic_export(monkeypatch, export_dir):  # noqa: F811
     def no_load():
         raise AssertionError("--cached must never construct a predictor")
@@ -313,6 +349,17 @@ def test_cached_explain_refuses_a_sequence_outside_the_testset(
     assert xai_demo.main(["--cached", "explain", NOVEL_SEQ]) == 1
     err = capsys.readouterr().err
     assert "error:" in err and "cached" in err
+
+
+def test_cached_explain_full_is_refused_without_loading_a_model(
+    export_dir,  # noqa: F811
+    monkeypatch,
+    capsys,
+):
+    _cli_on_synthetic_export(monkeypatch, export_dir)
+    assert xai_demo.main(["--cached", "explain", TESTSET_ONLY_SEQ, "--full"]) == 1
+    err = capsys.readouterr().err
+    assert "error:" in err and "--full" in err
 
 
 def test_an_invalid_sequence_prints_an_error_not_a_traceback(

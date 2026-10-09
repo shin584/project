@@ -1160,3 +1160,163 @@ def test_cached_only_testset_sequence_uses_cached_shap_for_its_sample(session):
 def test_cached_only_testset_sequence_of_a_case_study_points_to_its_case(session):
     ig = _section(session.explain(SEQ), "Integrated Gradients")
     assert "CONCORDANT_C01" in " ".join(ig)  # sample_id 0, the first SEQ row
+
+
+# ---------------------------------------------------------------------------
+# Live ISM on request (issue #29)
+# ---------------------------------------------------------------------------
+
+
+class SequenceScoredModelB(FakeModelB):
+    """FakeModelB whose score depends on the sequence, so live ISM deltas are
+    non-zero: score = 0.2 + 0.01 * (number of G) - 0.3 * (T at position 27)."""
+
+    def predict(self, sequences):
+        self.predict_calls.append(list(sequences))
+        return np.array(
+            [0.2 + 0.01 * s.count("G") - 0.3 * (s[27] == "T") for s in sequences]
+        )
+
+
+class OffsetModelA(DifferentiableModelA):
+    """DifferentiableModelA scores NOVEL_SEQ at ~0, where the relative delta is
+    NaN-masked; an offset keeps its live ISM deltas defined."""
+
+    def predict(self, sequences):
+        return super().predict(sequences) + 0.5
+
+
+def _full_session(export_dir):
+    predictors = Predictors(
+        OffsetModelA(), SequenceScoredModelB(), DifferentiableModelBXAI()
+    )
+    session = XAISession(
+        export_dir, export_dir / "test_metadata.csv", predictors, ig_steps=2
+    )
+    return session, predictors
+
+
+def _ism_rows(section, model):
+    """`pos region mut delta` rows of one model's block in an ISM section."""
+    start = next(i for i, ln in enumerate(section) if ln.startswith(model))
+    end = next(
+        (i for i in range(start + 1, len(section)) if section[i].startswith("Model")),
+        len(section),
+    )
+    return [ln.split() for ln in section[start + 1 : end] if ln.split()[0].isdigit()]
+
+
+def _expected_top_rows(sequence, score_fn, n=xai_session.ISM_TOP_POSITIONS):
+    """Hand-rolled ISM convention: relative delta (mutant - WT) / |WT| per
+    position x lexicographic alt base, positions ranked by max |delta|."""
+    wt = score_fn(sequence)
+    delta = np.array(
+        [
+            [
+                (score_fn(sequence[:p] + alt + sequence[p + 1 :]) - wt) / abs(wt)
+                for alt in sorted(set("ACGT") - {base})
+            ]
+            for p, base in enumerate(sequence)
+        ]
+    )
+    strongest = np.abs(delta).argmax(axis=1)
+    ranked = np.argsort(-np.abs(delta).max(axis=1), kind="stable")[:n]
+    return [
+        [
+            str(p),
+            xai_session._region_of(p),
+            f"{sequence[p]}>{sorted(set('ACGT') - {sequence[p]})[strongest[p]]}",
+            f"{delta[p, strongest[p]]:+.3f}",
+        ]
+        for p in ranked
+    ]
+
+
+def test_without_full_no_ism_is_computed(export_dir):
+    session, predictors = _full_session(export_dir)
+    text = session.explain(NOVEL_SEQ)
+    assert "== ISM" not in text
+    assert predictors.model_a.predict_calls == [[NOVEL_SEQ]]
+    assert predictors.model_b.predict_calls == [[NOVEL_SEQ]]
+
+
+def test_full_appends_a_live_ism_summary_for_both_models_with_elapsed_time(
+    export_dir,
+):
+    session, _ = _full_session(export_dir)
+    text = session.explain(NOVEL_SEQ, full=True)
+    header = _line(text.splitlines(), "== ISM")
+    assert "live" in header
+    section = _section(text, "ISM")
+    joined = "\n".join(section)
+    assert re.search(r"Model A ISM \d+\.\d+s", joined)
+    assert re.search(r"Model B ISM \d+\.\d+s", joined)
+    assert len(_ism_rows(section, "Model A")) == xai_session.ISM_TOP_POSITIONS
+    assert len(_ism_rows(section, "Model B")) == xai_session.ISM_TOP_POSITIONS
+    # The rest of the live explanation is unchanged.
+    for title in ("Integrated Gradients", "Token-grouped SHAP"):
+        assert _section(text, title), title
+
+
+def test_full_ism_deltas_follow_the_ism_sweep_conventions(export_dir):
+    session, predictors = _full_session(export_dir)
+    section = _section(session.explain(NOVEL_SEQ, full=True), "ISM")
+
+    def score_a(seq):
+        return float(predictors.model_a.predict([seq])[0])
+
+    def score_b(seq):
+        return float(predictors.model_b.predict([seq])[0])
+
+    assert _ism_rows(section, "Model A") == _expected_top_rows(NOVEL_SEQ, score_a)
+    rows_b = _ism_rows(section, "Model B")
+    assert rows_b == _expected_top_rows(NOVEL_SEQ, score_b)
+    assert rows_b[0][:3] == ["27", "PAM", "G>T"]  # the planted PAM drop
+
+
+def test_full_scores_every_single_base_mutant_through_predict(export_dir):
+    session, predictors = _full_session(export_dir)
+    session.explain(NOVEL_SEQ, full=True)
+    scored = [s for call in predictors.model_b.predict_calls for s in call]
+    mutants = set(scored) - {NOVEL_SEQ}
+    assert len(mutants) == 36 * 3
+    assert all(sum(a != b for a, b in zip(m, NOVEL_SEQ)) == 1 for m in mutants)
+
+
+def test_full_ism_reports_an_undefined_delta_when_the_wt_score_is_near_zero(
+    export_dir,
+):
+    predictors = Predictors(
+        DifferentiableModelA(), FakeModelB(score=0.0), DifferentiableModelBXAI()
+    )
+    session = XAISession(
+        export_dir, export_dir / "test_metadata.csv", predictors, ig_steps=2
+    )
+    section = _section(session.explain(NOVEL_SEQ, full=True), "ISM")
+    assert _ism_rows(section, "Model B") == []
+    assert "정의되지 않음" in "\n".join(section)
+
+
+def test_full_on_a_lowercase_sequence_mutates_the_upper_cased_sequence(export_dir):
+    session, predictors = _full_session(export_dir)
+    session.explain(NOVEL_SEQ.lower(), full=True)
+    scored = [s for call in predictors.model_b.predict_calls for s in call]
+    assert all(s == s.upper() for s in scored)
+
+
+@pytest.mark.parametrize("query", [NOVEL_SEQ, TESTSET_ONLY_SEQ, "P01"])
+def test_cached_only_refuses_full_without_calling_a_predictor(export_dir, query):
+    session = XAISession(export_dir, export_dir / "test_metadata.csv")
+    with pytest.raises(XAISessionError, match="--full") as excinfo:
+        session.explain(query, full=True)
+    assert "cached" in str(excinfo.value)
+
+
+def test_full_on_a_case_study_id_is_refused_with_a_pointer_to_its_cached_ism(
+    export_dir,
+):
+    session, predictors = _full_session(export_dir)
+    with pytest.raises(XAISessionError, match="--full"):
+        session.explain("P01", full=True)
+    assert predictors.model_a.predict_calls == []
+    assert predictors.model_b.predict_calls == []
