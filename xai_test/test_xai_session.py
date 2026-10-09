@@ -1,9 +1,10 @@
-"""Tests for the XAI demo session (issues #23, #24).
+"""Tests for the XAI demo session (issues #23, #24, #25).
 
 Drives only the session's public operations against a small synthetic
 export directory built in the test - no real model or real export is read.
 """
 
+import hashlib
 import json
 
 import numpy as np
@@ -17,6 +18,7 @@ from mismatch_profiling import (
     SEED_REGION_END,
     SEED_REGION_START,
 )
+from paired_bootstrap import compute_metrics
 from shap_grouping import HIDDEN_DIM, SHAP_GROUP_COUNT
 from xai_session import XAISession, XAISessionError
 
@@ -100,27 +102,52 @@ def _arrays(n):
     }
 
 
+N_SAMPLES = 6
+TRUE_SCORES = np.array([0.2, 0.35, 0.5, 0.9, 0.7, 0.3])
+PRED_B = np.array([0.25, 0.3, 0.55, 0.85, 0.6, 0.4])
+
+
+def _sequences():
+    # Distinct rows so a tampered sequence is attributable to one sample_id.
+    seqs = [SEQ[:i] + "T" + SEQ[i + 1 :] for i in range(N_SAMPLES)]
+    for _, _, sample_id, *_ in CASES:
+        seqs[sample_id] = SEQ
+    return seqs
+
+
+def _sha256(text):
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _column_sha256(sequences):
+    # Same convention as test_dataset_verifier.py / step5_export.py.
+    return hashlib.sha256(
+        pd.util.hash_pandas_object(pd.Series(sequences, name="sequence")).values
+    ).hexdigest()
+
+
 @pytest.fixture
 def export_dir(tmp_path):
-    n = 6
+    n = N_SAMPLES
+    sequences = _sequences()
     summary = {
-        "metadata": {"total_samples": n},
+        "metadata": {"total_samples": n, "sha256_checksum": _column_sha256(sequences)},
         "global_evaluation": {},
         "complex_mismatch_metadata": _complex_metadata(),
         "case_studies": [_case_entry(*c) for c in CASES],
     }
     (tmp_path / "model_analysis_summary.json").write_text(json.dumps(summary))
     np.savez(tmp_path / "model_analysis_arrays.npz", **_arrays(n))
-    pd.DataFrame({"sample_id": range(n), "pred_raw": np.linspace(0.1, 0.9, n)}).to_csv(
+    pd.DataFrame({"sample_id": range(n), "pred_raw": PRED_B}).to_csv(
         tmp_path / "model_b_testset_predictions.csv", index=False
     )
     pd.DataFrame(
         {
             "sample_id": range(n),
             "original_id": range(100, 100 + n),
-            "sequence": [SEQ] * n,
-            "true_score": np.linspace(0.2, 0.8, n),
-            "sequence_hash": ["0" * 64] * n,
+            "sequence": sequences,
+            "true_score": TRUE_SCORES,
+            "sequence_hash": [_sha256(s) for s in sequences],
         }
     ).to_csv(tmp_path / "test_metadata.csv", index=False)
     return tmp_path
@@ -281,3 +308,126 @@ def test_complex_mismatch_results_by_region_for_both_models(session):
     ):
         line = next(ln for ln in section if ln.split()[:1] == [region])
         assert f"{a:+.3f}" in line and f"{b:+.3f}" in line
+
+
+# --- report: Testset integrity + Model B headline performance (issue #25) ---
+
+
+def _edit_csv(path, edit):
+    df = pd.read_csv(path)
+    edit(df)
+    df.to_csv(path, index=False)
+
+
+def _edit_summary(export_dir, edit):
+    path = export_dir / "model_analysis_summary.json"
+    summary = json.loads(path.read_text())
+    edit(summary)
+    path.write_text(json.dumps(summary))
+
+
+def _report(export_dir):
+    return XAISession(export_dir, export_dir / "test_metadata.csv").report()
+
+
+def _integrity_lines(text):
+    return [ln for ln in _section(text, "Testset integrity") if ln.strip()]
+
+
+def test_report_integrity_passes_on_an_intact_export(export_dir):
+    lines = _integrity_lines(_report(export_dir))
+    assert len(lines) == 3
+    assert all(ln.startswith("PASS") for ln in lines)
+    assert f"{N_SAMPLES}/{N_SAMPLES}" in lines[1]
+    assert f"{len(CASES)}/{len(CASES)}" in lines[2]
+
+
+def test_report_flags_a_tampered_testset_sequence(export_dir):
+    def tamper(df):
+        df.loc[2, "sequence"] = "G" + df.loc[2, "sequence"][1:]
+
+    _edit_csv(export_dir / "test_metadata.csv", tamper)
+    lines = _integrity_lines(_report(export_dir))
+    column, rows, _ = lines
+    assert column.startswith("FAIL") and "SHA256" in column
+    assert rows.startswith("FAIL") and "sample_id 2" in rows
+
+
+def test_report_flags_a_tampered_row_hash(export_dir):
+    def tamper(df):
+        df.loc[4, "sequence_hash"] = "f" * 64
+
+    _edit_csv(export_dir / "test_metadata.csv", tamper)
+    column, rows, cases = _integrity_lines(_report(export_dir))
+    assert column.startswith("PASS")  # the sequences themselves are intact
+    assert rows.startswith("FAIL") and "sample_id 4" in rows
+    assert cases.startswith("PASS")
+
+
+def test_report_flags_a_tampered_column_hash(export_dir):
+    def tamper(summary):
+        summary["metadata"]["sha256_checksum"] = "a" * 64
+
+    _edit_summary(export_dir, tamper)
+    column, rows, cases = _integrity_lines(_report(export_dir))
+    assert column.startswith("FAIL") and "a" * 8 in column
+    assert rows.startswith("PASS") and cases.startswith("PASS")
+
+
+def test_report_flags_a_case_study_sequence_that_differs_from_its_testset_row(
+    export_dir,
+):
+    def tamper(summary):
+        case = summary["case_studies"][0]  # DISCORDANT_P01, sample_id 3
+        case["sequence"] = "C" + case["sequence"][1:]
+
+    _edit_summary(export_dir, tamper)
+    column, rows, cases = _integrity_lines(_report(export_dir))
+    assert column.startswith("PASS") and rows.startswith("PASS")
+    assert cases.startswith("FAIL")
+    assert "DISCORDANT_P01" in cases and "sample_id 3" in cases
+
+
+def _performance_values(text):
+    section = _section(text, "Model B Testset")
+    line = next(ln for ln in section if ln.startswith("Spearman"))
+    tokens = line.replace("|", " ").split()
+    return dict(zip(tokens[::2], map(float, tokens[1::2]))), section
+
+
+def test_report_model_b_performance_is_computed_from_the_predictions_csv(
+    export_dir,
+):
+    values, section = _performance_values(_report(export_dir))
+    expected = compute_metrics(TRUE_SCORES, PRED_B)
+    for name, key in (
+        ("Spearman", "spearman"),
+        ("Pearson", "pearson"),
+        ("MAE", "mae"),
+        ("MSE", "mse"),
+    ):
+        assert values[name] == pytest.approx(expected[key], abs=5e-4)
+    assert any("ablation" in ln for ln in section)  # not directly comparable
+
+    # A different CSV yields different numbers: nothing is hard-coded.
+    shifted = PRED_B[::-1].copy()
+
+    def replace(df):
+        df["pred_raw"] = shifted
+
+    _edit_csv(export_dir / "model_b_testset_predictions.csv", replace)
+    values, _ = _performance_values(_report(export_dir))
+    assert values["MAE"] == pytest.approx(
+        compute_metrics(TRUE_SCORES, shifted)["mae"], abs=5e-4
+    )
+
+
+def test_report_flags_predictions_that_do_not_cover_the_testset(export_dir):
+    def drop(df):
+        df.drop(index=[1, 4], inplace=True)
+
+    _edit_csv(export_dir / "model_b_testset_predictions.csv", drop)
+    _, section = _performance_values(_report(export_dir))
+    warning = next(ln for ln in section if ln.startswith("FAIL"))
+    assert f"{N_SAMPLES - 2}/{N_SAMPLES}" in warning
+    assert "sample_id 1, 4" in warning

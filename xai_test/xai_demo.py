@@ -1,9 +1,10 @@
-"""Demo CLI for the XAI system (issues #21, #23).
+"""Demo CLI for the XAI system (issues #21, #23, #25).
 
 Thin entry point: parses arguments, constructs an `XAISession` and prints.
 All analysis and rendering lives in `xai_session.py`.
 
     python xai_demo.py --cached cases
+    python xai_demo.py --cached report
     python xai_demo.py --cached explain P01
 """
 
@@ -25,6 +26,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("cases", parents=[common], help="list all Case Studies")
+    sub.add_parser(
+        "report",
+        parents=[common],
+        help="Testset integrity check and global findings",
+    )
     explain = sub.add_parser("explain", parents=[common], help="explain one Case Study")
     explain.add_argument("query", help="Case Study ID, e.g. P01 or DISCORDANT_P01")
     return parser
@@ -43,6 +49,8 @@ def main(argv=None) -> int:
         session = XAISession()
         if args.command == "cases":
             print(session.cases())
+        elif args.command == "report":
+            print(session.report())
         elif args.command == "explain":
             print(session.explain(args.query))
     except (XAISessionError, OSError) as e:

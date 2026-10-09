@@ -1,25 +1,28 @@
-"""XAI demo session: the testable core behind the demo CLI (issues #21, #23, #24).
+"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#25).
 
 `XAISession` is the single seam between the export contract and the terminal:
 it is constructed from the standardized export directory
 (`model_analysis_summary.json`, `model_analysis_arrays.npz`,
 `model_b_testset_predictions.csv`) plus `test_metadata.csv`, and its public
 operations return rendered text. With no predictors it runs in cached-only
-mode and never touches a model. So far the summary JSON (Case Studies,
-complex-mismatch scenarios), the arrays and the metadata are read; the
-predictions arrive with `report()` and raw-sequence `explain` in later
-slices of #21.
+mode and never touches a model.
 
 `explain <CaseID>` renders the cached explanation sections as plain-text
 tables: Integrated Gradients (per position, with Distal/Seed/PAM labels and
 region shares), Token-grouped SHAP, an ISM summary and complex-mismatch
 results by region.
 
+`report()` opens with a Testset integrity check (the export's whole-column
+SHA256, every row's `sequence_hash`, every Case Study's sequence against its
+Testset row) and Model B's headline Testset metrics computed from the
+exported predictions CSV.
+
 Unlike the dashboard (ADR 0002), the session shows Model A next to Model B
 and surfaces Concordant/Discordant labels, because the presentation's claim
 is comparative (ADR 0003).
 """
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -41,6 +44,7 @@ from mismatch_profiling import (
     SEED_REGION_END,
     SEED_REGION_START,
 )
+from paired_bootstrap import compute_metrics
 from shap_grouping import token_grouped_shap
 
 _XAI_TEST_ROOT = Path(__file__).resolve().parent
@@ -116,6 +120,22 @@ def _format_region_shares(attribution: np.ndarray) -> str:
     )
 
 
+def _sequence_sha256(sequence: str) -> str:
+    """Per-row hash; same convention as test_dataset_verifier.generate_sha256."""
+    return hashlib.sha256(sequence.encode("utf-8")).hexdigest()
+
+
+def _column_sha256(sequences: pd.Series) -> str:
+    """Whole-column hash; same convention as test_dataset_verifier.py and
+    step5_export.py, so it is comparable to the export's `sha256_checksum`."""
+    return hashlib.sha256(pd.util.hash_pandas_object(sequences).values).hexdigest()
+
+
+def _truncated_id_list(ids, limit: int = 10) -> str:
+    shown = ", ".join(str(i) for i in ids[:limit])
+    return shown + (f" 외 {len(ids) - limit}개" if len(ids) > limit else "")
+
+
 def _short_id(case_id: str) -> str:
     """`DISCORDANT_P01` -> `P01`: the form typed at the demo prompt."""
     return case_id.split("_", 1)[-1]
@@ -138,11 +158,13 @@ class XAISession:
         self._cases = summary["case_studies"]
         self._cases_by_id = {case["case_id"].upper(): case for case in self._cases}
         self._complex_meta = summary["complex_mismatch_metadata"]
+        self._recorded_column_sha256 = summary["metadata"]["sha256_checksum"]
         with np.load(result_dir / "model_analysis_arrays.npz") as arrays:
             self._arrays = {key: arrays[key] for key in _ARRAY_KEYS}
-        # Read now so later operations (Testset matching, integrity checks)
-        # share one loaded copy; the tracer bullet itself only needs the cache.
         self._meta = pd.read_csv(metadata_path)
+        self._predictions_b = pd.read_csv(
+            result_dir / "model_b_testset_predictions.csv"
+        )
         self._predictors = predictors
 
     @property
@@ -189,6 +211,84 @@ class XAISession:
             self._complex_mismatch_section(case),
         )
         return "\n\n".join((header, *sections))
+
+    def report(self) -> str:
+        return f"{self._integrity_section()}\n\n{self._performance_section()}"
+
+    def _integrity_section(self) -> str:
+        lines = ["== Testset integrity (SHA256)"]
+        recorded = self._recorded_column_sha256
+        actual = _column_sha256(self._meta["sequence"])
+        if actual == recorded:
+            lines.append(f"PASS  whole-column SHA256 일치 ({actual[:16]}...)")
+        else:
+            lines.append(
+                "FAIL  whole-column SHA256 불일치: export 기록 "
+                f"{recorded[:16]}... / 현재 Testset {actual[:16]}..."
+            )
+
+        rehashed = self._meta["sequence"].map(_sequence_sha256)
+        bad_rows = self._meta.loc[
+            rehashed != self._meta["sequence_hash"], "sample_id"
+        ].tolist()
+        n = len(self._meta)
+        if bad_rows:
+            lines.append(
+                f"FAIL  sequence_hash 불일치 {len(bad_rows)}/{n}행: "
+                f"sample_id {_truncated_id_list(bad_rows)}"
+            )
+        else:
+            lines.append(f"PASS  sequence_hash {n}/{n}행 일치")
+
+        testset_seq = dict(zip(self._meta["sample_id"], self._meta["sequence"]))
+        bad_cases = [
+            f"{case['case_id']} (sample_id {case['sample_id']})"
+            for case in self._cases
+            if testset_seq.get(case["sample_id"]) != case["sequence"]
+        ]
+        if bad_cases:
+            lines.append(
+                f"FAIL  Case Study sequence가 Testset 행과 불일치 "
+                f"{len(bad_cases)}/{len(self._cases)}개: {', '.join(bad_cases)}"
+            )
+        else:
+            lines.append(
+                f"PASS  Case Study sequence {len(self._cases)}/{len(self._cases)}개가 "
+                "Testset 행과 일치"
+            )
+        return "\n".join(lines)
+
+    def _performance_section(self) -> str:
+        joined = self._meta[["sample_id", "true_score"]].merge(
+            self._predictions_b[["sample_id", "pred_raw"]],
+            on="sample_id",
+            validate="one_to_one",
+        )
+        metrics = compute_metrics(
+            joined["true_score"].to_numpy(), joined["pred_raw"].to_numpy()
+        )
+        lines = [
+            (
+                "== Model B Testset 성능 "
+                f"(model_b_testset_predictions.csv에서 계산, n={len(joined)})"
+            ),
+            (
+                f"Spearman {metrics['spearman']:.3f} | Pearson {metrics['pearson']:.3f}"
+                f" | MAE {metrics['mae']:.4f} | MSE {metrics['mse']:.4f}"
+            ),
+        ]
+        # An inner join would otherwise silently score a subset of the Testset.
+        missing = sorted(set(self._meta["sample_id"]) - set(joined["sample_id"]))
+        if missing:
+            lines.append(
+                f"FAIL  predictions CSV가 Testset {len(joined)}/{len(self._meta)}행만 "
+                f"포함 - 누락 sample_id {_truncated_id_list(missing)}"
+            )
+        lines.append(
+            "주의: production Model B는 Testset과 겹치는 데이터로 학습되어, "
+            "clean dev split으로 재학습한 ablation variant와 직접 비교할 수 없음"
+        )
+        return "\n".join(lines)
 
     def _ig_section(self, case: dict) -> str:
         ig = case["integrated_gradients"]
