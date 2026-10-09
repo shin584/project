@@ -23,7 +23,7 @@ nucleotides independently.
 
 Both models' final attribution arrays are within-sequence L1-normalized
 before any comparison - comparisons are relative-distribution based, never
-raw magnitude - especially at the PAM (`NNGRRT`) and Seed (PAM-proximal
+raw magnitude - especially at the PAM (`NNGRRN`) and Seed (PAM-proximal
 17-24bp) positions. Seed boundaries (17-24) reuse mismatch_profiling.py's
 existing convention; PAM boundaries (25-30bp inclusive) are this dataset's
 confirmed fixed sequence-construction alignment (36bp = ... + 8bp Seed at

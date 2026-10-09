@@ -65,7 +65,7 @@ PREDICTOR_LOADERS = (
 
 HELP_TEXT = """명령어:
   <Case Study ID>   예: P01, R01, C01 또는 DISCORDANT_P01 - Case Study 설명
-  <36bp sequence>   ACGT 36bp (대소문자 무관, PAM NNGRRT at 25-30) - live 설명
+  <36bp sequence>   ACGT 36bp (대소문자 무관, PAM NNGRRN at 25-30) - live 설명
                     (--cached에서는 Testset sequence만 cache로 설명)
   cases             Case Study 목록
   report            Testset integrity check와 global findings

@@ -13,7 +13,7 @@ region shares), Token-grouped SHAP, an ISM summary and complex-mismatch
 results by region.
 
 `explain <36bp sequence>` validates a typed sequence (length 36, ACGT,
-case-insensitive, PAM `NNGRRT` at positions 25-30) and looks it up in the
+case-insensitive, PAM `NNGRRN` at positions 25-30) and looks it up in the
 Testset by sequence hash. With predictors loaded it computes Model A / Model B
 scores, Token-grouped SHAP (Tree SHAP on Model B's live features) and
 Integrated Gradients for both models live, timing each computation. In
@@ -113,9 +113,10 @@ DETERMINISTIC_PROJECTION_NOTE = (
 
 SEQUENCE_LENGTH = 36
 NUCLEOTIDES = "ACGT"
-# Expected bases at PAM_REGION_START..PAM_REGION_END-1, as IUPAC codes.
-PAM_PATTERN = "NNGRRT"
-_IUPAC = {"N": "ACGT", "G": "G", "R": "AG", "T": "T"}
+# Expected bases at PAM_REGION_START..PAM_REGION_END-1, as IUPAC codes. The
+# last base is N, not T: see "PAM window" in CONTEXT.md (issue #31).
+PAM_PATTERN = "NNGRRN"
+_IUPAC = {"N": "ACGT", "G": "G", "R": "AG"}
 # A query this long without "_" is read as a sequence, not a Case Study ID.
 MIN_SEQUENCE_QUERY_LENGTH = 10
 
@@ -259,7 +260,7 @@ def _validate_sequence(query: str) -> str:
     if not all(b in _IUPAC[code] for b, code in zip(pam, PAM_PATTERN)):
         raise XAISessionError(
             f"PAM(위치 {PAM_REGION_START}-{PAM_REGION_END - 1})이 {PAM_PATTERN}이 "
-            f"아님: {pam} (R = A/G)"
+            f"아님: {pam} (R = A/G, N = A/C/G/T)"
         )
     return sequence
 

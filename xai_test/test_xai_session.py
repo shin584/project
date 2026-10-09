@@ -1,12 +1,15 @@
 """Tests for the XAI demo session (issues #23-#28).
 
-Drives only the session's public operations against a small synthetic
-export directory built in the test - no real model or real export is read.
+Drives only the session's public operations, against a small synthetic
+export directory built in the test - no real model is loaded. The only real
+files read are the checked-in Testset and export, by the PAM validation tests
+(issue #31), in cached-only mode.
 """
 
 import hashlib
 import json
 import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -807,6 +810,8 @@ def test_cached_only_explain_labels_scores_cached_and_shows_no_live_column(sessi
 TESTSET_ONLY_SAMPLE = 2
 TESTSET_ONLY_SEQ = _sequences()[TESTSET_ONLY_SAMPLE]
 NOVEL_SEQ = "GGGGACGTACGTACGTACGTACGTACGGAGTACGTA"  # valid PAM, not in the Testset
+# Holds the checked-in Testset and export; read only by the PAM validation tests.
+CHECKED_IN_DIR = Path(__file__).parent
 
 
 class DifferentiableModelA:
@@ -922,9 +927,9 @@ def _position_row_or_none(section, pos):
         (NOVEL_SEQ + "A", "36"),  # too long
         (NOVEL_SEQ[:5] + "N" + NOVEL_SEQ[6:], "A/C/G/T"),
         (NOVEL_SEQ[:10] + "U" + NOVEL_SEQ[11:], "A/C/G/T"),
-        (NOVEL_SEQ[:27] + "C" + NOVEL_SEQ[28:], "PAM"),  # N N [G] R R T
-        (NOVEL_SEQ[:28] + "T" + NOVEL_SEQ[29:], "PAM"),  # R must be A/G
-        (NOVEL_SEQ[:30] + "A" + NOVEL_SEQ[31:], "PAM"),  # last PAM base must be T
+        (NOVEL_SEQ[:27] + "C" + NOVEL_SEQ[28:], "PAM"),  # N N [G] R R N
+        (NOVEL_SEQ[:28] + "T" + NOVEL_SEQ[29:], "PAM"),  # first R must be A/G
+        (NOVEL_SEQ[:29] + "C" + NOVEL_SEQ[30:], "PAM"),  # second R must be A/G
     ],
 )
 def test_invalid_typed_sequences_raise_a_clear_error(export_dir, sequence, message):
@@ -933,6 +938,39 @@ def test_invalid_typed_sequences_raise_a_clear_error(export_dir, sequence, messa
         session.explain(sequence)
     assert predictors.model_a.predict_calls == []
     assert predictors.model_b.predict_calls == []
+
+
+@pytest.mark.parametrize("base", "ACG")
+def test_any_base_at_the_last_pam_position_is_accepted(export_dir, base):
+    # The Testset's PAM window is NNGRRN: position 30 is not fixed (issue #31).
+    sequence = NOVEL_SEQ[:30] + base + NOVEL_SEQ[31:]
+    session, predictors = _typed_session(export_dir)
+    session.explain(sequence)
+    assert predictors.model_a.predict_calls == [[sequence]]
+
+
+@pytest.fixture(scope="module")
+def checked_in_session():
+    return XAISession(
+        CHECKED_IN_DIR / "final_analysis_result", CHECKED_IN_DIR / "test_metadata.csv"
+    )
+
+
+def test_every_real_testset_sequence_passes_validation(checked_in_session):
+    sequences = pd.read_csv(CHECKED_IN_DIR / "test_metadata.csv")["sequence"]
+    assert len(sequences) == 514
+    for sequence in sequences:
+        checked_in_session.explain(sequence)  # raises XAISessionError if refused
+
+
+def test_every_real_case_study_sequence_passes_validation(checked_in_session):
+    summary_path = (
+        CHECKED_IN_DIR / "final_analysis_result" / "model_analysis_summary.json"
+    )
+    cases = json.loads(summary_path.read_text(encoding="utf-8"))["case_studies"]
+    assert len(cases) == 15
+    for case in cases:
+        checked_in_session.explain(case["sequence"])
 
 
 def test_invalid_typed_sequence_is_rejected_in_cached_only_mode_too(session):

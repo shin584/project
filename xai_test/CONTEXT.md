@@ -30,6 +30,10 @@ _Avoid_: "embedding_only" as a synonym for "NT-only regression head performance"
 The fixed, isolated evaluation set: 514 SaCas9 sequences (10% of the 5,145-row dataset), carved out via a single `seed=42` random permutation (`torch.randperm`) in `test_dataset_verifier.py` — not K-fold cross-validation. `sample_id` ranges 0–513. Stored in `test_metadata.csv` with SHA256 checksums (`sequence_hash` per row, plus a whole-column dataset hash) to guard against data leakage.
 _Avoid_: "515 samples" (a corrected documentation error — the real count is 514)
 
+**PAM window**:
+The 6bp window at 0-indexed positions 25-30 of the 36bp sequence (`PAM_REGION_START/END` in `mismatch_profiling.py`). In this dataset it follows `NNGRRN`: the canonical SaCas9 `NNGRRT` with position 30 not fixed — every Testset row has `NNGRR` at 25-29, but only 54 of 514 have `T` at 30 (issue #31). Typed-sequence validation therefore requires G at 27 and A/G at 28-29 only.
+_Avoid_: "NNGRRT" as the description of this dataset's PAM window — requiring `T` at position 30 rejects about 90% of real Testset sequences.
+
 **sample_id / original_id**:
 `sample_id` is the Testset-internal fixed index (0–513, assigned by row order after isolation). `original_id` is the row's index in the full, pre-split SaCas9 dataset. Kept distinct to preserve traceability back to the source data without letting internal indices leak into cross-dataset joins.
 

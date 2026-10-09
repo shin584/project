@@ -49,7 +49,8 @@ from ism_sweep import (
 )
 
 SEQ_LEN = 36
-# PAM (NNGRRT), confirmed dataset alignment: 25-30 inclusive (25:31 as a slice).
+# PAM window (NNGRRN: position 30 not fixed, see CONTEXT.md), confirmed
+# dataset alignment: 25-30 inclusive (25:31 as a slice).
 # Kept here, beside Seed/Distal, so torch-free code (the demo CLI's cached-only
 # mode) can share one set of region constants with integrated_gradients.py.
 PAM_REGION_START, PAM_REGION_END = 25, 31
