@@ -1,4 +1,4 @@
-"""Tests for the XAI demo session (issues #23, #24, #25).
+"""Tests for the XAI demo session (issues #23-#26).
 
 Drives only the session's public operations against a small synthetic
 export directory built in the test - no real model or real export is read.
@@ -19,6 +19,7 @@ from mismatch_profiling import (
     SEED_REGION_START,
 )
 from paired_bootstrap import compute_metrics
+from shap_analysis import aggregate_physical_contribution_ratio
 from shap_grouping import HIDDEN_DIM, SHAP_GROUP_COUNT
 from xai_session import XAISession, XAISessionError
 
@@ -93,13 +94,63 @@ def _arrays(n):
     shap[P01_SAMPLE, :HIDDEN_DIM] = 0.05 / HIDDEN_DIM  # [CLS]
     shap[P01_SAMPLE, 2 * HIDDEN_DIM] = -0.2  # Token 2 (pos 6-11)
     shap[P01_SAMPLE, 8960 + 3] = 0.1  # GC
+    shap[0, 8960 + 0] = -0.02  # MFE on another sample
+    # Testset-wide region patterns for `report`; P01's own rows are kept.
+    for sample in range(n):
+        if sample != P01_SAMPLE:
+            complex_a[sample] = COMPLEX_A_TESTSET
+            complex_b[sample] = COMPLEX_B_TESTSET
     return {
         "ism_delta_model_a": ism_a,
         "ism_delta_model_b": ism_b,
+        "mismatch_single_min_model_a": _single_min(n, SINGLE_MIN_A),
+        "mismatch_single_min_model_b": _single_min(n, SINGLE_MIN_B),
         "mismatch_complex_model_a": complex_a,
         "mismatch_complex_model_b": complex_b,
         "shap_values": shap,
     }
+
+
+# Single-mismatch worst-case drop per region, identical across samples.
+# Model A peaks in PAM (against the Seed-sensitivity hypothesis), Model B in Seed.
+SINGLE_MIN_A = {"Distal": -0.1, "Seed": -0.2, "PAM": -0.4}
+SINGLE_MIN_B = {"Distal": -0.05, "Seed": -0.3, "PAM": -0.1}
+_REGION_SPANS = {
+    "Distal": (DISTAL_REGION_START, DISTAL_REGION_END),
+    "Seed": (SEED_REGION_START, SEED_REGION_END),
+    "PAM": (PAM_REGION_START, PAM_REGION_END),
+}
+
+
+def _single_min(n, by_region):
+    values = np.zeros((n, 36))
+    for region, value in by_region.items():
+        start, end = _REGION_SPANS[region]
+        values[:, start:end] = value
+    return values
+
+
+# Complex-mismatch deltas for every non-P01 sample: Model A drops most on
+# Intermittent, Model B on Seed.
+COMPLEX_A_TESTSET = np.array([-0.02] * 5 + [-0.01] * 5 + [-0.03] * 5)
+COMPLEX_B_TESTSET = np.array([-0.04] * 5 + [-0.01] * 5 + [-0.02] * 5)
+
+
+def _metrics(spearman, pearson, mae, mse):
+    return {"spearman": spearman, "pearson": pearson, "mae": mae, "mse": mse}
+
+
+ABLATION = {
+    "embedding_only": _metrics(0.8427, 0.8573, 0.0929, 0.0142),
+    "physical_only": _metrics(0.7479, 0.7568, 0.1287, 0.0238),
+    "full_model": _metrics(0.8447, 0.8588, 0.0933, 0.0141),
+    "paired_bootstrap_95ci": {
+        "delta_spearman_full_vs_embedding_only": [-0.0009, 0.0050],
+        "delta_mse_full_vs_embedding_only": [-0.0002, 0.0001],
+        "delta_spearman_full_vs_physical_only": [0.0711, 0.1236],
+        "delta_mse_full_vs_physical_only": [-0.0117, -0.0077],
+    },
+}
 
 
 N_SAMPLES = 6
@@ -132,7 +183,11 @@ def export_dir(tmp_path):
     sequences = _sequences()
     summary = {
         "metadata": {"total_samples": n, "sha256_checksum": _column_sha256(sequences)},
-        "global_evaluation": {},
+        "global_evaluation": {
+            "ablation_results": ABLATION,
+            # Deliberately stale: the report must recompute from the arrays.
+            "aggregate_physical_shap_contribution_ratio": 0.5,
+        },
         "complex_mismatch_metadata": _complex_metadata(),
         "case_studies": [_case_entry(*c) for c in CASES],
     }
@@ -431,3 +486,230 @@ def test_report_flags_predictions_that_do_not_cover_the_testset(export_dir):
     warning = next(ln for ln in section if ln.startswith("FAIL"))
     assert f"{N_SAMPLES - 2}/{N_SAMPLES}" in warning
     assert "sample_id 1, 4" in warning
+
+
+# --- report: global findings with computed interpretation lines (issue #26) ---
+
+
+def _np_arrays(export_dir):
+    with np.load(export_dir / "model_analysis_arrays.npz") as arrays:
+        return {key: arrays[key] for key in arrays.files}
+
+
+def _edit_arrays(export_dir, edit):
+    arrays = _np_arrays(export_dir)
+    edit(arrays)
+    np.savez(export_dir / "model_analysis_arrays.npz", **arrays)
+
+
+def _edit_cis(export_dir, **cis):
+    def edit(summary):
+        stored = summary["global_evaluation"]["ablation_results"]
+        stored["paired_bootstrap_95ci"].update(cis)
+
+    _edit_summary(export_dir, edit)
+
+
+def _line(section, prefix):
+    return next(ln for ln in section if ln.startswith(prefix))
+
+
+def test_report_renders_every_global_section_in_cached_only_mode(session):
+    assert session.cached_only
+    text = session.report()
+    for title in (
+        "Testset integrity",
+        "Model B Testset",
+        "Ablation",
+        "Physical-feature SHAP share",
+        "Mismatch sensitivity",
+        "IG attribution share",
+        "Handoff",
+    ):
+        assert _section(text, title), title
+
+
+def test_report_ablation_shows_each_variant_and_ci(session):
+    section = _section(session.report(), "Ablation")
+    for label, key in (
+        ("Model B-Embedding", "embedding_only"),
+        ("Model B-Physical", "physical_only"),
+        ("Model B-Full", "full_model"),
+    ):
+        row = _line(section, label)
+        metrics = ABLATION[key]
+        assert f"{metrics['spearman']:.4f}" in row and f"{metrics['mse']:.4f}" in row
+    row = _line(section, "Full vs Embedding-only ΔSpearman")
+    assert "[-0.0009, +0.0050]" in row
+
+
+@pytest.mark.parametrize(
+    "ci, verdict",
+    [
+        ([-0.0009, 0.0050], "0 포함"),
+        ([0.0, 0.0050], "0 포함"),  # an endpoint on zero still includes zero
+        ([0.0010, 0.0050], "0 미포함"),
+        ([-0.0050, -0.0010], "0 미포함"),
+    ],
+)
+def test_report_ablation_states_whether_each_ci_crosses_zero(export_dir, ci, verdict):
+    _edit_cis(export_dir, delta_spearman_full_vs_embedding_only=ci)
+    section = _section(_report(export_dir), "Ablation")
+    assert verdict in _line(section, "Full vs Embedding-only ΔSpearman")
+    # The untouched CIs keep their own verdicts.
+    assert "0 포함" in _line(section, "Full vs Embedding-only ΔMSE")
+    assert "0 미포함" in _line(section, "Full vs Physical-only ΔSpearman")
+
+
+def test_report_ablation_interpretation_flips_with_the_embedding_ci(export_dir):
+    line = _line(_section(_report(export_dir), "Ablation"), "해석")
+    assert "유의한 차이 없음" in line
+
+    _edit_cis(export_dir, delta_spearman_full_vs_embedding_only=[0.0010, 0.0050])
+    line = _line(_section(_report(export_dir), "Ablation"), "해석")
+    assert "유의한 차이 없음" not in line
+    assert "ΔSpearman" in line and "더 좋음" in line
+
+
+def test_report_ablation_reads_a_higher_full_mse_as_worse(export_dir):
+    _edit_cis(export_dir, delta_mse_full_vs_embedding_only=[0.0001, 0.0003])
+    line = _line(_section(_report(export_dir), "Ablation"), "해석")
+    assert "ΔMSE" in line and "더 나쁨" in line
+
+
+def test_report_physical_shap_share_is_computed_from_the_arrays(export_dir):
+    expected = aggregate_physical_contribution_ratio(
+        _np_arrays(export_dir)["shap_values"]
+    )
+    assert 0 < expected < 1
+    section = "\n".join(_section(_report(export_dir), "Physical-feature SHAP share"))
+    assert f"{expected:.4%}" in section
+    assert "50.0000%" not in section  # not the stale summary value
+    assert "해석" in section
+
+
+def _mismatch(text):
+    return _section(text, "Mismatch sensitivity")
+
+
+def test_report_single_mismatch_medians_by_region_for_both_models(session):
+    section = _mismatch(session.report())
+    for region in ("Distal", "Seed", "PAM"):
+        row = _line(section, f"single {region}")
+        assert f"{SINGLE_MIN_A[region]:+.3f}" in row
+        assert f"{SINGLE_MIN_B[region]:+.3f}" in row
+
+
+def test_report_single_mismatch_line_names_the_computed_region(session):
+    section = _mismatch(session.report())
+    line_a = _line(section, "해석(single): Model A")
+    assert "PAM" in line_a and "Seed 민감 가설과 불일치" in line_a
+    line_b = _line(section, "해석(single): Model B")
+    assert "Seed" in line_b and "Seed 민감 가설과 일치" in line_b
+
+
+def test_report_single_mismatch_uses_medians_not_means(export_dir):
+    def outlier(arrays):
+        # One sample's huge Distal drop would dominate a mean.
+        single = arrays["mismatch_single_min_model_a"]
+        single[0, DISTAL_REGION_START:DISTAL_REGION_END] = -50.0
+
+    _edit_arrays(export_dir, outlier)
+    section = _mismatch(_report(export_dir))
+    assert f"{SINGLE_MIN_A['Distal']:+.3f}" in _line(section, "single Distal")
+    assert "PAM" in _line(section, "해석(single): Model A")
+
+
+def test_report_single_mismatch_line_follows_the_data(export_dir):
+    def seed_heavy(arrays):
+        single = arrays["mismatch_single_min_model_a"]
+        single[:, SEED_REGION_START:SEED_REGION_END] = -0.9
+
+    _edit_arrays(export_dir, seed_heavy)
+    line = _line(_mismatch(_report(export_dir)), "해석(single): Model A")
+    assert "Seed" in line and "Seed 민감 가설과 일치" in line
+
+
+def test_report_single_mismatch_without_any_drop(export_dir):
+    def flat(arrays):
+        arrays["mismatch_single_min_model_b"][:] = 0.1
+
+    _edit_arrays(export_dir, flat)
+    line = _line(_mismatch(_report(export_dir)), "해석(single): Model B")
+    assert "감소 없음" in line
+
+
+def test_report_complex_mismatch_medians_and_line(session):
+    section = _mismatch(session.report())
+    for region, a, b in (
+        ("Seed", -0.02, -0.04),
+        ("Distal", -0.01, -0.01),
+        ("Intermittent", -0.03, -0.02),
+    ):
+        row = _line(section, f"complex {region}")
+        assert f"{a:+.3f}" in row and f"{b:+.3f}" in row
+    line_a = _line(section, "해석(complex): Model A")
+    assert "Intermittent" in line_a and "Seed 민감 가설과 불일치" in line_a
+    line_b = _line(section, "해석(complex): Model B")
+    assert "Seed" in line_b and "Seed 민감 가설과 일치" in line_b
+
+
+def test_report_complex_mismatch_uses_medians_not_means(export_dir):
+    def outlier(arrays):
+        # One sample's huge Distal drop would dominate a mean.
+        arrays["mismatch_complex_model_b"][0, 5:10] = -50.0
+
+    _edit_arrays(export_dir, outlier)
+    section = _mismatch(_report(export_dir))
+    assert f"{-0.01:+.3f}" in _line(section, "complex Distal").split()[-1]
+    assert "Seed" in _line(section, "해석(complex): Model B")
+
+
+def test_report_mismatch_line_prints_the_region_spread(session):
+    line = _line(_mismatch(session.report()), "해석(single): Model A")
+    spread = SINGLE_MIN_A["Distal"] - SINGLE_MIN_A["PAM"]
+    assert f"region 간 차이 {spread:.3f}" in line
+
+
+def test_report_ig_share_averaged_over_case_studies(session):
+    text = session.report()
+    header = _line(text.splitlines(), "== IG attribution share")
+    assert f"Case Study {len(CASES)}개" in header
+    section = _section(text, "IG attribution share")
+    # Every synthetic case carries IG_A / IG_B, so the mean is their own share.
+    assert _line(section, "Model A").split()[2:6] == [
+        "0.250",
+        "0.250",
+        "0.500",
+        "0.000",
+    ]
+    assert _line(section, "Model B").split()[2:6] == [
+        "0.000",
+        "0.400",
+        "0.000",
+        "0.600",
+    ]
+    assert "Model A가 PAM+Seed" in _line(section, "해석")
+
+
+def test_report_ig_line_names_the_model_actually_concentrating_more(export_dir):
+    pam_only = np.zeros(36)
+    pam_only[PAM_REGION_START] = 1.0
+
+    def edit(summary):
+        for case in summary["case_studies"]:
+            ig = case["integrated_gradients"]
+            ig["model_b_phase4_projected_norm_attr_36bp"] = pam_only.tolist()
+
+    _edit_summary(export_dir, edit)
+    line = _line(_section(_report(export_dir), "IG attribution share"), "해석")
+    assert "Model B가 PAM+Seed" in line
+
+
+def test_report_closes_with_the_export_handoff(session):
+    text = session.report()
+    section = _section(text, "Handoff")
+    joined = "\n".join(section)
+    assert "model_analysis_summary.json" in joined
+    assert "model_analysis_arrays.npz" in joined
+    assert text.rstrip().endswith(section[-1])  # the report's last section

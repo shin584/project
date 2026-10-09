@@ -1,4 +1,4 @@
-"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#25).
+"""XAI demo session: the testable core behind the demo CLI (issues #21, #23-#26).
 
 `XAISession` is the single seam between the export contract and the terminal:
 it is constructed from the standardized export directory
@@ -15,7 +15,11 @@ results by region.
 `report()` opens with a Testset integrity check (the export's whole-column
 SHA256, every row's `sequence_hash`, every Case Study's sequence against its
 Testset row) and Model B's headline Testset metrics computed from the
-exported predictions CSV.
+exported predictions CSV, then the global findings: the ablation with Paired
+Bootstrap 95% CIs, the physical-feature SHAP share, mismatch sensitivity by
+region and IG attribution share by region, closing with the export handoff.
+Every interpretation line is computed from the numbers its section prints;
+none asserts a predetermined conclusion.
 
 Unlike the dashboard (ADR 0002), the session shows Model A next to Model B
 and surfaces Concordant/Discordant labels, because the presentation's claim
@@ -45,6 +49,7 @@ from mismatch_profiling import (
     SEED_REGION_START,
 )
 from paired_bootstrap import compute_metrics
+from shap_analysis import EMBEDDING_DIM, aggregate_physical_contribution_ratio
 from shap_grouping import token_grouped_shap
 
 _XAI_TEST_ROOT = Path(__file__).resolve().parent
@@ -90,9 +95,34 @@ DETERMINISTIC_PROJECTION_NOTE = (
     "(모델이 nucleotide를 독립적으로 인식한다는 근거가 아님)"
 )
 
+# The region the Seed-sensitivity hypothesis predicts mismatches hurt most.
+HYPOTHESIS_REGION = "Seed"
+
+# (label, summary key) of each ablation variant, in display order.
+ABLATION_VARIANTS = (
+    ("Model B-Embedding", "embedding_only"),
+    ("Model B-Physical", "physical_only"),
+    ("Model B-Full", "full_model"),
+)
+# (label, CI key suffix) of each variant Model B-Full is bootstrapped against.
+ABLATION_BASELINES = (
+    ("Embedding-only", "embedding_only"),
+    ("Physical-only", "physical_only"),
+)
+# (label, CI key metric, whether a higher value is better).
+ABLATION_CI_METRICS = (("ΔSpearman", "spearman", True), ("ΔMSE", "mse", False))
+
+HANDOFF_FILES = (
+    "model_analysis_summary.json",
+    "model_analysis_arrays.npz",
+    "model_b_testset_predictions.csv",
+)
+
 _ARRAY_KEYS = (
     "ism_delta_model_a",
     "ism_delta_model_b",
+    "mismatch_single_min_model_a",
+    "mismatch_single_min_model_b",
     "mismatch_complex_model_a",
     "mismatch_complex_model_b",
     "shap_values",
@@ -107,16 +137,45 @@ def _region_of(pos: int) -> str:
     return NO_REGION
 
 
-def _format_region_shares(attribution: np.ndarray) -> str:
-    """Each region's fraction of the sequence's absolute attribution mass."""
+SHARE_NAMES = (*(name for name, _, _ in REGIONS), "other")
+
+
+def _region_shares(attribution: np.ndarray) -> np.ndarray:
+    """Each region's fraction of the absolute attribution mass, in
+    `SHARE_NAMES` order (the last entry is everything outside the regions)."""
     mass = np.abs(attribution)
     total = mass.sum()
     region_mass = [mass[start:end].sum() for _, start, end in REGIONS]
-    other = total - sum(region_mass)
-    parts = [(name, m) for (name, _, _), m in zip(REGIONS, region_mass)]
-    parts.append(("other", other))
-    return " | ".join(
-        f"{name} {(m / total if total else 0.0):.3f}" for name, m in parts
+    shares = np.array([*region_mass, total - sum(region_mass)])
+    return shares / total if total else np.zeros_like(shares)
+
+
+def _format_region_shares(attribution: np.ndarray) -> str:
+    """One-line `Distal 0.250 | Seed ... | other ...` share summary."""
+    shares = _region_shares(attribution)
+    return " | ".join(f"{name} {s:.3f}" for name, s in zip(SHARE_NAMES, shares))
+
+
+def _ci_verdict(lower: float, upper: float, higher_is_better: bool) -> str | None:
+    """None when the CI includes zero, else whether Full is better or worse."""
+    if lower <= 0 <= upper:
+        return None
+    return "더 좋음" if (lower > 0) == higher_is_better else "더 나쁨"
+
+
+def _most_sensitive_line(tag: str, model: str, medians: dict[str, float]) -> str:
+    """Name the region with the largest median drop and check it against the
+    Seed-sensitivity hypothesis, whichever way it comes out. The spread across
+    regions is printed too, so a near-flat profile isn't read as a strong peak."""
+    region = min(medians, key=medians.get)
+    if medians[region] >= 0:
+        return f"해석({tag}): {model}는 어느 region에서도 median 감소 없음"
+    agreement = "일치" if region == HYPOTHESIS_REGION else "불일치"
+    spread = max(medians.values()) - medians[region]
+    return (
+        f"해석({tag}): {model}는 {region}에서 가장 크게 감소 "
+        f"(median {medians[region]:+.3f}, region 간 차이 {spread:.3f})"
+        f" - {HYPOTHESIS_REGION} 민감 가설과 {agreement}"
     )
 
 
@@ -158,6 +217,7 @@ class XAISession:
         self._cases = summary["case_studies"]
         self._cases_by_id = {case["case_id"].upper(): case for case in self._cases}
         self._complex_meta = summary["complex_mismatch_metadata"]
+        self._ablation = summary["global_evaluation"]["ablation_results"]
         self._recorded_column_sha256 = summary["metadata"]["sha256_checksum"]
         with np.load(result_dir / "model_analysis_arrays.npz") as arrays:
             self._arrays = {key: arrays[key] for key in _ARRAY_KEYS}
@@ -213,7 +273,16 @@ class XAISession:
         return "\n\n".join((header, *sections))
 
     def report(self) -> str:
-        return f"{self._integrity_section()}\n\n{self._performance_section()}"
+        sections = (
+            self._integrity_section(),
+            self._performance_section(),
+            self._ablation_section(),
+            self._physical_shap_section(),
+            self._mismatch_region_section(),
+            self._ig_region_section(),
+            self._handoff_section(),
+        )
+        return "\n\n".join(sections)
 
     def _integrity_section(self) -> str:
         lines = ["== Testset integrity (SHA256)"]
@@ -290,6 +359,166 @@ class XAISession:
         )
         return "\n".join(lines)
 
+    def _ablation_section(self) -> str:
+        lines = [
+            "== Ablation (clean dev split으로 재학습한 variant, Testset 평가)",
+            f"{'variant':<18} {'Spearman':>8} {'Pearson':>8} {'MAE':>7} {'MSE':>7}",
+        ]
+        for label, key in ABLATION_VARIANTS:
+            m = self._ablation[key]
+            lines.append(
+                f"{label:<18} {m['spearman']:>8.4f} {m['pearson']:>8.4f}"
+                f" {m['mae']:>7.4f} {m['mse']:>7.4f}"
+            )
+        lines.append("Paired Bootstrap 95% CI (Δ = Full - variant)")
+        cis = self._ablation["paired_bootstrap_95ci"]
+        vs_embedding = []  # significant differences vs Embedding-only
+        for baseline, suffix in ABLATION_BASELINES:
+            for label, metric, higher_is_better in ABLATION_CI_METRICS:
+                lower, upper = cis[f"delta_{metric}_full_vs_{suffix}"]
+                verdict = _ci_verdict(lower, upper, higher_is_better)
+                status = (
+                    "0 포함 → 유의한 차이 없음"
+                    if verdict is None
+                    else f"0 미포함 → Full이 유의하게 {verdict}"
+                )
+                lines.append(
+                    f"Full vs {baseline} {label} [{lower:+.4f}, {upper:+.4f}]  {status}"
+                )
+                if suffix == "embedding_only" and verdict is not None:
+                    vs_embedding.append(f"{label} {verdict}")
+        if vs_embedding:
+            finding = (
+                "물리 feature를 더한 Full이 Embedding-only 대비 "
+                f"{', '.join(vs_embedding)} (CI가 0 미포함)"
+            )
+        else:
+            finding = (
+                "Full vs Embedding-only의 모든 CI가 0을 포함 → 물리 feature 추가에 의한 "
+                "유의한 차이 없음"
+            )
+        lines.append(f"해석: {finding}")
+        return "\n".join(lines)
+
+    def _physical_shap_section(self) -> str:
+        shap = self._arrays["shap_values"]
+        share = aggregate_physical_contribution_ratio(shap)
+        n_features = shap.shape[1]
+        n_physical = n_features - EMBEDDING_DIM
+        feature_share = n_physical / n_features
+        ratio = share / feature_share
+        comparison = "기대치보다 작음" if ratio < 1 else "기대치 이상"
+        return "\n".join(
+            [
+                "== Physical-feature SHAP share (Model B, Testset 전체 |SHAP| 대비)",
+                (
+                    f"물리 feature {n_physical}개의 |SHAP| 비율 {share:.4%} "
+                    f"(feature 수 비율 {n_physical}/{n_features} = {feature_share:.4%})"
+                ),
+                (
+                    f"해석: 물리 feature의 SHAP 기여는 feature 수 비율의 {ratio:.2f}배로, "
+                    f"균등 기여 {comparison}"
+                ),
+            ]
+        )
+
+    def _mismatch_region_section(self) -> str:
+        single = {
+            model: {
+                name: float(np.nanmedian(self._arrays[key][:, start:end]))
+                for name, start, end in REGIONS
+            }
+            for model, key in (
+                ("Model A", "mismatch_single_min_model_a"),
+                ("Model B", "mismatch_single_min_model_b"),
+            )
+        }
+        complex_ = {
+            model: {
+                region: float(np.nanmedian(self._arrays[key][:, indices]))
+                for region, indices in self._complex_scenarios_by_region().items()
+            }
+            for model, key in (
+                ("Model A", "mismatch_complex_model_a"),
+                ("Model B", "mismatch_complex_model_b"),
+            )
+        }
+        lines = [
+            (
+                "== Mismatch sensitivity by region "
+                f"(median relative delta, Testset n={len(self._meta)})"
+            ),
+            (
+                "single = position별 3개 alt base 중 worst-case drop, "
+                "region 내 모든 sample x position의 median"
+            ),
+            "complex = scenario region별 모든 sample x scenario의 median",
+            f"{'':<20} {'Model A':>8} {'Model B':>8}",
+        ]
+        for tag, medians in (("single", single), ("complex", complex_)):
+            for region in medians["Model A"]:
+                lines.append(
+                    f"{tag + ' ' + region:<20} {medians['Model A'][region]:>+8.3f}"
+                    f" {medians['Model B'][region]:>+8.3f}"
+                )
+            lines += [_most_sensitive_line(tag, m, medians[m]) for m in medians]
+        return "\n".join(lines)
+
+    def _ig_region_section(self) -> str:
+        lines = [
+            (
+                f"== IG attribution share by region (Case Study {len(self._cases)}개 "
+                "평균, |attr| 비율)"
+            ),
+            f"{'model':<8} " + " ".join(f"{name:>6}" for name in SHARE_NAMES),
+        ]
+        focus = {}
+        for model, key in (
+            ("Model A", "model_a_norm_attr_36bp"),
+            ("Model B", "model_b_phase4_projected_norm_attr_36bp"),
+        ):
+            shares = np.mean(
+                [
+                    _region_shares(np.asarray(case["integrated_gradients"][key]))
+                    for case in self._cases
+                ],
+                axis=0,
+            )
+            lines.append(f"{model:<8} " + " ".join(f"{s:>6.3f}" for s in shares))
+            focus[model] = sum(
+                shares[SHARE_NAMES.index(name)] for name in ("PAM", "Seed")
+            )
+        a, b = focus["Model A"], focus["Model B"]
+        if np.isclose(a, b):
+            verdict = "두 모델의 PAM+Seed 집중도가 같음"
+        else:
+            verdict = f"{'Model A' if a > b else 'Model B'}가 PAM+Seed에 attribution을 더 집중"
+        lines.append(
+            f"해석: PAM+Seed share Model A {a:.3f} / Model B {b:.3f} → {verdict}"
+        )
+        return "\n".join(lines)
+
+    def _handoff_section(self) -> str:
+        return "\n".join(
+            [
+                "== Handoff (visualization layer)",
+                "이 report의 수치는 모두 standardized export에서 계산됨: "
+                + ", ".join(HANDOFF_FILES),
+                (
+                    "시각화 layer(dashboard)가 소비하는 contract도 같은 export "
+                    "(model_analysis_summary.json + arrays)"
+                ),
+            ]
+        )
+
+    def _complex_scenarios_by_region(self) -> dict[str, list[int]]:
+        by_region: dict[str, list[int]] = {}
+        for scenario in self._complex_meta:
+            by_region.setdefault(scenario["region"], []).append(
+                scenario["scenario_index"]
+            )
+        return by_region
+
     def _ig_section(self, case: dict) -> str:
         ig = case["integrated_gradients"]
         attr_a = np.asarray(ig["model_a_norm_attr_36bp"])
@@ -355,11 +584,7 @@ class XAISession:
         sample_id = case["sample_id"]
         delta_a = self._arrays["mismatch_complex_model_a"][sample_id]
         delta_b = self._arrays["mismatch_complex_model_b"][sample_id]
-        by_region: dict[str, list[int]] = {}
-        for scenario in self._complex_meta:
-            by_region.setdefault(scenario["region"], []).append(
-                scenario["scenario_index"]
-            )
+        by_region = self._complex_scenarios_by_region()
         lines = [
             "== Complex mismatch (cached, relative delta, region별 scenario 평균 / 최저)",
             (
