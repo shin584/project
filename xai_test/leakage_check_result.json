@@ -1,0 +1,169 @@
+{
+  "membership": {
+    "seen_definition": "sequence appears in sacas9_Dataset/train.csv",
+    "unique_sequences": {
+      "total": 464,
+      "seen": 460,
+      "unseen": 4
+    },
+    "rows": {
+      "total": 514,
+      "seen": 509,
+      "unseen": 5
+    },
+    "unique_sequences_in_old_split": {
+      "train": 460,
+      "val": 120,
+      "test": 136
+    },
+    "unseen_unique_sequences": [
+      "CAATCTCAATAAATTTCCCAAGACACTGGGGGGCTC",
+      "CCTCTCCCTGGGAGGGGAGCGCTTCAGGGGCCAGGG",
+      "GGAGGAAGACTTTGAGGAAGAGGAAGAGGATGAAGA",
+      "TCCAAAGGCGTAGAACCGACCTTTGTCGGAGGTTGG"
+    ]
+  },
+  "model_b": {
+    "all": {
+      "n": 514,
+      "mae": 0.0803900618111893,
+      "mse": 0.010396906872320016,
+      "spearman": 0.8963598517318797
+    },
+    "seen": {
+      "n": 509,
+      "mae": 0.07999801544633243,
+      "mse": 0.010296538808439087,
+      "spearman": 0.8965620068717062
+    },
+    "unseen": {
+      "n": 5,
+      "mae": 0.12030038175361937,
+      "mse": 0.020614375775398423,
+      "spearman": null
+    },
+    "note": "The unseen group is tiny, so its metrics and the seen-vs-unseen tests have very low statistical power; treat them as indicative only. Rows are treated as independent, but duplicate sequences make them mildly correlated, so the p-value and CI are slightly optimistic.",
+    "seen_vs_unseen_abs_error": {
+      "mae_delta_unseen_minus_seen": 0.04030236630728694,
+      "mae_delta_bootstrap_ci95": [
+        -0.029849487818237493,
+        0.10755708595927706
+      ],
+      "bootstrap_resamples": 10000,
+      "mann_whitney_u": 1658.0,
+      "mann_whitney_p": 0.25250160151129053
+    }
+  },
+  "case_studies": {
+    "cases": [
+      {
+        "case_id": "DISCORDANT_P01",
+        "sample_id": 216,
+        "case_type": "Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_P02",
+        "sample_id": 507,
+        "case_type": "Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_P03",
+        "sample_id": 406,
+        "case_type": "Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_P04",
+        "sample_id": 325,
+        "case_type": "Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_P05",
+        "sample_id": 352,
+        "case_type": "Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_R01",
+        "sample_id": 94,
+        "case_type": "Reverse Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_R02",
+        "sample_id": 106,
+        "case_type": "Reverse Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_R03",
+        "sample_id": 472,
+        "case_type": "Reverse Primary Discordant",
+        "seen": false
+      },
+      {
+        "case_id": "DISCORDANT_R04",
+        "sample_id": 436,
+        "case_type": "Reverse Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "DISCORDANT_R05",
+        "sample_id": 320,
+        "case_type": "Reverse Primary Discordant",
+        "seen": true
+      },
+      {
+        "case_id": "CONCORDANT_C01",
+        "sample_id": 90,
+        "case_type": "Concordant",
+        "seen": true
+      },
+      {
+        "case_id": "CONCORDANT_C02",
+        "sample_id": 388,
+        "case_type": "Concordant",
+        "seen": false
+      },
+      {
+        "case_id": "CONCORDANT_C03",
+        "sample_id": 169,
+        "case_type": "Concordant",
+        "seen": true
+      },
+      {
+        "case_id": "CONCORDANT_C04",
+        "sample_id": 335,
+        "case_type": "Concordant",
+        "seen": true
+      },
+      {
+        "case_id": "CONCORDANT_C05",
+        "sample_id": 238,
+        "case_type": "Concordant",
+        "seen": true
+      }
+    ],
+    "counts_by_type": {
+      "Primary Discordant": {
+        "seen": 5,
+        "unseen": 0
+      },
+      "Reverse Primary Discordant": {
+        "seen": 4,
+        "unseen": 1
+      },
+      "Concordant": {
+        "seen": 4,
+        "unseen": 1
+      }
+    },
+    "totals": {
+      "seen": 13,
+      "unseen": 2
+    }
+  }
+}
