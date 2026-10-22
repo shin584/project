@@ -1,15 +1,29 @@
 import hashlib
+import json
 
 import pandas as pd
 import pytest
-from grouped_split import DATASET_PATH, build_grouped_split, load_full_dataset
+from grouped_split import (
+    BASE_DIR,
+    DATASET_PATH,
+    OUTPUT_DIR,
+    build_grouped_split,
+    load_full_dataset,
+)
 from grouped_testset import (
+    CHECKSUM_FILENAME,
     TESTSET_COLUMNS,
+    TESTSET_FILENAME,
     build_grouped_testset,
     column_checksum,
     main,
 )
 from test_dataset_verifier import isolate_and_verify_testset
+
+OLD_TESTSET_PATH = BASE_DIR / "test_metadata.csv"
+# Pinned for seed=42 so a change to the grouped split shows up as a diff here.
+EXPECTED_ROWS = 514
+EXPECTED_SEQUENCES = 180
 
 
 def _toy_full_df() -> pd.DataFrame:
@@ -53,7 +67,7 @@ def testset(full_df, assignments) -> pd.DataFrame:
 
 
 def test_testset_columns_are_test_metadata_columns_plus_cell_line_block():
-    old_columns = pd.read_csv("test_metadata.csv", nrows=0).columns.tolist()
+    old_columns = pd.read_csv(OLD_TESTSET_PATH, nrows=0).columns.tolist()
 
     assert TESTSET_COLUMNS == old_columns + ["cell_line_block"]
 
@@ -91,7 +105,7 @@ def test_column_checksum_matches_the_existing_verifier(tmp_path):
     _, verifier_hash = isolate_and_verify_testset(
         str(DATASET_PATH), output_csv_path=str(tmp_path / "old.csv")
     )
-    old_testset = pd.read_csv("test_metadata.csv")
+    old_testset = pd.read_csv(OLD_TESTSET_PATH)
 
     assert column_checksum(old_testset["sequence"]) == verifier_hash
 
@@ -112,40 +126,42 @@ def test_real_testset_is_exactly_every_row_of_the_grouped_test_split(
 ):
     test_rows = assignments[assignments["split"] == "test"]
 
-    assert len(testset) == len(test_rows) == 514
+    assert len(testset) == len(test_rows) == EXPECTED_ROWS
     assert set(testset["original_id"]) == set(test_rows["original_id"])
-    assert testset["sequence"].str.strip().str.upper().nunique() == 180
+    assert testset["sequence"].str.strip().str.upper().nunique() == EXPECTED_SEQUENCES
     assert testset["original_id"].is_monotonic_increasing
-    assert testset["sample_id"].tolist() == list(range(514))
+    assert testset["sample_id"].tolist() == list(range(EXPECTED_ROWS))
 
 
 def test_real_testset_sequence_hashes_and_checksum(testset):
     expected = testset["sequence"].map(
         lambda s: hashlib.sha256(s.encode("utf-8")).hexdigest()
     )
+    with open(OUTPUT_DIR / CHECKSUM_FILENAME, encoding="utf-8") as f:
+        committed = json.load(f)
 
     assert testset["sequence_hash"].tolist() == expected.tolist()
-    assert (
-        column_checksum(testset["sequence"])
-        == hashlib.sha256(
-            pd.util.hash_pandas_object(testset["sequence"]).values
-        ).hexdigest()
-    )
+    # The committed checksum pins the export across environments (e.g. Colab).
+    assert column_checksum(testset["sequence"]) == committed["dataset_sha256"]
 
 
 def test_main_writes_byte_identical_files_on_rerun(tmp_path):
     first = main(["--seed", "42", "--output-dir", str(tmp_path / "a")])
     second = main(["--seed", "42", "--output-dir", str(tmp_path / "b")])
 
-    for name in ("test_metadata.csv", "test_checksum.json"):
+    for name in (TESTSET_FILENAME, CHECKSUM_FILENAME):
         assert (tmp_path / "a" / name).read_bytes() == (
             tmp_path / "b" / name
         ).read_bytes()
     assert first == second
 
-    written = pd.read_csv(tmp_path / "a" / "test_metadata.csv")
+    written = pd.read_csv(tmp_path / "a" / TESTSET_FILENAME)
     assert list(written.columns) == TESTSET_COLUMNS
     assert column_checksum(written["sequence"]) == first["dataset_sha256"]
-    file_bytes = (tmp_path / "a" / "test_metadata.csv").read_bytes()
+    file_bytes = (tmp_path / "a" / TESTSET_FILENAME).read_bytes()
     assert first["file_sha256"] == hashlib.sha256(file_bytes).hexdigest()
-    assert first["seed"] == 42 and first["rows"] == 514 and first["sequences"] == 180
+    assert first["seed"] == 42
+    assert first["rows"] == EXPECTED_ROWS
+    assert first["sequences"] == EXPECTED_SEQUENCES
+    with open(OUTPUT_DIR / CHECKSUM_FILENAME, encoding="utf-8") as f:
+        assert json.load(f) == first

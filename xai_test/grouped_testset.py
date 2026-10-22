@@ -23,7 +23,12 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from grouped_split import OUTPUT_DIR, build_grouped_split, load_full_dataset
+from grouped_split import (
+    OUTPUT_DIR,
+    build_grouped_split,
+    load_full_dataset,
+    normalize_sequences,
+)
 from test_dataset_verifier import generate_sha256
 
 TESTSET_COLUMNS = [
@@ -84,7 +89,7 @@ def main(argv: list[str] | None = None) -> dict:
     record = {
         "seed": args.seed,
         "rows": len(testset),
-        "sequences": int(testset["sequence"].nunique()),
+        "sequences": int(normalize_sequences(testset["sequence"]).nunique()),
         "dataset_sha256": column_checksum(testset["sequence"]),
         "file_sha256": hashlib.sha256(csv_path.read_bytes()).hexdigest(),
     }
