@@ -1,0 +1,41 @@
+{
+  "seed": 42,
+  "counts": {
+    "train": {
+      "rows": 4118,
+      "sequences": 1445,
+      "rows_by_cell_line_block": {
+        "L1": 1228,
+        "L2": 1445,
+        "L3": 1445
+      }
+    },
+    "val": {
+      "rows": 513,
+      "sequences": 180,
+      "rows_by_cell_line_block": {
+        "L1": 153,
+        "L2": 180,
+        "L3": 180
+      }
+    },
+    "test": {
+      "rows": 514,
+      "sequences": 180,
+      "rows_by_cell_line_block": {
+        "L1": 154,
+        "L2": 180,
+        "L3": 180
+      }
+    },
+    "total": {
+      "rows": 5145,
+      "sequences": 1805,
+      "rows_by_cell_line_block": {
+        "L1": 1535,
+        "L2": 1805,
+        "L3": 1805
+      }
+    }
+  }
+}
