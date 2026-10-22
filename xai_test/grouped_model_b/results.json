@@ -1,0 +1,172 @@
+{
+  "testset": {
+    "rows": 514,
+    "sequences": 180
+  },
+  "models": {
+    "pred_all_rows": {
+      "label": "grouped all-rows (leak-free)",
+      "leaky": false,
+      "n_rows": 514,
+      "row_level": {
+        "spearman": 0.47940203741202486,
+        "pearson": 0.4618555170545807,
+        "mae": 0.17273777380428848,
+        "mse": 0.042769310554175634
+      },
+      "sequence_level": {
+        "n_sequences": 180,
+        "spearman": 0.5122977046616665
+      },
+      "per_cell_line_block": {
+        "L1": {
+          "n": 154,
+          "spearman": 0.4829279512391467
+        },
+        "L2": {
+          "n": 180,
+          "spearman": 0.5154438923012027
+        },
+        "L3": {
+          "n": 180,
+          "spearman": 0.4308239966254102
+        }
+      }
+    },
+    "pred_seq_mean": {
+      "label": "grouped seq-mean (leak-free)",
+      "leaky": false,
+      "n_rows": 514,
+      "row_level": {
+        "spearman": 0.4671441153112023,
+        "pearson": 0.4594078692521382,
+        "mae": 0.1730013460498267,
+        "mse": 0.04292812601881204
+      },
+      "sequence_level": {
+        "n_sequences": 180,
+        "spearman": 0.5001697583258743
+      },
+      "per_cell_line_block": {
+        "L1": {
+          "n": 154,
+          "spearman": 0.4719863311893673
+        },
+        "L2": {
+          "n": 180,
+          "spearman": 0.493410290441063
+        },
+        "L3": {
+          "n": 180,
+          "spearman": 0.4311676286305132
+        }
+      }
+    },
+    "production": {
+      "label": "production (leaky)",
+      "leaky": true,
+      "n_rows": 514,
+      "row_level": {
+        "spearman": 0.9114450780825749,
+        "pearson": 0.9183647000904369,
+        "mae": 0.07562857144391195,
+        "mse": 0.008897763002086827
+      },
+      "sequence_level": {
+        "n_sequences": 180,
+        "spearman": 0.9855509943722544
+      },
+      "per_cell_line_block": {
+        "L1": {
+          "n": 154,
+          "spearman": 0.9189860108266182
+        },
+        "L2": {
+          "n": 180,
+          "spearman": 0.918941942652551
+        },
+        "L3": {
+          "n": 180,
+          "spearman": 0.9015298826095455
+        }
+      }
+    }
+  },
+  "vs_production": {
+    "pred_all_rows": {
+      "spearman": {
+        "delta": -0.43204304067055005,
+        "ci95": [
+          -0.49637974728179773,
+          -0.36998866332993574
+        ]
+      },
+      "pearson": {
+        "delta": -0.4565091830358562,
+        "ci95": [
+          -0.52331348140932,
+          -0.3925362204445946
+        ]
+      },
+      "mae": {
+        "delta": 0.09710920236037653,
+        "ci95": [
+          0.08688567557314299,
+          0.10698591048501252
+        ]
+      },
+      "mse": {
+        "delta": 0.03387154755208881,
+        "ci95": [
+          0.030060835227520403,
+          0.03793220012791227
+        ]
+      }
+    },
+    "pred_seq_mean": {
+      "spearman": {
+        "delta": -0.4443009627713726,
+        "ci95": [
+          -0.5106189473263482,
+          -0.3792298845246607
+        ]
+      },
+      "pearson": {
+        "delta": -0.4589568308382987,
+        "ci95": [
+          -0.5219974042148439,
+          -0.3978896759421504
+        ]
+      },
+      "mae": {
+        "delta": 0.09737277460591474,
+        "ci95": [
+          0.0871711072199696,
+          0.10742734800447228
+        ]
+      },
+      "mse": {
+        "delta": 0.03403036301672521,
+        "ci95": [
+          0.030178486368397116,
+          0.03809381478858425
+        ]
+      }
+    }
+  },
+  "bootstrap": {
+    "n_resamples": 1000,
+    "seed": 42,
+    "ci": 0.95,
+    "level": "row"
+  },
+  "parity": {
+    "status": "skipped",
+    "reason": "NT_sacas9_grouped_model/ not found; download the fine-tuned checkpoint from Google Drive into C:\\project\\MC_project\\xai_test\\NT_sacas9_grouped_model and rerun"
+  },
+  "old_reference": {
+    "production_old_testset_spearman": 0.896,
+    "clean_split_ablation_spearman": 0.845,
+    "note": "Row-level Spearman on the old seed=42 Testset (test_metadata.csv): production Model B, and the clean-split ablation from #13. Both use NT_sacas9_fintuned_model, whose fine-tune saw almost every Testset sequence, so neither is leak-free."
+  }
+}
