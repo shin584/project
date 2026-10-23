@@ -6,7 +6,8 @@ So 9-Hydra v2 uses the published column verbatim for train/test, and carves only
 
 ## Consequences
 
-- Our test set is fixed by the dataset, so we cannot resize it, rebalance it, or regenerate it under a different seed. If a future dataset re-export changes that column, the split changes with it — hence the `dataset_sha256` pin in `split_checksum.json`.
+- Our test set is fixed by the dataset, so we cannot resize it, rebalance it, or regenerate it under a different seed. If a future dataset re-export changes that column, the split changes with it — hence the `dataset_sha256` pin in `split_checksum.json`. `SpCas9/spcas9_split.py` enforces this by refusing a non-default `--seed` that would overwrite the published split in place.
+- "10% of Training" above is 10% of the training **protospacers**, not of the training rows. Grouping moves whole protospacers together, and the PAM library's heavy protospacers (up to 268 rows each) make the row share land near but not on 10%: 2,075 of 20,759 protospacers, which is 3,676 of 32,810 rows, or 11.2%. `split_checksum.json` is the authority on the exact figures.
 - v1 cannot be fairly compared to the published model at all: of the 3,847 `Use = Test` rows inside v1's all-9-heads frame, 2,781 were trained on and 665 validated on, leaving 401 clean. That is reported as a finding, not worked around.
 - v2 differs from v1 on two axes, not one: the split *and* the output activation (sigmoid → linear). The activation change is not cosmetic — v1's labels span negative values that a sigmoid head cannot represent, so v1 was mis-specified as well as leaky — but it does mean a v1↔v2 delta cannot be attributed to the dataset fix alone. A third run (v1's architecture including sigmoid, on the clean split) would isolate it, and was deliberately not built; architecture work is deferred to v3.
 

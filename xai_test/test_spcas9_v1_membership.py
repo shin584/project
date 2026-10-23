@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.model_selection import train_test_split
-from test_spcas9_data import make_sequence
+from test_spcas9_data import make_sequence, numbered_protospacer
 
 from SpCas9.spcas9_data import filter_all_heads, load_spcas9_table
 from SpCas9.spcas9_v1_membership import (
@@ -15,7 +15,6 @@ from SpCas9.spcas9_v1_membership import (
     UNSEEN_TARGET,
     build_membership,
     categorize,
-    pam_library_protospacers,
     rebuild_roles,
     summarize,
 )
@@ -33,13 +32,7 @@ def _toy_frame(sequences: list[str], use: list[str] | None = None) -> pd.DataFra
 
 def _numbered_sequences(n: int) -> list[str]:
     """`n` rows with distinct protospacers, numbered in base-4 over ACGT."""
-    bases = "ACGT"
-    return [
-        make_sequence(
-            protospacer="".join(bases[(i >> (2 * k)) & 0b11] for k in range(20))
-        )
-        for i in range(n)
-    ]
+    return [make_sequence(protospacer=numbered_protospacer(i)) for i in range(n)]
 
 
 @pytest.fixture(scope="module")
@@ -118,23 +111,6 @@ def test_categorize_gives_every_row_exactly_one_known_category():
 
 def test_categorize_against_no_training_rows_calls_everything_unseen():
     assert categorize(_numbered_sequences(5), []) == [UNSEEN_TARGET] * 5
-
-
-# --- unit: PAM library ---
-
-
-def test_pam_library_holds_only_protospacers_seen_with_more_than_one_pam():
-    library = pam_library_protospacers(
-        [
-            make_sequence(protospacer="G" * 20, pam="TGG"),
-            make_sequence(protospacer="G" * 20, pam="CGG"),
-            make_sequence(protospacer="C" * 20, pam="TGG"),
-            make_sequence(protospacer="C" * 20, pam="TGG", tail="AAA"),
-            make_sequence(protospacer="T" * 20, pam="AGG"),
-        ]
-    )
-
-    assert library == {"G" * 20}
 
 
 # --- unit: membership frame ---

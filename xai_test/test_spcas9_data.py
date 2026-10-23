@@ -4,12 +4,14 @@ import pytest
 
 from SpCas9.spcas9_data import (
     HEAD_NAMES,
+    TRNA_COLUMN,
     filter_all_heads,
     filter_any_head,
     head_labels,
     is_published_test,
     load_spcas9_table,
     normalize_table,
+    pam_library_protospacers,
     pams,
     protospacers,
 )
@@ -22,6 +24,7 @@ SEQUENCE_COLUMN = (
     "+ 3 nt PAM (RED BOLD UPPERCASE)+ 3nt right neighboring sequence)"
 )
 USE_COLUMN = "Use (Training or Test)"
+TRNA_SPREADSHEET_COLUMN = "tRNA feature \n(1 = tRNA-N20 sgRNA, \n0 = (G/g)N19 sgRNA)"
 SPREADSHEET_HEAD_ORDER = [
     "SpCas9",
     "SpCas9-NG",
@@ -42,13 +45,19 @@ def make_sequence(
     return "ACGT" + protospacer + pam + tail
 
 
+def numbered_protospacer(i: int) -> str:
+    """A distinct 20nt protospacer per `i`, numbered in base-4 over ACGT."""
+    bases = "ACGT"
+    return "".join(bases[(i >> (2 * k)) & 0b11] for k in range(20))
+
+
 def _raw_table(rows: list[dict]) -> pd.DataFrame:
     """A frame shaped like the spreadsheet. Each row dict may set any head."""
     return pd.DataFrame(
         [
             {
                 SEQUENCE_COLUMN: row.get("sequence", make_sequence()),
-                "tRNA feature \n(1 = tRNA-N20 sgRNA, \n0 = (G/g)N19 sgRNA)": 0,
+                TRNA_SPREADSHEET_COLUMN: row.get("trna_feature", 0),
                 USE_COLUMN: row.get("use", "Training"),
                 **{head: row.get(head, 1.0) for head in SPREADSHEET_HEAD_ORDER},
             }
@@ -56,7 +65,7 @@ def _raw_table(rows: list[dict]) -> pd.DataFrame:
         ],
         columns=[
             SEQUENCE_COLUMN,
-            "tRNA feature \n(1 = tRNA-N20 sgRNA, \n0 = (G/g)N19 sgRNA)",
+            TRNA_SPREADSHEET_COLUMN,
             USE_COLUMN,
             *SPREADSHEET_HEAD_ORDER,
         ],
@@ -182,6 +191,47 @@ def test_is_published_test_marks_only_the_papers_held_out_rows():
     assert flags.tolist() == [True, False, True]
 
 
+# --- unit: the tRNA feature passes through as metadata ---
+
+
+def test_normalize_table_passes_the_trna_feature_through():
+    raw = _raw_table([{"trna_feature": 1}, {"trna_feature": 0}])
+
+    table = normalize_table(raw)
+
+    assert table[TRNA_COLUMN].tolist() == [1, 0]
+
+
+def test_trna_feature_is_not_treated_as_a_head_column():
+    # A row missing every head must still drop out of both filters, however
+    # the tRNA column reads - it is metadata, not a label.
+    raw = _raw_table(
+        [{"trna_feature": 1, **{head: "n.a." for head in SPREADSHEET_HEAD_ORDER}}]
+    )
+    table = normalize_table(raw)
+
+    assert TRNA_COLUMN not in HEAD_NAMES
+    assert len(filter_any_head(table)) == 0
+    assert len(filter_all_heads(table)) == 0
+
+
+# --- unit: the PAM library ---
+
+
+def test_pam_library_holds_only_protospacers_seen_with_more_than_one_pam():
+    library = pam_library_protospacers(
+        [
+            make_sequence(protospacer="G" * 20, pam="TGG"),
+            make_sequence(protospacer="G" * 20, pam="CGG"),
+            make_sequence(protospacer="C" * 20, pam="TGG"),
+            make_sequence(protospacer="C" * 20, pam="TGG", tail="AAA"),
+            make_sequence(protospacer="T" * 20, pam="AGG"),
+        ]
+    )
+
+    assert library == {"G" * 20}
+
+
 # --- regression: the real kim_2020_table_s8.xlsx ---
 
 
@@ -192,3 +242,13 @@ def test_real_table_filters_to_the_pinned_row_counts(real_table):
 
 def test_real_table_sequences_are_all_30bp(real_table):
     assert set(real_table["sequence"].str.len()) == {30}
+
+
+def test_real_trna_feature_is_a_zero_one_flag_on_every_row(real_table):
+    assert set(real_table[TRNA_COLUMN].unique()) == {0, 1}
+
+
+def test_real_pam_library_holds_the_pinned_thirty_protospacers(real_table):
+    library = pam_library_protospacers(filter_any_head(real_table)["sequence"])
+
+    assert len(library) == 30

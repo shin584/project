@@ -6,12 +6,17 @@ rows, the same sequence windows and the same labels.
 
 - `load_spcas9_table` reads the spreadsheet, coerces the nine head columns to
   numbers (the literal string `"n.a."` becomes NaN) and drops every row whose
-  sequence is not 30bp.
+  sequence is not 30bp. It also carries the **tRNA feature** column through as
+  metadata - the published split stratifies on it, but it is not a model input
+  (see issue #42's Out of Scope).
 - Two filters over that frame: `filter_all_heads` (29,303 rows - the frame
   9-Hydra v1 was trained on) and `filter_any_head` (37,996 rows - the frame
   the v2 masked-loss build uses).
 - `protospacers` / `pams` cut the SpCas9 target window: 20nt protospacer at
   0-indexed 4-23, 3nt PAM at 24-26 (see `CONTEXT.md`).
+- `pam_library_protospacers` names the 30 protospacers of the embedded PAM
+  library, a property of the dataset that both the v1 audit and the v2 split
+  stratify by.
 - `head_labels` returns labels **keyed by head name**, never by position. The
   spreadsheet orders `eSpCas9(1.1)` before `SpCas9-HF.1`; the saved model
   outputs them the other way round, so positional arrays would silently swap
@@ -20,6 +25,7 @@ rows, the same sequence windows and the same labels.
 Read-only: this module opens the spreadsheet and writes nothing.
 """
 
+from collections.abc import Iterable
 from pathlib import Path
 
 import numpy as np
@@ -53,7 +59,13 @@ LABEL_SCALE = 100.0
 
 SEQUENCE_COLUMN = "sequence"
 USE_COLUMN = "use"
+TRNA_COLUMN = "trna_feature"
+
+# The spreadsheet's own vocabulary for the published split. These are the only
+# two values `Use (Training or Test)` is defined to take.
+TRAINING_USE_VALUE = "Training"
 TEST_USE_VALUE = "Test"
+USE_VALUES = (TRAINING_USE_VALUE, TEST_USE_VALUE)
 
 
 def _find_column(columns: pd.Index, needle: str) -> str:
@@ -66,9 +78,9 @@ def _find_column(columns: pd.Index, needle: str) -> str:
 def load_spcas9_table(path: Path = DATASET_PATH) -> pd.DataFrame:
     """Read the spreadsheet into a frame with normalized columns.
 
-    Returns `sequence`, `use` and the nine head columns (numeric, `"n.a."`
-    coerced to NaN). Rows whose sequence is not 30bp are dropped; row order is
-    otherwise the spreadsheet's, and the index is reset.
+    Returns `sequence`, `use`, `trna_feature` and the nine head columns
+    (numeric, `"n.a."` coerced to NaN). Rows whose sequence is not 30bp are
+    dropped; row order is otherwise the spreadsheet's, and the index is reset.
     """
     raw = pd.read_excel(path)
     return normalize_table(raw)
@@ -78,11 +90,13 @@ def normalize_table(raw: pd.DataFrame) -> pd.DataFrame:
     """Normalize an already-read spreadsheet frame. Seam for testing."""
     sequence_column = _find_column(raw.columns, "Input sequence")
     use_column = _find_column(raw.columns, "Use (Training or Test)")
+    trna_column = _find_column(raw.columns, "tRNA feature")
 
     table = pd.DataFrame(
         {
             SEQUENCE_COLUMN: raw[sequence_column].astype(str).str.strip().str.upper(),
             USE_COLUMN: raw[use_column].astype(str).str.strip(),
+            TRNA_COLUMN: pd.to_numeric(raw[trna_column], errors="coerce"),
         }
     )
     for head in HEAD_NAMES:
@@ -110,6 +124,24 @@ def protospacers(table: pd.DataFrame) -> pd.Series:
 def pams(table: pd.DataFrame) -> pd.Series:
     """The 3nt PAM at 0-indexed positions 24-26."""
     return table[SEQUENCE_COLUMN].str[PAM_SLICE]
+
+
+def pam_library_protospacers(sequences: Iterable[str]) -> set[str]:
+    """Protospacers that appear with more than one distinct PAM.
+
+    The dataset holds a PAM library: 30 protospacers repeated across up to 268
+    rows each that vary only at positions 24-29. Every other repeated
+    protospacer in the frame repeats as a byte-identical 30-mer, so "more than
+    one PAM" separates the library cleanly without a frequency threshold.
+    """
+    frame = pd.DataFrame(
+        {
+            "protospacer": [s[PROTOSPACER_SLICE] for s in sequences],
+            "pam": [s[PAM_SLICE] for s in sequences],
+        }
+    )
+    distinct_pams = frame.groupby("protospacer")["pam"].nunique()
+    return set(distinct_pams[distinct_pams > 1].index)
 
 
 def head_labels(

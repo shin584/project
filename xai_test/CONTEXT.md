@@ -72,6 +72,14 @@ _Avoid_: "Model A" (that is the SaCas9 model), "the SpCas9 model" alone (ambiguo
 The current SpCas9 multi-variant model: 9-Hydra v1's architecture unchanged except a **linear** output head in place of sigmoid, trained on the 9-Hydra split with a masked per-head loss so each row contributes only to the variant heads it actually has measured. Labels are the published percentages divided by 100, a range that spans negatives (−7.5 to 95.4 raw) and which sigmoid could not represent.
 _Avoid_: "the new 9-Hydra", "the fixed model" (ambiguous once v3 exists — v3 is the architecture revision)
 
+**9-Hydra split**:
+The published train/val/test partition of the at-least-one-head frame, written to disk by `SpCas9/spcas9_split.py` as `SpCas9/published_split/{train,val,test}.csv` with a `split_checksum.json` sidecar. Train and test are `dataset/kim_2020_table_s8.xlsx`'s own `Use (Training or Test)` column **verbatim** — 32,810 / 5,186 rows, see `docs/adr/0004-honor-kim-2020-use-column.md`. Validation is the one part we carve ourselves: 10% of the 20,759 training protospacers, grouped so no protospacer spans train and val, seeded with `np.random.default_rng(42)`, giving 29,134 train / 3,676 val rows. Only the sidecar is version-controlled (`*.csv` is git-ignored); it pins the seed, the counts, each CSV's SHA-256 and `dataset_sha256`, the spreadsheet's own digest, so a re-export cannot silently redefine the split.
+_Avoid_: "the grouped split" (that is the SaCas9 sequence-grouped split from issue #34 — a different dataset, and grouped by sequence rather than by protospacer); describing the train/test boundary as seeded (only the validation carve-out is)
+
+**tRNA feature**:
+The spreadsheet's `tRNA feature` column: 1 for a tRNA-N20 sgRNA, 0 for a (G/g)N19 sgRNA. Carried through the shared loader and the 9-Hydra split as `trna_feature` so later steps can stratify on it, but **metadata only** — never a model input to any 9-Hydra version.
+_Avoid_: "the tRNA flag" as something the model sees
+
 **9-Hydra Testset**:
 The 5,186 rows of `dataset/kim_2020_table_s8.xlsx` whose `Use (Training or Test)` column reads `Test`, restricted to 30bp sequences with at least one measured variant head. It shares zero protospacers and zero exact 30-mers with the 32,810 training rows. Per-head label coverage is 5,021 for `SpCas9` and ~5,170 for most heads, but only 3,982 / 3,979 for `SpCas9-NG` / `VRQR variant`.
 _Avoid_: "Testset" unqualified (that is the 514-row SaCas9 set defined above)

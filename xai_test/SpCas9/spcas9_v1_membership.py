@@ -33,13 +33,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from SpCas9.spcas9_data import (
-    PAM_SLICE,
     PROTOSPACER_SLICE,
     SEQUENCE_COLUMN,
     USE_COLUMN,
     filter_all_heads,
     is_published_test,
     load_spcas9_table,
+    pam_library_protospacers,
     pams,
     protospacers,
 )
@@ -128,24 +128,6 @@ def categorize(sequences: Iterable[str], train_sequences: Iterable[str]) -> list
         else:
             categories.append(UNSEEN_TARGET)
     return categories
-
-
-def pam_library_protospacers(sequences: Iterable[str]) -> set[str]:
-    """Protospacers that appear with more than one distinct PAM.
-
-    The dataset holds a PAM library: 30 protospacers repeated across up to 268
-    rows each that vary only at positions 24-29. Every other repeated
-    protospacer in the frame repeats as a byte-identical 30-mer, so "more than
-    one PAM" separates the library cleanly without a frequency threshold.
-    """
-    frame = pd.DataFrame(
-        {
-            "protospacer": [s[PROTOSPACER_SLICE] for s in sequences],
-            "pam": [s[PAM_SLICE] for s in sequences],
-        }
-    )
-    distinct_pams = frame.groupby("protospacer")["pam"].nunique()
-    return set(distinct_pams[distinct_pams > 1].index)
 
 
 def build_membership(
