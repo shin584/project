@@ -5,15 +5,9 @@ import pandas as pd
 import pytest
 from test_spcas9_data import make_sequence
 
-from SpCas9.spcas9_data import HEAD_NAMES, output_name
-from SpCas9.spcas9_v1_audit import (
-    build_report,
-    full_metrics,
-    holm_bonferroni,
-    pred_column,
-    predictions_by_head,
-    true_column,
-)
+from SpCas9.spcas9_data import HEAD_NAMES
+from SpCas9.spcas9_metrics import pred_column, true_column
+from SpCas9.spcas9_v1_audit import build_report, holm_bonferroni
 
 # Per-row absolute error baked into the toy frame, by (role, category).
 ERRORS = {
@@ -163,14 +157,6 @@ def test_membership_summary_counts_roles_and_categories(report):
     }
 
 
-@pytest.mark.filterwarnings("ignore::scipy.stats.ConstantInputWarning")
-def test_full_metrics_turns_an_undefined_correlation_into_none():
-    metrics = full_metrics(np.linspace(0, 1, 12), np.full(12, 0.5))
-    assert metrics["spearman"] is None
-    assert metrics["pearson"] is None
-    json.dumps(metrics, allow_nan=False)
-
-
 # --- Holm-Bonferroni ---
 
 
@@ -182,25 +168,3 @@ def test_holm_bonferroni_matches_a_hand_computed_step_down():
 
 def test_holm_bonferroni_caps_at_one():
     assert holm_bonferroni([0.5, 0.6]) == pytest.approx([1.0, 1.0])
-
-
-# --- model output plumbing (no model loaded) ---
-
-
-def test_predictions_are_keyed_by_output_name_not_position():
-    names = [output_name(head) for head in HEAD_NAMES]
-    hf, esp = names.index("Output_SpCas9_HF_1"), names.index("Output_eSpCas9_1_1_")
-    names[hf], names[esp] = names[esp], names[hf]
-    outputs = [np.full((2, 1), float(i)) for i in range(len(names))]
-
-    preds = predictions_by_head(names, outputs)
-
-    assert preds["SpCas9-HF.1"].tolist() == [float(esp)] * 2
-    assert preds["eSpCas9(1.1)"].tolist() == [float(hf)] * 2
-    assert list(preds) == list(HEAD_NAMES)
-
-
-def test_predictions_by_head_rejects_a_missing_head():
-    names = [output_name(head) for head in HEAD_NAMES[:-1]]
-    with pytest.raises(KeyError, match="evoCas9"):
-        predictions_by_head(names, [np.zeros((1, 1))] * len(names))

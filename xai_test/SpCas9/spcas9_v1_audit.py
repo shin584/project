@@ -6,12 +6,14 @@ rows, and which v1 numbers can be set beside Kim 2020's.
 
 - Loads `SpCas9/Multi-Cas_1IN_9Hydra_Divide_Testset.keras` on CPU and scores
   all 29,303 all-9-heads rows once. Each output is matched to its label by
-  head name, via the shared loader's `output_name`, never by position.
+  head name, through `spcas9_metrics.predictions_by_head`, never by
+  position.
 - Writes the predictions to `SpCas9/v1_audit/predictions.csv`, with
   `predictions_checksum.json` beside it (seed, row counts, dataset SHA256,
   checkpoint SHA256 and the CSV's own SHA256), so the write-up can cite
   numbers without reloading TensorFlow.
-- Per head, reports n / Spearman / Pearson / MAE / MSE for Unseen target and
+- Per head, reports n / Spearman / Pearson / MAE / MSE (the shared
+  `full_metrics`) for Unseen target and
   PAM-variant overlap, and n / MAE / MSE only for Exact duplicate (41 rows:
   no correlation and no test).
 - Per head, compares Unseen target against PAM-variant overlap absolute
@@ -37,14 +39,12 @@ Usage: python -m SpCas9.spcas9_v1_audit [--n-resamples 10000] [--seed 42]
 import argparse
 import hashlib
 import json
-import math
 from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from leakage_check import MIN_N_FOR_SPEARMAN, compare_abs_errors, group_metrics
-from scipy.stats import pearsonr
+from leakage_check import compare_abs_errors, group_metrics
 
 from SpCas9.spcas9_data import (
     BASE_DIR,
@@ -58,7 +58,14 @@ from SpCas9.spcas9_data import (
     library_versions,
     load_spcas9_table,
     one_hot,
-    output_name,
+)
+from SpCas9.spcas9_metrics import (
+    error_metrics,
+    full_metrics,
+    head_arrays,
+    pred_column,
+    predictions_by_head,
+    true_column,
 )
 from SpCas9.spcas9_v1_membership import (
     CATEGORIES,
@@ -94,37 +101,20 @@ CORRELATED_CATEGORIES = (UNSEEN_TARGET, PAM_VARIANT_OVERLAP)
 CONTROL_SEEDS = tuple(range(10))
 
 
-def true_column(head: str) -> str:
-    return f"{head}_true"
-
-
-def pred_column(head: str) -> str:
-    return f"{head}_pred"
-
-
-def predictions_by_head(
-    output_names: Sequence[str], outputs: Sequence[np.ndarray]
-) -> dict[str, np.ndarray]:
-    """Key the model's outputs by head name, using the model's own output names."""
-    by_output = {
-        name: np.asarray(out, dtype=np.float64).reshape(-1)
-        for name, out in zip(output_names, outputs, strict=True)
-    }
-    missing = [head for head in HEAD_NAMES if output_name(head) not in by_output]
-    if missing:
-        raise KeyError(f"checkpoint has no output for heads {missing}")
-    return {head: by_output[output_name(head)] for head in HEAD_NAMES}
-
-
 def score_checkpoint(
     sequences: Sequence[str], checkpoint_path: Path = CHECKPOINT_PATH
 ) -> dict[str, np.ndarray]:
-    """v1's predictions for `sequences`, keyed by head name. Not unit-tested."""
+    """v1's predictions for `sequences`, keyed by head name. Not unit-tested.
+
+    v1's functional model returns its outputs as a list, so they are zipped
+    against the model's own `output_names` before `predictions_by_head` keys
+    them by head name.
+    """
     import keras
 
     model = keras.models.load_model(checkpoint_path, compile=False)
     outputs = model.predict(one_hot(sequences), batch_size=1024, verbose=0)
-    return predictions_by_head(list(model.output_names), outputs)
+    return predictions_by_head(dict(zip(model.output_names, outputs, strict=True)))
 
 
 def build_predictions(
@@ -150,35 +140,6 @@ def build_predictions(
     return frame
 
 
-def _finite_or_none(value: float | None) -> float | None:
-    return None if value is None or not math.isfinite(value) else float(value)
-
-
-def full_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    """`group_metrics` (#32) plus Pearson, under the same minimum-n rule."""
-    metrics = group_metrics(y_true, y_pred)
-    pearson = (
-        float(pearsonr(y_true, y_pred)[0])
-        if len(y_true) >= MIN_N_FOR_SPEARMAN
-        else None
-    )
-    metrics["pearson"] = pearson
-    return {key: _finite_or_none(v) if key != "n" else v for key, v in metrics.items()}
-
-
-def error_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    """n / MAE / MSE only, for groups where a correlation means nothing."""
-    metrics = group_metrics(y_true, y_pred)
-    return {key: metrics[key] for key in ("n", "mae", "mse")}
-
-
-def _head_arrays(frame: pd.DataFrame, head: str) -> tuple[np.ndarray, np.ndarray]:
-    return (
-        frame[true_column(head)].to_numpy(dtype=np.float64),
-        frame[pred_column(head)].to_numpy(dtype=np.float64),
-    )
-
-
 def holm_bonferroni(pvalues: Sequence[float]) -> list[float]:
     """Holm step-down adjusted p-values, in the input order, capped at 1."""
     p = np.asarray(pvalues, dtype=np.float64)
@@ -196,7 +157,7 @@ def category_metrics(test_rows: pd.DataFrame) -> dict:
     for head in HEAD_NAMES:
         per_category = {}
         for category in CATEGORIES:
-            y_true, y_pred = _head_arrays(
+            y_true, y_pred = head_arrays(
                 test_rows[test_rows[CATEGORY_COLUMN] == category], head
             )
             metric = (
@@ -220,7 +181,7 @@ def category_tests(
     for head in HEAD_NAMES:
         abs_err = {}
         for category in CORRELATED_CATEGORIES:
-            y_true, y_pred = _head_arrays(
+            y_true, y_pred = head_arrays(
                 test_rows[test_rows[CATEGORY_COLUMN] == category], head
             )
             abs_err[category] = np.abs(y_pred - y_true)
@@ -256,7 +217,7 @@ def published_test_by_role(frame: pd.DataFrame) -> dict:
             "n": len(rows),
             "comparable_to_kim_2020": role == TEST,
             "heads": {
-                head: full_metrics(*_head_arrays(rows, head)) for head in HEAD_NAMES
+                head: full_metrics(*head_arrays(rows, head)) for head in HEAD_NAMES
             },
         }
     return report
@@ -264,7 +225,7 @@ def published_test_by_role(frame: pd.DataFrame) -> dict:
 
 def _role_maes(frame: pd.DataFrame, head: str) -> dict[str, float]:
     return {
-        role: group_metrics(*_head_arrays(frame[frame[ROLE_COLUMN] == role], head))[
+        role: group_metrics(*head_arrays(frame[frame[ROLE_COLUMN] == role], head))[
             "mae"
         ]
         for role in ROLES
@@ -308,7 +269,7 @@ def role_sanity_check(
     }
 
     abs_err = np.mean(
-        [np.abs(np.subtract(*_head_arrays(frame, head)[::-1])) for head in HEAD_NAMES],
+        [np.abs(np.subtract(*head_arrays(frame, head)[::-1])) for head in HEAD_NAMES],
         axis=0,
     )
     control_gaps = {
