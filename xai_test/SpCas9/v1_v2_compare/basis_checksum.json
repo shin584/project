@@ -1,0 +1,26 @@
+{
+  "rows": 1740,
+  "categories": {
+    "unseen_target": 606,
+    "pam_variant_overlap": 1134
+  },
+  "v1_predictions": {
+    "from_audit": 1421,
+    "rescored": 319,
+    "checkpoint": "Multi-Cas_1IN_9Hydra_Divide_Testset.keras",
+    "checkpoint_sha256": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+    "note": "v1 is deterministic per 30-mer, so a basis row repeating a sequence the audit scored reuses that prediction. The rest went through the same pinned v1 checkpoint; the audit's own files were not rewritten."
+  },
+  "sources": {
+    "v1": {
+      "file": "predictions.csv",
+      "file_sha256": "fca7dacd9cac93d14eaae3fdf6304b0f3a7e40bc244298c65522f08e8e24fa36"
+    },
+    "v2": {
+      "file": "predictions.csv",
+      "file_sha256": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b"
+    }
+  },
+  "file": "basis.csv",
+  "file_sha256": "4ae5b1d548535b84df6391afb18b55bee499018b0f6ad6a9beb1e692c71bfdd5"
+}

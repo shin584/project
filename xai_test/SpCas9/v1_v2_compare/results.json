@@ -1,0 +1,533 @@
+{
+  "models": {
+    "v1": "9-Hydra v1",
+    "v2": "9-Hydra v2"
+  },
+  "testset": "9-Hydra Testset",
+  "basis": {
+    "rows": 1740,
+    "definition": "The 9-Hydra Testset rows falling in neither of 9-Hydra v1's train and val roles, matched row by row through the position each row holds in the normalized spreadsheet - never by joining the two frames' row_index columns, which count different frames.",
+    "categories": {
+      "unseen_target": 606,
+      "pam_variant_overlap": 1134
+    },
+    "v1_predictions": {
+      "from_audit": 1421,
+      "rescored": 319,
+      "checkpoint": "Multi-Cas_1IN_9Hydra_Divide_Testset.keras",
+      "checkpoint_sha256": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+      "note": "v1 is deterministic per 30-mer, so a basis row repeating a sequence the audit scored reuses that prediction. The rest went through the same pinned v1 checkpoint; the audit's own files were not rewritten."
+    },
+    "sources": {
+      "v1": {
+        "file": "predictions.csv",
+        "file_sha256": "fca7dacd9cac93d14eaae3fdf6304b0f3a7e40bc244298c65522f08e8e24fa36"
+      },
+      "v2": {
+        "file": "predictions.csv",
+        "file_sha256": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b"
+      }
+    },
+    "file": "basis.csv",
+    "file_sha256": "4ae5b1d548535b84df6391afb18b55bee499018b0f6ad6a9beb1e692c71bfdd5"
+  },
+  "scale": "published percentage / 100 (the scale 9-Hydra v2 was trained on)",
+  "min_n_for_comparison": 300,
+  "categories": {
+    "unseen_target": {
+      "rows": 606,
+      "distinct_sequences": 387,
+      "composition": {
+        "exact_duplicate": 0,
+        "pam_variant": 606
+      },
+      "heads": {
+        "SpCas9": {
+          "n": 466,
+          "distinct_sequences": 297,
+          "excluded": false,
+          "v1": {
+            "n": 466,
+            "mae": 0.05738575531269984,
+            "mse": 0.007020803445076892,
+            "spearman": 0.815418886289055,
+            "pearson": 0.9261172236897938
+          },
+          "v2": {
+            "n": 466,
+            "mae": 0.05717629786340054,
+            "mse": 0.006568047388953468,
+            "spearman": 0.8252096218794704,
+            "pearson": 0.9309841287331612
+          },
+          "delta": {
+            "mae": -0.00020945744929930232,
+            "mse": -0.00045275605612342396,
+            "spearman": 0.009790735590415434,
+            "pearson": 0.004866905043367398
+          },
+          "delta_ci95": {
+            "spearman": [
+              -0.012390606526368617,
+              0.0332122990849572
+            ],
+            "mae": [
+              -0.002940281164734175,
+              0.0028119924889500984
+            ]
+          },
+          "delta_ci95_by_sequence": {
+            "spearman": [
+              -0.01926863569055648,
+              0.04248262731411726
+            ],
+            "mae": [
+              -0.0036513957845545324,
+              0.0035668222259596133
+            ]
+          }
+        },
+        "SpCas9-NG": {
+          "n": 346,
+          "distinct_sequences": 346,
+          "excluded": false,
+          "v1": {
+            "n": 346,
+            "mae": 0.06894357068474444,
+            "mse": 0.008144202195604426,
+            "spearman": 0.675381632533336,
+            "pearson": 0.7474607395048601
+          },
+          "v2": {
+            "n": 346,
+            "mae": 0.06773174536169521,
+            "mse": 0.007865864379309723,
+            "spearman": 0.6979230296231006,
+            "pearson": 0.7561771250377354
+          },
+          "delta": {
+            "mae": -0.001211825323049226,
+            "mse": -0.00027833781629470374,
+            "spearman": 0.022541397089764548,
+            "pearson": 0.008716385532875237
+          }
+        },
+        "VRQR variant": {
+          "n": 344,
+          "distinct_sequences": 344,
+          "excluded": false,
+          "v1": {
+            "n": 344,
+            "mae": 0.06451205283873371,
+            "mse": 0.0074291833282762,
+            "spearman": 0.8257727126673288,
+            "pearson": 0.826350243606988
+          },
+          "v2": {
+            "n": 344,
+            "mae": 0.06374944888074022,
+            "mse": 0.007260811455496893,
+            "spearman": 0.8272484206740618,
+            "pearson": 0.8301670515994327
+          },
+          "delta": {
+            "mae": -0.0007626039579934907,
+            "mse": -0.00016837187277930765,
+            "spearman": 0.001475708006733023,
+            "pearson": 0.0038168079924446596
+          }
+        },
+        "xCas": {
+          "n": 601,
+          "distinct_sequences": 385,
+          "excluded": false,
+          "v1": {
+            "n": 601,
+            "mae": 0.07356569396831339,
+            "mse": 0.009567803816253613,
+            "spearman": 0.8208338028336711,
+            "pearson": 0.8105663814686486
+          },
+          "v2": {
+            "n": 601,
+            "mae": 0.06680579649173224,
+            "mse": 0.007894430416365089,
+            "spearman": 0.8404016911171458,
+            "pearson": 0.8385870162627346
+          },
+          "delta": {
+            "mae": -0.00675989747658115,
+            "mse": -0.001673373399888524,
+            "spearman": 0.019567888283474666,
+            "pearson": 0.028020634794086008
+          }
+        },
+        "Sniper-Cas9": {
+          "n": 596,
+          "distinct_sequences": 381,
+          "excluded": false,
+          "v1": {
+            "n": 596,
+            "mae": 0.05728448471907087,
+            "mse": 0.006721354847092055,
+            "spearman": 0.8250275320975348,
+            "pearson": 0.9238377976968434
+          },
+          "v2": {
+            "n": 596,
+            "mae": 0.05588620533986007,
+            "mse": 0.0064511481398870935,
+            "spearman": 0.8425217164745913,
+            "pearson": 0.9269681802171866
+          },
+          "delta": {
+            "mae": -0.001398279379210797,
+            "mse": -0.0002702067072049615,
+            "spearman": 0.01749418437705652,
+            "pearson": 0.0031303825203432556
+          }
+        },
+        "SpCas9-HF.1": {
+          "n": 602,
+          "distinct_sequences": 384,
+          "excluded": false,
+          "v1": {
+            "n": 602,
+            "mae": 0.11906870619978108,
+            "mse": 0.02712895604757701,
+            "spearman": 0.7175257133430883,
+            "pearson": 0.6793423439776936
+          },
+          "v2": {
+            "n": 602,
+            "mae": 0.10415033087219434,
+            "mse": 0.02341910330271988,
+            "spearman": 0.7434149459720504,
+            "pearson": 0.7130525219843824
+          },
+          "delta": {
+            "mae": -0.014918375327586733,
+            "mse": -0.0037098527448571304,
+            "spearman": 0.025889232628962033,
+            "pearson": 0.03371017800668885
+          }
+        },
+        "eSpCas9(1.1)": {
+          "n": 603,
+          "distinct_sequences": 387,
+          "excluded": false,
+          "v1": {
+            "n": 603,
+            "mae": 0.10514170651334453,
+            "mse": 0.021661763853143022,
+            "spearman": 0.7577962063997203,
+            "pearson": 0.7708325488195583
+          },
+          "v2": {
+            "n": 603,
+            "mae": 0.08645003046165196,
+            "mse": 0.015486515040039816,
+            "spearman": 0.7755056955963012,
+            "pearson": 0.8221582299938827
+          },
+          "delta": {
+            "mae": -0.01869167605169257,
+            "mse": -0.006175248813103206,
+            "spearman": 0.017709489196580885,
+            "pearson": 0.051325681174324345
+          }
+        },
+        "HypaCas9": {
+          "n": 603,
+          "distinct_sequences": 386,
+          "excluded": false,
+          "v1": {
+            "n": 603,
+            "mae": 0.09042517670017088,
+            "mse": 0.016430968486613684,
+            "spearman": 0.791151781698669,
+            "pearson": 0.7800098133076308
+          },
+          "v2": {
+            "n": 603,
+            "mae": 0.08855775869206967,
+            "mse": 0.016841114846480352,
+            "spearman": 0.7953018106670133,
+            "pearson": 0.7768341227886464
+          },
+          "delta": {
+            "mae": -0.0018674180081012098,
+            "mse": 0.00041014635986666784,
+            "spearman": 0.004150028968344377,
+            "pearson": -0.0031756905189843643
+          }
+        },
+        "evoCas9": {
+          "n": 592,
+          "distinct_sequences": 378,
+          "excluded": false,
+          "v1": {
+            "n": 592,
+            "mae": 0.08373649607371782,
+            "mse": 0.019122380071753948,
+            "spearman": 0.6873382891583204,
+            "pearson": 0.5671346787150837
+          },
+          "v2": {
+            "n": 592,
+            "mae": 0.08540337369673581,
+            "mse": 0.019173426512470226,
+            "spearman": 0.697334432099187,
+            "pearson": 0.5355001777117004
+          },
+          "delta": {
+            "mae": 0.0016668776230179955,
+            "mse": 5.104644071627848e-05,
+            "spearman": 0.009996142940866592,
+            "pearson": -0.031634501003383275
+          }
+        }
+      }
+    },
+    "pam_variant_overlap": {
+      "rows": 1134,
+      "distinct_sequences": 784,
+      "composition": {
+        "exact_duplicate": 990,
+        "pam_variant": 144
+      },
+      "heads": {
+        "SpCas9": {
+          "n": 1109,
+          "distinct_sequences": 773,
+          "excluded": false,
+          "v1": {
+            "n": 1109,
+            "mae": 0.062461964152874735,
+            "mse": 0.006960990848964594,
+            "spearman": 0.8928602273073336,
+            "pearson": 0.9344024962526842
+          },
+          "v2": {
+            "n": 1109,
+            "mae": 0.0641070046205462,
+            "mse": 0.007672610465898118,
+            "spearman": 0.8680623229825635,
+            "pearson": 0.9181491835259702
+          },
+          "delta": {
+            "mae": 0.0016450404676714714,
+            "mse": 0.0007116196169335235,
+            "spearman": -0.024797904324770137,
+            "pearson": -0.016253312726714042
+          },
+          "delta_ci95": {
+            "spearman": [
+              -0.03377430597957414,
+              -0.016032870708778426
+            ],
+            "mae": [
+              -0.0007574184127004958,
+              0.004068143280108093
+            ]
+          },
+          "delta_ci95_by_sequence": {
+            "spearman": [
+              -0.04012677471349622,
+              -0.011835044336636213
+            ],
+            "mae": [
+              -0.002110697921268368,
+              0.005486617773756709
+            ]
+          }
+        },
+        "SpCas9-NG": {
+          "n": 190,
+          "distinct_sequences": 173,
+          "excluded": true,
+          "reason": "190 comparable rows in the pam_variant_overlap stratum, below the 300-row minimum for a v1 <-> v2 delta"
+        },
+        "VRQR variant": {
+          "n": 189,
+          "distinct_sequences": 172,
+          "excluded": true,
+          "reason": "189 comparable rows in the pam_variant_overlap stratum, below the 300-row minimum for a v1 <-> v2 delta"
+        },
+        "xCas": {
+          "n": 1123,
+          "distinct_sequences": 775,
+          "excluded": false,
+          "v1": {
+            "n": 1123,
+            "mae": 0.07534029858536895,
+            "mse": 0.010018034380706527,
+            "spearman": 0.8590984941493885,
+            "pearson": 0.8437198379345283
+          },
+          "v2": {
+            "n": 1123,
+            "mae": 0.0747969594053086,
+            "mse": 0.009763911192261592,
+            "spearman": 0.833859551282535,
+            "pearson": 0.8286313696748099
+          },
+          "delta": {
+            "mae": -0.0005433391800603454,
+            "mse": -0.0002541231884449352,
+            "spearman": -0.025238942866853575,
+            "pearson": -0.015088468259718435
+          }
+        },
+        "Sniper-Cas9": {
+          "n": 1128,
+          "distinct_sequences": 780,
+          "excluded": false,
+          "v1": {
+            "n": 1128,
+            "mae": 0.06337917777738836,
+            "mse": 0.007330590952932756,
+            "spearman": 0.8880335114378384,
+            "pearson": 0.9255534877276849
+          },
+          "v2": {
+            "n": 1128,
+            "mae": 0.06487290982984992,
+            "mse": 0.008034466149220165,
+            "spearman": 0.8680390546953228,
+            "pearson": 0.9150813006167369
+          },
+          "delta": {
+            "mae": 0.0014937320524615605,
+            "mse": 0.0007038751962874087,
+            "spearman": -0.019994456742515543,
+            "pearson": -0.010472187110947995
+          }
+        },
+        "SpCas9-HF.1": {
+          "n": 1129,
+          "distinct_sequences": 780,
+          "excluded": false,
+          "v1": {
+            "n": 1129,
+            "mae": 0.08949533496736431,
+            "mse": 0.016861341807962664,
+            "spearman": 0.8455914728289712,
+            "pearson": 0.8146691635919321
+          },
+          "v2": {
+            "n": 1129,
+            "mae": 0.0924792676543017,
+            "mse": 0.018734042639718396,
+            "spearman": 0.8080474206909224,
+            "pearson": 0.7720355127418939
+          },
+          "delta": {
+            "mae": 0.0029839326869373906,
+            "mse": 0.0018727008317557317,
+            "spearman": -0.03754405213804879,
+            "pearson": -0.04263365085003823
+          }
+        },
+        "eSpCas9(1.1)": {
+          "n": 1127,
+          "distinct_sequences": 778,
+          "excluded": false,
+          "v1": {
+            "n": 1127,
+            "mae": 0.08792411544421722,
+            "mse": 0.01576873268252958,
+            "spearman": 0.8398470984010309,
+            "pearson": 0.8334391563498457
+          },
+          "v2": {
+            "n": 1127,
+            "mae": 0.07711676648381288,
+            "mse": 0.012008887893641618,
+            "spearman": 0.8439090020075788,
+            "pearson": 0.8653721350021711
+          },
+          "delta": {
+            "mae": -0.010807348960404334,
+            "mse": -0.00375984478888796,
+            "spearman": 0.004061903606547901,
+            "pearson": 0.03193297865232547
+          }
+        },
+        "HypaCas9": {
+          "n": 1128,
+          "distinct_sequences": 779,
+          "excluded": false,
+          "v1": {
+            "n": 1128,
+            "mae": 0.06873765391749768,
+            "mse": 0.009494031964287669,
+            "spearman": 0.8802312569419602,
+            "pearson": 0.8659824831361277
+          },
+          "v2": {
+            "n": 1128,
+            "mae": 0.0803997117144885,
+            "mse": 0.013644928679748551,
+            "spearman": 0.8273882825508092,
+            "pearson": 0.8017675351598337
+          },
+          "delta": {
+            "mae": 0.01166205779699081,
+            "mse": 0.004150896715460883,
+            "spearman": -0.05284297439115104,
+            "pearson": -0.06421494797629401
+          }
+        },
+        "evoCas9": {
+          "n": 1123,
+          "distinct_sequences": 774,
+          "excluded": false,
+          "v1": {
+            "n": 1123,
+            "mae": 0.062012079267472896,
+            "mse": 0.01082375681123188,
+            "spearman": 0.7360035166813989,
+            "pearson": 0.7660255192042582
+          },
+          "v2": {
+            "n": 1123,
+            "mae": 0.06615443344232787,
+            "mse": 0.013278850263559861,
+            "spearman": 0.7424378043381239,
+            "pearson": 0.6768868244602599
+          },
+          "delta": {
+            "mae": 0.004142354174854972,
+            "mse": 0.002455093452327981,
+            "spearman": 0.006434287656725046,
+            "pearson": -0.08913869474399827
+          }
+        }
+      }
+    }
+  },
+  "excluded": {
+    "unseen_target": [],
+    "pam_variant_overlap": [
+      "SpCas9-NG",
+      "VRQR variant"
+    ]
+  },
+  "pooling": "No pooled v1 <-> v2 figure is reported. The PAM-variant overlap rows gave v1 a protospacer it had already fitted, so pooling them with the Unseen-target rows would present a partially advantaged comparison as a fair one.",
+  "distinct_sequences": "Both models are a pure function of the 30-mer, and a stratum holds fewer distinct 30-mers than rows - 466 SpCas9 Unseen-target rows over 297 of them. `distinct_sequences` is reported beside every `n` because the two are not interchangeable: a row-resampling bootstrap draws a repeated 30-mer as independent evidence, so `delta_ci95` is narrower than the distinct targets support, and `n` against MIN_N_FOR_COMPARISON counts rows rather than targets.",
+  "bootstrap": {
+    "head": "SpCas9",
+    "metrics": [
+      "spearman",
+      "mae"
+    ],
+    "units": {
+      "delta_ci95": "rows",
+      "delta_ci95_by_sequence": "distinct 30-mers (the interval to quote)"
+    },
+    "n_resamples": 1000,
+    "seed": 42,
+    "ci": 0.95
+  }
+}

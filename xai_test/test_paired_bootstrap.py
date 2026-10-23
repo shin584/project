@@ -1,6 +1,10 @@
 import numpy as np
 import pytest
-from paired_bootstrap import compute_metrics, paired_bootstrap_delta_ci
+from paired_bootstrap import (
+    clustered_paired_bootstrap_delta_ci,
+    compute_metrics,
+    paired_bootstrap_delta_ci,
+)
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
@@ -121,3 +125,62 @@ def test_ci_narrows_as_resample_count_increases_variance_stabilizes():
         assert np.isfinite(lower)
         assert np.isfinite(upper)
         assert lower <= upper
+
+
+# --- clustered_paired_bootstrap_delta_ci --------------------------------------
+
+
+def test_clustered_ci_matches_the_row_ci_when_every_row_is_its_own_cluster():
+    """One row per cluster is the row bootstrap, so the two must agree."""
+    y_true, preds_a, preds_b = _make_regression_fixture(n=120)
+
+    rows = paired_bootstrap_delta_ci(
+        y_true, preds_a, preds_b, "mae", n_resamples=300, seed=7
+    )
+    clustered = clustered_paired_bootstrap_delta_ci(
+        y_true, preds_a, preds_b, np.arange(len(y_true)), "mae", n_resamples=300, seed=7
+    )
+
+    assert clustered == pytest.approx(rows)
+
+
+def test_clustered_ci_is_wider_when_rows_are_replicates_of_few_clusters():
+    """Replicates are not independent evidence; the interval has to say so."""
+    y_true, preds_a, preds_b = _make_regression_fixture(n=60)
+    # Each cluster holds four near-identical replicate rows.
+    y_true = np.repeat(y_true, 4)
+    preds_a = np.repeat(preds_a, 4)
+    preds_b = np.repeat(preds_b, 4)
+    clusters = np.repeat(np.arange(60), 4)
+
+    rows = paired_bootstrap_delta_ci(
+        y_true, preds_a, preds_b, "mae", n_resamples=400, seed=3
+    )
+    clustered = clustered_paired_bootstrap_delta_ci(
+        y_true, preds_a, preds_b, clusters, "mae", n_resamples=400, seed=3
+    )
+
+    assert clustered[1] - clustered[0] > rows[1] - rows[0]
+
+
+def test_clustered_ci_keeps_every_row_of_a_drawn_cluster():
+    """A drawn cluster brings its whole group, so sizes stay cluster-sized."""
+    y_true = np.array([0.0, 1.0, 0.0, 1.0])
+    clusters = np.array(["a", "a", "b", "b"])
+
+    low, high = clustered_paired_bootstrap_delta_ci(
+        y_true, y_true, y_true + 0.5, clusters, "mae", n_resamples=50, seed=1
+    )
+
+    # Every draw is two whole clusters, so the MAE delta is -0.5 every time.
+    assert low == pytest.approx(-0.5)
+    assert high == pytest.approx(-0.5)
+
+
+def test_clustered_ci_rejects_a_cluster_label_per_row_mismatch():
+    y_true, preds_a, preds_b = _make_regression_fixture(n=20)
+
+    with pytest.raises(ValueError, match="cluster"):
+        clustered_paired_bootstrap_delta_ci(
+            y_true, preds_a, preds_b, np.arange(5), "mae", n_resamples=10
+        )
