@@ -1,10 +1,13 @@
-"""Build the 9-Hydra v2 masked per-head training path and smoke-train it (issue #46).
+"""Run the full seeded 9-Hydra v2 training and log it (issue #47).
 
-The training path for **9-Hydra v2**: v1's architecture on the 9-Hydra split,
+The training path for **9-Hydra v2** (built in #46): v1's architecture on the 9-Hydra split,
 with a masked per-head loss so each row contributes only to the variant heads
-it actually has measured. `--smoke` runs the whole path over one epoch and a
-small subsample, so a plumbing mistake surfaces in minutes rather than hours
-into the full run (#47).
+it actually has measured. A bare run is the real one - up to 50 epochs over
+the whole training split on local CPU, 911 steps an epoch (29,134 training
+rows at `batch_size=32`; #47's estimate of ~1,025 counted the published
+32,810 before the validation carve-out came out of it) - and `--smoke` runs
+the same path over one epoch and a small subsample, so a plumbing mistake
+surfaces in minutes rather than hours in.
 
 - **The split is read from disk, never re-derived.** `load_published_split`
   reads `SpCas9/published_split/` and checks each CSV's SHA-256 and row count
@@ -40,14 +43,31 @@ Hyperparameters are v1's throughout (`Adam(0.001)`, `batch_size=32`,
 `keras.utils.set_random_seed(42)` added. Early stopping watches the
 protospacer-grouped validation carve-out, not a Keras `validation_split`.
 
+Every run writes a **9-Hydra v2 training log** beside its checkpoint: the seed,
+those hyperparameters, the per-epoch history, the **stopping epoch**, the
+library versions, the device and the consumed split's checksums - enough to
+reproduce the run, and enough to tell which split a checkpoint came from. It
+is written LF-only because git tracks it, but it is deliberately not
+byte-reproducible: `duration_seconds` and `finished_at` record wall clock, so
+two runs of one seed write two different files. CPU-only by design: TF >= 2.11
+has no GPU on native Windows, and the log's `device.gpus_visible` records that
+it stayed that way.
+
+v2 is expected to score *lower* than v1 did on paper. v1's figures rest on a
+test set where 740 rows shared a protospacer with its training rows; the gap
+is the leakage coming out, not a regression to tune away.
+
 Reads the split artifacts and the checkpoint; writes only into its
 `--output-dir`.
 
-Usage: python -m SpCas9.spcas9_train --smoke [--smoke-rows 256] [--seed 42]
+Usage: python -m SpCas9.spcas9_train [--smoke [--smoke-rows 256]] [--seed 42]
 """
 
 import argparse
 import json
+import platform
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -59,6 +79,7 @@ from SpCas9.spcas9_data import (
     SEQUENCE_COLUMN,
     clean_head_name,
     head_labels,
+    library_versions,
     one_hot,
     output_name,
 )
@@ -76,8 +97,11 @@ from SpCas9.spcas9_split import OUTPUT_DIR as SPLIT_DIR
 OUTPUT_DIR = BASE_DIR / "SpCas9" / "v2_train"
 SMOKE_OUTPUT_DIR = OUTPUT_DIR / "smoke"
 CHECKPOINT_FILENAME = "9hydra_v2.keras"
+LOG_FILENAME = "training_log.json"
 
 SEQUENCE_SHAPE = (30, 4)
+# The subset of the shared LIBRARIES this path can actually move a number by.
+TRAIN_LIBRARIES = ("tensorflow", "keras", "numpy", "pandas")
 INPUT_LAYER_NAME = "In_Seq"
 
 # v1's recipe, unchanged (issue #42's Implementation Decisions).
@@ -285,6 +309,150 @@ def head_coverage(frame: pd.DataFrame) -> dict[str, int]:
     return {head: int(frame[head].notna().sum()) for head in HEAD_NAMES}
 
 
+def hyperparameter_record(
+    epochs: int = EPOCHS, batch_size: int = BATCH_SIZE, seed: int = SEED
+) -> dict:
+    """v1's recipe as data, for the training log.
+
+    Written out rather than derived from the callbacks so the log states what
+    the run was *asked* for, and a later edit to a constant shows up as a
+    difference between two logs rather than being silently absorbed. The three
+    the caller can override are the three a run can actually change - a
+    `--smoke` log must not claim the 50 epochs it did not ask for.
+    """
+    return {
+        "optimizer": "Adam",
+        "learning_rate": LEARNING_RATE,
+        "batch_size": batch_size,
+        "epochs": epochs,
+        "seed": seed,
+        "loss": "mse",
+        "weighted_metrics": "mae",
+        "early_stopping": {
+            "monitor": "val_loss",
+            "patience": EARLY_STOPPING_PATIENCE,
+            "restore_best_weights": True,
+        },
+        "reduce_lr_on_plateau": {
+            "monitor": "val_loss",
+            "factor": LR_FACTOR,
+            "patience": LR_PATIENCE,
+            "min_lr": MIN_LR,
+        },
+    }
+
+
+def device_record() -> dict:
+    """What the run executed on - enough to show the CPU-only claim.
+
+    The one place that asks TensorFlow about hardware. `gpus_visible` is 0 on
+    the intended target: TF >= 2.11 exposes no GPU on native Windows, so a
+    non-zero count here means the log came from somewhere else.
+    """
+    import tensorflow as tf
+
+    return {
+        "platform": platform.platform(),
+        "processor": platform.processor(),
+        "gpus_visible": len(tf.config.list_physical_devices("GPU")),
+    }
+
+
+def stopping_epoch(history: dict[str, list[float]], epochs: int = EPOCHS) -> dict:
+    """Which epoch the saved weights came from, and whether it stopped early.
+
+    `restore_best_weights=True` means the checkpoint holds the weights from
+    the lowest-`val_loss` epoch, not the last one, so the log reports both:
+    `epochs_run` is how far the run got, `best_epoch` (1-indexed, matching
+    Keras' own epoch numbering in the console) is what was saved. That the
+    weights were restored is not repeated here - it is already stated once,
+    in `hyperparameter_record`'s `early_stopping`.
+    """
+    val_loss = list(history["val_loss"])
+    best = int(np.argmin(val_loss))
+    return {
+        "epochs_run": len(val_loss),
+        "best_epoch": best + 1,
+        "best_val_loss": float(val_loss[best]),
+        "early_stopped": len(val_loss) < epochs,
+    }
+
+
+def split_record(split_dir: Path = SPLIT_DIR) -> dict:
+    """The consumed split's identity: per-file digests plus the sidecar's own.
+
+    The digests are recomputed from the CSVs on disk rather than copied out
+    of `split_checksum.json`, and the sidecar is itself hashed, so the log
+    pins the bytes that were trained on even if the sidecar is later edited.
+    """
+    checksum_path = split_dir / CHECKSUM_FILENAME
+    with open(checksum_path, encoding="utf-8") as f:
+        record = json.load(f)
+    return {
+        "dir": split_dir.name,
+        "checksum_file": CHECKSUM_FILENAME,
+        "checksum_sha256": file_sha256(checksum_path),
+        "seed": record["seed"],
+        "dataset_sha256": record["dataset_sha256"],
+        "rows": record["rows"],
+        "files": {
+            SPLIT_FILENAMES[name]: file_sha256(split_dir / SPLIT_FILENAMES[name])
+            for name in SPLITS
+        },
+    }
+
+
+def build_training_log(
+    history: dict[str, list[float]],
+    splits: dict[str, pd.DataFrame],
+    checkpoint_path: Path,
+    split_dir: Path = SPLIT_DIR,
+    seed: int = SEED,
+    epochs: int = EPOCHS,
+    duration_seconds: float | None = None,
+) -> dict:
+    """Everything needed to reproduce the run, as a JSON-serialisable dict.
+
+    `split` is the published split's own identity - the full counts and
+    digests the sidecar pins. `rows_fitted` is what this run actually fed the
+    model, which is the same thing only when the run is not subsampled; the
+    two are named apart so a `--smoke` log cannot read as if 29,134 rows went
+    through it.
+    """
+    return {
+        "model": "9-Hydra v2",
+        "hyperparameters": hyperparameter_record(epochs=epochs, seed=seed),
+        "split": split_record(split_dir),
+        "rows_fitted": {name: len(splits[name]) for name in SPLITS},
+        "head_coverage": {name: head_coverage(splits[name]) for name in SPLITS},
+        "stopping": stopping_epoch(history, epochs=epochs),
+        "history": {key: [float(v) for v in values] for key, values in history.items()},
+        "versions": library_versions(TRAIN_LIBRARIES),
+        "device": device_record(),
+        "checkpoint": {
+            "file": checkpoint_path.name,
+            "sha256": file_sha256(checkpoint_path),
+        },
+        "duration_seconds": duration_seconds,
+        "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
+def write_training_log(log: dict, path: Path) -> Path:
+    """Write `log` as JSON with a fixed `\\n` line ending.
+
+    Same rule as the split's checksum sidecar: this is a file git tracks, so
+    it must not come out CRLF on Windows and LF everywhere else. `allow_nan`
+    is off because `NaN` is not JSON - a diverged run should fail loudly here
+    rather than write a file no strict parser will read.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(log, f, indent=2, allow_nan=False)
+        f.write("\n")
+    return path
+
+
 def main(argv: list[str] | None = None) -> dict:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -311,22 +479,43 @@ def main(argv: list[str] | None = None) -> dict:
             f"{name:>5}: {len(splits[name]):>6} rows, coverage {head_coverage(splits[name])}"
         )
 
+    epochs = SMOKE_EPOCHS if args.smoke else EPOCHS
+    started = time.monotonic()
     model, history, checkpoint_path = train(
         splits,
         output_dir=output_dir,
-        epochs=SMOKE_EPOCHS if args.smoke else EPOCHS,
+        epochs=epochs,
         batch_size=BATCH_SIZE,
         seed=args.seed,
     )
+    duration = time.monotonic() - started
     verify_reloads_clean(model, checkpoint_path, encode_inputs(splits[TEST]))
+
+    log = build_training_log(
+        history.history,
+        splits,
+        checkpoint_path,
+        split_dir=args.split_dir,
+        seed=args.seed,
+        epochs=epochs,
+        duration_seconds=round(duration, 1),
+    )
+    log_path = write_training_log(log, output_dir / LOG_FILENAME)
 
     last = {key: float(values[-1]) for key, values in history.history.items()}
     print(f"loss {last['loss']:.5f} / val_loss {last['val_loss']:.5f}")
     for head in HEAD_NAMES:
         name = output_name(head)
         print(f"{head:>13}: masked val MAE {last['val_' + name + '_mae']:.5f}")
+    print(
+        f"best epoch {log['stopping']['best_epoch']} of "
+        f"{log['stopping']['epochs_run']} run "
+        f"(val_loss {log['stopping']['best_val_loss']:.5f}), "
+        f"{duration / 60:.1f} min"
+    )
     print(f"Saved {checkpoint_path}; it reloads with no custom objects registered")
-    return {"epochs_run": len(history.history["loss"]), "last_epoch": last}
+    print(f"Wrote {log_path}")
+    return {"epochs_run": len(history.history["loss"]), "last_epoch": last, "log": log}
 
 
 if __name__ == "__main__":

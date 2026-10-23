@@ -39,7 +39,6 @@ import hashlib
 import json
 import math
 from collections.abc import Sequence
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import numpy as np
@@ -56,6 +55,7 @@ from SpCas9.spcas9_data import (
     filter_all_heads,
     head_labels,
     is_published_test,
+    library_versions,
     load_spcas9_table,
     one_hot,
     output_name,
@@ -86,7 +86,6 @@ PREDICTIONS_PATH = OUTPUT_DIR / "predictions.csv"
 CHECKSUM_PATH = OUTPUT_DIR / "predictions_checksum.json"
 RESULTS_PATH = OUTPUT_DIR / "results.json"
 
-LIBRARIES = ("tensorflow", "keras", "numpy", "pandas", "scipy", "scikit-learn")
 
 # Exact duplicates are reported for size and error only (CONTEXT.md).
 CORRELATED_CATEGORIES = (UNSEEN_TARGET, PAM_VARIANT_OVERLAP)
@@ -354,16 +353,6 @@ def build_report(frame: pd.DataFrame, n_resamples: int = 10000, seed: int = 42) 
 
 def sha256_of(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def library_versions(names: Sequence[str] = LIBRARIES) -> dict[str, str | None]:
-    found = {}
-    for name in names:
-        try:
-            found[name] = version(name)
-        except PackageNotFoundError:
-            found[name] = None
-    return found
 
 
 def write_predictions(

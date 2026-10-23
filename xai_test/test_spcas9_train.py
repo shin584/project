@@ -18,11 +18,20 @@ from SpCas9.spcas9_split import (
     write_split,
 )
 from SpCas9.spcas9_train import (
+    EPOCHS,
+    LOG_FILENAME,
+    TRAIN_LIBRARIES,
+    build_training_log,
     encode_inputs,
     head_coverage,
+    hyperparameter_record,
+    library_versions,
     load_published_split,
     masked_labels_and_weights,
+    split_record,
+    stopping_epoch,
     subsample,
+    write_training_log,
 )
 
 # The two heads the spreadsheet and the model order differently.
@@ -236,3 +245,193 @@ def test_real_split_masks_rather_than_drops_the_partially_measured_rows(real_spl
     assert (
         np.stack([weights[output_name(h)] for h in HEAD_NAMES]).sum(axis=0).min() >= 1
     )
+
+
+# --- unit: the training log records what reproduces the run (#47) ---
+
+
+def _history(val_losses: list[float]) -> dict[str, list[float]]:
+    """A `History.history`-shaped dict with one metric per epoch."""
+    return {
+        "loss": [v + 0.01 for v in val_losses],
+        "val_loss": list(val_losses),
+        "learning_rate": [0.001] * len(val_losses),
+    }
+
+
+def test_stopping_epoch_is_the_best_val_loss_epoch_one_indexed():
+    record = stopping_epoch(_history([0.5, 0.3, 0.4, 0.35, 0.36, 0.37]))
+
+    assert record["epochs_run"] == 6
+    assert record["best_epoch"] == 2
+    assert record["best_val_loss"] == pytest.approx(0.3)
+
+
+def test_stopping_epoch_reports_early_stopping_against_the_epoch_budget():
+    stopped = stopping_epoch(_history([0.5] * 7), epochs=EPOCHS)
+    ran_out = stopping_epoch(_history([0.5] * 50), epochs=EPOCHS)
+
+    assert stopped["early_stopped"] is True
+    assert ran_out["early_stopped"] is False
+
+
+def test_hyperparameter_record_pins_v1s_recipe():
+    record = hyperparameter_record()
+
+    assert record["optimizer"] == "Adam"
+    assert record["learning_rate"] == 0.001
+    assert record["batch_size"] == 32
+    assert record["epochs"] == 50
+    assert record["seed"] == 42
+    assert record["early_stopping"] == {
+        "monitor": "val_loss",
+        "patience": 5,
+        "restore_best_weights": True,
+    }
+    assert record["reduce_lr_on_plateau"] == {
+        "monitor": "val_loss",
+        "factor": 0.2,
+        "patience": 3,
+        "min_lr": 1e-6,
+    }
+
+
+def test_the_log_reports_the_four_libraries_the_run_depends_on():
+    versions = library_versions(TRAIN_LIBRARIES)
+
+    assert set(versions) == {"tensorflow", "keras", "numpy", "pandas"}
+    assert all(v is not None for v in versions.values())
+
+
+def test_split_record_carries_the_checksums_that_tie_the_run_to_one_split(
+    written_split,
+):
+    record = split_record(written_split)
+
+    with open(written_split / CHECKSUM_FILENAME, encoding="utf-8") as f:
+        pinned = json.load(f)
+    for name in SPLITS:
+        filename = SPLIT_FILENAMES[name]
+        assert record["files"][filename] == pinned["files"][filename]
+        assert record["files"][filename] == file_sha256(written_split / filename)
+    assert record["rows"] == pinned["rows"]
+    assert record["checksum_sha256"] == file_sha256(written_split / CHECKSUM_FILENAME)
+
+
+def test_build_training_log_records_every_field_the_issue_asks_for(
+    written_split, tmp_path
+):
+    checkpoint = tmp_path / "9hydra_v2.keras"
+    checkpoint.write_bytes(b"not a real checkpoint")
+    splits = load_published_split(written_split)
+
+    log = build_training_log(
+        history=_history([0.5, 0.3, 0.4]),
+        splits=splits,
+        checkpoint_path=checkpoint,
+        split_dir=written_split,
+        duration_seconds=12.5,
+    )
+
+    assert log["hyperparameters"] == hyperparameter_record()
+    assert log["hyperparameters"]["seed"] == 42
+    assert log["history"]["val_loss"] == [0.5, 0.3, 0.4]
+    assert log["stopping"]["best_epoch"] == 2
+    assert (
+        log["versions"]["tensorflow"] == library_versions(TRAIN_LIBRARIES)["tensorflow"]
+    )
+    assert log["split"]["files"][SPLIT_FILENAMES[TRAIN]] == file_sha256(
+        written_split / SPLIT_FILENAMES[TRAIN]
+    )
+    assert log["checkpoint"]["sha256"] == file_sha256(checkpoint)
+    assert log["rows_fitted"][TRAIN] == len(splits[TRAIN])
+    assert (
+        log["head_coverage"][TRAIN]["SpCas9"] == head_coverage(splits[TRAIN])["SpCas9"]
+    )
+    assert log["duration_seconds"] == 12.5
+    assert log["hyperparameters"]["batch_size"] == 32
+    assert log["device"]["gpus_visible"] == 0
+
+
+def test_build_training_log_is_json_serialisable(written_split, tmp_path):
+    checkpoint = tmp_path / "9hydra_v2.keras"
+    checkpoint.write_bytes(b"not a real checkpoint")
+
+    log = build_training_log(
+        history=_history([0.5, 0.3]),
+        splits=load_published_split(written_split),
+        checkpoint_path=checkpoint,
+        split_dir=written_split,
+        duration_seconds=1.0,
+    )
+
+    assert json.loads(json.dumps(log))["stopping"]["epochs_run"] == 2
+
+
+def test_a_smoke_log_reports_the_epochs_it_asked_for_not_the_full_budget():
+    """The log must state what the run requested, not the module constant."""
+    record = hyperparameter_record(epochs=1)
+
+    assert record["epochs"] == 1
+    assert record["learning_rate"] == 0.001
+
+
+def test_build_training_log_names_the_fitted_rows_apart_from_the_split(
+    written_split, tmp_path
+):
+    """A subsampled run must not read as if the whole split went through it."""
+    checkpoint = tmp_path / "9hydra_v2.keras"
+    checkpoint.write_bytes(b"not a real checkpoint")
+    splits = load_published_split(written_split)
+    subsampled = {name: subsample(frame, 3) for name, frame in splits.items()}
+
+    log = build_training_log(
+        history=_history([0.5]),
+        splits=subsampled,
+        checkpoint_path=checkpoint,
+        split_dir=written_split,
+        epochs=1,
+    )
+
+    assert log["rows_fitted"] == {name: 3 for name in SPLITS}
+    assert log["split"]["rows"][TRAIN] == len(splits[TRAIN])
+
+
+# --- unit: the tracked artifact is written byte-reproducibly ---
+
+
+def test_write_training_log_fixes_the_line_ending_so_the_tracked_file_is_stable(
+    written_split, tmp_path
+):
+    """LF on every platform - the same rule as the split's checksum sidecar."""
+    checkpoint = tmp_path / "9hydra_v2.keras"
+    checkpoint.write_bytes(b"not a real checkpoint")
+    log = build_training_log(
+        history=_history([0.5]),
+        splits=load_published_split(written_split),
+        checkpoint_path=checkpoint,
+        split_dir=written_split,
+    )
+
+    path = write_training_log(log, tmp_path / "out" / LOG_FILENAME)
+
+    raw = path.read_bytes()
+    assert b"\r" not in raw
+    assert raw.endswith(b"\n")
+    assert json.loads(raw.decode("utf-8"))["stopping"]["epochs_run"] == 1
+
+
+def test_write_training_log_refuses_a_nan_rather_than_writing_invalid_json(
+    written_split, tmp_path
+):
+    checkpoint = tmp_path / "9hydra_v2.keras"
+    checkpoint.write_bytes(b"not a real checkpoint")
+    log = build_training_log(
+        history={"loss": [float("nan")], "val_loss": [float("nan")]},
+        splits=load_published_split(written_split),
+        checkpoint_path=checkpoint,
+        split_dir=written_split,
+    )
+
+    with pytest.raises(ValueError):
+        write_training_log(log, tmp_path / LOG_FILENAME)

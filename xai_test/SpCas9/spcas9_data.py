@@ -26,12 +26,18 @@ rows, the same sequence windows and the same labels.
   expects, and the `Output_<clean name>` layer name that keys a head's
   predictions, labels and sample weights. They live here so the v1 audit and
   the v2 training path cannot drift apart on either.
+- `library_versions` reports installed versions through
+  `importlib.metadata`, so a provenance record can be built without importing
+  the frameworks themselves. Shared for the same reason as the plumbing: the
+  v1 audit's report and the **9-Hydra v2 training log** should say versions
+  the same way.
 
 Read-only: this module opens the spreadsheet and writes nothing.
 """
 
 import re
 from collections.abc import Iterable, Sequence
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import numpy as np
@@ -39,6 +45,10 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATASET_PATH = BASE_DIR / "dataset" / "kim_2020_table_s8.xlsx"
+
+# Every library whose version could change a SpCas9 number. A caller that
+# needs fewer (the v2 training log) passes its own subset.
+LIBRARIES = ("tensorflow", "keras", "numpy", "pandas", "scipy", "scikit-learn")
 
 # Head order as the saved 9-Hydra checkpoint emits its outputs (the `targets`
 # list in `models/Multi_Cas_1IN_9Hydra_Divide_Testset.ipynb`), which is *not*
@@ -192,3 +202,19 @@ def is_published_test(table: pd.DataFrame) -> pd.Series:
     frame built from one.
     """
     return table[USE_COLUMN] == TEST_USE_VALUE
+
+
+def library_versions(names: Sequence[str] = LIBRARIES) -> dict[str, str | None]:
+    """Installed version of each of `names`, `None` where it is not installed.
+
+    Read from the installed distribution metadata rather than from each
+    library's `__version__`, so building a provenance record costs no
+    framework import.
+    """
+    found = {}
+    for name in names:
+        try:
+            found[name] = version(name)
+        except PackageNotFoundError:
+            found[name] = None
+    return found

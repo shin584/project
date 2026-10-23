@@ -9,7 +9,10 @@ __pycache__/
 # models/Multi-Cas_1IN_9Hydra_Divide_Testset.keras).
 xai_test/SpCas9/*.keras
 
-# 9-Hydra v2 training output: the smoke run's throwaway checkpoint, and the
-# full run's until there is a decision to keep one (it would go under models/,
-# like every other checkpoint).
-xai_test/SpCas9/v2_train/
+# 9-Hydra v2 training output: the smoke run's throwaway artifacts, and every
+# checkpoint until there is a decision to keep one (it would go under models/,
+# like every other checkpoint). The full run's `training_log.json` stays
+# tracked - small, and the reproducibility record the checkpoint is traced by
+# (#47).
+xai_test/SpCas9/v2_train/**/*.keras
+xai_test/SpCas9/v2_train/smoke/
