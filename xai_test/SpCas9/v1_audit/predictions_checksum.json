@@ -1,0 +1,17 @@
+{
+  "seed": 42,
+  "test_size": 0.1,
+  "validation_split": 0.2,
+  "rows": 29303,
+  "roles": {
+    "train": 21097,
+    "val": 5275,
+    "test": 2931
+  },
+  "dataset": "kim_2020_table_s8.xlsx",
+  "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+  "checkpoint": "Multi-Cas_1IN_9Hydra_Divide_Testset.keras",
+  "checkpoint_sha256": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+  "file": "predictions.csv",
+  "file_sha256": "fca7dacd9cac93d14eaae3fdf6304b0f3a7e40bc244298c65522f08e8e24fa36"
+}

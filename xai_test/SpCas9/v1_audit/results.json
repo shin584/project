@@ -1,0 +1,671 @@
+{
+  "membership": {
+    "rows": 29303,
+    "roles": {
+      "train": 21097,
+      "val": 5275,
+      "test": 2931
+    },
+    "test_categories": {
+      "unseen_target": 2191,
+      "pam_variant_overlap": 699,
+      "exact_duplicate": 41
+    },
+    "published_test_rows": 3847,
+    "published_test_by_role": {
+      "train": 2781,
+      "val": 665,
+      "test": 401
+    },
+    "pam_library": {
+      "protospacers": 30,
+      "rows": 7197
+    }
+  },
+  "scale": "published percentage / 100 (the scale v1 was trained on)",
+  "category_metrics": {
+    "SpCas9": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.04988736248688678,
+        "mse": 0.005249638438810467,
+        "spearman": 0.9277472046450589,
+        "pearson": 0.9426420003955976
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.021804973052606653,
+        "mse": 0.0011195441225282153,
+        "spearman": 0.7348449015229639,
+        "pearson": 0.978445764400485
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.05147670798114104,
+        "mse": 0.005664390327381613
+      }
+    },
+    "SpCas9-NG": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.06443986684189189,
+        "mse": 0.007217592196488735,
+        "spearman": 0.72680427369199,
+        "pearson": 0.777715029333005
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.03475253043501582,
+        "mse": 0.0020351825640339593,
+        "spearman": 0.9171701928431762,
+        "pearson": 0.9500374230807657
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.05834389598433679,
+        "mse": 0.005526156673870122
+      }
+    },
+    "VRQR variant": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.06338715943447427,
+        "mse": 0.007233331344696262,
+        "spearman": 0.84587207822763,
+        "pearson": 0.8427534583629974
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.022627623275128406,
+        "mse": 0.0010392048738828786,
+        "spearman": 0.7905917054771537,
+        "pearson": 0.9624419170589638
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.07816902440785618,
+        "mse": 0.009793910411085512
+      }
+    },
+    "xCas": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.06096559322369724,
+        "mse": 0.006871898278773397,
+        "spearman": 0.8566093151168809,
+        "pearson": 0.8484043518126685
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.022861813572258635,
+        "mse": 0.0010425987625538795,
+        "spearman": 0.8046961889887724,
+        "pearson": 0.9596861168737916
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.08911862201995681,
+        "mse": 0.014365108838494164
+      }
+    },
+    "Sniper-Cas9": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.04887789247115203,
+        "mse": 0.0052617628562616515,
+        "spearman": 0.9256838136039701,
+        "pearson": 0.9365602145730547
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.020926479161820718,
+        "mse": 0.0010181045595958162,
+        "spearman": 0.7465007317043176,
+        "pearson": 0.9774326556860471
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.04738170463708352,
+        "mse": 0.005887140840362737
+      }
+    },
+    "SpCas9-HF.1": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.06959624028862442,
+        "mse": 0.014081668365091485,
+        "spearman": 0.6973022774925504,
+        "pearson": 0.716287054253235
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.021889956029738786,
+        "mse": 0.00163286134822678,
+        "spearman": 0.6073516168645108,
+        "pearson": 0.946778445796893
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.05174063152469585,
+        "mse": 0.0073948356611438625
+      }
+    },
+    "eSpCas9(1.1)": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.0682365027065741,
+        "mse": 0.012715082182061039,
+        "spearman": 0.764898255360701,
+        "pearson": 0.7816395307361886
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.018838846856944823,
+        "mse": 0.0010296491916921573,
+        "spearman": 0.6507196702850748,
+        "pearson": 0.966088040618684
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.05442956651688242,
+        "mse": 0.007398704490211917
+      }
+    },
+    "HypaCas9": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.06072774645310222,
+        "mse": 0.010828159815975572,
+        "spearman": 0.8104261937303612,
+        "pearson": 0.8094693935733323
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.02058818180239101,
+        "mse": 0.0017093627189049727,
+        "spearman": 0.5664021756125497,
+        "pearson": 0.9192318469305581
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.048623757212584655,
+        "mse": 0.006484197836942687
+      }
+    },
+    "evoCas9": {
+      "unseen_target": {
+        "n": 2191,
+        "mae": 0.03182208879794683,
+        "mse": 0.005278366847305488,
+        "spearman": 0.515231425914145,
+        "pearson": 0.6373952376914559
+      },
+      "pam_variant_overlap": {
+        "n": 699,
+        "mae": 0.019013585083688223,
+        "mse": 0.0008537742224929387,
+        "spearman": 0.5824207203202985,
+        "pearson": 0.8642249503219073
+      },
+      "exact_duplicate": {
+        "n": 41,
+        "mae": 0.04899272299802616,
+        "mse": 0.006801754384517213
+      }
+    }
+  },
+  "unseen_target_vs_pam_variant_overlap": {
+    "groups": {
+      "seen": "pam_variant_overlap",
+      "unseen": "unseen_target"
+    },
+    "correction": "Holm-Bonferroni across the nine heads",
+    "heads": {
+      "SpCas9": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.028082389434280125,
+        "mae_delta_bootstrap_ci95": [
+          0.02521096041078765,
+          0.031031355057581162
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1044978.0,
+        "mann_whitney_p": 7.120282491318647e-48,
+        "mann_whitney_p_holm": 4.984197743923052e-47
+      },
+      "SpCas9-NG": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.02968733640687607,
+        "mae_delta_bootstrap_ci95": [
+          0.026549521801093278,
+          0.03278605592052835
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1021952.0,
+        "mann_whitney_p": 1.3970957685228808e-40,
+        "mann_whitney_p_holm": 6.9854788426144044e-40
+      },
+      "VRQR variant": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.04075953615934587,
+        "mae_delta_bootstrap_ci95": [
+          0.03779596116337004,
+          0.04372756641857315
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1147840.0,
+        "mann_whitney_p": 4.8244043142974697e-88,
+        "mann_whitney_p_holm": 4.341963882867723e-87
+      },
+      "xCas": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.0381037796514386,
+        "mae_delta_bootstrap_ci95": [
+          0.03519044547027002,
+          0.04097864772562926
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1125681.0,
+        "mann_whitney_p": 2.432083074488028e-78,
+        "mann_whitney_p_holm": 1.9456664595904224e-77
+      },
+      "Sniper-Cas9": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.027951413309331315,
+        "mae_delta_bootstrap_ci95": [
+          0.025144769424909865,
+          0.03090446541380416
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1031816.0,
+        "mann_whitney_p": 1.250700743151852e-43,
+        "mann_whitney_p_holm": 7.504204458911112e-43
+      },
+      "SpCas9-HF.1": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.04770628425888564,
+        "mae_delta_bootstrap_ci95": [
+          0.043016495833917305,
+          0.0523659260264589
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 937674.0,
+        "mann_whitney_p": 3.549755746673571e-19,
+        "mann_whitney_p_holm": 7.099511493347142e-19
+      },
+      "eSpCas9(1.1)": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.04939765584962927,
+        "mae_delta_bootstrap_ci95": [
+          0.0452121339238119,
+          0.05363162313815647
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 1006878.0,
+        "mann_whitney_p": 3.8302207717169235e-36,
+        "mann_whitney_p_holm": 1.5320883086867694e-35
+      },
+      "HypaCas9": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.04013956465071121,
+        "mae_delta_bootstrap_ci95": [
+          0.035722778574095906,
+          0.044581478184796394
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 936882.0,
+        "mann_whitney_p": 5.152942500261102e-19,
+        "mann_whitney_p_holm": 7.099511493347142e-19
+      },
+      "evoCas9": {
+        "mae_delta_unseen_target_minus_pam_variant_overlap": 0.01280850371425861,
+        "mae_delta_bootstrap_ci95": [
+          0.009675831664315515,
+          0.01598331012228088
+        ],
+        "bootstrap_resamples": 10000,
+        "mann_whitney_u": 588167.0,
+        "mann_whitney_p": 2.3472357519622922e-20,
+        "mann_whitney_p_holm": 7.041707255886877e-20
+      }
+    }
+  },
+  "published_test_by_role": {
+    "train": {
+      "n": 2781,
+      "comparable_to_kim_2020": false,
+      "heads": {
+        "SpCas9": {
+          "n": 2781,
+          "mae": 0.03560553490236591,
+          "mse": 0.002991215770415923,
+          "spearman": 0.9319891962642555,
+          "pearson": 0.9667768250733475
+        },
+        "SpCas9-NG": {
+          "n": 2781,
+          "mae": 0.04886889460896243,
+          "mse": 0.004248204847535148,
+          "spearman": 0.9002020968423223,
+          "pearson": 0.9197022378556119
+        },
+        "VRQR variant": {
+          "n": 2781,
+          "mae": 0.04594718163373833,
+          "mse": 0.004340814828683214,
+          "spearman": 0.9232459947566256,
+          "pearson": 0.9203823461004246
+        },
+        "xCas": {
+          "n": 2781,
+          "mae": 0.041549252202744406,
+          "mse": 0.003613284216151565,
+          "spearman": 0.9247609175144853,
+          "pearson": 0.9330778557074061
+        },
+        "Sniper-Cas9": {
+          "n": 2781,
+          "mae": 0.03390901879457482,
+          "mse": 0.0027700246526641092,
+          "spearman": 0.926824024404559,
+          "pearson": 0.9658206917750304
+        },
+        "SpCas9-HF.1": {
+          "n": 2781,
+          "mae": 0.04470462756743554,
+          "mse": 0.006518863272132468,
+          "spearman": 0.7535815816708854,
+          "pearson": 0.8735340729651678
+        },
+        "eSpCas9(1.1)": {
+          "n": 2781,
+          "mae": 0.04318714446196834,
+          "mse": 0.00568888125517639,
+          "spearman": 0.8185494298011203,
+          "pearson": 0.9046350348103288
+        },
+        "HypaCas9": {
+          "n": 2781,
+          "mae": 0.03844817146755395,
+          "mse": 0.004614562366611036,
+          "spearman": 0.7953699880939538,
+          "pearson": 0.908906428958571
+        },
+        "evoCas9": {
+          "n": 2781,
+          "mae": 0.026218637070411305,
+          "mse": 0.003183879610766119,
+          "spearman": 0.5200570408610509,
+          "pearson": 0.8228901591968205
+        }
+      }
+    },
+    "val": {
+      "n": 665,
+      "comparable_to_kim_2020": false,
+      "heads": {
+        "SpCas9": {
+          "n": 665,
+          "mae": 0.03970139415467239,
+          "mse": 0.003862330194016611,
+          "spearman": 0.9153725352205463,
+          "pearson": 0.9562044097269015
+        },
+        "SpCas9-NG": {
+          "n": 665,
+          "mae": 0.05315394722672109,
+          "mse": 0.00510750563511842,
+          "spearman": 0.8824172744491228,
+          "pearson": 0.9030786163246803
+        },
+        "VRQR variant": {
+          "n": 665,
+          "mae": 0.052571725073544476,
+          "mse": 0.005696813914287438,
+          "spearman": 0.901217922327853,
+          "pearson": 0.889772675156908
+        },
+        "xCas": {
+          "n": 665,
+          "mae": 0.04866389244046108,
+          "mse": 0.005270429710296302,
+          "spearman": 0.9014416886963019,
+          "pearson": 0.9000393626863656
+        },
+        "Sniper-Cas9": {
+          "n": 665,
+          "mae": 0.03802175582444739,
+          "mse": 0.0036503472336156485,
+          "spearman": 0.917826662099803,
+          "pearson": 0.9537908757057832
+        },
+        "SpCas9-HF.1": {
+          "n": 665,
+          "mae": 0.050434448689548335,
+          "mse": 0.00883761409287948,
+          "spearman": 0.7203906917708719,
+          "pearson": 0.7820223271582852
+        },
+        "eSpCas9(1.1)": {
+          "n": 665,
+          "mae": 0.048893286559287034,
+          "mse": 0.008033288639962083,
+          "spearman": 0.8129172878654299,
+          "pearson": 0.8349380957364265
+        },
+        "HypaCas9": {
+          "n": 665,
+          "mae": 0.041675093320636555,
+          "mse": 0.005692151980689551,
+          "spearman": 0.7915046151451314,
+          "pearson": 0.8819876739372026
+        },
+        "evoCas9": {
+          "n": 665,
+          "mae": 0.02636106242988641,
+          "mse": 0.00351215200388279,
+          "spearman": 0.5200006475908756,
+          "pearson": 0.70155289266656
+        }
+      }
+    },
+    "test": {
+      "n": 401,
+      "comparable_to_kim_2020": true,
+      "heads": {
+        "SpCas9": {
+          "n": 401,
+          "mae": 0.0417981968265962,
+          "mse": 0.00439619464299099,
+          "spearman": 0.9278257963137245,
+          "pearson": 0.9524981487051577
+        },
+        "SpCas9-NG": {
+          "n": 401,
+          "mae": 0.053635062607531536,
+          "mse": 0.0051881371667982104,
+          "spearman": 0.84817844279898,
+          "pearson": 0.8868368193163036
+        },
+        "VRQR variant": {
+          "n": 401,
+          "mae": 0.048963337777269085,
+          "mse": 0.004975317914348547,
+          "spearman": 0.9035755641905446,
+          "pearson": 0.9000773079530988
+        },
+        "xCas": {
+          "n": 401,
+          "mae": 0.04965218905807144,
+          "mse": 0.005663616002013117,
+          "spearman": 0.9072092992204405,
+          "pearson": 0.887946974888071
+        },
+        "Sniper-Cas9": {
+          "n": 401,
+          "mae": 0.03827789526731322,
+          "mse": 0.004072478994500841,
+          "spearman": 0.9336899792980727,
+          "pearson": 0.9515771593439996
+        },
+        "SpCas9-HF.1": {
+          "n": 401,
+          "mae": 0.05812698811351908,
+          "mse": 0.011272462344301628,
+          "spearman": 0.7746178718883682,
+          "pearson": 0.7781679008947358
+        },
+        "eSpCas9(1.1)": {
+          "n": 401,
+          "mae": 0.055175318121718754,
+          "mse": 0.009933174119225618,
+          "spearman": 0.8314422604659869,
+          "pearson": 0.8422002076811822
+        },
+        "HypaCas9": {
+          "n": 401,
+          "mae": 0.05151383283414665,
+          "mse": 0.008664909743362986,
+          "spearman": 0.8103873487155745,
+          "pearson": 0.8440347674384886
+        },
+        "evoCas9": {
+          "n": 401,
+          "mae": 0.033329325694335894,
+          "mse": 0.004726905633391318,
+          "spearman": 0.552526393207163,
+          "pearson": 0.7077222607593912
+        }
+      }
+    }
+  },
+  "role_sanity_check": {
+    "per_head": {
+      "SpCas9": {
+        "mae": {
+          "train": 0.03884415752312444,
+          "val": 0.04472871047500767,
+          "test": 0.0432123617877065
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      },
+      "SpCas9-NG": {
+        "mae": {
+          "train": 0.051725210385161785,
+          "val": 0.056518678280050645,
+          "test": 0.057274604831122136
+        },
+        "rises_train_to_val_to_test": true,
+        "train_below_val_and_test": true
+      },
+      "VRQR variant": {
+        "mae": {
+          "train": 0.049155646448428424,
+          "val": 0.054633994300974535,
+          "test": 0.053873389625032415
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      },
+      "xCas": {
+        "mae": {
+          "train": 0.04606923649530756,
+          "val": 0.05223437492366149,
+          "test": 0.0522722231125717
+        },
+        "rises_train_to_val_to_test": true,
+        "train_below_val_and_test": true
+      },
+      "Sniper-Cas9": {
+        "mae": {
+          "train": 0.0366818347606239,
+          "val": 0.042988731639229665,
+          "test": 0.04219096595992058
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      },
+      "SpCas9-HF.1": {
+        "mae": {
+          "train": 0.04863284130422682,
+          "val": 0.0593183112245739,
+          "test": 0.057969228123396804
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      },
+      "eSpCas9(1.1)": {
+        "mae": {
+          "train": 0.04701793625259112,
+          "val": 0.05663391043715985,
+          "test": 0.05626275797007862
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      },
+      "HypaCas9": {
+        "mae": {
+          "train": 0.041939677369277555,
+          "val": 0.05072696786137761,
+          "test": 0.05098574056783836
+        },
+        "rises_train_to_val_to_test": true,
+        "train_below_val_and_test": true
+      },
+      "evoCas9": {
+        "mae": {
+          "train": 0.027121950186263025,
+          "val": 0.03154167420070744,
+          "test": 0.029007640454697597
+        },
+        "rises_train_to_val_to_test": false,
+        "train_below_val_and_test": true
+      }
+    },
+    "mean_mae_over_heads": {
+      "train": 0.0430209434138894,
+      "val": 0.049925039260304754,
+      "test": 0.04922765693692942
+    },
+    "rises_train_to_val_to_test": false,
+    "heads_rising": 3,
+    "train_below_val_and_test": true,
+    "heads_train_below_val_and_test": 9,
+    "held_out_minus_train_mae": 0.006655006449655283,
+    "control_seed_held_out_minus_train_mae": {
+      "0": -0.000651502932412,
+      "1": -0.0010034115089873202,
+      "2": -0.0007799032905445799,
+      "3": -0.00042575303027493627,
+      "4": 0.00036541816196768856,
+      "5": -0.00019675543730113265,
+      "6": 0.0007046716479569837,
+      "7": 0.00019772527137752044,
+      "8": 0.0011409912496453678,
+      "9": 0.00048535206953356086
+    }
+  },
+  "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 42,
+    "ci": 0.95
+  },
+  "predictions": {
+    "seed": 42,
+    "test_size": 0.1,
+    "validation_split": 0.2,
+    "rows": 29303,
+    "roles": {
+      "train": 21097,
+      "val": 5275,
+      "test": 2931
+    },
+    "dataset": "kim_2020_table_s8.xlsx",
+    "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+    "checkpoint": "Multi-Cas_1IN_9Hydra_Divide_Testset.keras",
+    "checkpoint_sha256": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+    "file": "predictions.csv",
+    "file_sha256": "fca7dacd9cac93d14eaae3fdf6304b0f3a7e40bc244298c65522f08e8e24fa36"
+  },
+  "libraries": {
+    "tensorflow": "2.21.0",
+    "keras": "3.14.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "scipy": "1.16.1",
+    "scikit-learn": "1.7.1"
+  }
+}
