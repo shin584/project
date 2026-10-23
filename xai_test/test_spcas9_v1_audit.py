@@ -5,13 +5,11 @@ import pandas as pd
 import pytest
 from test_spcas9_data import make_sequence
 
-from SpCas9.spcas9_data import HEAD_NAMES
+from SpCas9.spcas9_data import HEAD_NAMES, output_name
 from SpCas9.spcas9_v1_audit import (
     build_report,
     full_metrics,
     holm_bonferroni,
-    one_hot,
-    output_name,
     pred_column,
     predictions_by_head,
     true_column,
@@ -206,16 +204,3 @@ def test_predictions_by_head_rejects_a_missing_head():
     names = [output_name(head) for head in HEAD_NAMES[:-1]]
     with pytest.raises(KeyError, match="evoCas9"):
         predictions_by_head(names, [np.zeros((1, 1))] * len(names))
-
-
-def test_one_hot_uses_acgt_channel_order_and_zeros_other_bases():
-    encoded = one_hot(["ACGTN"])
-    assert encoded.shape == (1, 5, 4)
-    assert encoded.dtype == np.float32
-    assert encoded[0].tolist() == [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1],
-        [0, 0, 0, 0],
-    ]

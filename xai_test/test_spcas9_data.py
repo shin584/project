@@ -11,6 +11,8 @@ from SpCas9.spcas9_data import (
     is_published_test,
     load_spcas9_table,
     normalize_table,
+    one_hot,
+    output_name,
     pam_library_protospacers,
     pams,
     protospacers,
@@ -252,3 +254,25 @@ def test_real_pam_library_holds_the_pinned_thirty_protospacers(real_table):
     library = pam_library_protospacers(filter_any_head(real_table)["sequence"])
 
     assert len(library) == 30
+
+
+# --- unit: the model plumbing every 9-Hydra version shares ---
+
+
+def test_one_hot_uses_acgt_channel_order_and_zeros_other_bases():
+    encoded = one_hot(["ACGTN"])
+    assert encoded.shape == (1, 5, 4)
+    assert encoded.dtype == np.float32
+    assert encoded[0].tolist() == [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+        [0, 0, 0, 0],
+    ]
+
+
+def test_output_name_cleans_the_two_heads_with_punctuation():
+    assert output_name("SpCas9") == "Output_SpCas9"
+    assert output_name("SpCas9-HF.1") == "Output_SpCas9_HF_1"
+    assert output_name("eSpCas9(1.1)") == "Output_eSpCas9_1_1_"

@@ -6,7 +6,7 @@ rows, and which v1 numbers can be set beside Kim 2020's.
 
 - Loads `SpCas9/Multi-Cas_1IN_9Hydra_Divide_Testset.keras` on CPU and scores
   all 29,303 all-9-heads rows once. Each output is matched to its label by
-  head name (`Output_<clean name>`), never by position.
+  head name, via the shared loader's `output_name`, never by position.
 - Writes the predictions to `SpCas9/v1_audit/predictions.csv`, with
   `predictions_checksum.json` beside it (seed, row counts, dataset SHA256,
   checkpoint SHA256 and the CSV's own SHA256), so the write-up can cite
@@ -38,7 +38,6 @@ import argparse
 import hashlib
 import json
 import math
-import re
 from collections.abc import Sequence
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -58,6 +57,8 @@ from SpCas9.spcas9_data import (
     head_labels,
     is_published_test,
     load_spcas9_table,
+    one_hot,
+    output_name,
 )
 from SpCas9.spcas9_v1_membership import (
     CATEGORIES,
@@ -87,9 +88,6 @@ RESULTS_PATH = OUTPUT_DIR / "results.json"
 
 LIBRARIES = ("tensorflow", "keras", "numpy", "pandas", "scipy", "scikit-learn")
 
-# One-hot layout the notebook encoded with; any other base is all zeros.
-ONE_HOT = {"A": 0, "C": 1, "G": 2, "T": 3}
-
 # Exact duplicates are reported for size and error only (CONTEXT.md).
 CORRELATED_CATEGORIES = (UNSEEN_TARGET, PAM_VARIANT_OVERLAP)
 
@@ -103,22 +101,6 @@ def true_column(head: str) -> str:
 
 def pred_column(head: str) -> str:
     return f"{head}_pred"
-
-
-def output_name(head: str) -> str:
-    """The checkpoint's output layer name for `head`, as the notebook built it."""
-    return "Output_" + re.sub(r"[^0-9a-zA-Z_]", "_", head)
-
-
-def one_hot(sequences: Sequence[str]) -> np.ndarray:
-    """`(n, 30, 4)` float32 one-hot encoding in A/C/G/T order."""
-    encoded = np.zeros((len(sequences), len(sequences[0]) if sequences else 0, 4))
-    for row, sequence in enumerate(sequences):
-        for position, base in enumerate(sequence):
-            channel = ONE_HOT.get(base)
-            if channel is not None:
-                encoded[row, position, channel] = 1.0
-    return encoded.astype(np.float32)
 
 
 def predictions_by_head(

@@ -8,3 +8,8 @@ __pycache__/
 # loads them are duplicates (xai_test/SpCas9/'s copy is byte-identical to
 # models/Multi-Cas_1IN_9Hydra_Divide_Testset.keras).
 xai_test/SpCas9/*.keras
+
+# 9-Hydra v2 training output: the smoke run's throwaway checkpoint, and the
+# full run's until there is a decision to keep one (it would go under models/,
+# like every other checkpoint).
+xai_test/SpCas9/v2_train/

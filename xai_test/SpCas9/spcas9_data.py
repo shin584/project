@@ -21,11 +21,17 @@ rows, the same sequence windows and the same labels.
   spreadsheet orders `eSpCas9(1.1)` before `SpCas9-HF.1`; the saved model
   outputs them the other way round, so positional arrays would silently swap
   those two heads.
+- `one_hot` and `output_name` are the two pieces of model plumbing every
+  9-Hydra version shares: the `(n, 30, 4)` A/C/G/T encoding the input layer
+  expects, and the `Output_<clean name>` layer name that keys a head's
+  predictions, labels and sample weights. They live here so the v1 audit and
+  the v2 training path cannot drift apart on either.
 
 Read-only: this module opens the spreadsheet and writes nothing.
 """
 
-from collections.abc import Iterable
+import re
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -56,6 +62,9 @@ PAM_SLICE = slice(24, 27)
 # The notebook trained on percentages divided by 100, so labels are scaled the
 # same way here to stay comparable with the checkpoint's outputs.
 LABEL_SCALE = 100.0
+
+# One-hot layout the v1 notebook encoded with; any other base is all zeros.
+ONE_HOT = {"A": 0, "C": 1, "G": 2, "T": 3}
 
 SEQUENCE_COLUMN = "sequence"
 USE_COLUMN = "use"
@@ -149,6 +158,31 @@ def head_labels(
 ) -> dict[str, np.ndarray]:
     """Labels keyed by head name, scaled the way the checkpoint was trained."""
     return {head: table[head].to_numpy(dtype=float) / scale for head in HEAD_NAMES}
+
+
+def clean_head_name(head: str) -> str:
+    """`head` reduced to the characters a Keras layer name may hold."""
+    return re.sub(r"[^0-9a-zA-Z_]", "_", head)
+
+
+def output_name(head: str) -> str:
+    """The output layer name for `head`, as the v1 notebook built it.
+
+    Every 9-Hydra version keys a head's predictions, labels and sample
+    weights by this name rather than by position.
+    """
+    return "Output_" + clean_head_name(head)
+
+
+def one_hot(sequences: Sequence[str]) -> np.ndarray:
+    """`(n, 30, 4)` float32 one-hot encoding in A/C/G/T order."""
+    encoded = np.zeros((len(sequences), len(sequences[0]) if sequences else 0, 4))
+    for row, sequence in enumerate(sequences):
+        for position, base in enumerate(sequence):
+            channel = ONE_HOT.get(base)
+            if channel is not None:
+                encoded[row, position, channel] = 1.0
+    return encoded.astype(np.float32)
 
 
 def is_published_test(table: pd.DataFrame) -> pd.Series:
