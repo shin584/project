@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.model_selection import train_test_split
+from test_spcas9_data import make_sequence
+
 from SpCas9.spcas9_data import filter_all_heads, load_spcas9_table
 from SpCas9.spcas9_v1_membership import (
     CATEGORIES,
@@ -17,7 +19,6 @@ from SpCas9.spcas9_v1_membership import (
     rebuild_roles,
     summarize,
 )
-from test_spcas9_data import make_sequence
 
 
 def _toy_frame(sequences: list[str], use: list[str] | None = None) -> pd.DataFrame:

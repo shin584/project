@@ -1,0 +1,6 @@
+# Rule selection is left at ruff's defaults; this file only tells isort which
+# imports are ours. Without it, `SpCas9` counts as first-party only when ruff
+# runs from inside `xai_test/`, so pre-commit (which runs from the repo root)
+# and a bare `ruff check` in `xai_test/` disagreed about import grouping.
+[lint.isort]
+known-first-party = ["SpCas9"]

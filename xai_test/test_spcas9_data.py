@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from SpCas9.spcas9_data import (
     HEAD_NAMES,
     filter_all_heads,

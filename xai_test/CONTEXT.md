@@ -76,6 +76,10 @@ _Avoid_: "the new 9-Hydra", "the fixed model" (ambiguous once v3 exists — v3 i
 The 5,186 rows of `dataset/kim_2020_table_s8.xlsx` whose `Use (Training or Test)` column reads `Test`, restricted to 30bp sequences with at least one measured variant head. It shares zero protospacers and zero exact 30-mers with the 32,810 training rows. Per-head label coverage is 5,021 for `SpCas9` and ~5,170 for most heads, but only 3,982 / 3,979 for `SpCas9-NG` / `VRQR variant`.
 _Avoid_: "Testset" unqualified (that is the 514-row SaCas9 set defined above)
 
+**9-Hydra v1 Testset (3,847 rows)**:
+The 9-Hydra Testset narrowed to rows with **all nine** heads measured: the paper's `Use = Test` rows that fall inside the 29,303-row all-9-heads frame 9-Hydra v1 was trained on. This is the set the leakage audit scores v1 against, because v1's row-level split ignored the `Use` column entirely — of these 3,847 rows, 2,781 were trained on and 665 validated on, leaving 401 that v1 never saw. Only those 401 are comparable with the published Kim 2020 numbers. Rebuilt by `is_published_test` / `summarize`'s `published_test_by_role` in `SpCas9/`.
+_Avoid_: treating it as interchangeable with the 5,186-row **9-Hydra Testset** (that one keeps rows with at least one head, and is what 9-Hydra v2 is evaluated on); "v1's test set" / "v1's Testset" as a name for it (v1's own test **role** is a different 2,931 rows, carved by `random_state=42` rather than by the `Use` column — the two sets meet only in the 401 clean rows)
+
 **SpCas9 target window**:
 The layout of the 30bp input sequence: left flank at 0-indexed positions 0-3, 20nt **protospacer** at 4-23, 3nt PAM at 24-26, right flank at 27-29.
 _Avoid_: "PAM window" (that term is defined above for SaCas9's 36bp sequence at positions 25-30 — a different layout entirely)

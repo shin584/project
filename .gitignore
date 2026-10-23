@@ -3,3 +3,8 @@
 *.h5
 
 __pycache__/
+
+# Model checkpoints live under models/; copies kept next to the code that
+# loads them are duplicates (xai_test/SpCas9/'s copy is byte-identical to
+# models/Multi-Cas_1IN_9Hydra_Divide_Testset.keras).
+xai_test/SpCas9/*.keras
