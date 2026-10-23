@@ -211,6 +211,24 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def write_json(record: dict, path: Path) -> Path:
+    """Write `record` as JSON with a fixed `\\n` line ending and no NaN.
+
+    The rule every tracked 9-Hydra JSON artifact follows - the **9-Hydra v2
+    training log**, the scoring report, and this module's own sidecar (which
+    writes its bytes inline, see `write_split`): git tracks these files, so
+    they must not come out CRLF on Windows and LF elsewhere. `allow_nan`
+    is off because `NaN` is not JSON - an undefined figure is `None` by the
+    time it arrives here, or this fails loudly rather than writing a file no
+    strict parser will read.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(record, f, indent=2, allow_nan=False)
+        f.write("\n")
+    return path
+
+
 def write_split(
     split: pd.DataFrame,
     output_dir: Path = OUTPUT_DIR,
@@ -236,6 +254,10 @@ def write_split(
     }
     # Fixed line ending here too, so the sidecar itself is byte-reproducible
     # across Windows and Colab - it is the one file of the set that git tracks.
+    # Written inline rather than through `write_json`: these exact bytes are
+    # already pinned, by the committed sidecar and by the training log's
+    # `checksum_sha256`, so the trailing newline `write_json` adds would
+    # invalidate both for cosmetics.
     with open(output_dir / CHECKSUM_FILENAME, "w", encoding="utf-8", newline="\n") as f:
         json.dump(record, f, indent=2)
     return record

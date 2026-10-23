@@ -16,6 +16,8 @@ comparison all have to agree on, so that two reports of "Spearman for
   Pearson under the same minimum-n rule, and the n/MAE/MSE-only variant for
   groups where a correlation means nothing. Both return `None` rather than
   NaN for an undefined figure, so a report stays strict JSON.
+- `head_metrics`: the two put together - a head's columns pulled out of a
+  predictions frame and scored.
 
 Pure arithmetic over arrays and frames: no model, no file, no dataset.
 """
@@ -84,3 +86,13 @@ def error_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """n / MAE / MSE only, for groups where a correlation means nothing."""
     metrics = group_metrics(y_true, y_pred)
     return {key: metrics[key] for key in ("n", "mae", "mse")}
+
+
+def head_metrics(frame: pd.DataFrame, head: str, metric=full_metrics) -> dict:
+    """`metric` over `head`'s rows of a predictions frame.
+
+    The pairing every scoring step repeats: pull a head's two columns out of a
+    predictions frame, then score them. `metric` is `error_metrics` for a
+    group where a correlation means nothing.
+    """
+    return metric(*head_arrays(frame, head))

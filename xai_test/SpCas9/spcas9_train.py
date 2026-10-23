@@ -91,6 +91,7 @@ from SpCas9.spcas9_split import (
     TRAIN,
     VAL,
     file_sha256,
+    write_json,
 )
 from SpCas9.spcas9_split import OUTPUT_DIR as SPLIT_DIR
 
@@ -439,18 +440,13 @@ def build_training_log(
 
 
 def write_training_log(log: dict, path: Path) -> Path:
-    """Write `log` as JSON with a fixed `\\n` line ending.
+    """Write `log` through the shared LF-and-no-NaN JSON writer.
 
-    Same rule as the split's checksum sidecar: this is a file git tracks, so
-    it must not come out CRLF on Windows and LF everywhere else. `allow_nan`
-    is off because `NaN` is not JSON - a diverged run should fail loudly here
-    rather than write a file no strict parser will read.
+    Named for what it writes, but the rule it follows is the one every
+    tracked 9-Hydra JSON artifact follows - see `spcas9_split.write_json`,
+    which is also where a diverged run's `NaN` fails loudly.
     """
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(log, f, indent=2, allow_nan=False)
-        f.write("\n")
-    return path
+    return write_json(log, path)
 
 
 def main(argv: list[str] | None = None) -> dict:

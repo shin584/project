@@ -23,9 +23,14 @@ than re-running the model.
   result.
 - **`predictions.csv` plus `predictions_checksum.json`**, keyed by the
   split's own `row_index` and carrying its metadata columns, so #49 joins
-  rows back to the split (and to v1's categories) without re-deriving
-  anything. The sidecar pins the CSV's digest, the checkpoint's, and the
-  consumed **9-Hydra split**'s.
+  rows back to the split without re-deriving any of them. That key is the
+  split's and only the split's: it counts the at-least-one-head frame, while
+  the v1 membership rebuild numbers the all-9-heads frame, so the two
+  `row_index` columns do **not** address the same rows. v1's categories are a
+  property of the protospacer, so a comparison reaches them through
+  `protospacer` / `sequence` - never by joining the two row indices. The
+  sidecar pins the CSV's digest, the checkpoint's, and the consumed
+  **9-Hydra split**'s.
 
 Metrics are on the scale v2 was trained on: the published percentage divided
 by 100.
@@ -44,7 +49,6 @@ Usage: python -m SpCas9.spcas9_eval [--checkpoint ...] [--output-dir ...]
 """
 
 import argparse
-import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -62,8 +66,7 @@ from SpCas9.spcas9_data import (
     one_hot,
 )
 from SpCas9.spcas9_metrics import (
-    full_metrics,
-    head_arrays,
+    head_metrics,
     pred_column,
     predictions_by_head,
     true_column,
@@ -76,6 +79,7 @@ from SpCas9.spcas9_split import (
     SPLIT_COLUMN,
     TEST,
     file_sha256,
+    write_json,
 )
 from SpCas9.spcas9_train import CHECKPOINT_FILENAME, load_published_split, split_record
 from SpCas9.spcas9_train import OUTPUT_DIR as TRAIN_DIR
@@ -87,9 +91,9 @@ PREDICTIONS_FILENAME = "predictions.csv"
 PREDICTIONS_CHECKSUM_FILENAME = "predictions_checksum.json"
 RESULTS_FILENAME = "results.json"
 
-# The split columns that ride along with the predictions, so a row can be
-# joined back to the split - and through it to v1's categories - without
-# re-deriving any of them.
+# The split columns that ride along with the predictions: `row_index` joins a
+# row back to the split, and `protospacer` is what v1's categories are defined
+# over, so neither has to be re-derived downstream.
 METADATA_COLUMNS = [
     ROW_INDEX_COLUMN,
     SEQUENCE_COLUMN,
@@ -105,6 +109,11 @@ METADATA_COLUMNS = [
 # reported figure names the column a reader can check it against.
 PAM_LIBRARY = "library"
 NON_LIBRARY = "non_library"
+# The tRNA feature's two values. The report keys its strata by `str(value)`,
+# since JSON has no integer keys: a reader of `results.json` and a caller
+# holding the dict in memory then index a stratum the same way. The row
+# comparison stays numeric, so the cut does not depend on how pandas typed
+# the column.
 TRNA_VALUES = (0, 1)
 
 SCALE_NOTE = "published percentage / 100 (the scale 9-Hydra v2 was trained on)"
@@ -131,7 +140,7 @@ def build_predictions(
     """The split's metadata columns plus each head's label and prediction.
 
     An unmeasured label stays missing rather than being filled - that is what
-    `available` reads to keep a head's metrics on its own rows - while every
+    `measured_rows` reads to keep a head's metrics to its own rows - while every
     row carries a prediction, since the model emits all nine heads for every
     sequence.
     """
@@ -149,83 +158,67 @@ def build_predictions(
     return frame
 
 
-def available(frame: pd.DataFrame, head: str) -> pd.DataFrame:
+def measured_rows(frame: pd.DataFrame, head: str) -> pd.DataFrame:
     """The rows of `frame` on which `head`'s variant was actually measured."""
     return frame[frame[true_column(head)].notna()]
 
 
-def _metrics(rows: pd.DataFrame, head: str) -> dict:
-    return full_metrics(*head_arrays(rows, head))
-
-
-def strata(frame: pd.DataFrame, head: str) -> dict:
+def strata_metrics(frame: pd.DataFrame, head: str) -> dict:
     """`head`'s metrics cut by PAM-library membership and by tRNA feature.
 
-    Both cuts are taken from the split's own metadata columns, and both are
-    taken over `available` rows only, so each stratum's `n` adds up to the
-    head's own.
+    Both cuts are taken from the split's own metadata columns, and both over
+    `measured_rows` only, so each stratum's `n` adds up to the head's own.
     """
-    rows = available(frame, head)
+    rows = measured_rows(frame, head)
     in_library = rows[PAM_LIBRARY_COLUMN].to_numpy(dtype=bool)
     return {
         PAM_LIBRARY_COLUMN: {
-            PAM_LIBRARY: _metrics(rows[in_library], head),
-            NON_LIBRARY: _metrics(rows[~in_library], head),
+            PAM_LIBRARY: head_metrics(rows[in_library], head),
+            NON_LIBRARY: head_metrics(rows[~in_library], head),
         },
         TRNA_COLUMN: {
-            value: _metrics(rows[rows[TRNA_COLUMN] == value], head)
+            str(value): head_metrics(rows[rows[TRNA_COLUMN] == value], head)
             for value in TRNA_VALUES
         },
     }
 
 
-def empty_strata(frame: pd.DataFrame, head: str) -> list[str]:
-    """`<stratum>=<value>` for every one of `head`'s strata holding no rows.
+def empty_strata(strata: dict) -> list[str]:
+    """`<stratum>=<value>` for every group of `strata` holding no rows.
 
     An empty stratum is not a result: it means this head was never measured
     on those rows, and saying so keeps an n=0 entry from reading as a
-    comparison that came out even.
+    comparison that came out even. Takes the report `strata_metrics` already
+    built, so a head's strata are computed once.
     """
     return [
         f"{name}={value}"
-        for name, groups in strata(frame, head).items()
+        for name, groups in strata.items()
         for value, metrics in groups.items()
         if metrics["n"] == 0
     ]
 
 
 def head_report(frame: pd.DataFrame, head: str) -> dict:
-    """`head`'s headline metrics over its available rows, plus the strata."""
-    report = _metrics(available(frame, head), head)
-    report["strata"] = strata(frame, head)
+    """`head`'s headline metrics over its measured rows, plus the strata."""
+    report = head_metrics(measured_rows(frame, head), head)
+    report["strata"] = strata_metrics(frame, head)
     return report
 
 
 def build_report(frame: pd.DataFrame) -> dict:
     """The JSON-serialisable scoring report, per head and per stratum."""
+    heads = {head: head_report(frame, head) for head in HEAD_NAMES}
     return {
         "model": "9-Hydra v2",
         "testset": "9-Hydra Testset",
         "scale": SCALE_NOTE,
         "rows": len(frame),
-        "heads": {head: head_report(frame, head) for head in HEAD_NAMES},
-        "empty_strata": {head: empty_strata(frame, head) for head in HEAD_NAMES},
+        "heads": heads,
+        "empty_strata": {
+            head: empty_strata(report["strata"]) for head, report in heads.items()
+        },
     }
-
-
-def write_json(record: dict, path: Path) -> Path:
-    """Write `record` with a fixed `\\n` line ending and no NaN.
-
-    Same rule as the split's checksum sidecar and the training log: a fixed
-    line ending because git tracks these files, and `allow_nan=False` because
-    `NaN` is not JSON - an undefined metric is `None` by the time it gets
-    here, or this fails loudly.
-    """
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(record, f, indent=2, allow_nan=False)
-        f.write("\n")
-    return path
 
 
 def write_predictions(
@@ -250,7 +243,7 @@ def write_predictions(
         "model": "9-Hydra v2",
         "rows": len(frame),
         "scale": SCALE_NOTE,
-        "coverage": {head: len(available(frame, head)) for head in HEAD_NAMES},
+        "coverage": {head: len(measured_rows(frame, head)) for head in HEAD_NAMES},
         "checkpoint": checkpoint_path.name,
         "checkpoint_sha256": file_sha256(checkpoint_path),
         "split": split_record(split_dir),
@@ -283,20 +276,29 @@ def main(argv: list[str] | None = None) -> dict:
     report["libraries"] = library_versions()
     results_path = write_json(report, args.output_dir / RESULTS_FILENAME)
 
-    for head, head_metrics in report["heads"].items():
-        library = head_metrics["strata"][PAM_LIBRARY_COLUMN]
+    for head, scored in report["heads"].items():
+        library = scored["strata"][PAM_LIBRARY_COLUMN]
+        trna = scored["strata"][TRNA_COLUMN]
         print(
-            f"{head:>13}: n={head_metrics['n']:>5} "
-            f"Spearman {head_metrics['spearman']:.3f} "
-            f"Pearson {head_metrics['pearson']:.3f} "
-            f"MAE {head_metrics['mae']:.4f} MSE {head_metrics['mse']:.4f} "
-            f"| PAM library {library[PAM_LIBRARY]['n']:>4} rows, "
-            f"Spearman {library[PAM_LIBRARY]['spearman']:.3f} "
-            f"vs {library[NON_LIBRARY]['spearman']:.3f} elsewhere"
+            f"{head:>13}: n={scored['n']:>5} "
+            f"Spearman {scored['spearman']:.3f} "
+            f"Pearson {scored['pearson']:.3f} "
+            f"MAE {scored['mae']:.4f} MSE {scored['mse']:.4f}"
         )
-    for head, names in report["empty_strata"].items():
+        print(
+            f"{'PAM library':>13}: {library[PAM_LIBRARY]['n']:>5} rows, "
+            f"Spearman {library[PAM_LIBRARY]['spearman']:.3f} "
+            f"vs {library[NON_LIBRARY]['spearman']:.3f} off the library"
+        )
+        names = report["empty_strata"][head]
         if names:
-            print(f"{head:>13}: no rows in {', '.join(names)} - no comparison there")
+            print(f"{'tRNA':>13}: no rows in {', '.join(names)} - no comparison")
+        else:
+            print(
+                f"{'tRNA':>13}: {trna['1']['n']:>5} rows at tRNA=1, "
+                f"MAE {trna['1']['mae']:.4f} "
+                f"vs {trna['0']['mae']:.4f} at tRNA=0"
+            )
     print(f"Wrote {args.output_dir / PREDICTIONS_FILENAME}, {results_path}")
     return report
 

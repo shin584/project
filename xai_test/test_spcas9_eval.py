@@ -12,11 +12,12 @@ from SpCas9.spcas9_eval import (
     PAM_LIBRARY,
     PREDICTIONS_FILENAME,
     TRNA_VALUES,
-    available,
     build_predictions,
     build_report,
     empty_strata,
     head_report,
+    measured_rows,
+    strata_metrics,
     write_predictions,
 )
 from SpCas9.spcas9_metrics import pred_column, true_column
@@ -95,14 +96,14 @@ def toy():
 # --- unit: a head's metrics cover only that head's available rows ---
 
 
-def test_available_keeps_exactly_the_rows_whose_label_is_measured(toy):
-    rows = available(toy, "SpCas9")
+def test_measured_rows_keeps_exactly_the_rows_whose_label_is_measured(toy):
+    rows = measured_rows(toy, "SpCas9")
 
     assert len(rows) == 9
     assert rows[true_column("SpCas9")].notna().all()
 
 
-def test_head_metrics_count_and_score_only_the_available_rows(toy):
+def test_head_metrics_count_and_score_only_the_measured_rows(toy):
     report = head_report(toy, "SpCas9")
 
     assert report["n"] == 9
@@ -134,7 +135,7 @@ def test_every_head_is_reported_even_one_with_no_measured_row(toy):
 # --- unit: the two strata, read from the split metadata ---
 
 
-def test_the_pam_library_strata_partition_the_heads_available_rows():
+def test_the_pam_library_strata_partition_the_heads_measured_rows():
     frame = _test_frame(
         [{"SpCas9": float(i), "in_pam_library": i % 2 == 0} for i in range(20)]
     )
@@ -147,7 +148,7 @@ def test_the_pam_library_strata_partition_the_heads_available_rows():
     assert library[PAM_LIBRARY]["n"] == 10
 
 
-def test_the_trna_strata_partition_the_heads_available_rows():
+def test_the_trna_strata_partition_the_heads_measured_rows():
     frame = _test_frame(
         [{"SpCas9": float(i), "trna_feature": i % 2} for i in range(20)]
     )
@@ -156,11 +157,11 @@ def test_the_trna_strata_partition_the_heads_available_rows():
     report = head_report(predictions, "SpCas9")
     trna = report["strata"]["trna_feature"]
 
-    assert [trna[value]["n"] for value in TRNA_VALUES] == [10, 10]
-    assert sum(trna[value]["n"] for value in TRNA_VALUES) == report["n"]
+    assert [trna[str(value)]["n"] for value in TRNA_VALUES] == [10, 10]
+    assert sum(trna[str(value)]["n"] for value in TRNA_VALUES) == report["n"]
 
 
-def test_a_strata_only_counts_rows_the_head_has_measured():
+def test_a_stratum_only_counts_rows_the_head_has_measured():
     frame = _test_frame(
         [
             {"SpCas9": float(i), "in_pam_library": True} if i < 6 else {"xCas": 1.0}
@@ -203,7 +204,9 @@ def test_empty_strata_are_named_so_a_missing_comparison_is_not_read_as_a_tie():
     )
     predictions = build_predictions(frame, _predictions(frame))
 
-    assert empty_strata(predictions, "SpCas9") == [f"trna_feature={TRNA_VALUES[1]}"]
+    assert empty_strata(strata_metrics(predictions, "SpCas9")) == [
+        f"trna_feature={TRNA_VALUES[1]}"
+    ]
     assert build_report(predictions)["empty_strata"]["SpCas9"] == [
         f"trna_feature={TRNA_VALUES[1]}"
     ]
@@ -326,7 +329,7 @@ def test_the_real_strata_partition_every_heads_coverage(real_test_rows):
         trna = report["strata"]["trna_feature"]
         assert report["n"] == PINNED_COVERAGE[head]
         assert library[PAM_LIBRARY]["n"] + library[NON_LIBRARY]["n"] == report["n"]
-        assert sum(trna[value]["n"] for value in TRNA_VALUES) == report["n"]
+        assert sum(trna[str(value)]["n"] for value in TRNA_VALUES) == report["n"]
 
 
 @pytest.mark.filterwarnings("ignore::scipy.stats.ConstantInputWarning")
@@ -342,9 +345,9 @@ def test_the_two_censored_heads_have_no_trna_rows_to_compare(real_test_rows):
     )
 
     censored = {
-        head: empty_strata(frame, head)
+        head: empty_strata(strata_metrics(frame, head))
         for head in HEAD_NAMES
-        if empty_strata(frame, head)
+        if empty_strata(strata_metrics(frame, head))
     }
 
     assert censored == {
