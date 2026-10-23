@@ -52,3 +52,41 @@ The analysis assumption that a 6-mer token's Integrated Gradients attribution is
 
 **Information Dependency** (Attention Rollout result):
 The recursively-rolled-out attention connectivity between input token pairs, computed as `0.5·A + 0.5·I` (applied before row-normalization) across NT's transformer layers with the `[CLS]` token removed and coordinates mapped back to nucleotide positions. Explicitly scoped as describing internal information dependency within the model, not a claim about physical DNA/protein binding.
+
+**Attribution Logo**:
+A per-sample visualization of Integrated Gradients attribution over the 36bp sequence: at each position only the actual base's letter is drawn, its height set by the signed attribution (above the axis for positive, below for negative). For Model B the attribution is the Deterministic Projection Rule's projection of token-level IG, and the view must state that assumption.
+_Avoid_: "Sequence Logo" (in bioinformatics that means an information-content (bits) logo over an alignment, which this is not)
+
+**Token-grouped SHAP**:
+Model B's per-sample SHAP summary in which the 8,960 embedding dimensions are collapsed into their 7 source tokens (signed sum of SHAP over each token's 1,280 dimensions, so each group shows whether it pushed the score up or down), shown alongside the 4 physical features individually — 11 groups in total. Of the 7 tokens, 6 are the 6-mers covering the 36bp sequence and one is `[CLS]`, which maps to no position and is labelled as global sequence context. Individual embedding dimension indices are never shown to users, since they carry no human-readable meaning.
+
+## Language — SpCas9 multi-variant models
+
+These terms describe a separate model family from Model A / Model B: nine SpCas9 variant heads over the Kim 2020 dataset, not SaCas9. They share no weights, no dataset and no split with the SaCas9 pipeline above.
+
+**9-Hydra v1**:
+The previous SpCas9 multi-variant model: one-hot encoded 30bp sequence → `Conv1D(128,3)` + `BatchNormalization` + `LSTM(64)` + `Dropout(0.3)` + `Dense(64)` shared trunk → 9 per-variant heads (`Dense(32)` → `Dense(1)`, sigmoid). Weights in `SpCas9/Multi-Cas_1IN_9Hydra_Divide_Testset.keras`, built by `models/Multi_Cas_1IN_9Hydra_Divide_Testset.ipynb`. Trained on a row-level `train_test_split(test_size=0.1, random_state=42)` over the all-9-heads subset, with Keras `validation_split=0.2`; its split roles rebuild deterministically as 21,097 train / 5,275 val / 2,931 test.
+_Avoid_: "Model A" (that is the SaCas9 model), "the SpCas9 model" alone (ambiguous — Model A was pretrained on SpCas9 data too)
+
+**9-Hydra v2**:
+The current SpCas9 multi-variant model: 9-Hydra v1's architecture unchanged except a **linear** output head in place of sigmoid, trained on the 9-Hydra split with a masked per-head loss so each row contributes only to the variant heads it actually has measured. Labels are the published percentages divided by 100, a range that spans negatives (−7.5 to 95.4 raw) and which sigmoid could not represent.
+_Avoid_: "the new 9-Hydra", "the fixed model" (ambiguous once v3 exists — v3 is the architecture revision)
+
+**9-Hydra Testset**:
+The 5,186 rows of `dataset/kim_2020_table_s8.xlsx` whose `Use (Training or Test)` column reads `Test`, restricted to 30bp sequences with at least one measured variant head. It shares zero protospacers and zero exact 30-mers with the 32,810 training rows. Per-head label coverage is 5,021 for `SpCas9` and ~5,170 for most heads, but only 3,982 / 3,979 for `SpCas9-NG` / `VRQR variant`.
+_Avoid_: "Testset" unqualified (that is the 514-row SaCas9 set defined above)
+
+**SpCas9 target window**:
+The layout of the 30bp input sequence: left flank at 0-indexed positions 0-3, 20nt **protospacer** at 4-23, 3nt PAM at 24-26, right flank at 27-29.
+_Avoid_: "PAM window" (that term is defined above for SaCas9's 36bp sequence at positions 25-30 — a different layout entirely)
+
+**Unseen target / PAM-variant overlap / Exact duplicate**:
+Three mutually exclusive, exhaustive categories for a row being evaluated, describing its relationship to a model's training rows. Defined at the protospacer level, because the dataset contains a PAM library of 30 protospacers each repeated across up to 268 rows that vary only at positions 24-29.
+- **Unseen target**: the protospacer appears in no training row.
+- **PAM-variant overlap**: the protospacer appears in training, but this exact 30-mer does not — a known target with a new PAM and a new 3' flank. A legitimate generalization test, *not* memorization.
+- **Exact duplicate**: this exact 30-mer appears in a training row. The only category that is memorization.
+
+Over 9-Hydra v1's 2,931 test rows the split is 2,191 / 699 / 41. The categories are reported separately and never pooled into a single "seen" figure, since 94% of the overlap mass is the benign kind.
+_Avoid_: binary "seen / unseen"; "known target, new PAM" as the name for the middle category (the 3' flank varies too)
+
+
