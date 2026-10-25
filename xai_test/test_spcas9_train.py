@@ -122,6 +122,20 @@ def test_labels_follow_the_head_name_not_the_column_order():
     assert weights[output_name(HF1)].tolist() == [1.0, 0.0]
 
 
+def test_reference_loss_uses_binary_mask_all_heads_and_validation_row_denominator():
+    from SpCas9.spcas9_train import reference_validation_loss
+
+    frame = _frame([{ESPCAS9: 100.0, HF1: 200.0}, {ESPCAS9: 300.0}])
+    labels, weights = masked_labels_and_weights(frame)
+    predictions = {output_name(h): np.zeros(2) for h in reversed(HEAD_NAMES)}
+    predictions[output_name(HF1)] = np.array([0.0, 9999.0])
+    # (1**2 + 3**2 + 2**2) / 2 rows = 7, not /3 measurements or /9 heads.
+    assert reference_validation_loss(labels, weights, predictions) == 7.0
+    # A placeholder must never enter the criterion, even if non-finite.
+    labels[output_name(HF1)][1] = np.nan
+    assert reference_validation_loss(labels, weights, predictions) == 7.0
+
+
 def test_head_coverage_counts_measured_rows_per_head():
     frame = _frame([{"SpCas9": 1.0, HF1: 2.0}, {"SpCas9": 3.0}])
 

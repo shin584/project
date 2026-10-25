@@ -115,6 +115,9 @@ LR_FACTOR = 0.2
 LR_PATIENCE = 3
 MIN_LR = 1e-6
 
+# The study uses this independently of a recipe's optimization objective.
+REFERENCE_LOSS = "val_reference_masked_mse"
+
 # The smoke run exists to exercise the plumbing, not to fit anything.
 SMOKE_EPOCHS = 1
 SMOKE_ROWS = 256
@@ -221,23 +224,63 @@ def compile_model(model, learning_rate: float = LEARNING_RATE) -> None:
     )
 
 
-def training_callbacks() -> list:
+def training_callbacks(monitor: str = "val_loss") -> list:
     """v1's early stopping and LR schedule, both watching the carve-out's loss."""
     import keras
 
     return [
         keras.callbacks.EarlyStopping(
-            monitor="val_loss",
+            monitor=monitor,
+            mode="min",
             patience=EARLY_STOPPING_PATIENCE,
             restore_best_weights=True,
         ),
         keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss",
+            monitor=monitor,
+            mode="min",
             factor=LR_FACTOR,
             patience=LR_PATIENCE,
             min_lr=MIN_LR,
         ),
     ]
+
+
+def reference_validation_loss(
+    labels: dict[str, np.ndarray],
+    binary_masks: dict[str, np.ndarray],
+    predictions: dict[str, np.ndarray],
+) -> float:
+    """Equal-head masked SSE / rows, independent of recipe training weights.
+
+    All arrays are aligned by output layer name. Select measured slots before
+    arithmetic so a missing-label placeholder cannot contribute, even as NaN.
+    Only binary masks are accepted; R2/R3 optimization weights cannot be passed
+    off as the common checkpoint-selection criterion.
+    """
+    rows = len(labels[output_name(HEAD_NAMES[0])])
+    if rows == 0:
+        raise ValueError("reference validation requires rows")
+    total = 0.0
+    for head in HEAD_NAMES:
+        name = output_name(head)
+        truth = np.asarray(labels[name], dtype=float).reshape(-1)
+        mask = np.asarray(binary_masks[name], dtype=float).reshape(-1)
+        predicted = np.asarray(predictions[name], dtype=float).reshape(-1)
+        if any(len(values) != rows for values in (truth, mask, predicted)):
+            raise ValueError(f"{head}: reference validation row mismatch")
+        if not np.isin(mask, [0.0, 1.0]).all():
+            raise ValueError(
+                "reference validation requires binary measured-label masks"
+            )
+        measured = mask == 1.0
+        errors = predicted[measured] - truth[measured]
+        if not np.isfinite(errors).all():
+            raise ValueError(f"{head}: non-finite reference validation measurement")
+        total += float(np.sum(np.square(errors)))
+    loss = total / rows
+    if not np.isfinite(loss):
+        raise ValueError("non-finite reference validation loss")
+    return loss
 
 
 def subsample(frame: pd.DataFrame, n_rows: int, seed: int = SEED) -> pd.DataFrame:
