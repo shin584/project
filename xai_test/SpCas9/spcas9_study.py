@@ -4,11 +4,9 @@ Planning and report-only inspection never import a training backend. Selection
 freeze and final Test evaluation are explicit, closed stages until later tickets.
 """
 
-import hashlib
 import json
 import platform
 import re
-import subprocess
 import sys
 import time
 import uuid
@@ -19,8 +17,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
-from SpCas9.spcas9_data import BASE_DIR, HEAD_NAMES, library_versions, output_name
+from SpCas9.spcas9_data import HEAD_NAMES, library_versions, output_name
 from SpCas9.spcas9_eval import build_predictions, build_report
+from SpCas9.spcas9_execution import reserve_destination, source_record
 from SpCas9.spcas9_metrics import predictions_by_head
 from SpCas9.spcas9_split import file_sha256, write_json
 from SpCas9.spcas9_study_inputs import REQUIRED_ROWS, InputPins, StudyInputs
@@ -97,29 +96,6 @@ def _stopping(history: dict[str, list[float]]) -> dict:
     }
 
 
-def _source_record() -> dict:
-    root = BASE_DIR.parent
-
-    def git(*args: str) -> str:
-        return (
-            subprocess.check_output(["git", "-C", str(root), *args])
-            .decode("utf-8")
-            .strip()
-        )
-
-    sources = list((BASE_DIR / "SpCas9").glob("*.py")) + list(BASE_DIR.glob("*.py"))
-    sources += [root / "ruff.toml", BASE_DIR / "CONTEXT.md"]
-    sources += list((BASE_DIR / "docs" / "adr").glob("*.md"))
-    files = {p.relative_to(root).as_posix(): file_sha256(p) for p in sorted(sources)}
-    snapshot = hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
-    return {
-        "revision": git("rev-parse", "HEAD"),
-        "dirty": bool(git("status", "--porcelain", "--untracked-files=normal")),
-        "snapshot_sha256": snapshot,
-        "files": files,
-    }
-
-
 def _protocol(inputs: StudyInputs) -> dict:
     params = hyperparameter_record()
     for key in ("early_stopping", "reduce_lr_on_plateau"):
@@ -173,13 +149,13 @@ class StudyProtocol:
         inputs = inputs or StudyInputs()
         inputs.validate()
         path = Path(output_root) / _identifier(study_id or f"study-{uuid.uuid4().hex}")
-        path.mkdir(parents=True, exist_ok=False)
+        reserve_destination(path)
         protocol_path = write_json(_protocol(inputs), path / "protocol.json")
         write_json(
             {
                 "created_at": _now(),
                 "protocol_sha256": file_sha256(protocol_path),
-                "source": _source_record(),
+                "source": source_record(),
                 "environment": {
                     "python": sys.version,
                     "platform": platform.platform(),
@@ -202,7 +178,7 @@ class StudyProtocol:
             raise ValueError("training seed must be 42, 43 or 44")
         run_id = _identifier(run_id or f"v2-{seed}-{uuid.uuid4().hex}")
         path = self.path / "runs" / run_id
-        path.mkdir(parents=True, exist_ok=False)
+        reserve_destination(path)
         write_json(
             {"recipe": "v2", "seed": seed, "created_at": _now()}, path / "plan.json"
         )
@@ -240,7 +216,7 @@ class StudyProtocol:
         try:
             protocol = self._protocol()
             frames = StudyInputs.from_record(protocol["inputs"]).validate()
-            source = _source_record()
+            source = source_record()
             execution = {
                 "source": source,
                 "inputs": protocol["inputs"],
