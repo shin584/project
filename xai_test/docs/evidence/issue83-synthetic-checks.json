@@ -1,0 +1,90 @@
+{
+  "optimizer_updates_charged": 6,
+  "training_seconds_charged": 339.0715981001407,
+  "sessions": [
+    {
+      "status": "finished",
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 30.22,
+      "result": "initial missing-module red; no model constructed"
+    },
+    {
+      "status": "finished",
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 19.93,
+      "result": "MSE scalar and every trainable-weight gradient parity passed"
+    },
+    {
+      "status": "finished",
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 24.46,
+      "result": "ranking fields missing red"
+    },
+    {
+      "status": "finished",
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 25.786960900062695
+    },
+    {
+      "status": "finished",
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 27.674637200077996
+    },
+    {
+      "status": "interrupted",
+      "optimizer_updates_reserved": 6,
+      "started_at_local": "2026-10-27T18:50:03+09:00",
+      "confirmed_stopped_not_later_than_local": "2026-10-27T18:53:33.2870555+09:00",
+      "elapsed_upper_bound_seconds": 211,
+      "actual_elapsed_seconds": null,
+      "accounting": "Conservative ceiling of process creation to first confirmed post-interruption clock; includes import/evaluation overhead. No retry or further optimizer update authorized."
+    }
+  ],
+  "budget_status": "exhausted; interrupted integration validation incomplete",
+  "issue": 83,
+  "validation_status": "incomplete: interrupted actual-backend integration; no further optimizer updates",
+  "full_fits_started": 0,
+  "preserved_disposable_checkpoints": {
+    "ranked.keras": {
+      "path": ".scratch/issue83-interrupted-checkpoints/ranked.keras",
+      "sha256": "3cb737d96edd018976d25df910e7d8b562a6f5e8abcebb490d3e9544acb3ef37",
+      "bytes": 401285
+    },
+    "reference.keras": {
+      "path": ".scratch/issue83-interrupted-checkpoints/reference.keras",
+      "sha256": "ebf4e3700391c361622dbbcae89487aebf1b732d424b5572b8c09f8cd61e7a23",
+      "bytes": 1029861
+    },
+    "zero.keras": {
+      "path": ".scratch/issue83-interrupted-checkpoints/zero.keras",
+      "sha256": "8142a8773ec0e99b627c48e59b3bf3a49ac2d48f79d6959bbbbf0723cd561b16",
+      "bytes": 401285
+    }
+  },
+  "source_sha256": {
+    "xai_test/SpCas9/spcas9_ranking.py": "d0a2eaed11d43ec2817297854f3233de3daa6328da38e287de2a6186a9ccba26",
+    "xai_test/SpCas9/spcas9_ranking_checks.py": "1dcb633b14ba768c0d3f028cd449cd10994f69bd423b78121833419ff503675a",
+    "xai_test/SpCas9/spcas9_study_backend.py": "e6ee3ab9c80d78fbbb42275f528ba7ff0c49f8a2dd1b0e11616c252e283e69e3",
+    "xai_test/test_spcas9_ranking.py": "132de2980fed0829362d64e0712fbdef7188729fe98a72a10347d979e2856ca2",
+    "xai_test/test_spcas9_ranking_checks.py": "b6b0d4a0aa17b4911fb9363d01dca0110016b8066e250aed2a51e8c3748a4234"
+  },
+  "base_revision": "d761c083d9b2bcdedd9ee3348642f9455e6484bb",
+  "regression_validation": {
+    "full_suite": {
+      "passed": 690,
+      "skipped": 7,
+      "elapsed_seconds": 665.25,
+      "synthetic_checks_opt_in": true
+    },
+    "final_watchdog_and_study_recheck": {
+      "passed": 6
+    },
+    "mypy_source_files_passed": 3,
+    "ruff": "passed"
+  },
+  "review": {
+    "standards_findings": 0,
+    "spec_findings": 1,
+    "unresolved": "Actual-backend combined-gradient and final checkpoint/reload completion evidence; original 300-second complete-check allowance not demonstrated."
+  }
+}
