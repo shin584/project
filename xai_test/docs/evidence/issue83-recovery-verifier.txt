@@ -1,0 +1,178 @@
+"""User-approved, at-most-120-second checkpoint verification; no optimizer updates."""
+
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+EVIDENCE = ROOT / "xai_test/docs/evidence/issue83-synthetic-checks.json"
+LEDGER = ROOT / ".scratch/issue83-synthetic-budget.json"
+DESTINATION = ROOT / ".scratch/issue83-recovered-verification"
+
+
+def write_record(path, record):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(record, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+def child():
+    # All checkpoint hashes are checked before any framework consumes them.
+    evidence = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    paths = {}
+    for name, artifact in evidence["preserved_disposable_checkpoints"].items():
+        path = ROOT / artifact["path"]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == artifact["sha256"]
+        paths[name] = path
+
+    import keras
+    import numpy as np
+    import tensorflow as tf
+
+    sys.path.insert(0, str(ROOT / "xai_test"))
+    from SpCas9.spcas9_data import HEAD_NAMES, output_name
+    from SpCas9.spcas9_study_backend import KerasNggBackend
+    from test_spcas9_ranking import fixture_batch
+
+    report = {"status": "running", "optimizer_updates_added": 0, "checks": {}}
+    report_path = DESTINATION / "results.json"
+
+    def passed(name, details):
+        report["checks"][name] = details
+        write_record(report_path, report)
+        print(name, flush=True)
+
+    # Default loading: no custom objects, training wrappers or registrations.
+    models = {name: keras.models.load_model(path) for name, path in paths.items()}
+    assert all(type(model).__name__ == "Functional" for model in models.values())
+    for model in models.values():
+        assert all(np.isfinite(weight.numpy()).all() for weight in model.weights)
+    initial_iterations = {name: int(model.optimizer.iterations.numpy()) for name, model in models.items()}
+    passed("plain_checkpoint_loading", {"models": len(models), "all_weights_finite": True})
+
+    max_weight_difference = 0.0
+    for left, right in zip(models["reference.keras"].weights, models["zero.keras"].weights, strict=True):
+        np.testing.assert_allclose(left, right, rtol=1e-5, atol=1e-6)
+        max_weight_difference = max(max_weight_difference, float(np.max(np.abs(left.numpy() - right.numpy()))))
+    passed("zero_weight_fit_checkpoint_parity", {"max_absolute_weight_difference": max_weight_difference})
+
+    model = models["ranked.keras"]
+    inputs, labels, masks = fixture_batch()
+    named_outputs = {output_name(head) for head in HEAD_NAMES}
+    before = model(inputs, training=False)
+    backend_outputs = KerasNggBackend().predict(paths["ranked.keras"], inputs)
+    assert set(before) == set(backend_outputs) == named_outputs
+    for name in named_outputs:
+        assert np.isfinite(backend_outputs[name]).all()
+        np.testing.assert_allclose(before[name], backend_outputs[name], rtol=1e-5, atol=1e-6)
+    passed("actual_backend_reload_parity", {"outputs": 9, "rows": len(inputs), "rtol": 1e-5, "atol": 1e-6})
+
+    from SpCas9.spcas9_ranking import training_adapter, training_objective
+
+    keras.utils.set_random_seed(42)
+    masked_labels = {name: tf.constant(np.where(masks[name] == 1, value, np.nan), dtype=tf.float32) for name, value in labels.items()}
+    with tf.GradientTape(persistent=True) as tape:
+        predictions = model(inputs, training=True)
+        native = model.compute_loss(x=inputs, y=labels, y_pred=predictions, sample_weight=masks)
+        zero = training_objective(inputs, masked_labels, masks, predictions, auxiliary_weight=0.0)
+        combined = training_objective(inputs, masked_labels, masks, predictions)
+    np.testing.assert_allclose(native, zero["loss"], rtol=1e-5, atol=1e-6)
+    native_gradients = tape.gradient(native, model.trainable_weights)
+    zero_gradients = tape.gradient(zero["loss"], model.trainable_weights)
+    combined_gradients = tape.gradient(combined["loss"], model.trainable_weights)
+    for native_gradient, zero_gradient, combined_gradient in zip(native_gradients, zero_gradients, combined_gradients, strict=True):
+        assert native_gradient is not None and zero_gradient is not None and combined_gradient is not None
+        np.testing.assert_allclose(native_gradient, zero_gradient, rtol=1e-5, atol=1e-6)
+        assert np.isfinite(combined_gradient).all()
+    assert all(np.isfinite(combined[name]).all() for name in combined)
+    passed("combined_loss_and_all_gradients", {
+        "trainable_tensors": len(combined_gradients), "masked_mse": float(combined["masked_mse"]),
+        "ranking": float(combined["ranking"]), "combined_loss": float(combined["loss"]),
+        "pair_counts": combined["pair_counts"].numpy().tolist(),
+        "gap_weight_sums": combined["gap_weight_sums"].numpy().tolist(),
+        "zero_weight_native_scalar_and_gradient_parity": True,
+    })
+
+    # Exercise the final adapter/metrics implementation without applying an update.
+    trainer = training_adapter(model)
+    trainer_iterations_before = int(trainer.optimizer.iterations.numpy())
+    with tf.GradientTape() as tape:
+        predictions = trainer(inputs, training=True)
+        loss = trainer.compute_loss(x=inputs, y=masked_labels, y_pred=predictions, sample_weight=masks)
+    gradients = tape.gradient(loss, trainer.trainable_weights)
+    assert np.isfinite(loss)
+    assert all(gradient is not None and np.isfinite(gradient).all() for gradient in gradients)
+    metrics = trainer.compute_metrics(inputs, masked_labels, predictions, sample_weight=masks)
+    assert all(np.isfinite(value).all() for value in metrics.values())
+    assert int(trainer.optimizer.iterations.numpy()) == trainer_iterations_before
+    passed("training_adapter_loss_gradient_metrics", {"loss": float(loss), "metrics": {name: float(value) for name, value in metrics.items()}})
+
+    # Reuse a prediction for a one-row partial batch and the all-missing case.
+    partial = training_objective(inputs[:1], {k: v[:1] for k, v in masked_labels.items()}, {k: v[:1] for k, v in masks.items()}, {k: v[:1] for k, v in predictions.items()})
+    assert not np.any(partial["pair_counts"])
+    native_partial = model.compute_loss(x=inputs[:1], y={k: v[:1] for k, v in labels.items()}, y_pred={k: v[:1] for k, v in predictions.items()}, sample_weight={k: v[:1] for k, v in masks.items()})
+    np.testing.assert_allclose(partial["loss"], native_partial, rtol=1e-5, atol=1e-6)
+    empty = training_objective(inputs, masked_labels, {k: np.zeros_like(v) for k, v in masks.items()}, predictions)
+    assert float(empty["loss"]) == float(empty["ranking"]) == 0
+    passed("partial_batch_and_empty_heads", {"partial_rows": 1, "empty_loss": 0.0})
+
+    # The adapter shares the functional model's updated BatchNorm state. Save
+    # that ordinary graph and compare before/after using default loading.
+    roundtrip = DESTINATION / "roundtrip.keras"
+    before = model(inputs, training=False)
+    model.save(roundtrip)
+    reloaded = keras.models.load_model(roundtrip)
+    after = reloaded(inputs, training=False)
+    assert type(reloaded).__name__ == "Functional" and set(after) == named_outputs
+    for name in named_outputs:
+        np.testing.assert_allclose(before[name], after[name], rtol=1e-5, atol=1e-6)
+    assert initial_iterations == {name: int(value.optimizer.iterations.numpy()) for name, value in models.items()}
+    assert trainer_iterations_before == int(trainer.optimizer.iterations.numpy())
+    passed("functional_save_reload_parity", {"outputs": 9, "rtol": 1e-5, "atol": 1e-6, "custom_objects": False})
+    # Preserve the original model and evidence bytes throughout recovery.
+    for name, artifact in evidence["preserved_disposable_checkpoints"].items():
+        assert hashlib.sha256(paths[name].read_bytes()).hexdigest() == artifact["sha256"]
+    report.update(status="completed", original_checkpoint_hashes_preserved=True, optimizer_iterations_unchanged=True)
+    write_record(report_path, report)
+
+
+def parent():
+    DESTINATION.mkdir(parents=True, exist_ok=False)
+    record = json.loads(LEDGER.read_text(encoding="utf-8"))
+    session = {
+        "status": "running", "kind": "user_approved_checkpoint_verification",
+        "authorization": "User replied y to maximum 120 additional seconds, no optimizer updates or full fits",
+        "started_at": datetime.now(timezone.utc).isoformat(), "wall_time_limit_seconds": 120,
+        "optimizer_updates_reserved": 0,
+    }
+    record["sessions"].append(session)
+    write_record(LEDGER, record)
+    started = time.monotonic()
+    status, code = "failed", 1
+    try:
+        with (DESTINATION / "stdout.log").open("w", encoding="utf-8") as stdout, (DESTINATION / "stderr.log").open("w", encoding="utf-8") as stderr:
+            result = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--child"], cwd=ROOT, stdout=stdout, stderr=stderr, timeout=119, check=False, env=dict(os.environ))
+        code = result.returncode
+        status = "completed" if code == 0 else "failed"
+    except subprocess.TimeoutExpired:
+        status, code = "timed_out", 124
+    finally:
+        elapsed = time.monotonic() - started
+        record["training_seconds_charged"] += elapsed
+        session.update(status=status, duration_seconds=elapsed, finished_at=datetime.now(timezone.utc).isoformat())
+        write_record(LEDGER, record)
+        write_record(DESTINATION / "execution.json", {"status": status, "duration_seconds": elapsed, "optimizer_updates_added": 0, "return_code": code})
+        print(json.dumps({"status": status, "duration_seconds": elapsed, "optimizer_updates_added": 0, "return_code": code}), flush=True)
+    return code
+
+
+if __name__ == "__main__":
+    if "--child" in sys.argv:
+        child()
+    else:
+        raise SystemExit(parent())

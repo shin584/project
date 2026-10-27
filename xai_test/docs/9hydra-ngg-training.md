@@ -72,8 +72,8 @@ for that session, in addition to the previously recorded 128.071598 seconds:
 339.071598 seconds in total. This upper bound includes imports/evaluation;
 the actual interrupted-session duration is unknown. The conservative charge
 exhausts the 300-second allowance, so no further synthetic fitting is permitted.
-This is incomplete validation, not evidence of an adopted candidate or a
-successful full study. Preserve the interrupted ledger for #85 accounting.
+That original check was incomplete. Preserve its interrupted-session charge
+for #85 accounting; the recovery below does not reset or replace that history.
 
 The tracked handoff is `docs/evidence/issue83-synthetic-checks.json`, including
 source/checkpoint digests and the conservative charge. Disposable checkpoint
@@ -82,5 +82,48 @@ are local artifacts, not replacements for trained v2 checkpoints.
 The final ordinary regression suite passed 690 tests (7 skipped, including
 the four opt-in synthetic checks); the final watchdog/study recheck passed
 six tests. Ruff and mypy passed for the changed sources. Independent review
-found no remaining Standards issue and one unresolved Spec verification
+initially found no remaining Standards issue and one unresolved Spec verification
 finding: completed actual-backend gradient and final reload evidence.
+
+## Approved verification recovery
+
+The user subsequently approved up to 120 additional seconds for verification
+of the preserved checkpoints, with no optimizer updates and no full fit. The
+external-timeout recovery completed in 56.921622 seconds. This is an explicit
+exception to the original check-time allowance, not evidence that all checks
+finished within the original 300 seconds. The conservative cumulative charge
+is now 395.993220 seconds; optimizer updates remain at six reserved, with zero
+added during recovery. Import the full cumulative charge into #85.
+
+All seven recovery checks passed:
+
+- All three checkpoints loaded as ordinary functional models without custom
+  objects, with finite saved weights and preserved original file hashes.
+- Reference and zero-auxiliary fit checkpoints had identical weights, including
+  non-trainable state (maximum absolute difference zero).
+- The actual backend reproduced all nine outputs from the preserved candidate
+  checkpoint at rtol=1e-5, atol=1e-6.
+- The combined objective and all 45 trainable-tensor gradients were finite;
+  zero-weight scalar and gradient parity with native Keras passed again using
+  the same forward pass and masked non-finite placeholders.
+- The final training adapter's loss, gradients and weighted metrics were finite
+  without applying an optimizer update.
+- A one-row partial batch retained native MSE reduction, and empty eligible
+  heads contributed finite zero.
+- Saving the shared functional inference model and loading it with default
+  Keras loading preserved all nine predictions within the same tolerance.
+
+Default loading warns that the candidate inference checkpoint has no fitted
+Adam slot state. Those slots belong to the disposable training adapter, so
+these checkpoints support inference verification, not training resume. The
+recovery checked that optimizer iteration counts stayed unchanged.
+
+The tracked results, approval and accounting are in
+`docs/evidence/issue83-synthetic-checks.json`. The exact verifier is archived in
+`docs/evidence/issue83-recovery-verifier.txt`; local execution logs and the new
+disposable roundtrip checkpoint remain in `.scratch/issue83-recovered-verification/`.
+This completes the outstanding implementation verification under the approved
+exception. It establishes no model-performance improvement or adoption result;
+full-study execution still depends on the subsequent tickets.
+Follow-up independent Standards and Spec reviews found no unresolved findings
+under the approved verification exception.

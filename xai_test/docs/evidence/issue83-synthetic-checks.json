@@ -1,6 +1,6 @@
 {
   "optimizer_updates_charged": 6,
-  "training_seconds_charged": 339.0715981001407,
+  "training_seconds_charged": 395.993219800191,
   "sessions": [
     {
       "status": "finished",
@@ -38,11 +38,21 @@
       "elapsed_upper_bound_seconds": 211,
       "actual_elapsed_seconds": null,
       "accounting": "Conservative ceiling of process creation to first confirmed post-interruption clock; includes import/evaluation overhead. No retry or further optimizer update authorized."
+    },
+    {
+      "status": "completed",
+      "kind": "user_approved_checkpoint_verification",
+      "authorization": "User replied y to maximum 120 additional seconds, no optimizer updates or full fits",
+      "started_at": "2026-10-27T10:43:07.688314+00:00",
+      "wall_time_limit_seconds": 120,
+      "optimizer_updates_reserved": 0,
+      "duration_seconds": 56.92162170005031,
+      "finished_at": "2026-10-27T10:44:04.611319+00:00"
     }
   ],
-  "budget_status": "exhausted; interrupted integration validation incomplete",
+  "budget_status": "original allowance exhausted; completed with explicit user-approved <=120-second zero-update verification exception",
   "issue": 83,
-  "validation_status": "incomplete: interrupted actual-backend integration; no further optimizer updates",
+  "validation_status": "completed_under_user_approved_checkpoint_verification_exception",
   "full_fits_started": 0,
   "preserved_disposable_checkpoints": {
     "ranked.keras": {
@@ -84,7 +94,126 @@
   },
   "review": {
     "standards_findings": 0,
-    "spec_findings": 1,
-    "unresolved": "Actual-backend combined-gradient and final checkpoint/reload completion evidence; original 300-second complete-check allowance not demonstrated."
+    "spec_findings": 0,
+    "resolved": "Actual-backend finite-gradient, zero-weight parity and final checkpoint/reload checks passed in the approved zero-update recovery. Original 300-second requirement is covered by the explicit user-approved exception, not retroactively claimed."
+  },
+  "verification_recovery": {
+    "authorization": "User replied y to maximum 120 additional seconds for checkpoint verification; no additional optimizer updates or full fits",
+    "original_check_time_limit_seconds": 300,
+    "additional_verification_time_limit_seconds": 120,
+    "original_complete_check_300_second_requirement_demonstrated": false,
+    "execution": {
+      "status": "completed",
+      "duration_seconds": 56.92162170005031,
+      "optimizer_updates_added": 0,
+      "return_code": 0
+    },
+    "results": {
+      "status": "completed",
+      "optimizer_updates_added": 0,
+      "checks": {
+        "plain_checkpoint_loading": {
+          "models": 3,
+          "all_weights_finite": true
+        },
+        "zero_weight_fit_checkpoint_parity": {
+          "max_absolute_weight_difference": 0.0
+        },
+        "actual_backend_reload_parity": {
+          "outputs": 9,
+          "rows": 3,
+          "rtol": 1e-05,
+          "atol": 1e-06
+        },
+        "combined_loss_and_all_gradients": {
+          "trainable_tensors": 45,
+          "masked_mse": 0.2679033875465393,
+          "ranking": 0.35883304476737976,
+          "combined_loss": 0.2714917063713074,
+          "pair_counts": [
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0
+          ],
+          "gap_weight_sums": [
+            0.0,
+            0.25,
+            0.0,
+            0.3499999940395355,
+            0.0,
+            0.44999998807907104,
+            0.0,
+            0.550000011920929,
+            0.0
+          ],
+          "zero_weight_native_scalar_and_gradient_parity": true
+        },
+        "training_adapter_loss_gradient_metrics": {
+          "loss": 0.2406388521194458,
+          "metrics": {
+            "loss": 0.0,
+            "Output_HypaCas9_mae": 0.24499396979808807,
+            "Output_Sniper_Cas9_mae": 0.029158394783735275,
+            "Output_SpCas9_mae": 0.08064983040094376,
+            "Output_SpCas9_HF_1_mae": 0.12374911457300186,
+            "Output_SpCas9_NG_mae": 0.129546120762825,
+            "Output_VRQR_variant_mae": 0.14467209577560425,
+            "Output_eSpCas9_1_1__mae": 0.0679503083229065,
+            "Output_evoCas9_mae": 0.12933024764060974,
+            "Output_xCas_mae": 0.1835738867521286,
+            "masked_mse": 0.2377358227968216,
+            "ngg_ranking": 0.2903030812740326,
+            "ngg_pairs_Output_SpCas9": 0.0,
+            "ngg_gap_weight_sum_Output_SpCas9": 0.0,
+            "ngg_pairs_Output_SpCas9_NG": 1.0,
+            "ngg_gap_weight_sum_Output_SpCas9_NG": 0.25,
+            "ngg_pairs_Output_VRQR_variant": 0.0,
+            "ngg_gap_weight_sum_Output_VRQR_variant": 0.0,
+            "ngg_pairs_Output_xCas": 1.0,
+            "ngg_gap_weight_sum_Output_xCas": 0.3499999940395355,
+            "ngg_pairs_Output_Sniper_Cas9": 0.0,
+            "ngg_gap_weight_sum_Output_Sniper_Cas9": 0.0,
+            "ngg_pairs_Output_SpCas9_HF_1": 1.0,
+            "ngg_gap_weight_sum_Output_SpCas9_HF_1": 0.44999998807907104,
+            "ngg_pairs_Output_eSpCas9_1_1_": 0.0,
+            "ngg_gap_weight_sum_Output_eSpCas9_1_1_": 0.0,
+            "ngg_pairs_Output_HypaCas9": 1.0,
+            "ngg_gap_weight_sum_Output_HypaCas9": 0.550000011920929,
+            "ngg_pairs_Output_evoCas9": 0.0,
+            "ngg_gap_weight_sum_Output_evoCas9": 0.0
+          }
+        },
+        "partial_batch_and_empty_heads": {
+          "partial_rows": 1,
+          "empty_loss": 0.0
+        },
+        "functional_save_reload_parity": {
+          "outputs": 9,
+          "rtol": 1e-05,
+          "atol": 1e-06,
+          "custom_objects": false
+        }
+      },
+      "original_checkpoint_hashes_preserved": true,
+      "optimizer_iterations_unchanged": true
+    },
+    "verifier": {
+      "executed_path": ".scratch/issue83-recover-verification.py",
+      "archive_path": "xai_test/docs/evidence/issue83-recovery-verifier.txt",
+      "sha256": "c7a2aef14d7c3d6d7421c74bddac0f3c39100a7bfc24279d735f4ceed9743be2"
+    },
+    "artifact_sha256": {
+      "stdout.log": "b9587c2d7a74996dbc8591716cb1e08275c45392f4e9daee3e759007abbe808e",
+      "stderr.log": "3e75486f621c19f7e8808047454b2b96277dc441085b23ddea27ac1dbb6b27e7",
+      "execution.json": "1450ce38ca5ed95566c4a22e1eddea1722e4721e53071f0aa43a691573d203f7",
+      "results.json": "12cf1b5c7b62ce63d324945ec2de6fc7b5d66db65dd6aee4cd484c22ba391d61",
+      "roundtrip.keras": "69cded440b7098284f336a90e8be4951734e9900d5a65235cba668bb17e4fae7"
+    }
   }
 }
