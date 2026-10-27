@@ -83,6 +83,19 @@ _IUPAC_TABLE: dict[str, str] = {
     "V": "[ACG]",
 }
 
+# Explicit v2 output contract; dictionary insertion order has no meaning.
+HYDRA_OUTPUT_LAYERS: dict[str, str] = {
+    "SpCas9": "Output_SpCas9",
+    "SpCas9-NG": "Output_SpCas9_NG",
+    "VRQR variant": "Output_VRQR_variant",
+    "xCas": "Output_xCas",
+    "Sniper-Cas9": "Output_Sniper_Cas9",
+    "SpCas9-HF.1": "Output_SpCas9_HF_1",
+    "eSpCas9(1.1)": "Output_eSpCas9_1_1_",
+    "HypaCas9": "Output_HypaCas9",
+    "evoCas9": "Output_evoCas9",
+}
+
 
 # ════════════════════════════════════════════════
 # 섹션 2. 데이터 구조
@@ -95,11 +108,14 @@ class PredictionResult:
 
     efficiency: float | None = None
     reason: str | None = None
+    efficiencies_by_protein: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.efficiency is None:
             if not self.reason:
                 raise ValueError("Unavailable predictions require a reason")
+            if self.efficiencies_by_protein:
+                raise ValueError("Unavailable predictions cannot contain efficiencies")
         elif not math.isfinite(self.efficiency):
             raise ValueError("Non-finite efficiency")
         elif self.reason is not None:
@@ -119,12 +135,14 @@ class CandidateSite:
     pam_start: int  # PAM 시작점(인덱스 형태)
     cut_pos: int  # 절단 위치
     distance: int  # 변이와의 거리
-    guide_seq: str  # gRNA 서열(AI 모델에 입력값으로 넣을 가이드 서열)
+    guide_seq: str  # gRNA protospacer; distinct from the model input window
     pam_seq: str  # 발견된 PAM 서열
     prediction: PredictionResult = field(
         default_factory=lambda: PredictionResult(reason="Prediction not requested")
     )
     final_score: float | None = None  # 거리패널티 적용 후 % 값
+    model_input_seq: str | None = None  # SpCas9: 4 + 20 + 3 + 3 in model orientation
+    model_input_reason: str | None = None
 
     @property
     def raw_score(self) -> float | None:
@@ -339,17 +357,28 @@ def scan_pam(
             ):  # 절단위치와 변이 위치 사이의 거리 계산해서 유효 서열만 추림
                 continue
 
-            sites.append(
-                CandidateSite(
-                    cas_type=cfg.name,
-                    strand=strand,
-                    pam_start=pam_start,
-                    cut_pos=cut_pos,
-                    distance=distance,
-                    guide_seq=search_seq[guide_start:guide_end],
-                    pam_seq=m.group(),
-                )
+            site = CandidateSite(
+                cas_type=cfg.name,
+                strand=strand,
+                pam_start=pam_start,
+                cut_pos=cut_pos,
+                distance=distance,
+                guide_seq=search_seq[guide_start:guide_end],
+                pam_seq=m.group(),
             )
+            if cfg.name == "SpCas9":
+                window_start, window_end = guide_start - 4, pam_end + 3
+                if window_start < 0 or window_end > seq_len:
+                    site.model_input_reason = "SpCas9: insufficient flanking context"
+                else:
+                    window = search_seq[window_start:window_end]
+                    if len(window) != 30 or set(window) - set("ACGT"):
+                        site.model_input_reason = (
+                            "SpCas9: invalid base or length in 30bp window"
+                        )
+                    else:
+                        site.model_input_seq = window
+            sites.append(site)
 
     return sites
 
@@ -416,12 +445,10 @@ class ModelBundle:
         path_B: str,  # Cas12a 모델 파일 위치
         path_C_dir: str,  # Sacas9는 모델 여러개이므로 파일이 들어있는 폴더 경로 받음
         sacas9_files: list[str] | None = None,
-        hydra_head_idx: int = 0,
     ):
         if sacas9_files is None:
             sacas9_files = ["SaCas9_1.keras", "SaCas9_2.keras", "SaCas9_3.keras"]
         self._load_errors: dict[str, list[str]] = {}
-        self.hydra_head_idx = hydra_head_idx
         self.model_A = self._load_single(path_A, "SpCas9")
         self.model_B = self._load_single(path_B, "Cas12a")
         self.models_C = self._load_ensemble(path_C_dir, sacas9_files, "SaCas9")
@@ -439,7 +466,7 @@ class ModelBundle:
 
     def _load_single(self, path: str, label: str) -> tf.keras.Model | None:
         try:
-            m = tf.keras.models.load_model(path)
+            m = tf.keras.models.load_model(path, compile=False)
             print(f"  ✅ {label} 로드 완료: {path}")
             return m
         except Exception as e:  # noqa: BLE001 — third-party loader errors become unavailable
@@ -482,6 +509,24 @@ class ModelBundle:
                 reason=f"{site.cas_type}: invalid guide sequence or length"
             )
 
+        if site.cas_type == "SpCas9":
+            if site.model_input_reason:
+                return PredictionResult(reason=site.model_input_reason)
+            window = site.model_input_seq
+            if not isinstance(window, str) or len(window) != 30:
+                return PredictionResult(
+                    reason="SpCas9: complete 30bp model window required"
+                )
+            if set(window) - set("ACGT"):
+                return PredictionResult(reason="SpCas9: invalid base in 30bp window")
+            if window[4:24] != site.guide_seq or window[24:27] != site.pam_seq:
+                return PredictionResult(
+                    reason="SpCas9: model window disagrees with guide/PAM"
+                )
+            x = _one_hot_encode(window, 30)
+            if x is None:
+                return PredictionResult(reason="SpCas9: invalid model window")
+
         if site.cas_type in self._load_errors:
             return PredictionResult(
                 reason=f"{site.cas_type}: model unavailable: {'; '.join(self._load_errors[site.cas_type])}"
@@ -490,7 +535,11 @@ class ModelBundle:
         # ── 방어 ③④ 모델 분기 예측 ──────────────────────────────
         try:
             if site.cas_type == "SpCas9":
-                score = self._predict_hydra(x)
+                efficiencies = self._predict_hydra(x)
+                return PredictionResult(
+                    efficiency=efficiencies["SpCas9"],
+                    efficiencies_by_protein=efficiencies,
+                )
             elif site.cas_type == "Cas12a":
                 score = self._predict_single(x, self.model_B)
             else:
@@ -501,16 +550,31 @@ class ModelBundle:
 
     """SpCas9의 모델의 결과값 처리 함수"""
 
-    def _predict_hydra(self, x: np.ndarray) -> float:
+    def _predict_hydra(self, x: np.ndarray) -> dict[str, float]:
         # ── 방어 ③ 모델 None 명시적 경고 ────────────────────────
         if self.model_A is None:
             raise ValueError("SpCas9 Hydra model unavailable")
         preds = self.model_A.predict(x, verbose=0)
-        if preds.ndim == 3:
-            return float(preds[0, self.hydra_head_idx, 0])
-        elif preds.ndim == 2 and preds.shape[1] > 1:
-            return float(preds[0, self.hydra_head_idx])
-        return float(preds[0, 0])
+        if not isinstance(preds, dict):
+            raise TypeError("Hydra v2 requires a dict keyed by output layer name")
+        efficiencies = {}
+        for protein, layer in HYDRA_OUTPUT_LAYERS.items():
+            if layer not in preds:
+                raise ValueError(f"Missing Hydra head {protein} ({layer})")
+            values = np.asarray(preds[layer])
+            if values.shape != (1, 1):
+                raise ValueError(
+                    f"Malformed Hydra head {protein} ({layer}): shape {values.shape}, expected (1, 1)"
+                )
+            if values.dtype.kind not in "fiu":
+                raise ValueError(
+                    f"Malformed Hydra head {protein} ({layer}): expected real numeric values"
+                )
+            value = float(values[0, 0])
+            if not math.isfinite(value):
+                raise ValueError(f"Non-finite Hydra head {protein} ({layer})")
+            efficiencies[protein] = value
+        return efficiencies
 
     """Cas12a의 모델의 결과값 처리 함수"""
 
@@ -633,6 +697,10 @@ class MultiCasScanner:
                 "distance": site.distance,
                 "pam": site.pam_seq,
                 "guide_seq": site.guide_seq,
+                "model_input_seq": site.model_input_seq,
+                "efficiencies_by_protein": dict(
+                    site.prediction.efficiencies_by_protein
+                ),
                 "available": site.prediction.available,
                 "reason": site.prediction.reason,
                 "rank": rank,

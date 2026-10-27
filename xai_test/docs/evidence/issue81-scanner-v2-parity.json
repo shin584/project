@@ -1,0 +1,242 @@
+{
+  "issue": 81,
+  "checkpoint": "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\9hydra_v2.keras",
+  "checkpoint_sha256": "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6",
+  "scanner_sha256": "6e06a365e45d5dba07bb44fe8836db25a1c3cd4de764bb879c147e95636fc436",
+  "reload_copy_sha256": "80ef49772e863dbbd7cae9bb1d916ebcdf403204622c0036dc35ea02b7fe88a2",
+  "environment": {
+    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "libraries": {
+      "tensorflow": "2.21.0",
+      "keras": "3.14.1",
+      "numpy": "2.3.2",
+      "pytest": "9.0.3"
+    },
+    "devices": [
+      "PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU')"
+    ]
+  },
+  "rtol": 1e-05,
+  "atol": 1e-06,
+  "passed": true,
+  "cases": [
+    {
+      "region": "AAAAAAAAAAAAAAATGCAACGTACGTACGTACGTACGTAGGTACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "region_sha256": "58a3b4dc5f2cb103a7740cb5daf7c584ce2fc8c2ca4cff365b4fdcd03c6f02d5",
+      "strand": "+",
+      "window": "TGCAACGTACGTACGTACGTACGTAGGTAC",
+      "window_sha256": "43a42bbd6c492981c22d769f3c25a3ecfdd5e51c2c292b35ae92454132e484c9",
+      "heads": {
+        "SpCas9": {
+          "direct": 0.5579652190208435,
+          "scanner": 0.5579652190208435,
+          "absolute_error": 0.0
+        },
+        "SpCas9-NG": {
+          "direct": 0.44320908188819885,
+          "scanner": 0.44320908188819885,
+          "absolute_error": 0.0
+        },
+        "VRQR variant": {
+          "direct": 0.36946505308151245,
+          "scanner": 0.36946505308151245,
+          "absolute_error": 0.0
+        },
+        "xCas": {
+          "direct": 0.41859427094459534,
+          "scanner": 0.41859427094459534,
+          "absolute_error": 0.0
+        },
+        "Sniper-Cas9": {
+          "direct": 0.5341883897781372,
+          "scanner": 0.5341883897781372,
+          "absolute_error": 0.0
+        },
+        "SpCas9-HF.1": {
+          "direct": 0.24993789196014404,
+          "scanner": 0.24993789196014404,
+          "absolute_error": 0.0
+        },
+        "eSpCas9(1.1)": {
+          "direct": 0.383676677942276,
+          "scanner": 0.383676677942276,
+          "absolute_error": 0.0
+        },
+        "HypaCas9": {
+          "direct": 0.3163437247276306,
+          "scanner": 0.3163437247276306,
+          "absolute_error": 0.0
+        },
+        "evoCas9": {
+          "direct": 0.05417807027697563,
+          "scanner": 0.05417807027697563,
+          "absolute_error": 0.0
+        }
+      }
+    },
+    {
+      "region": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTGTACCTACGTACGTACGTACGTACGTTGCATTTTTTTTTTTTTTT",
+      "region_sha256": "eb164627943f3b51212bb96b6ed209075f2e27c02862a07b28c3088f1aeaa29b",
+      "strand": "-",
+      "window": "TGCAACGTACGTACGTACGTACGTAGGTAC",
+      "window_sha256": "43a42bbd6c492981c22d769f3c25a3ecfdd5e51c2c292b35ae92454132e484c9",
+      "heads": {
+        "SpCas9": {
+          "direct": 0.5579652190208435,
+          "scanner": 0.5579652190208435,
+          "absolute_error": 0.0
+        },
+        "SpCas9-NG": {
+          "direct": 0.44320908188819885,
+          "scanner": 0.44320908188819885,
+          "absolute_error": 0.0
+        },
+        "VRQR variant": {
+          "direct": 0.36946505308151245,
+          "scanner": 0.36946505308151245,
+          "absolute_error": 0.0
+        },
+        "xCas": {
+          "direct": 0.41859427094459534,
+          "scanner": 0.41859427094459534,
+          "absolute_error": 0.0
+        },
+        "Sniper-Cas9": {
+          "direct": 0.5341883897781372,
+          "scanner": 0.5341883897781372,
+          "absolute_error": 0.0
+        },
+        "SpCas9-HF.1": {
+          "direct": 0.24993789196014404,
+          "scanner": 0.24993789196014404,
+          "absolute_error": 0.0
+        },
+        "eSpCas9(1.1)": {
+          "direct": 0.383676677942276,
+          "scanner": 0.383676677942276,
+          "absolute_error": 0.0
+        },
+        "HypaCas9": {
+          "direct": 0.3163437247276306,
+          "scanner": 0.3163437247276306,
+          "absolute_error": 0.0
+        },
+        "evoCas9": {
+          "direct": 0.05417807027697563,
+          "scanner": 0.05417807027697563,
+          "absolute_error": 0.0
+        }
+      }
+    },
+    {
+      "region": "AAAAAAAAAAAAAAACATGTGCATGCATGCATGCATGCATGGATCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "region_sha256": "6c63703588d15ba568ce696a43014a7e009f4395c7990b6c4f67abbeb46a411f",
+      "strand": "+",
+      "window": "CATGTGCATGCATGCATGCATGCATGGATC",
+      "window_sha256": "e06d78b4e901b200cdd224e06e991a46b7fce99504bc3e464272a4616ca89553",
+      "heads": {
+        "SpCas9": {
+          "direct": 0.513427197933197,
+          "scanner": 0.513427197933197,
+          "absolute_error": 0.0
+        },
+        "SpCas9-NG": {
+          "direct": 0.3984687328338623,
+          "scanner": 0.3984687328338623,
+          "absolute_error": 0.0
+        },
+        "VRQR variant": {
+          "direct": 0.2955523133277893,
+          "scanner": 0.2955523133277893,
+          "absolute_error": 0.0
+        },
+        "xCas": {
+          "direct": 0.3285294473171234,
+          "scanner": 0.3285294473171234,
+          "absolute_error": 0.0
+        },
+        "Sniper-Cas9": {
+          "direct": 0.5004287958145142,
+          "scanner": 0.5004287958145142,
+          "absolute_error": 0.0
+        },
+        "SpCas9-HF.1": {
+          "direct": 0.26623573899269104,
+          "scanner": 0.26623573899269104,
+          "absolute_error": 0.0
+        },
+        "eSpCas9(1.1)": {
+          "direct": 0.3429078757762909,
+          "scanner": 0.3429078757762909,
+          "absolute_error": 0.0
+        },
+        "HypaCas9": {
+          "direct": 0.30870911478996277,
+          "scanner": 0.30870911478996277,
+          "absolute_error": 0.0
+        },
+        "evoCas9": {
+          "direct": 0.04454544186592102,
+          "scanner": 0.04454544186592102,
+          "absolute_error": 0.0
+        }
+      }
+    },
+    {
+      "region": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTGATCCATGCATGCATGCATGCATGCACATGTTTTTTTTTTTTTTT",
+      "region_sha256": "e536325c88f4953f3d316f851aaaf91df75b374c102c7466f64d149da1a60006",
+      "strand": "-",
+      "window": "CATGTGCATGCATGCATGCATGCATGGATC",
+      "window_sha256": "e06d78b4e901b200cdd224e06e991a46b7fce99504bc3e464272a4616ca89553",
+      "heads": {
+        "SpCas9": {
+          "direct": 0.513427197933197,
+          "scanner": 0.513427197933197,
+          "absolute_error": 0.0
+        },
+        "SpCas9-NG": {
+          "direct": 0.3984687328338623,
+          "scanner": 0.3984687328338623,
+          "absolute_error": 0.0
+        },
+        "VRQR variant": {
+          "direct": 0.2955523133277893,
+          "scanner": 0.2955523133277893,
+          "absolute_error": 0.0
+        },
+        "xCas": {
+          "direct": 0.3285294473171234,
+          "scanner": 0.3285294473171234,
+          "absolute_error": 0.0
+        },
+        "Sniper-Cas9": {
+          "direct": 0.5004287958145142,
+          "scanner": 0.5004287958145142,
+          "absolute_error": 0.0
+        },
+        "SpCas9-HF.1": {
+          "direct": 0.26623573899269104,
+          "scanner": 0.26623573899269104,
+          "absolute_error": 0.0
+        },
+        "eSpCas9(1.1)": {
+          "direct": 0.3429078757762909,
+          "scanner": 0.3429078757762909,
+          "absolute_error": 0.0
+        },
+        "HypaCas9": {
+          "direct": 0.30870911478996277,
+          "scanner": 0.30870911478996277,
+          "absolute_error": 0.0
+        },
+        "evoCas9": {
+          "direct": 0.04454544186592102,
+          "scanner": 0.04454544186592102,
+          "absolute_error": 0.0
+        }
+      }
+    }
+  ]
+}
