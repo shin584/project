@@ -181,6 +181,50 @@ def test_validation_run_persists_named_measured_predictions_and_reopens_without_
         study.train_validation(run_id, backend=FixtureBackend())
 
 
+def test_report_only_reopens_intact_legacy_validation_evidence(inputs, tmp_path):
+    study = StudyProtocol.plan(tmp_path / "studies", inputs)
+    run_id = study.plan_run(seed=42)
+    result = study.train_validation(run_id, backend=FixtureBackend())
+    path = study.path / "runs" / run_id
+
+    # Recreate the pre-#82 persisted schema, keeping all original metric values.
+    # These fixture manifests represent an intact historical run, not a request
+    # to migrate or rewrite real evidence.
+    def legacy_metrics(metrics):
+        return {key: metrics[key] for key in ("n", "mae", "mse", "spearman", "pearson")}
+
+    report = result["validation"]
+    legacy = {
+        key: report[key]
+        for key in ("model", "scale", "rows", "empty_strata", "split", "population")
+    }
+    legacy["heads"] = {
+        head: {
+            **legacy_metrics(scored),
+            "strata": {
+                name: {
+                    value: legacy_metrics(metrics) for value, metrics in groups.items()
+                }
+                for name, groups in scored["strata"].items()
+            },
+        }
+        for head, scored in report["heads"].items()
+    }
+    write_json(legacy, path / "validation.json")
+    evidence = json.loads((path / "evidence.json").read_text())
+    evidence["files"]["validation.json"] = digest(path / "validation.json")
+    write_json(evidence, path / "evidence.json")
+    state = json.loads((path / "state.json").read_text())
+    state["evidence_sha256"] = digest(path / "evidence.json")
+    write_json(state, path / "state.json")
+    before = {file: digest(file) for file in path.iterdir()}
+
+    reopened = StudyProtocol(study.path).report_only(run_id)
+    assert reopened["eligible"] is True
+    assert reopened["validation"] == legacy
+    assert {file: digest(file) for file in path.iterdir()} == before
+
+
 @pytest.mark.parametrize(
     "failure",
     ["nonfinite", "parity", "checkpoint", "history", "wrong_best", "interrupted"],

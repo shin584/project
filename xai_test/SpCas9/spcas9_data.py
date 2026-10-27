@@ -145,6 +145,14 @@ def pams(table: pd.DataFrame) -> pd.Series:
     return table[SEQUENCE_COLUMN].str[PAM_SLICE]
 
 
+def is_ngg(table: pd.DataFrame) -> pd.Series:
+    """Whether the normalized 30mer's PAM (positions 24-26) ends in GG.
+
+    Its complement is non-NGG, independently of PAM-library membership.
+    """
+    return pams(table).str.endswith("GG")
+
+
 def pam_library_protospacers(sequences: Iterable[str]) -> set[str]:
     """Protospacers that appear with more than one distinct PAM.
 
@@ -211,7 +219,7 @@ def library_versions(names: Sequence[str] = LIBRARIES) -> dict[str, str | None]:
     library's `__version__`, so building a provenance record costs no
     framework import.
     """
-    found = {}
+    found: dict[str, str | None] = {}
     for name in names:
         try:
             found[name] = version(name)

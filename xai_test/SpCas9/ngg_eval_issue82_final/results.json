@@ -1,0 +1,845 @@
+{
+  "model": "9-Hydra v2",
+  "testset": "9-Hydra Testset",
+  "scale": "published percentage / 100 (the scale 9-Hydra v2 was trained on)",
+  "rows": 5186,
+  "heads": {
+    "SpCas9": {
+      "n": 5021,
+      "mae": 0.05114970229758603,
+      "mse": 0.005821584478246365,
+      "spearman": 0.9218741508682023,
+      "pearson": 0.9414531253291127,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1292,
+            "mae": 0.02803868749688199,
+            "mse": 0.002096382462806292,
+            "spearman": 0.6848266377448357,
+            "pearson": 0.9601958438115995,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3729,
+            "mae": 0.0591570584580874,
+            "mse": 0.00711226857691855,
+            "spearman": 0.9059577202538632,
+            "pearson": 0.9250658296713834,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3856,
+            "mae": 0.04614435503174844,
+            "mse": 0.005104764680468615,
+            "spearman": 0.9108351483875619,
+            "pearson": 0.9425225583795821,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1165,
+            "mae": 0.06771675728219524,
+            "mse": 0.008194165714496158,
+            "spearman": 0.7760553640075296,
+            "pearson": 0.8897076189757847,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "SpCas9-NG": {
+      "n": 3982,
+      "mae": 0.06420729862845996,
+      "mse": 0.0068345754567872416,
+      "spearman": 0.8409641930110089,
+      "pearson": 0.8678524457138481,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1290,
+            "mae": 0.05869083882334081,
+            "mse": 0.005576809763957163,
+            "spearman": 0.8368730997206854,
+            "pearson": 0.876557344804351,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 2692,
+            "mae": 0.06685077305216118,
+            "mse": 0.007437293786560942,
+            "spearman": 0.7096987816997298,
+            "pearson": 0.7800037567833067,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3982,
+            "mae": 0.06420729862845996,
+            "mse": 0.0068345754567872416,
+            "spearman": 0.8409641930110089,
+            "pearson": 0.8678524457138481,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 0,
+            "mae": null,
+            "mse": null,
+            "spearman": null,
+            "pearson": null,
+            "unavailable_reasons": {
+              "mae": "no measured rows",
+              "mse": "no measured rows",
+              "spearman": "no measured rows",
+              "pearson": "no measured rows"
+            }
+          }
+        }
+      }
+    },
+    "VRQR variant": {
+      "n": 3979,
+      "mae": 0.05837905484033615,
+      "mse": 0.006751522778373335,
+      "spearman": 0.8806122809372273,
+      "pearson": 0.8711949076337969,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1287,
+            "mae": 0.036341693924008114,
+            "mse": 0.0032265048997529716,
+            "spearman": 0.6805338315751461,
+            "pearson": 0.8824431622064994,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 2692,
+            "mae": 0.06891474707633695,
+            "mse": 0.008436774639363086,
+            "spearman": 0.8180015124112756,
+            "pearson": 0.8195982667502771,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3979,
+            "mae": 0.05837905484033615,
+            "mse": 0.006751522778373335,
+            "spearman": 0.8806122809372273,
+            "pearson": 0.8711949076337969,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 0,
+            "mae": null,
+            "mse": null,
+            "spearman": null,
+            "pearson": null,
+            "unavailable_reasons": {
+              "mae": "no measured rows",
+              "mse": "no measured rows",
+              "spearman": "no measured rows",
+              "pearson": "no measured rows"
+            }
+          }
+        }
+      }
+    },
+    "xCas": {
+      "n": 5170,
+      "mae": 0.06027285480571915,
+      "mse": 0.007191281897796531,
+      "spearman": 0.8809650892999338,
+      "pearson": 0.869819941740227,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1290,
+            "mae": 0.03096768826593398,
+            "mse": 0.002180620568668022,
+            "spearman": 0.7021469974316851,
+            "pearson": 0.8939391015795619,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3880,
+            "mae": 0.07001606739240034,
+            "mse": 0.008857197648975855,
+            "spearman": 0.8305509713167638,
+            "pearson": 0.8264541564047955,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3983,
+            "mae": 0.05466026536544962,
+            "mse": 0.006266907171544593,
+            "spearman": 0.8876721116538142,
+            "pearson": 0.8819010863190556,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1187,
+            "mae": 0.07910600033275673,
+            "mse": 0.010293038034832308,
+            "spearman": 0.8002284509729863,
+            "pearson": 0.801939761713647,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "Sniper-Cas9": {
+      "n": 5170,
+      "mae": 0.049676950519612156,
+      "mse": 0.00569035792169027,
+      "spearman": 0.922102258145456,
+      "pearson": 0.9402190190522397,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1293,
+            "mae": 0.025759335099839978,
+            "mse": 0.0017456563684853546,
+            "spearman": 0.6804371007606449,
+            "pearson": 0.9653424003296729,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3877,
+            "mae": 0.05765360172873401,
+            "mse": 0.0070059367476624015,
+            "spearman": 0.9075963774254479,
+            "pearson": 0.9240702981848257,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3979,
+            "mae": 0.04379747415100105,
+            "mse": 0.0048046003270046074,
+            "spearman": 0.9119481518781886,
+            "pearson": 0.9407831245390824,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1191,
+            "mae": 0.06931963437410721,
+            "mse": 0.008649576619636746,
+            "spearman": 0.7738380539536106,
+            "pearson": 0.8860180379802596,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "SpCas9-HF.1": {
+      "n": 5177,
+      "mae": 0.07090622353883883,
+      "mse": 0.014546741367263265,
+      "spearman": 0.789503636419693,
+      "pearson": 0.7811608874399795,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1295,
+            "mae": 0.026469315723082212,
+            "mse": 0.00365661945293066,
+            "spearman": 0.4746119214820915,
+            "pearson": 0.8348752105253879,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3882,
+            "mae": 0.08572997305491425,
+            "mse": 0.018179587291802347,
+            "spearman": 0.7809463113001007,
+            "pearson": 0.7512397195603988,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3988,
+            "mae": 0.05959003578593677,
+            "mse": 0.012028809996431866,
+            "spearman": 0.7167114377446099,
+            "pearson": 0.7566015982793486,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1189,
+            "mae": 0.10886161189760536,
+            "mse": 0.022992082247730566,
+            "spearman": 0.7113244309540407,
+            "pearson": 0.7120948252941125,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "eSpCas9(1.1)": {
+      "n": 5176,
+      "mae": 0.06273257092872718,
+      "mse": 0.010585945253339658,
+      "spearman": 0.847474000773496,
+      "pearson": 0.8611874111013841,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1292,
+            "mae": 0.01822441049433475,
+            "mse": 0.0007628087803775943,
+            "spearman": 0.5636114185161365,
+            "pearson": 0.9733315488543327,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3884,
+            "mae": 0.07753806610927175,
+            "mse": 0.013853579734046911,
+            "spearman": 0.8329279460361743,
+            "pearson": 0.8275819289944492,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3988,
+            "mae": 0.05480155482634543,
+            "mse": 0.00943273834079879,
+            "spearman": 0.7919932735489319,
+            "pearson": 0.8383597687859193,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1188,
+            "mae": 0.0893562175754431,
+            "mse": 0.014457148256044175,
+            "spearman": 0.7275820044446344,
+            "pearson": 0.8150562554013167,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "HypaCas9": {
+      "n": 5177,
+      "mae": 0.05992316951136351,
+      "mse": 0.010094955809865885,
+      "spearman": 0.8336650402939462,
+      "pearson": 0.838629180451558,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1295,
+            "mae": 0.024598721928444596,
+            "mse": 0.0028826145574792927,
+            "spearman": 0.42577300532174506,
+            "pearson": 0.8681460464989733,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3882,
+            "mae": 0.0717070849209153,
+            "mse": 0.012500927453822771,
+            "spearman": 0.8433652194555041,
+            "pearson": 0.8183692677159945,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3990,
+            "mae": 0.04981085293828464,
+            "mse": 0.008150003806394916,
+            "spearman": 0.7837097846104364,
+            "pearson": 0.841140375333199,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1187,
+            "mae": 0.09391486548995216,
+            "mse": 0.016632747295838225,
+            "spearman": 0.7514122679776782,
+            "pearson": 0.7499057358233396,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    },
+    "evoCas9": {
+      "n": 5161,
+      "mae": 0.04478922745430177,
+      "mse": 0.008373869831569994,
+      "spearman": 0.633845758917318,
+      "pearson": 0.6700665674419266,
+      "unavailable_reasons": {},
+      "strata": {
+        "in_pam_library": {
+          "library": {
+            "n": 1291,
+            "mae": 0.014233572619525731,
+            "mse": 0.00044615338315194216,
+            "spearman": 0.5396338201873782,
+            "pearson": 0.8294489112817679,
+            "unavailable_reasons": {}
+          },
+          "non_library": {
+            "n": 3870,
+            "mae": 0.05498234125060561,
+            "mse": 0.011018490486584907,
+            "spearman": 0.6532305098680233,
+            "pearson": 0.6507773904801827,
+            "unavailable_reasons": {}
+          }
+        },
+        "trna_feature": {
+          "0": {
+            "n": 3977,
+            "mae": 0.03197604636422651,
+            "mse": 0.005144656770517594,
+            "spearman": 0.5322074105238038,
+            "pearson": 0.6739631270545222,
+            "unavailable_reasons": {}
+          },
+          "1": {
+            "n": 1184,
+            "mae": 0.08782809670702922,
+            "mse": 0.019220643770594823,
+            "spearman": 0.7133240541688328,
+            "pearson": 0.5986778815659208,
+            "unavailable_reasons": {}
+          }
+        }
+      }
+    }
+  },
+  "empty_strata": {
+    "SpCas9": [],
+    "SpCas9-NG": [
+      "trna_feature=1"
+    ],
+    "VRQR variant": [
+      "trna_feature=1"
+    ],
+    "xCas": [],
+    "Sniper-Cas9": [],
+    "SpCas9-HF.1": [],
+    "eSpCas9(1.1)": [],
+    "HypaCas9": [],
+    "evoCas9": []
+  },
+  "metrics_schema_version": 2,
+  "populations": {
+    "ngg": {
+      "rows": 2008,
+      "heads": {
+        "SpCas9": {
+          "n": 1907,
+          "mae": 0.06729971701881524,
+          "mse": 0.008197521500515831,
+          "spearman": 0.5146163406577565,
+          "pearson": 0.6779186521279493,
+          "unavailable_reasons": {},
+          "n_rows": 1907,
+          "unique_30mers": 1018,
+          "unique_protospacers": 889
+        },
+        "SpCas9-NG": {
+          "n": 1102,
+          "mae": 0.06717227049793456,
+          "mse": 0.0077202680772284525,
+          "spearman": 0.557812577104134,
+          "pearson": 0.6700274454064649,
+          "unavailable_reasons": {},
+          "n_rows": 1102,
+          "unique_30mers": 1023,
+          "unique_protospacers": 893
+        },
+        "VRQR variant": {
+          "n": 1102,
+          "mae": 0.07976002118607849,
+          "mse": 0.010207074327553951,
+          "spearman": 0.655840432630516,
+          "pearson": 0.6727437225163531,
+          "unavailable_reasons": {},
+          "n_rows": 1102,
+          "unique_30mers": 1022,
+          "unique_protospacers": 892
+        },
+        "xCas": {
+          "n": 2001,
+          "mae": 0.07367114472593991,
+          "mse": 0.009361278176732305,
+          "spearman": 0.7639567386582501,
+          "pearson": 0.7676370389018269,
+          "unavailable_reasons": {},
+          "n_rows": 2001,
+          "unique_30mers": 1059,
+          "unique_protospacers": 929
+        },
+        "Sniper-Cas9": {
+          "n": 1997,
+          "mae": 0.06728407693784211,
+          "mse": 0.008495649685873984,
+          "spearman": 0.5551385316770959,
+          "pearson": 0.6930096616350573,
+          "unavailable_reasons": {},
+          "n_rows": 1997,
+          "unique_30mers": 1054,
+          "unique_protospacers": 925
+        },
+        "SpCas9-HF.1": {
+          "n": 2003,
+          "mae": 0.14197676365119358,
+          "mse": 0.033570472197380026,
+          "spearman": 0.47146968553118,
+          "pearson": 0.4687554770884199,
+          "unavailable_reasons": {},
+          "n_rows": 2003,
+          "unique_30mers": 1059,
+          "unique_protospacers": 928
+        },
+        "eSpCas9(1.1)": {
+          "n": 2001,
+          "mae": 0.11281624373008747,
+          "mse": 0.022406431723932984,
+          "spearman": 0.5026202791381816,
+          "pearson": 0.5503387771761611,
+          "unavailable_reasons": {},
+          "n_rows": 2001,
+          "unique_30mers": 1058,
+          "unique_protospacers": 929
+        },
+        "HypaCas9": {
+          "n": 2002,
+          "mae": 0.11480648553028697,
+          "mse": 0.02252304856508085,
+          "spearman": 0.5595214819961835,
+          "pearson": 0.5752288517252865,
+          "unavailable_reasons": {},
+          "n_rows": 2002,
+          "unique_30mers": 1060,
+          "unique_protospacers": 929
+        },
+        "evoCas9": {
+          "n": 1995,
+          "mae": 0.09974513604637421,
+          "mse": 0.02104855301277625,
+          "spearman": 0.5667918032112881,
+          "pearson": 0.5235638741754411,
+          "unavailable_reasons": {},
+          "n_rows": 1995,
+          "unique_30mers": 1057,
+          "unique_protospacers": 927
+        }
+      },
+      "pooled": {
+        "n": 16110,
+        "mae": 0.09379274362343491,
+        "mse": 0.016775063132502058,
+        "spearman": 0.7237022925218468,
+        "pearson": 0.7301529890163504,
+        "unavailable_reasons": {},
+        "n_rows": 2008,
+        "unique_30mers": 1060,
+        "unique_protospacers": 929
+      }
+    },
+    "non_ngg": {
+      "rows": 3178,
+      "heads": {
+        "SpCas9": {
+          "n": 3114,
+          "mae": 0.04125950381544598,
+          "mse": 0.004366571022412109,
+          "spearman": 0.8293708859771269,
+          "pearson": 0.8117838511859794,
+          "unavailable_reasons": {},
+          "n_rows": 3114,
+          "unique_30mers": 2605,
+          "unique_protospacers": 1452
+        },
+        "SpCas9-NG": {
+          "n": 2880,
+          "mae": 0.06307278508673739,
+          "mse": 0.006495675016604527,
+          "spearman": 0.875858064131479,
+          "pearson": 0.8768045546168748,
+          "unavailable_reasons": {},
+          "n_rows": 2880,
+          "unique_30mers": 2647,
+          "unique_protospacers": 1497
+        },
+        "VRQR variant": {
+          "n": 2877,
+          "mae": 0.05018933467592598,
+          "mse": 0.0054279156156354005,
+          "spearman": 0.8879744098292464,
+          "pearson": 0.9014287616163479,
+          "unavailable_reasons": {},
+          "n_rows": 2877,
+          "unique_30mers": 2643,
+          "unique_protospacers": 1496
+        },
+        "xCas": {
+          "n": 3169,
+          "mae": 0.0518127796620266,
+          "mse": 0.0058210822909330155,
+          "spearman": 0.8494169899238473,
+          "pearson": 0.8392241176373633,
+          "unavailable_reasons": {},
+          "n_rows": 3169,
+          "unique_30mers": 2650,
+          "unique_protospacers": 1500
+        },
+        "Sniper-Cas9": {
+          "n": 3173,
+          "mae": 0.038595503479837416,
+          "mse": 0.003924783495886653,
+          "spearman": 0.8250949994636145,
+          "pearson": 0.8067951332108267,
+          "unavailable_reasons": {},
+          "n_rows": 3173,
+          "unique_30mers": 2654,
+          "unique_protospacers": 1500
+        },
+        "SpCas9-HF.1": {
+          "n": 3174,
+          "mae": 0.026056100084192766,
+          "mse": 0.00254153252897597,
+          "spearman": 0.5752869180370745,
+          "pearson": 0.5747204050844682,
+          "unavailable_reasons": {},
+          "n_rows": 3174,
+          "unique_30mers": 2654,
+          "unique_protospacers": 1500
+        },
+        "eSpCas9(1.1)": {
+          "n": 3175,
+          "mae": 0.0311680262750195,
+          "mse": 0.003136246535967295,
+          "spearman": 0.6676680129243707,
+          "pearson": 0.6757807652944501,
+          "unavailable_reasons": {},
+          "n_rows": 3175,
+          "unique_30mers": 2655,
+          "unique_protospacers": 1502
+        },
+        "HypaCas9": {
+          "n": 3175,
+          "mae": 0.025316429772817135,
+          "mse": 0.0022584072442153784,
+          "spearman": 0.5845186341083746,
+          "pearson": 0.6021283153383473,
+          "unavailable_reasons": {},
+          "n_rows": 3175,
+          "unique_30mers": 2655,
+          "unique_protospacers": 1501
+        },
+        "evoCas9": {
+          "n": 3166,
+          "mae": 0.010159714617541026,
+          "mse": 0.0003871380101845001,
+          "spearman": 0.2961582601854476,
+          "pearson": 0.43341041693827104,
+          "unavailable_reasons": {},
+          "n_rows": 3166,
+          "unique_30mers": 2646,
+          "unique_protospacers": 1495
+        }
+      },
+      "pooled": {
+        "n": 27903,
+        "mae": 0.037106781678761136,
+        "mse": 0.0037717104321938256,
+        "spearman": 0.7884140333863295,
+        "pearson": 0.8747134118653335,
+        "unavailable_reasons": {},
+        "n_rows": 3178,
+        "unique_30mers": 2658,
+        "unique_protospacers": 1502
+      }
+    }
+  },
+  "equal_head_ngg": {
+    "required_heads": [
+      "SpCas9",
+      "SpCas9-NG",
+      "VRQR variant",
+      "xCas",
+      "Sniper-Cas9",
+      "SpCas9-HF.1",
+      "eSpCas9(1.1)",
+      "HypaCas9",
+      "evoCas9"
+    ],
+    "unavailable_reasons": {},
+    "mae": 0.0916146510360614,
+    "spearman": 0.571974207844954
+  },
+  "split": "test",
+  "execution": {
+    "mode": "saved_predictions",
+    "interpreter": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "source": {
+      "revision": "0f8da6024688b10775e4d1f7655d6c23edfd71a5",
+      "dirty": true,
+      "snapshot_sha256": "e919b29ef49f4878065bcc3ea54d75139b295548fcf7e5eaf634c695b8289a29",
+      "files": {
+        "ruff.toml": "c3a23692a31536d8576de8e0ff2a485a10e28eabfe819f61dbc2fad32d54fe97",
+        "xai_test/ablation.py": "694d9fed632b1781c24faee6af3402b9079757902970e8b9e463de88a998a6cd",
+        "xai_test/analysis_export.py": "1272645a7c159649652af8ba4498a7640de3c81c34e3e3cef79d071199e6d121",
+        "xai_test/attention_rollout.py": "bae96bcd0ed8e11c77023c005939e211788faa0a936c6e3cf0d0b82a3d500354",
+        "xai_test/build_colab_grouped_model_b.py": "8348749f4d55a3b7fd9cec90ffd8d586c30b7ea20c1ed193eb7bcf9150579ce5",
+        "xai_test/case_study_selection.py": "83f25e52f3518b01247a2361b200caaa717f5929c64180be66f8d5912526913c",
+        "xai_test/col.py": "1518121e8991ba423f6364838a30c7ba05e6879e01e343935215794ad5f8ea85",
+        "xai_test/CONTEXT.md": "c5b88b04df28456cc1864a4b882d056457dd4e313abe2847ac8b344870987812",
+        "xai_test/dev_split.py": "da6385e4fca96bf813a418e998248dd036b74515a09d56bc77b0fdd7dc5c2204",
+        "xai_test/docs/adr/0001-separate-xai-predictor-class.md": "0ef28fce08166c8ae7733d615710754390accf27f20399bc5607cfe5dadec35e",
+        "xai_test/docs/adr/0002-dashboard-explains-model-b-only.md": "a0a3bf22d17c24f9cf8262243746d5eac9607abf08dcac65b2db7b448dfc15fb",
+        "xai_test/docs/adr/0003-demo-cli-compares-model-a-and-model-b.md": "c2b81f1ebecdc455b74f75964c816feed526e3e4b6aada360c23970099fed755",
+        "xai_test/docs/adr/0004-honor-kim-2020-use-column.md": "a01da4f6904d045612774be30c54c0192387617b1711b6b01fd08d1a24b67f33",
+        "xai_test/docs/adr/0005-keep-9hydra-inference-sequence-only.md": "d85c498cb992f81e078080dcae6c86ee47d154e4967e171e0a4de386c4a1101c",
+        "xai_test/export_model_b_testset.py": "f9cb175d18d1b9a3eee6d85c2ecb305592aa62538a022f2db78100746e2c5d12",
+        "xai_test/grouped_model_b.py": "c728f28d5f650093da142c5398cf48d8cc8d700e1cdd251c573da6bd2e5fed06",
+        "xai_test/grouped_model_b_eval.py": "1f446549d8490a3967b45b74771b8fac27a95efca443d5e9ab623f4fb47590ec",
+        "xai_test/grouped_split.py": "6185496db6feda92c6ee4305df4e02deae165e3c11b4ef9a20fa826941c8d222",
+        "xai_test/grouped_testset.py": "70ae2d78fc0a92be72f536da696ff0ea7479171259bff4fa92893853487baa5d",
+        "xai_test/integrated_gradients.py": "081a5ad8170f846c28ad238fc94b246a3627ea99369197cedd35ddd3b57dada7",
+        "xai_test/ism_sweep.py": "2cba30a0ab15ad375acae0399274fc0bc93f7565efe062ca712bcde40313295e",
+        "xai_test/leakage_check.py": "e5562a99a3572b47e24590f0c01563a1bedeef8274cc0d858a1e925860b2c07f",
+        "xai_test/mismatch_profiling.py": "602c8d9f868d6959b14186f9db6cef09c5e071050ec9d96b28290532e1f7fdc3",
+        "xai_test/model_a_wrapper.py": "0c375098a82f3d6de11810188f476a8cc294cd5b33d6a75451abaab918cf8708",
+        "xai_test/model_b_testset_export.py": "c57b4009e26c164a0e98a9e79f0b4b8774362978b0469342702d49bc37168795",
+        "xai_test/model_b_wrapper.py": "712adcbf4dc6fe983751ee5604d36b691a9d1b2a3abd3ccb73cdca9fd23fcee2",
+        "xai_test/model_b_xai_wrapper.py": "10a45052244bc052fed24c866e304c308428ca65f5cf59e0dc8fd0e5b9076814",
+        "xai_test/nt_feature_stacking.py": "10922136a506c289e73b2442928b109293a7b43f68d9e1c975770bf553685c70",
+        "xai_test/nt_pretrain.py": "4424cdc6bddc1f6333aa0e68b361b65b8d84e7a0f796fbc90859ee3d59dad598",
+        "xai_test/paired_bootstrap.py": "e1aa355ac804665c2f936a2a4dfb6831e0fbd2fd5d779b83cfb6543c0594d568",
+        "xai_test/shap_analysis.py": "87c353194077fd67a1efab6662e790c3041da09fc8d4d289ff44e4875771d3cb",
+        "xai_test/shap_grouping.py": "9898404c11fda651f1c280c096e7547e326b88bb0cb8af4addaf7a346f5fe577",
+        "xai_test/SpCas9/__init__.py": "7980e6fb0afdfa24fb7b13f26e47617aae792dc2445018d07e5b261ed2102522",
+        "xai_test/SpCas9/spcas9_compare.py": "a3dea0f903e6401514869f9a99c7072750ae0b497af3785f289e77c2881c5fe0",
+        "xai_test/SpCas9/spcas9_data.py": "298fa8519770dee2489d778cdcfa80595fefa7d6fc9fb8586e91150ab41494b5",
+        "xai_test/SpCas9/spcas9_diagnostics.py": "d4b62ea6d5700859154c238aff83b80d6e798998390c79a4f4d311cc8f1abe4f",
+        "xai_test/SpCas9/spcas9_eval.py": "411d05d59ca96bcefc0336d60f24adeb6d9a8a575f7ede8aab65c0f90cd2f158",
+        "xai_test/SpCas9/spcas9_execution.py": "8ef4258d063d75b39ced0b9b74b01d6d5838d5f0b8c1089602eb6d8fe7068a75",
+        "xai_test/SpCas9/spcas9_metrics.py": "ca86cdde297f2bfc17e265ae278e01132b7eced3ff6363dca9af6eed7d9b9792",
+        "xai_test/SpCas9/spcas9_split.py": "21a73285bb6f720e26c0c1dd27380b8f326c14a86d580436c892cab31da3b8cc",
+        "xai_test/SpCas9/spcas9_study.py": "b49fa60ec14e032a8884d19bc1471a4587eafc177e06d607de9a630ca48ff1a6",
+        "xai_test/SpCas9/spcas9_study_backend.py": "dd0f9c545bfe40ec94f4c8e28540abf697144be96c0e8202becad12138fa000c",
+        "xai_test/SpCas9/spcas9_study_inputs.py": "32bc90d161bf25c8b7521d0f629a53234f5a5f107c7b0004f9938baf41b479b0",
+        "xai_test/SpCas9/spcas9_train.py": "3ae56fc0d03691affc4b089deab4e46ce246dc06d1b2855ee8a80b4cb21383c4",
+        "xai_test/SpCas9/spcas9_v1_audit.py": "4aa6cbba66bcf769a727194469a490bc8008851e945aaee5c8396751f1b7ea05",
+        "xai_test/SpCas9/spcas9_v1_membership.py": "9d0956c7a34aefa315fd29ce1c5988cf453761c538552481d52c346bd637a6c3",
+        "xai_test/step1_verify.py": "c9c0de589ce7a357c73f3d0add4388ecc34c47199a4c68f0a7d4aff07070e8a2",
+        "xai_test/step3_ism.py": "0c9f22533dbce7b43f5fbf6c840fee4c3a105b59c3b459e0f222bc40cd480e40",
+        "xai_test/step3_mismatch.py": "3c1789c26061ab334db1795738224e180117d0c1c62ad003ac02ad283ada2860",
+        "xai_test/step4_ablation.py": "398d6af67aaaec537cc0a2ff37a1e5f85b542147050181c1e9e378f8c912fd07",
+        "xai_test/step4_attention_rollout.py": "ce535ecfc2a654894f8031d449b100cd9e1f3db919155efb64f767fb2802d683",
+        "xai_test/step4_shap.py": "bb7958d8c8cd161a9c8fbd9c60368cef6ffd57fcd29acaa834b1b0036b87c2ca",
+        "xai_test/step5_export.py": "fa7acbc78d6f38487c8ce031279f25a4af5d8ebd5da1787b216c489df9bb8474",
+        "xai_test/test_ablation.py": "4e6c664ba76724087174a9f5a95a47f149461513ada708125b66cc793da5181f",
+        "xai_test/test_analysis_export.py": "77ffb90937b9c9b7eea971f1c51338b9f8f4cc4e752a8e5042e470c0913c1528",
+        "xai_test/test_attention_rollout.py": "2dfaae85cc8ab80ca475709152f9dc23a4a2df2bd795dea51b2ac1809c39fcd4",
+        "xai_test/test_case_study_selection.py": "2c9ddf6960b1160e73472d94a235064607f073e9568da30bdea6e0dfd5ac84aa",
+        "xai_test/test_dataset_verifier.py": "5944b665b62282763f95e0e27180a5316342ef87fccbd2e148a72043586b226d",
+        "xai_test/test_dev_split.py": "a91a048fbf30ed2faa59577c4f0817ae9f0023f996c38379910a2844429c684a",
+        "xai_test/test_grouped_model_b.py": "47e5fa4cf55150c891fca19533c4c6071d89f9661421028fdb3b8a6b289cc2a0",
+        "xai_test/test_grouped_model_b_eval.py": "cc1511bf6bedfdbb03af47e16e2015ab2cd650992b6067c10b6621f798eb46d9",
+        "xai_test/test_grouped_split.py": "78236e08d22b68d7061e8db0f6b69b6d47ab765409588b7d9198bd3e46a53e86",
+        "xai_test/test_grouped_testset.py": "e6429be53633ccba1679cf4c12b500a0b1e0821c227448629e940d25a5ec7824",
+        "xai_test/test_integrated_gradients.py": "b1885087b289545d9ee6098b71fa08ad6ba7f6c0a7b778653f2177ceed518d60",
+        "xai_test/test_ism_sweep.py": "87cd3df6d85ff7ff078987d46a9ec1449762d9941fce2ac16420f97e3b131d78",
+        "xai_test/test_leakage_check.py": "8ee22974e69e341383d370a7e8b44b16cdc0eaf8f4306adafad5ca0d9fdbcdd0",
+        "xai_test/test_mismatch_profiling.py": "34e57aa69ebc66a650cb63dda7c5117cb3d4c41326e4c13680d688d89b93a504",
+        "xai_test/test_model_b_testset_export.py": "026004ddd78355f5070b32ac127e758983659d6b9b21f6a1ccfdd7ee2e3d1985",
+        "xai_test/test_model_b_xai_wrapper.py": "5956091e409cdcd061c548ee142c5379f15e918efc7116baaef6b4cdcc143d58",
+        "xai_test/test_multi_cas_scanner.py": "28759aa09f61639e82f14f76b3d0253b305393db33b33a5ec282625556268642",
+        "xai_test/test_paired_bootstrap.py": "1378b4cc6a968708265fae5f54b45c3c6bd50e50291bb269c8c0f06b126e1300",
+        "xai_test/test_shap_analysis.py": "5606219f0b092561a71939de6f3ffea6502cee61022cc27db43d1b095949dc21",
+        "xai_test/test_shap_grouping.py": "7cf64f9db6cd9ada0bd3451c231822ffb289940052ba04d8b9d6393de9520aa9",
+        "xai_test/test_spcas9_compare.py": "88cc692dcb326f168c7ed25e3e87b8eca1a30a70bc93a58135941fcb149063b3",
+        "xai_test/test_spcas9_data.py": "ec45e00d8cf695b236c83a098ce14fd5e31ae92224c91d0cebbf5f6ed36278f7",
+        "xai_test/test_spcas9_diagnostics.py": "cf723e2d5ba1a9fff016b91eb2786cd7363470b970c46a1386e4e939d05c3330",
+        "xai_test/test_spcas9_eval.py": "b973f08e0e91554cbb66991c47c3d1e714153ad001191e86b79d66f2aad8287f",
+        "xai_test/test_spcas9_metrics.py": "551c2a1c7d0f6ea291acbd67dbc167203658612ecae3eccd369a586104bd53d1",
+        "xai_test/test_spcas9_split.py": "1e4e399f5b545414207b5539c1368bf5617cb9597dc5b75d50fc71c1347a0bbb",
+        "xai_test/test_spcas9_study.py": "7266382d8a8076e91e696190bc12e54f9d35ffa785669d42c221e2b02103ba29",
+        "xai_test/test_spcas9_train.py": "530e9eced2a0248a1cc29f2135ffd74ea04ece059cd24c962075ea4e6ff20fa0",
+        "xai_test/test_spcas9_v1_audit.py": "4c82807ec697796c2fb2dd4fddbe31f38dd0470ece9c80c80428f8c1fa395e7e",
+        "xai_test/test_spcas9_v1_membership.py": "7c95030df70829ddf0945bd4aace7abb1587fd09b502c8f197d0082c61b16f2f",
+        "xai_test/test_xai_demo.py": "ccab23c69a1fb55230e373cb79b2ca90b0d51b4617609f8ade60f5ec8d5d1df0",
+        "xai_test/test_xai_session.py": "a6530cefb95e6dcbf83190765f5e1843c5c713f8537a04908f9141ad17450360",
+        "xai_test/xai_demo.py": "e33e8dd411dacc046c2eb0ca9e0f1cea3f8627e14e52d1362b7851a899c2843a",
+        "xai_test/xai_session.py": "18086c6dcb3c316236dd91e61a4b25aef9b575c35a546b662373fe1318b137e6"
+      }
+    }
+  },
+  "predictions": {
+    "model": "9-Hydra v2",
+    "rows": 5186,
+    "scale": "published percentage / 100 (the scale 9-Hydra v2 was trained on)",
+    "coverage": {
+      "SpCas9": 5021,
+      "SpCas9-NG": 3982,
+      "VRQR variant": 3979,
+      "xCas": 5170,
+      "Sniper-Cas9": 5170,
+      "SpCas9-HF.1": 5177,
+      "eSpCas9(1.1)": 5176,
+      "HypaCas9": 5177,
+      "evoCas9": 5161
+    },
+    "checkpoint": "9hydra_v2.keras",
+    "checkpoint_sha256": "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6",
+    "split": {
+      "dir": "published_split",
+      "checksum_file": "split_checksum.json",
+      "checksum_sha256": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+      "seed": 42,
+      "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+      "rows": {
+        "train": 29134,
+        "val": 3676,
+        "test": 5186,
+        "total": 37996
+      },
+      "files": {
+        "train.csv": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+        "val.csv": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+        "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+      }
+    },
+    "file": "predictions.csv",
+    "file_sha256": "3c057286965d1440f8b412edc3c4bfc9f5eb936e2a3793d28d68a93b12e29d30",
+    "input_predictions": "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions.csv",
+    "input_predictions_sha256": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+    "input_sidecar": "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions_checksum.json",
+    "input_sidecar_sha256": "fcf1159bb039d388f7415e62cffa0a81e83c368ddb5f0c504272b0869aa170f5"
+  },
+  "libraries": {
+    "tensorflow": "2.21.0",
+    "keras": "3.14.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "scipy": "1.16.1",
+    "scikit-learn": "1.7.1"
+  }
+}

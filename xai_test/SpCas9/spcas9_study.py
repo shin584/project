@@ -58,8 +58,8 @@ def _state(path: Path, value: dict) -> None:
     temporary.replace(path)
 
 
-def _validation_report(frame: pd.DataFrame) -> dict:
-    report = build_report(frame)
+def _validation_report(frame: pd.DataFrame, *, metrics_schema_version: int = 2) -> dict:
+    report = build_report(frame, metrics_schema_version=metrics_schema_version)
     del report["testset"]
     return {**report, "split": "val", "population": "9-Hydra validation"}
 
@@ -344,8 +344,14 @@ class StudyProtocol:
             if name != Path(name).name or file_sha256(path / name) != expected:
                 raise ValueError(f"corrupted run evidence: {name}")
         training = _read(path / "training.json")
-        validation = _validation_report(pd.read_csv(path / "predictions.csv"))
-        if validation != _read(path / "validation.json"):
+        persisted_validation = _read(path / "validation.json")
+        validation = _validation_report(
+            pd.read_csv(path / "predictions.csv"),
+            metrics_schema_version=persisted_validation.get(
+                "metrics_schema_version", 1
+            ),
+        )
+        if validation != persisted_validation:
             raise ValueError("corrupted validation report")
         return {
             **report,

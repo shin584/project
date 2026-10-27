@@ -12,12 +12,13 @@ comparison all have to agree on, so that two reports of "Spearman for
   checkpoint carries the nine heads in an order that disagrees with the
   spreadsheet's on `eSpCas9(1.1)` / `SpCas9-HF.1`, so predictions are never
   matched to labels by position.
-- `full_metrics` / `error_metrics`: `leakage_check.group_metrics` (#32) plus
-  Pearson under the same minimum-n rule, and the n/MAE/MSE-only variant for
-  groups where a correlation means nothing. Both return `None` rather than
-  NaN for an undefined figure, so a report stays strict JSON.
+- `full_metrics` / `error_metrics`: MAE/MSE and correlations under #32's
+  minimum-n rule, and the historical n/MAE/MSE-only variant. Full metrics
+  explain unavailable values and keep reports strict JSON.
 - `head_metrics`: the two put together - a head's columns pulled out of a
   predictions frame and scored.
+- `population_metrics` / `equal_head_ngg_summary`: measured NGG/non-NGG
+  groups and the equal-weight mean over all nine required NGG heads (#82).
 
 Pure arithmetic over arrays and frames: no model, no file, no dataset.
 """
@@ -28,9 +29,15 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 from leakage_check import MIN_N_FOR_SPEARMAN, group_metrics
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
-from SpCas9.spcas9_data import HEAD_NAMES, output_name
+from SpCas9.spcas9_data import (
+    HEAD_NAMES,
+    SEQUENCE_COLUMN,
+    is_ngg,
+    output_name,
+    protospacers,
+)
 
 
 def true_column(head: str) -> str:
@@ -71,15 +78,46 @@ def _finite_or_none(value: float | None) -> float | None:
 
 
 def full_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    """`group_metrics` (#32) plus Pearson, under the same minimum-n rule."""
-    metrics = group_metrics(y_true, y_pred)
-    pearson = (
-        float(pearsonr(y_true, y_pred)[0])
-        if len(y_true) >= MIN_N_FOR_SPEARMAN
-        else None
+    """Measured-pair metrics with the existing minimum-n rule and reasons.
+
+    Invalid measured values invalidate the group; they are never dropped to
+    manufacture a finite result. The head mask must be applied by the caller.
+    """
+    y_true, y_pred = np.asarray(y_true, dtype=float), np.asarray(y_pred, dtype=float)
+    if y_true.ndim != 1 or y_true.shape != y_pred.shape:
+        raise ValueError("metrics require equally sized one-dimensional arrays")
+    n = len(y_true)
+    values: dict[str, float | None] = dict.fromkeys(
+        ("mae", "mse", "spearman", "pearson")
     )
-    metrics["pearson"] = pearson
-    return {key: _finite_or_none(v) if key != "n" else v for key, v in metrics.items()}
+    reasons = {}
+    if not n:
+        reasons = dict.fromkeys(values, "no measured rows")
+    elif not (np.isfinite(y_true).all() and np.isfinite(y_pred).all()):
+        reasons = dict.fromkeys(values, "non-finite measured label or prediction")
+    else:
+        with np.errstate(over="ignore", invalid="ignore"):
+            residual = y_pred - y_true
+            values["mae"] = float(np.mean(np.abs(residual)))
+            values["mse"] = float(np.mean(residual**2))
+        if n < MIN_N_FOR_SPEARMAN:
+            reason = f"requires at least {MIN_N_FOR_SPEARMAN} measured rows"
+        elif np.ptp(y_true) == 0 or np.ptp(y_pred) == 0:
+            reason = "constant measured labels or predictions"
+        else:
+            reason = None
+            values["spearman"] = float(spearmanr(y_true, y_pred)[0])
+            values["pearson"] = float(pearsonr(y_true, y_pred)[0])
+        if reason:
+            reasons.update(spearman=reason, pearson=reason)
+        for key, value in values.items():
+            if _finite_or_none(value) is None and key not in reasons:
+                reasons[key] = "non-finite computed metric"
+    return {
+        "n": n,
+        **{key: _finite_or_none(value) for key, value in values.items()},
+        "unavailable_reasons": reasons,
+    }
 
 
 def error_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
@@ -96,3 +134,64 @@ def head_metrics(frame: pd.DataFrame, head: str, metric=full_metrics) -> dict:
     group where a correlation means nothing.
     """
     return metric(*head_arrays(frame, head))
+
+
+def target_counts(frame: pd.DataFrame) -> dict[str, int]:
+    """Rows and distinct inputs, without deduplicating repeated observations."""
+    return {
+        "n_rows": len(frame),
+        "unique_30mers": int(frame[SEQUENCE_COLUMN].nunique()),
+        "unique_protospacers": int(protospacers(frame).nunique()),
+    }
+
+
+def population_metrics(frame: pd.DataFrame) -> dict:
+    """NGG and its complement, each scored on every head's measured rows.
+
+    Pooled n counts measured head/row pairs; n_rows counts distinct eligible
+    rows. Pooled correlations are computed over the concatenated pairs, never
+    from a mean of head correlations.
+    """
+    mask = is_ngg(frame)
+    populations = {}
+    for name, selected in (("ngg", mask), ("non_ngg", ~mask)):
+        rows = frame[selected]
+        heads, labels, predictions = {}, [], []
+        any_measured = np.zeros(len(rows), dtype=bool)
+        for head in HEAD_NAMES:
+            measured = rows[true_column(head)].notna().to_numpy()
+            eligible = rows[measured]
+            y_true, y_pred = head_arrays(eligible, head)
+            heads[head] = {**full_metrics(y_true, y_pred), **target_counts(eligible)}
+            labels.append(y_true)
+            predictions.append(y_pred)
+            any_measured |= measured
+        populations[name] = {
+            "rows": len(rows),
+            "heads": heads,
+            "pooled": {
+                **full_metrics(np.concatenate(labels), np.concatenate(predictions)),
+                **target_counts(rows[any_measured]),
+            },
+        }
+    return populations
+
+
+def equal_head_ngg_summary(populations: dict) -> dict:
+    """Arithmetic means across all nine heads; any missing metric blocks its mean."""
+    heads = populations["ngg"]["heads"]
+    summary: dict = {"required_heads": list(HEAD_NAMES), "unavailable_reasons": {}}
+    for metric in ("mae", "spearman"):
+        unavailable = {
+            head: heads[head]["unavailable_reasons"][metric]
+            for head in HEAD_NAMES
+            if heads[head][metric] is None
+        }
+        summary[metric] = (
+            None
+            if unavailable
+            else math.fsum(heads[head][metric] / len(HEAD_NAMES) for head in HEAD_NAMES)
+        )
+        if unavailable:
+            summary["unavailable_reasons"][metric] = unavailable
+    return summary

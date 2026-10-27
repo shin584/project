@@ -321,14 +321,15 @@ def metric_delta(v2_metrics: dict, v1_metrics: dict) -> dict:
             if v2_metrics[name] is None or v1_metrics[name] is None
             else v2_metrics[name] - v1_metrics[name]
         )
-        for name in v2_metrics
-        if name != "n"
+        for name in ("mae", "mse", "spearman", "pearson")
     }
 
 
-def _ci_arrays(rows: pd.DataFrame, head: str) -> tuple[np.ndarray, ...]:
+def _ci_arrays(
+    rows: pd.DataFrame, head: str
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """`head`'s labels and both models' predictions, in `preds_a = v2` order."""
-    return tuple(
+    labels, v2, v1 = (
         rows[column].to_numpy(dtype=np.float64)
         for column in (
             true_column(head),
@@ -336,6 +337,7 @@ def _ci_arrays(rows: pd.DataFrame, head: str) -> tuple[np.ndarray, ...]:
             model_pred_column(V1, head),
         )
     )
+    return labels, v2, v1
 
 
 def delta_ci(rows: pd.DataFrame, head: str, n_resamples: int, seed: int) -> dict:

@@ -1,4 +1,4 @@
-"""Score 9-Hydra v2 on the 9-Hydra Testset, per head and by stratum (issue #48).
+"""Score measured 9-Hydra rows, including NGG populations (issues #48, #82).
 
 Where 9-Hydra v2 stands on the 5,186-row **9-Hydra Testset**, scored once and
 written down so the v1 <-> v2 comparison (#49) reads the predictions rather
@@ -40,16 +40,27 @@ verifies the CSVs against `split_checksum.json` the same way training did -
 a checkpoint and its score cannot come from two different splits. Nothing
 here retrains or re-splits.
 
-Full scoring is not unit-tested; running the script is the check, as with #38.
+NGG and non-NGG are sequence-derived populations, separate from the existing
+PAM-library and tRNA strata. Shared population arithmetic lives in
+`spcas9_metrics` for reuse by validation monitors and comparison reports.
 
-Read-only with respect to the checkpoint and every dataset file; writes only
-the three files in `SpCas9/v2_eval/`.
+Use `--predictions` to verify and re-evaluate saved predictions without loading
+a model; otherwise predict from the checkpoint on `--split val|test`. Test is
+restricted to the independently pinned historical v2 checkpoint, predictions
+and published inputs. Candidate Test remains behind the study finalist guard.
 
-Usage: python -m SpCas9.spcas9_eval [--checkpoint ...] [--output-dir ...]
+Inputs are read-only. The output directory must be new, including when the
+default historical destination already exists.
+
+Usage: python -m SpCas9.spcas9_eval --output-dir NEW_DIR [--predictions CSV]
 """
 
 import argparse
+import hashlib
+import json
+import sys
 from collections.abc import Mapping, Sequence
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -65,8 +76,11 @@ from SpCas9.spcas9_data import (
     library_versions,
     one_hot,
 )
+from SpCas9.spcas9_execution import reserve_destination, source_record
 from SpCas9.spcas9_metrics import (
+    equal_head_ngg_summary,
     head_metrics,
+    population_metrics,
     pred_column,
     predictions_by_head,
     true_column,
@@ -78,10 +92,11 @@ from SpCas9.spcas9_split import (
     ROW_INDEX_COLUMN,
     SPLIT_COLUMN,
     TEST,
+    VAL,
     file_sha256,
     write_json,
 )
-from SpCas9.spcas9_train import CHECKPOINT_FILENAME, load_published_split, split_record
+from SpCas9.spcas9_train import CHECKPOINT_FILENAME, split_record
 from SpCas9.spcas9_train import OUTPUT_DIR as TRAIN_DIR
 
 CHECKPOINT_PATH = TRAIN_DIR / CHECKPOINT_FILENAME
@@ -90,6 +105,13 @@ OUTPUT_DIR = BASE_DIR / "SpCas9" / "v2_eval"
 PREDICTIONS_FILENAME = "predictions.csv"
 PREDICTIONS_CHECKSUM_FILENAME = "predictions_checksum.json"
 RESULTS_FILENAME = "results.json"
+
+# Existing, already evaluated v2 only. New candidates must use the study's
+# guarded finalist/Test stage; this historical evaluator cannot authorize it.
+STORED_V2_SHA256 = "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6"
+STORED_PREDICTIONS_SHA256 = (
+    "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b"
+)
 
 # The split columns that ride along with the predictions: `row_index` joins a
 # row back to the split, and `protospacer` is what v1's categories are defined
@@ -144,7 +166,12 @@ def build_predictions(
     row carries a prediction, since the model emits all nine heads for every
     sequence.
     """
-    frame = test_frame[METADATA_COLUMNS].copy().reset_index(drop=True)
+    metadata = METADATA_COLUMNS + [
+        column
+        for column in test_frame.columns
+        if column not in METADATA_COLUMNS and column not in HEAD_NAMES
+    ]
+    frame = test_frame[metadata].copy().reset_index(drop=True)
     labels = head_labels(test_frame)
     for head in HEAD_NAMES:
         values = np.asarray(preds[head], dtype=np.float64).reshape(-1)
@@ -206,10 +233,12 @@ def head_report(frame: pd.DataFrame, head: str) -> dict:
     return report
 
 
-def build_report(frame: pd.DataFrame) -> dict:
-    """The JSON-serialisable scoring report, per head and per stratum."""
+def build_report(frame: pd.DataFrame, *, metrics_schema_version: int = 2) -> dict:
+    """Scoring report; schema 1 is retained to verify intact historical studies."""
+    if metrics_schema_version not in (1, 2):
+        raise ValueError("unsupported metrics schema version")
     heads = {head: head_report(frame, head) for head in HEAD_NAMES}
-    return {
+    report = {
         "model": "9-Hydra v2",
         "testset": "9-Hydra Testset",
         "scale": SCALE_NOTE,
@@ -219,6 +248,20 @@ def build_report(frame: pd.DataFrame) -> dict:
             head: empty_strata(report["strata"]) for head, report in heads.items()
         },
     }
+    if metrics_schema_version == 1:
+        for scored in heads.values():
+            del scored["unavailable_reasons"]
+            for groups in scored["strata"].values():
+                for metrics in groups.values():
+                    del metrics["unavailable_reasons"]
+    else:
+        populations = population_metrics(frame)
+        report.update(
+            metrics_schema_version=2,
+            populations=populations,
+            equal_head_ngg=equal_head_ngg_summary(populations),
+        )
+    return report
 
 
 def write_predictions(
@@ -226,6 +269,8 @@ def write_predictions(
     checkpoint_path: Path = CHECKPOINT_PATH,
     output_dir: Path = OUTPUT_DIR,
     split_dir: Path = SPLIT_DIR,
+    *,
+    input_predictions: dict | None = None,
 ) -> dict:
     """Write the predictions CSV and its checksum sidecar; return the record.
 
@@ -234,6 +279,16 @@ def write_predictions(
     consumed split's (through `split_record`, which also carries the
     spreadsheet's `dataset_sha256`).
     """
+    for filename in (
+        PREDICTIONS_FILENAME,
+        PREDICTIONS_CHECKSUM_FILENAME,
+        RESULTS_FILENAME,
+    ):
+        path = output_dir / filename
+        if path.exists() or path.is_symlink():
+            raise FileExistsError(path)
+    checkpoint_digest = file_sha256(checkpoint_path)
+    split = split_record(split_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     predictions_path = output_dir / PREDICTIONS_FILENAME
     # Fixed line ending so `file_sha256` matches across Windows and Colab.
@@ -245,13 +300,54 @@ def write_predictions(
         "scale": SCALE_NOTE,
         "coverage": {head: len(measured_rows(frame, head)) for head in HEAD_NAMES},
         "checkpoint": checkpoint_path.name,
-        "checkpoint_sha256": file_sha256(checkpoint_path),
-        "split": split_record(split_dir),
+        "checkpoint_sha256": checkpoint_digest,
+        "split": split,
         "file": PREDICTIONS_FILENAME,
         "file_sha256": file_sha256(predictions_path),
     }
+    if input_predictions is not None:
+        record.update(input_predictions)
     write_json(record, output_dir / PREDICTIONS_CHECKSUM_FILENAME)
     return record
+
+
+def _read_predictions(
+    path: Path, sidecar: Path, rows: pd.DataFrame, checkpoint_digest: str, split: dict
+) -> tuple[pd.DataFrame, dict]:
+    """Verify saved bytes and their row/label alignment without running a model."""
+    raw, sidecar_raw = path.read_bytes(), sidecar.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    record = json.loads(sidecar_raw)
+    if (
+        record["file_sha256"] != digest
+        or record["checkpoint_sha256"] != checkpoint_digest
+        or record["split"] != split
+    ):
+        raise ValueError("prediction/checkpoint/split SHA-256 evidence differs")
+    frame = pd.read_csv(BytesIO(raw))
+    expected = build_predictions(
+        rows, {head: frame[pred_column(head)].to_numpy() for head in HEAD_NAMES}
+    )
+    if record["rows"] != len(frame):
+        raise ValueError("prediction sidecar row count differs")
+    try:
+        pd.testing.assert_frame_equal(
+            frame[expected.columns],
+            expected,
+            check_dtype=False,
+            rtol=1e-12,
+            atol=1e-14,
+        )
+    except (AssertionError, KeyError) as error:
+        raise ValueError(
+            "predictions do not match split rows, metadata or labels"
+        ) from error
+    return frame, {
+        "input_predictions": str(path.resolve()),
+        "input_predictions_sha256": digest,
+        "input_sidecar": str(sidecar.resolve()),
+        "input_sidecar_sha256": hashlib.sha256(sidecar_raw).hexdigest(),
+    }
 
 
 def main(argv: list[str] | None = None) -> dict:
@@ -259,46 +355,84 @@ def main(argv: list[str] | None = None) -> dict:
     parser.add_argument("--checkpoint", type=Path, default=CHECKPOINT_PATH)
     parser.add_argument("--split-dir", type=Path, default=SPLIT_DIR)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument("--split", choices=(VAL, TEST), default=TEST)
+    parser.add_argument(
+        "--predictions",
+        type=Path,
+        help="Re-evaluate saved predictions without inference",
+    )
+    parser.add_argument("--prediction-sidecar", type=Path)
     args = parser.parse_args(argv)
 
-    test_rows = load_published_split(args.split_dir)[TEST]
-    preds = score_checkpoint(test_rows[SEQUENCE_COLUMN].tolist(), args.checkpoint)
-    frame = build_predictions(test_rows, preds)
+    if args.output_dir.exists() or args.output_dir.is_symlink():
+        raise FileExistsError(args.output_dir)
+    if args.prediction_sidecar and not args.predictions:
+        parser.error("--prediction-sidecar requires --predictions")
+    checkpoint_digest = file_sha256(args.checkpoint)
+    if args.split == TEST:
+        if checkpoint_digest != STORED_V2_SHA256:
+            raise PermissionError(
+                "candidate Test evaluation requires the guarded study finalist stage"
+            )
+        if (
+            args.predictions
+            and file_sha256(args.predictions) != STORED_PREDICTIONS_SHA256
+        ):
+            raise PermissionError(
+                "Test replay is restricted to the stored v2 predictions"
+            )
+    from SpCas9.spcas9_study_inputs import StudyInputs
+
+    splits = StudyInputs(split_dir=args.split_dir).validate()
+    rows = splits[args.split]
+    split = split_record(args.split_dir)
+    input_predictions = None
+    sources: tuple[Path, ...] = (args.checkpoint, args.split_dir)
+    if args.predictions:
+        sidecar = args.prediction_sidecar or args.predictions.with_name(
+            PREDICTIONS_CHECKSUM_FILENAME
+        )
+        frame, input_predictions = _read_predictions(
+            args.predictions, sidecar, rows, checkpoint_digest, split
+        )
+        sources += (args.predictions, sidecar)
+    else:
+        preds = score_checkpoint(rows[SEQUENCE_COLUMN].tolist(), args.checkpoint)
+        frame = build_predictions(rows, preds)
+    if (
+        file_sha256(args.checkpoint) != checkpoint_digest
+        or split_record(args.split_dir) != split
+    ):
+        raise ValueError("checkpoint or split changed during evaluation")
+    report = build_report(frame)
+    report["split"] = args.split
+    if args.split != TEST:
+        del report["testset"]
+    report["execution"] = {
+        "mode": "saved_predictions" if args.predictions else "checkpoint_inference",
+        "interpreter": sys.executable,
+        "source": source_record(),
+    }
+    reserve_destination(args.output_dir, sources)
     checksum = write_predictions(
         frame,
         checkpoint_path=args.checkpoint,
         output_dir=args.output_dir,
         split_dir=args.split_dir,
+        input_predictions=input_predictions,
     )
 
-    report = build_report(frame)
     report["predictions"] = checksum
     report["libraries"] = library_versions()
     results_path = write_json(report, args.output_dir / RESULTS_FILENAME)
 
     for head, scored in report["heads"].items():
-        library = scored["strata"][PAM_LIBRARY_COLUMN]
-        trna = scored["strata"][TRNA_COLUMN]
         print(
             f"{head:>13}: n={scored['n']:>5} "
-            f"Spearman {scored['spearman']:.3f} "
-            f"Pearson {scored['pearson']:.3f} "
-            f"MAE {scored['mae']:.4f} MSE {scored['mse']:.4f}"
+            f"Spearman {scored['spearman']} Pearson {scored['pearson']} "
+            f"MAE {scored['mae']} MSE {scored['mse']}"
         )
-        print(
-            f"{'PAM library':>13}: {library[PAM_LIBRARY]['n']:>5} rows, "
-            f"Spearman {library[PAM_LIBRARY]['spearman']:.3f} "
-            f"vs {library[NON_LIBRARY]['spearman']:.3f} off the library"
-        )
-        names = report["empty_strata"][head]
-        if names:
-            print(f"{'tRNA':>13}: no rows in {', '.join(names)} - no comparison")
-        else:
-            print(
-                f"{'tRNA':>13}: {trna['1']['n']:>5} rows at tRNA=1, "
-                f"MAE {trna['1']['mae']:.4f} "
-                f"vs {trna['0']['mae']:.4f} at tRNA=0"
-            )
+    print(f"Equal-head NGG: {report['equal_head_ngg']}")
     print(f"Wrote {args.output_dir / PREDICTIONS_FILENAME}, {results_path}")
     return report
 

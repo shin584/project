@@ -258,6 +258,273 @@ def test_report_states_the_scale_and_the_scored_row_count(toy):
     assert "100" in report["scale"]
 
 
+def _population_fixture():
+    """Two PAM populations, repeated targets, unequal masks and measured zero."""
+    rows = []
+    for pam in ("TGG", "TGA"):
+        for i in range(20):
+            rows.append(
+                {
+                    "sequence": make_sequence(
+                        protospacer=numbered_protospacer(i // 10),
+                        pam=pam,
+                        tail="AGG",  # The sequence suffix is not the PAM.
+                    ),
+                    "protospacer": numbered_protospacer(i // 10),
+                    "in_pam_library": i % 2 == 0,
+                    **{head: float(i * 10) for head in HEAD_NAMES},
+                    "SpCas9": float(i * 10) if i % 2 == 0 else np.nan,
+                    "SpCas9-NG": float(i * 10) if i < 12 else np.nan,
+                }
+            )
+    frame = _test_frame(rows)
+    return build_predictions(frame, _predictions(frame, {"SpCas9": 0.9}))
+
+
+def test_report_scores_measured_pam_populations_and_equal_heads(tmp_path):
+    from SpCas9.spcas9_split import write_json
+
+    frame = _population_fixture()
+    original = frame.copy(deep=True)
+    path = write_json(build_report(frame), tmp_path / "report.json")
+    report = json.loads(path.read_text())
+
+    for population in ("ngg", "non_ngg"):
+        scored = report["populations"][population]
+        assert scored["rows"] == 20
+        assert scored["heads"]["SpCas9"]["n"] == 10  # Includes measured 0.
+        assert scored["heads"]["SpCas9-NG"]["n"] == 12
+        assert scored["heads"]["SpCas9"]["mae"] == pytest.approx(0.9)
+        assert scored["heads"]["SpCas9"]["mse"] == pytest.approx(0.81)
+        assert scored["pooled"]["n"] == 162  # Measured head/row pairs.
+        assert scored["pooled"]["n_rows"] == 20
+        assert scored["pooled"]["unique_30mers"] == 2
+        assert scored["pooled"]["unique_protospacers"] == 2
+        assert scored["pooled"]["mae"] == pytest.approx(121 / 810)
+        assert scored["pooled"]["mse"] == pytest.approx(481 / 8100)
+        assert scored["pooled"]["spearman"] < 0.99
+    assert report["equal_head_ngg"]["mae"] == pytest.approx(17 / 90)
+    assert report["equal_head_ngg"]["spearman"] == pytest.approx(1.0)
+    pd.testing.assert_frame_equal(frame, original)
+
+
+def test_report_head_average_correlation_is_not_pooled_correlation():
+    frame = _population_fixture()
+    # Exactly reverse one head's order. Eight +1 and one -1 give 7/9.
+    frame[pred_column("SpCas9")] = -frame[true_column("SpCas9")]
+    report = build_report(frame)
+    assert report["equal_head_ngg"]["spearman"] == pytest.approx(7 / 9)
+    assert report["populations"]["ngg"]["pooled"]["spearman"] != pytest.approx(7 / 9)
+
+
+@pytest.mark.parametrize(
+    ("problem", "reason"),
+    [
+        ("empty", "no measured rows"),
+        ("small", "requires at least 10 measured rows"),
+        ("constant", "constant measured labels or predictions"),
+        ("nonfinite", "non-finite measured label or prediction"),
+    ],
+)
+def test_report_explains_unavailable_required_head_without_skipping_it(
+    tmp_path, problem, reason
+):
+    from SpCas9.spcas9_split import write_json
+
+    frame = _population_fixture()
+    head = "evoCas9"
+    if problem == "empty":
+        frame[true_column(head)] = np.nan
+    elif problem == "small":
+        frame.loc[frame.index % 20 >= 9, true_column(head)] = np.nan
+    elif problem == "constant":
+        frame[pred_column(head)] = 0.0
+    else:
+        frame.loc[0, pred_column(head)] = np.inf
+
+    path = write_json(build_report(frame), tmp_path / "report.json")
+    report = json.loads(path.read_text())
+    summary = report["equal_head_ngg"]
+    assert summary["spearman"] is None
+    assert summary["unavailable_reasons"]["spearman"] == {head: reason}
+    scored = report["populations"]["ngg"]["heads"][head]
+    assert scored["unavailable_reasons"]["pearson"] == reason
+    if problem in ("empty", "nonfinite"):
+        assert summary["mae"] is None
+        assert summary["unavailable_reasons"]["mae"] == {head: reason}
+    else:
+        assert summary["mae"] is not None
+
+
+def test_report_names_an_entirely_empty_population():
+    frame = _population_fixture().iloc[:20]
+    report = build_report(frame)
+    empty = report["populations"]["non_ngg"]
+    assert empty["rows"] == empty["pooled"]["n"] == 0
+    assert empty["pooled"]["unique_30mers"] == 0
+    assert empty["pooled"]["unavailable_reasons"]["mae"] == "no measured rows"
+    json.dumps(report, allow_nan=False)
+
+
+def test_report_equal_head_mean_of_finite_large_errors_remains_strict_json():
+    frame = _test_frame([{head: 0.0 for head in HEAD_NAMES}])
+    predictions = build_predictions(
+        frame, {head: np.array([1e308]) for head in HEAD_NAMES}
+    )
+    report = build_report(predictions)
+    assert report["equal_head_ngg"]["mae"] == pytest.approx(1e308)
+    json.dumps(report, allow_nan=False)
+
+
+def test_predictions_preserve_additional_condition_metadata_and_every_row():
+    frame = _test_frame([{"SpCas9": 0.0}, {"SpCas9": 50.0}])
+    frame["expression_condition"] = ["first", "second"]
+    predictions = build_predictions(frame, _predictions(frame))
+    assert predictions["expression_condition"].tolist() == ["first", "second"]
+    assert len(predictions) == 2
+
+
+@pytest.fixture
+def replay_inputs(tmp_path):
+    import shutil
+
+    from SpCas9.spcas9_split import CHECKSUM_FILENAME, SPLIT_FILENAMES
+
+    split_dir = tmp_path / "published_split"
+    split_dir.mkdir()
+    for filename in (*SPLIT_FILENAMES.values(), CHECKSUM_FILENAME):
+        shutil.copyfile(SPLIT_DIR / filename, split_dir / filename)
+    checkpoint = tmp_path / "fixture.keras"
+    checkpoint.write_bytes(b"fixture checkpoint; never loaded for report-only")
+    validation = load_published_split(split_dir)["val"]
+    predictions = build_predictions(
+        validation, _predictions(validation, {"SpCas9": 0.9})
+    )
+    predictions["expression_condition"] = ["first", "second"] * (len(validation) // 2)
+    stored = tmp_path / "stored"
+    write_predictions(predictions, checkpoint, stored, split_dir)
+    return split_dir, checkpoint, stored
+
+
+def _replay_args(replay_inputs, destination, split="val"):
+    split_dir, checkpoint, stored = replay_inputs
+    return [
+        "--split-dir",
+        str(split_dir),
+        "--checkpoint",
+        str(checkpoint),
+        "--predictions",
+        str(stored / PREDICTIONS_FILENAME),
+        "--split",
+        split,
+        "--output-dir",
+        str(destination),
+    ]
+
+
+def test_evaluation_replays_verified_predictions_to_a_fresh_report(
+    replay_inputs, tmp_path
+):
+    from SpCas9.spcas9_eval import RESULTS_FILENAME, main
+    from SpCas9.spcas9_split import file_sha256
+
+    split_dir, checkpoint, stored = replay_inputs
+    protected = [checkpoint, *split_dir.iterdir(), *stored.iterdir()]
+    before = {path: file_sha256(path) for path in protected}
+    destination = tmp_path / "recomputed"
+    main(_replay_args(replay_inputs, destination))
+    report = json.loads((destination / RESULTS_FILENAME).read_text())
+    assert report["split"] == "val"
+    assert "testset" not in report
+    assert report["equal_head_ngg"]["mae"] == pytest.approx(17 / 90)
+    provenance = report["predictions"]
+    assert provenance["checkpoint_sha256"] == before[checkpoint]
+    assert (
+        provenance["input_predictions_sha256"] == before[stored / PREDICTIONS_FILENAME]
+    )
+    assert provenance["file_sha256"] == file_sha256(destination / PREDICTIONS_FILENAME)
+    assert provenance["split"]["files"]["val.csv"] == before[split_dir / "val.csv"]
+    reread = pd.read_csv(destination / PREDICTIONS_FILENAME)
+    assert reread["expression_condition"].tolist() == ["first", "second"] * 1838
+    assert {path: file_sha256(path) for path in protected} == before
+
+
+@pytest.mark.parametrize(
+    "problem", ["predictions", "checkpoint", "split", "identity", "label"]
+)
+def test_evaluation_refuses_damaged_or_misaligned_replay_evidence(
+    replay_inputs, tmp_path, problem
+):
+    from SpCas9.spcas9_eval import PREDICTIONS_CHECKSUM_FILENAME, main
+    from SpCas9.spcas9_split import file_sha256, write_json
+
+    split_dir, checkpoint, stored = replay_inputs
+    if problem == "predictions":
+        with (stored / PREDICTIONS_FILENAME).open("a") as stream:
+            stream.write("\n")
+    elif problem == "checkpoint":
+        checkpoint.write_bytes(b"changed")
+    elif problem == "split":
+        with (split_dir / "val.csv").open("a") as stream:
+            stream.write("\n")
+    else:
+        path = stored / PREDICTIONS_FILENAME
+        frame = pd.read_csv(path)
+        column = ROW_INDEX_COLUMN if problem == "identity" else true_column("SpCas9")
+        frame.loc[0, column] = 123.0
+        frame.to_csv(path, index=False, lineterminator="\n")
+        sidecar = stored / PREDICTIONS_CHECKSUM_FILENAME
+        record = json.loads(sidecar.read_text())
+        record["file_sha256"] = file_sha256(path)
+        write_json(record, sidecar)
+    destination = tmp_path / "rejected"
+    with pytest.raises(ValueError):
+        main(_replay_args(replay_inputs, destination))
+    assert not destination.exists()
+
+
+def test_evaluation_refuses_existing_output_and_candidate_test(replay_inputs, tmp_path):
+    from SpCas9.spcas9_eval import main
+
+    destination = tmp_path / "reserved"
+    destination.mkdir()
+    marker = destination / "keep"
+    marker.write_bytes(b"earlier evidence")
+    with pytest.raises(FileExistsError):
+        main(_replay_args(replay_inputs, destination))
+    assert marker.read_bytes() == b"earlier evidence"
+    with pytest.raises(PermissionError, match="Test"):
+        main(_replay_args(replay_inputs, tmp_path / "candidate", split=TEST))
+    assert not (tmp_path / "candidate").exists()
+
+
+def test_validation_evaluation_refuses_test_rows_with_a_self_issued_sidecar(
+    replay_inputs, tmp_path
+):
+    from SpCas9.spcas9_eval import main
+    from SpCas9.spcas9_split import CHECKSUM_FILENAME, file_sha256, write_json
+
+    split_dir, checkpoint, _ = replay_inputs
+    # Make all self-reported digests and labels consistent: independent pins
+    # must still refuse using historical Test observations as validation.
+    test_bytes = (split_dir / "test.csv").read_bytes()
+    (split_dir / "val.csv").write_bytes(test_bytes)
+    path = split_dir / CHECKSUM_FILENAME
+    record = json.loads(path.read_text())
+    record["files"]["val.csv"] = file_sha256(split_dir / "val.csv")
+    record["rows"]["val"] = record["rows"]["test"]
+    write_json(record, path)
+    rows = load_published_split(split_dir)["val"]
+    saved = tmp_path / "mislabelled"
+    write_predictions(
+        build_predictions(rows, _predictions(rows)), checkpoint, saved, split_dir
+    )
+    destination = tmp_path / "refused_test"
+    with pytest.raises(ValueError, match="SHA-256"):
+        main(_replay_args((split_dir, checkpoint, saved), destination))
+    assert not destination.exists()
+
+
 # --- unit: the predictions file and its checksum sidecar ---
 
 

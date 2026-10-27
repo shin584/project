@@ -1,0 +1,42 @@
+{
+  "model": "9-Hydra v2",
+  "rows": 5186,
+  "scale": "published percentage / 100 (the scale 9-Hydra v2 was trained on)",
+  "coverage": {
+    "SpCas9": 5021,
+    "SpCas9-NG": 3982,
+    "VRQR variant": 3979,
+    "xCas": 5170,
+    "Sniper-Cas9": 5170,
+    "SpCas9-HF.1": 5177,
+    "eSpCas9(1.1)": 5176,
+    "HypaCas9": 5177,
+    "evoCas9": 5161
+  },
+  "checkpoint": "9hydra_v2.keras",
+  "checkpoint_sha256": "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6",
+  "split": {
+    "dir": "published_split",
+    "checksum_file": "split_checksum.json",
+    "checksum_sha256": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+    "seed": 42,
+    "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+    "rows": {
+      "train": 29134,
+      "val": 3676,
+      "test": 5186,
+      "total": 37996
+    },
+    "files": {
+      "train.csv": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+      "val.csv": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+      "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+    }
+  },
+  "file": "predictions.csv",
+  "file_sha256": "3c057286965d1440f8b412edc3c4bfc9f5eb936e2a3793d28d68a93b12e29d30",
+  "input_predictions": "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions.csv",
+  "input_predictions_sha256": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+  "input_sidecar": "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions_checksum.json",
+  "input_sidecar_sha256": "fcf1159bb039d388f7415e62cffa0a81e83c368ddb5f0c504272b0869aa170f5"
+}
