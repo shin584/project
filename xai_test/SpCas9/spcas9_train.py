@@ -224,7 +224,9 @@ def compile_model(model, learning_rate: float = LEARNING_RATE) -> None:
     )
 
 
-def training_callbacks(monitor: str = "val_loss") -> list:
+def training_callbacks(
+    monitor: str = "val_loss", *, restore_best_weights: bool = True
+) -> list:
     """v1's early stopping and LR schedule, both watching the carve-out's loss."""
     import keras
 
@@ -233,7 +235,7 @@ def training_callbacks(monitor: str = "val_loss") -> list:
             monitor=monitor,
             mode="min",
             patience=EARLY_STOPPING_PATIENCE,
-            restore_best_weights=True,
+            restore_best_weights=restore_best_weights,
         ),
         keras.callbacks.ReduceLROnPlateau(
             monitor=monitor,

@@ -8,6 +8,7 @@ from typing import Protocol
 import numpy as np
 
 from SpCas9.spcas9_ranking import RANKING_WEIGHT
+from SpCas9.spcas9_selection import ngg_callbacks, ngg_stopping
 
 
 @dataclass
@@ -24,6 +25,7 @@ class FitResult:
     history: dict[str, list[float]]
     validation_predictions: dict[str, np.ndarray]
     environment: dict
+    selection: dict | None = None
 
 
 class TrainingBackend(Protocol):
@@ -42,13 +44,16 @@ class TrainingBackend(Protocol):
 
 
 class KerasV2Backend:
-    """The historical v2 model/optimizer with explicit common-loss monitoring."""
+    """Original masked MSE, using the shared NGG checkpoint policy by default."""
 
-    def __init__(self, *, epochs: int = 50):
+    def __init__(self, *, epochs: int = 50, selection: str = "ngg"):
         # A smaller value is for bounded disposable synthetic checks only.
         if not 1 <= epochs <= 50:
             raise ValueError("epochs must be between 1 and 50")
         self.epochs = epochs
+        if selection not in ("ngg", "reference_mse"):
+            raise ValueError("unknown checkpoint selection policy")
+        self.selection = selection
 
     def _trainer(self, model):
         return model
@@ -91,6 +96,15 @@ class KerasV2Backend:
         for weight in model.get_weights():
             initial_digest.update(weight.tobytes())
         trainer = self._trainer(model)
+        selector = None
+        if self.selection == "ngg":
+            callbacks, selector = ngg_callbacks(validation)
+        else:
+            # Compatibility with the frozen historical #51 protocol only.
+            callbacks = [
+                ReferenceValidation(),
+                *training_callbacks(monitor=REFERENCE_LOSS),
+            ]
         history = trainer.fit(
             x=training.inputs,
             y=training.labels,
@@ -99,29 +113,50 @@ class KerasV2Backend:
             epochs=self.epochs,
             batch_size=BATCH_SIZE,
             shuffle=True,
-            callbacks=[
-                ReferenceValidation(),
-                *training_callbacks(monitor=REFERENCE_LOSS),
-            ],
+            callbacks=callbacks,
             verbose=1,
         )
-        # EarlyStopping restored the common-criterion best weights on train end.
+        # NGG selector is the sole weight owner; legacy #51 uses EarlyStopping.
         model.save(checkpoint_path)
         values = {
             name: [float(v) for v in series] for name, series in history.history.items()
         }
         values["recipe_optimization_loss"] = values.pop("loss")
         values["val_recipe_optimization_loss"] = values.pop("val_loss")
+        selection_record = None
+        if selector is not None:
+            selection_record = ngg_stopping(values)
+            validation_predictions = selector.predictions
+            reloaded = self.predict(checkpoint_path, validation.inputs)
+            for name, predictions in validation_predictions.items():
+                if name not in reloaded or not np.allclose(
+                    reloaded[name], predictions, rtol=1e-5, atol=1e-6
+                ):
+                    raise ValueError(
+                        f"selected NGG checkpoint save/reload parity failed: {name}"
+                    )
+            selection_record["save_reload_parity"] = {
+                "passed": True,
+                "rtol": 1e-5,
+                "atol": 1e-6,
+                "split": "val",
+            }
+        else:
+            validation_predictions = model.predict(
+                validation.inputs, batch_size=1024, verbose=0
+            )
         return FitResult(
             values,
-            model.predict(validation.inputs, batch_size=1024, verbose=0),
+            validation_predictions,
             {
                 "backend": "keras",
                 "device": device_record(),
                 "initial_weights_sha256": initial_digest.hexdigest(),
                 "optimizer_updates": int(trainer.optimizer.iterations.numpy()),
+                "checkpoint_selection": self.selection,
                 **self._objective_record(),
             },
+            selection=selection_record,
         )
 
     def _objective_record(self) -> dict:
@@ -139,8 +174,8 @@ class KerasV2Backend:
 class KerasNggBackend(KerasV2Backend):
     """Fixed #83 candidate; zero weight exists solely for equivalence checks.
 
-    This implements training, not execution readiness. The shared NGG monitor
-    and frozen budget scheduler are subsequent tickets (#84/#85).
+    This implements training, not execution readiness. The NGG monitor is
+    shared with baseline; the frozen budget scheduler is ticket #85.
     """
 
     def __init__(self, *, auxiliary_weight: float = RANKING_WEIGHT, epochs: int = 50):

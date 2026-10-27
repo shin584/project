@@ -379,3 +379,90 @@ def test_default_pins_accept_the_existing_published_artifacts():
         "val": 3676,
         "test": 5186,
     }
+
+
+@pytest.mark.parametrize(
+    "failure", [None, "history", "wrong_mae", "wrong_spearman", "wrong_epoch"]
+)
+def test_ngg_run_persists_selected_epoch_and_both_histories_or_refuses_invalid_evidence(
+    inputs, tmp_path, failure
+):
+    from SpCas9.spcas9_selection import NGG_MAE, NGG_SPEARMAN, ngg_stopping
+    from SpCas9.spcas9_study_backend import FitResult
+
+    # A new pinned fixture; historical input bytes and evidence are untouched.
+    path = inputs.split_dir / "val.csv"
+    frame = pd.read_csv(path)
+    frame["sequence"] = "ACGT" * 6 + "AGGAAA"
+    for head in HEAD_NAMES:
+        frame[head] = (np.arange(len(frame)) % 5) * 100.0
+    frame.to_csv(path, index=False, lineterminator="\n")
+    files = {**inputs.pins.files, "val.csv": digest(path)}
+    sidecar = inputs.split_dir / CHECKSUM_FILENAME
+    record = json.loads(sidecar.read_text())
+    record["files"] = files
+    write_json(record, sidecar)
+    ngg_inputs = StudyInputs(
+        inputs.source_path,
+        inputs.split_dir,
+        InputPins(inputs.pins.dataset_sha256, digest(sidecar), files),
+    )
+
+    class NggBackend:
+        def fit(self, training, validation, *, seed, checkpoint_path):
+            checkpoint_path.write_bytes(b"selected epoch2")
+            history = {
+                "recipe_optimization_loss": [3.0, 2.0, 1.0],
+                "val_recipe_optimization_loss": [3.0, 2.0, 1.0],
+                "learning_rate": [0.001] * 3,
+                NGG_MAE: [5.0, 5.0, 5.0],
+                NGG_SPEARMAN: [-1.0, 1.0, 1.0],
+            }
+            selection = ngg_stopping(history)
+            if failure == "history":
+                del history[NGG_SPEARMAN]
+            elif failure == "wrong_mae":
+                history[NGG_MAE][1] = 4.0
+            elif failure == "wrong_spearman":
+                history[NGG_SPEARMAN] = [-1.0] * 3
+            elif failure == "wrong_epoch":
+                selection["best_epoch"] = 3
+            return FitResult(
+                history,
+                self.predict(checkpoint_path, validation.inputs),
+                {"backend": "fixture"},
+                selection,
+            )
+
+        def predict(self, checkpoint_path, inputs):
+            return {
+                output_name(h): (5.0 + np.arange(len(inputs)) % 5)[:, None]
+                for h in HEAD_NAMES
+            }
+
+    study = StudyProtocol.plan(
+        tmp_path / "studies", ngg_inputs, checkpoint_selection="ngg"
+    )
+    run_id = study.plan_run(seed=42)
+    if failure:
+        with pytest.raises(ValueError):
+            study.train_validation(run_id, backend=NggBackend())
+        assert study.report_only(run_id)["eligible"] is False
+    else:
+        result = study.train_validation(run_id, backend=NggBackend())
+        assert result["training"]["stopping"]["best_epoch"] == 2
+        assert result["training"]["selection"]["history"][NGG_MAE] == [5.0, 5.0, 5.0]
+        assert result["training"]["selection"]["history"][NGG_SPEARMAN] == [
+            -1.0,
+            1.0,
+            1.0,
+        ]
+        assert (
+            result["protocol"]["hyperparameters"]["early_stopping"][
+                "restore_best_weights"
+            ]
+            is False
+        )
+        assert StudyProtocol(study.path).report_only(run_id) == result
+        with pytest.raises(PermissionError):
+            study.evaluate_test()

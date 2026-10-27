@@ -187,7 +187,21 @@ def test_backend_preserves_fit_order_partial_batch_and_plain_checkpoint(
         {k: v[row_ids] for k, v in labels.items()},
         {k: v[row_ids] for k, v in masks.items()},
     )
-    validation = TrainingRows(inputs, labels, masks)
+    # Shared #84 monitoring retains #82's minimum-n and nonconstant-label
+    # requirements for every head. This is validation only, not more updates.
+    validation_inputs = one_hot(
+        [
+            "AAAA"
+            + format(index, "020b").replace("0", "A").replace("1", "C")
+            + "AGGAAA"
+            for index in range(12)
+        ]
+    )
+    validation = TrainingRows(
+        validation_inputs,
+        {name: np.linspace(0, 0.5, 12, dtype=np.float32) for name in labels},
+        {name: np.ones(12, dtype=np.float32) for name in masks},
+    )
     reference_path, zero_path, ranked_path = (
         tmp_path / f"{name}.keras" for name in ("reference", "zero", "ranked")
     )
@@ -232,7 +246,7 @@ def test_backend_preserves_fit_order_partial_batch_and_plain_checkpoint(
     # The ordinary loader receives no custom objects, including when compiled.
     reloaded = keras.models.load_model(ranked_path)
     assert type(reloaded).__name__ == "Functional"
-    after = backend.predict(ranked_path, inputs)
+    after = backend.predict(ranked_path, validation.inputs)
     assert set(after) == {output_name(head) for head in HEAD_NAMES}
     for name, before in ranked.validation_predictions.items():
         assert np.isfinite(before).all()

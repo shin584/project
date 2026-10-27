@@ -1,11 +1,12 @@
-# NGG ranking training adapter (#83)
+# NGG ranking training and checkpoint selection (#83, #84)
 
 `SpCas9.spcas9_study_backend.KerasNggBackend` implements the fixed candidate
 on the existing `TrainingRows`/`FitResult` boundary. `KerasV2Backend` retains
 the original objective. Neither is an authorization to run a full fit.
 The historical `StudyProtocol` still describes v2 only; do not inject the
-candidate into a v2 run. The shared NGG checkpoint monitor (#84) and frozen
-recipe/run/budget protocol (#85) must be implemented before study execution.
+candidate into a historical v2 run. Both backends now default to the shared
+NGG checkpoint policy (#84). The frozen recipe/run/budget protocol (#85)
+remains required before study execution.
 
 The training-only wrapper shares the functional model's weights and overrides
 loss computation, leaving Keras' single batch forward pass, Adam(0.001), array
@@ -32,7 +33,56 @@ History records `masked_mse`, `ngg_ranking`, and each output's
 `ngg_pairs_<output>`/`ngg_gap_weight_sum_<output>`. The latter two are epoch
 sums of batch counts and normalization denominators, not a new epoch-wide
 normalization. Validation history has the same statistics with a `val_`
-prefix. The historical reference-MSE callback remains in place until #84.
+prefix. These objective statistics do not choose the NGG checkpoint.
+
+## Shared validation and checkpoint ownership (#84)
+
+At each epoch end, one validation prediction set supplies both equal-head
+NGG MAE and mean NGG Spearman through #82's measured-head arithmetic. Missing
+labels are excluded before arithmetic; a measured zero remains measured.
+Undefined required head metrics, non-finite values, missing monitors and
+stale epoch delivery fail explicitly. The existing minimum of ten measured
+rows for correlation still applies; it is not relaxed for monitoring.
+
+The callback order is producer, authoritative selector, EarlyStopping, then
+ReduceLROnPlateau. Both consumers monitor `val_equal_head_ngg_mae`, retaining
+patience5 and factor0.2/patience3/min_lr1e-6 (including Keras' existing MAE
+improvement definitions). EarlyStopping has `restore_best_weights=False`.
+The selector alone restores the minimum-MAE weights; exact MAE ties prefer
+higher mean NGG Spearman, then the earlier epoch. Spearman does not reset
+stopping or LR patience. Baseline still optimizes original masked MSE.
+
+`FitResult.selection` records the selected one-based epoch, both full metric
+histories, ownership and save/reload parity. Returned validation predictions
+are cached from that selected epoch, and the saved functional model must
+reproduce them at rtol1e-5/atol1e-6. No extra inference recomputes the selected
+epoch for reporting before the independent checkpoint reload check.
+
+The existing `StudyProtocol.plan(..., checkpoint_selection="ngg")` per-run
+evidence boundary records this policy and verifies both restored metrics
+against its history before completing a run. This extension is for the
+subsequent #79 runner; it does not implement #85 budgets, candidate orchestration
+or authorize execution. The historical #51 protocol keeps reference-MSE
+selection by default and explicitly constructs its legacy backend policy.
+Old report-only evidence remains readable. Candidate Test stays guarded.
+
+`test_spcas9_selection.py` replays synthetic epochs through real Keras callbacks,
+with no gradient computation or optimizer updates. It checks exact ties,
+MAE-only patience/LR behavior, failure handling, actual weight restoration,
+ordinary checkpoint serialization and real inference reload parity. The
+study tests also verify persisted histories and refusal of inconsistent
+selection evidence. These are callback/serialization checks, not new fits
+or a repeat of #83's exhausted learning-path checks. The #83 ledger below
+remains unchanged.
+
+Verification on 2026-10-27: the full suite, run from `xai_test/` with
+`python -m pytest -q -p no:cacheprovider`, passed 715 tests with 7 skipped.
+Ruff passed for all seven changed Python files; mypy passed for all four
+changed source modules. Independent Standards and Spec reviews reported
+zero findings. Exact-tie verification also invokes the real reloaded graph
+and reproduces all nine outputs captured at the selected epoch, distinguishing
+them from the later tied epoch. No new 9-Hydra fit or optimizer update was
+performed. Disposable suite evidence is in `.scratch/issue84-full-results.xml`.
 
 Only the ordinary functional model is saved. Its input remains one sequence
 of shape `(30, 4)` and its nine linear outputs retain their names and scale.

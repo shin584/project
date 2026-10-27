@@ -21,6 +21,12 @@ from SpCas9.spcas9_data import HEAD_NAMES, library_versions, output_name
 from SpCas9.spcas9_eval import build_predictions, build_report
 from SpCas9.spcas9_execution import reserve_destination, source_record
 from SpCas9.spcas9_metrics import predictions_by_head
+from SpCas9.spcas9_selection import (
+    NGG_MAE,
+    ngg_stopping,
+    ngg_summary,
+    validation_ngg_mask,
+)
 from SpCas9.spcas9_split import file_sha256, write_json
 from SpCas9.spcas9_study_inputs import REQUIRED_ROWS, InputPins, StudyInputs
 from SpCas9.spcas9_train import (
@@ -74,7 +80,24 @@ def _predictions(outputs: dict, rows: int) -> dict[str, np.ndarray]:
     return predictions
 
 
-def _stopping(history: dict[str, list[float]]) -> dict:
+def _stopping(
+    history: dict[str, list[float]], *, selection: str = "reference_mse"
+) -> dict:
+    if selection == "ngg":
+        stopping = ngg_stopping(history)
+        for name in (
+            "recipe_optimization_loss",
+            "val_recipe_optimization_loss",
+            "learning_rate",
+        ):
+            values = np.asarray(history.get(name, []), dtype=float)
+            if (
+                values.ndim != 1
+                or len(values) != stopping["epochs_run"]
+                or not np.isfinite(values).all()
+            ):
+                raise ValueError(f"invalid {name} history")
+        return {**stopping, "early_stopped": stopping["epochs_run"] < 50}
     reference = np.asarray(history[REFERENCE_LOSS], dtype=float)
     if not 1 <= len(reference) <= 50 or not np.isfinite(reference).all():
         raise ValueError("invalid reference validation stopping history")
@@ -96,11 +119,17 @@ def _stopping(history: dict[str, list[float]]) -> dict:
     }
 
 
-def _protocol(inputs: StudyInputs) -> dict:
+def _protocol(inputs: StudyInputs, checkpoint_selection: str = "reference_mse") -> dict:
+    if checkpoint_selection not in ("ngg", "reference_mse"):
+        raise ValueError("unknown checkpoint selection policy")
     params = hyperparameter_record()
     for key in ("early_stopping", "reduce_lr_on_plateau"):
-        params[key]["monitor"] = REFERENCE_LOSS
-    return {
+        params[key]["monitor"] = (
+            NGG_MAE if checkpoint_selection == "ngg" else REFERENCE_LOSS
+        )
+    if checkpoint_selection == "ngg":
+        params["early_stopping"]["restore_best_weights"] = False
+    record = {
         "schema_version": 1,
         "issue": 51,
         "model": "9-Hydra v2",
@@ -122,6 +151,7 @@ def _protocol(inputs: StudyInputs) -> dict:
         "head_coefficients": {head: 1.0 for head in HEAD_NAMES},
         "training_weights": "binary measured-label mask; metadata does not condition sampling or weights",
         "hyperparameters": params,
+        "checkpoint_selection": checkpoint_selection,
         "reference_validation_loss": {
             "name": REFERENCE_LOSS,
             "definition": "sum of all nine binary-masked squared-error sums / validation rows",
@@ -132,6 +162,16 @@ def _protocol(inputs: StudyInputs) -> dict:
         "implemented_stages": ["plan", "train_validation", "report_only"],
         "deferred_stages": ["freeze_selection", "evaluate_test"],
     }
+    if checkpoint_selection == "ngg":
+        record.update(schema_version=2, issue=84)
+        del record["reference_validation_loss"]
+        record["checkpoint_policy"] = {
+            "monitor": NGG_MAE,
+            "definition": "equal-head measured NGG MAE; exact ties prefer higher mean NGG Spearman, then earlier epoch",
+            "weights_owner": "NGG selector",
+            "required_monitor_failure": "missing, stale or non-finite values fail the run",
+        }
+    return record
 
 
 class StudyProtocol:
@@ -145,12 +185,14 @@ class StudyProtocol:
         inputs: StudyInputs | None = None,
         *,
         study_id: str | None = None,
+        checkpoint_selection: str = "reference_mse",
     ) -> "StudyProtocol":
         inputs = inputs or StudyInputs()
         inputs.validate()
+        protocol = _protocol(inputs, checkpoint_selection)
         path = Path(output_root) / _identifier(study_id or f"study-{uuid.uuid4().hex}")
         reserve_destination(path)
-        protocol_path = write_json(_protocol(inputs), path / "protocol.json")
+        protocol_path = write_json(protocol, path / "protocol.json")
         write_json(
             {
                 "created_at": _now(),
@@ -233,7 +275,12 @@ class StudyProtocol:
 
             training, validation = training_rows("train"), training_rows("val")
             checkpoint = path / CHECKPOINT_FILENAME
-            backend = backend or KerasV2Backend()
+            selection = protocol.get("checkpoint_selection", "reference_mse")
+            backend = backend or KerasV2Backend(selection=selection)
+            if isinstance(backend, KerasV2Backend) and backend.selection != selection:
+                raise ValueError(
+                    "backend checkpoint selection differs from frozen protocol"
+                )
             result = backend.fit(
                 training,
                 validation,
@@ -241,7 +288,7 @@ class StudyProtocol:
                 checkpoint_path=checkpoint,
             )
             checkpoint_digest = file_sha256(checkpoint)
-            stopping = _stopping(result.history)
+            stopping = _stopping(result.history, selection=selection)
             before = _predictions(result.validation_predictions, len(frames["val"]))
             after = _predictions(
                 backend.predict(checkpoint, validation.inputs), len(frames["val"])
@@ -251,20 +298,45 @@ class StudyProtocol:
                     raise ValueError(f"validation save/reload parity failed for {head}")
             if checkpoint_digest != file_sha256(checkpoint):
                 raise ValueError("checkpoint evidence changed during parity")
-            restored_reference = reference_validation_loss(
-                validation.labels,
-                validation.weights,
-                {output_name(head): values for head, values in after.items()},
-            )
-            if not np.isclose(
-                restored_reference,
-                stopping["best_reference_loss"],
-                rtol=1e-5,
-                atol=1e-6,
-            ):
-                raise ValueError(
-                    "checkpoint predictions do not match best reference validation loss"
+            outputs = {output_name(head): values for head, values in after.items()}
+            if selection == "ngg":
+                restored = ngg_summary(
+                    validation.labels,
+                    validation.weights,
+                    outputs,
+                    validation_ngg_mask(validation.inputs),
                 )
+                for metric in ("mae", "spearman"):
+                    if not np.isclose(
+                        restored[metric],
+                        stopping[f"best_ngg_{metric}"],
+                        rtol=1e-5,
+                        atol=1e-6,
+                    ):
+                        raise ValueError(
+                            f"checkpoint predictions do not match selected NGG {metric}"
+                        )
+                expected_selection = ngg_stopping(result.history)
+                if result.selection is None or any(
+                    result.selection.get(key) != value
+                    for key, value in expected_selection.items()
+                ):
+                    raise ValueError(
+                        "backend NGG selection evidence differs from monitor history"
+                    )
+            else:
+                restored_reference = reference_validation_loss(
+                    validation.labels, validation.weights, outputs
+                )
+                if not np.isclose(
+                    restored_reference,
+                    stopping["best_reference_loss"],
+                    rtol=1e-5,
+                    atol=1e-6,
+                ):
+                    raise ValueError(
+                        "checkpoint predictions do not match best reference validation loss"
+                    )
             predictions = build_predictions(frames["val"], after)
             predictions.to_csv(
                 path / "predictions.csv", index=False, lineterminator="\n"
@@ -277,6 +349,7 @@ class StudyProtocol:
                     **execution,
                     "history": result.history,
                     "stopping": stopping,
+                    "selection": result.selection,
                     "environment": result.environment,
                     "rows_fitted": {
                         "train": len(frames["train"]),
