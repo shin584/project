@@ -13,12 +13,15 @@ import time
 import uuid
 from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
+from SpCas9.spcas9_acceptance import GATE_SETTINGS, bootstrap_intervals
+from SpCas9.spcas9_acceptance import build_report as build_validation_report
 from SpCas9.spcas9_budget import (
     BudgetedBackend,
     BudgetLedger,
@@ -28,9 +31,15 @@ from SpCas9.spcas9_budget import (
     synthetic_handoff,
 )
 from SpCas9.spcas9_data import HEAD_NAMES, library_versions, output_name
-from SpCas9.spcas9_eval import build_predictions, build_report
+from SpCas9.spcas9_eval import (
+    PREDICTIONS_CHECKSUM_FILENAME,
+    _read_predictions,
+    build_predictions,
+    build_report,
+    validate_prediction_rows,
+)
 from SpCas9.spcas9_execution import reserve_destination, source_record
-from SpCas9.spcas9_metrics import predictions_by_head
+from SpCas9.spcas9_metrics import population_metrics, predictions_by_head
 from SpCas9.spcas9_selection import (
     NGG_MAE,
     ngg_stopping,
@@ -38,7 +47,12 @@ from SpCas9.spcas9_selection import (
     validation_ngg_mask,
 )
 from SpCas9.spcas9_split import file_sha256, write_json
-from SpCas9.spcas9_study_inputs import REQUIRED_ROWS, InputPins, StudyInputs
+from SpCas9.spcas9_study_inputs import (
+    REQUIRED_ROWS,
+    InputPins,
+    StudyInputs,
+    checked_bytes,
+)
 from SpCas9.spcas9_train import (
     CHECKPOINT_FILENAME,
     REFERENCE_LOSS,
@@ -46,6 +60,7 @@ from SpCas9.spcas9_train import (
     hyperparameter_record,
     masked_labels_and_weights,
     reference_validation_loss,
+    split_record,
 )
 
 if TYPE_CHECKING:
@@ -652,7 +667,7 @@ class StudyProtocol:
                 },
                 path / "training.json",
             )
-            files = (
+            files: tuple[str, ...] = (
                 "plan.json",
                 "started.json",
                 "execution.json",
@@ -661,6 +676,28 @@ class StudyProtocol:
                 "validation.json",
                 "training.json",
             )
+            if frozen is not None and "reporting" in frozen:
+                train_predictions = build_predictions(
+                    frames["train"],
+                    _predictions(
+                        backend.predict(checkpoint, training.inputs),
+                        len(frames["train"]),
+                    ),
+                )
+                train_predictions.to_csv(
+                    path / "training_predictions.csv", index=False, lineterminator="\n"
+                )
+                write_json(
+                    population_metrics(pd.read_csv(path / "training_predictions.csv"))[
+                        "ngg"
+                    ],
+                    path / "training_ngg.json",
+                )
+                files += ("training_predictions.csv", "training_ngg.json")
+            if file_sha256(checkpoint) != checkpoint_digest:
+                raise ValueError(
+                    "selected checkpoint changed during training diagnostics"
+                )
             write_json(
                 {"files": {name: file_sha256(path / name) for name in files}},
                 path / "evidence.json",
@@ -719,6 +756,8 @@ class StudyProtocol:
             "validation.json",
             "training.json",
         }
+        if "training_ngg.json" in evidence["files"]:
+            required |= {"training_predictions.csv", "training_ngg.json"}
         if set(evidence["files"]) != required:
             raise ValueError("missing or unexpected required run evidence")
         for name, expected in evidence["files"].items():
@@ -734,6 +773,13 @@ class StudyProtocol:
         )
         if validation != persisted_validation:
             raise ValueError("corrupted validation report")
+        training_ngg = None
+        if "training_ngg.json" in evidence["files"]:
+            training_ngg = population_metrics(
+                pd.read_csv(path / "training_predictions.csv")
+            )["ngg"]
+            if training_ngg != _read(path / "training_ngg.json"):
+                raise ValueError("corrupted training NGG report")
         return {
             **report,
             "training": training,
@@ -741,7 +787,146 @@ class StudyProtocol:
             "source": training["source"],
             "inputs": training["inputs"],
             "evidence": evidence,
+            **({"training_ngg": training_ngg} if training_ngg is not None else {}),
         }
+
+    def validation_report(
+        self,
+        destination: Path,
+        *,
+        stored_predictions: Path | None = None,
+        stored_sidecar: Path | None = None,
+    ) -> dict:
+        """Rebuild both #86 gates and supplementary CI from verified validation bytes.
+
+        Missing or damaged required run evidence is operationally incomplete.
+        No backend is loaded, no candidate Test predictions are accessed and
+        no historical seeds are manufactured for the stored-v2 comparison.
+        """
+        destination = Path(destination)
+        if destination.exists() or destination.is_symlink():
+            raise FileExistsError(destination)
+        if stored_sidecar is not None and stored_predictions is None:
+            raise ValueError("stored_sidecar requires stored_predictions")
+        with self.evaluation_timing():
+            config = self.execution_configuration()
+            if any(
+                config["acceptance"][key] != value
+                for key, value in GATE_SETTINGS.items()
+            ):
+                raise ValueError(
+                    "frozen acceptance thresholds differ from reporting implementation"
+                )
+            inputs = StudyInputs.from_record(config["protocol"]["inputs"])
+            raw = checked_bytes(
+                inputs.split_dir / "val.csv", inputs.pins.files["val.csv"]
+            )
+            rows = pd.read_csv(BytesIO(raw))
+            rows["sequence"] = rows["sequence"].astype(str).str.strip().str.upper()
+            sources: tuple[Path, ...] = (
+                self.path,
+                inputs.source_path,
+                inputs.split_dir,
+            )
+            if stored_predictions is not None:
+                stored_predictions = Path(stored_predictions)
+                stored_sidecar = (
+                    Path(stored_sidecar)
+                    if stored_sidecar is not None
+                    else stored_predictions.with_name(PREDICTIONS_CHECKSUM_FILENAME)
+                )
+                sources += (stored_predictions, stored_sidecar)
+            reserve_destination(destination, sources)
+            runs: dict = {"baseline": {}, "candidate": {}}
+            evidence: dict = {"baseline": {}, "candidate": {}}
+            unavailable = {}
+            for attempt in BudgetLedger(self.path).status()["attempts"]:
+                recipe, seed, run_id = (
+                    attempt[key] for key in ("recipe", "seed", "run_id")
+                )
+                try:
+                    run = self._report_only(run_id)
+                    if attempt["status"] != "completed" or not run["eligible"]:
+                        raise ValueError("required run not completed")
+                    if (
+                        run["source"] != config["source"]
+                        or run["inputs"] != config["protocol"]["inputs"]
+                    ):
+                        raise ValueError(
+                            "run source/input identity differs from fixed study"
+                        )
+                    path = self.path / "runs" / _identifier(run_id) / "predictions.csv"
+                    sha256 = run["evidence"]["files"]["predictions.csv"]
+                    runs[recipe][seed] = pd.read_csv(
+                        BytesIO(checked_bytes(path, sha256))
+                    )
+                    validate_prediction_rows(runs[recipe][seed], rows)
+                    evidence[recipe][seed] = {
+                        "run_id": run_id,
+                        "prediction_sha256": sha256,
+                        "checkpoint_sha256": run["evidence"]["files"][
+                            CHECKPOINT_FILENAME
+                        ],
+                        "manifest": run["evidence"],
+                        "history": run["training"]["history"],
+                        "stopping": run["training"]["stopping"],
+                        "environment": run["training"]["environment"],
+                        "training_ngg": run.get("training_ngg"),
+                    }
+                except (ValueError, FileNotFoundError, KeyError) as error:
+                    runs[recipe].pop(seed, None)
+                    unavailable[run_id] = f"{type(error).__name__}: {error}"
+            stored, stored_identity = None, None
+            if stored_predictions is not None:
+                assert stored_sidecar is not None  # Resolved together above.
+                try:
+                    stored, stored_identity = _read_predictions(
+                        stored_predictions,
+                        stored_sidecar,
+                        rows,
+                        config["acceptance"]["historical_checkpoint_sha256"],
+                        split_record(inputs.split_dir),
+                    )
+                    stored_identity["checkpoint_sha256"] = config["acceptance"][
+                        "historical_checkpoint_sha256"
+                    ]
+                except (ValueError, FileNotFoundError, KeyError) as error:
+                    unavailable["stored_v2"] = f"{type(error).__name__}: {error}"
+            else:
+                unavailable["stored_v2"] = (
+                    "stored v2 validation predictions not supplied"
+                )
+            report = build_validation_report(runs, stored, bootstrap=False)
+            report.update(
+                execution_mode=config["mode"],
+                run_evidence=evidence,
+                unavailable_evidence=unavailable,
+                identity={
+                    "protocol_sha256": file_sha256(self.path / "protocol.json"),
+                    "execution_config_sha256": file_sha256(
+                        self.path / "execution-config.json"
+                    ),
+                    "source": config["source"],
+                    "environment": config["environment"],
+                    "inputs": config["protocol"]["inputs"],
+                    "stored_v2": stored_identity,
+                },
+                reconstruction={
+                    "source": source_record(),
+                    "environment": environment_record(),
+                },
+            )
+        with self.evaluation_timing(bootstrap=True):
+            report["bootstrap"] = bootstrap_intervals(runs, config["ci"])
+        write_json(report, destination / "validation.json")
+        write_json(
+            {
+                "file": "validation.json",
+                "sha256": file_sha256(destination / "validation.json"),
+            },
+            destination / "checksum.json",
+        )
+        return report
 
     def freeze_selection(self) -> None:
         raise NotImplementedError("finalist selection/freeze is a later protocol stage")

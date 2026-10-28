@@ -19,6 +19,7 @@ import uuid
 from contextlib import contextmanager
 from pathlib import Path
 
+from SpCas9.spcas9_acceptance import BOOTSTRAP_SETTINGS, GATE_SETTINGS
 from SpCas9.spcas9_data import library_versions
 from SpCas9.spcas9_execution import source_record
 from SpCas9.spcas9_split import file_sha256
@@ -181,6 +182,7 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
             "base_rows": "batch32, original row sampling/shuffle; paired-seed initial weights and row order",
         },
         "acceptance": {
+            **GATE_SETTINGS,
             "comparisons": [
                 "three paired seeds vs refitted baseline",
                 "candidate seed42 vs stored v2",
@@ -189,11 +191,7 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
                 "validation first",
                 "Test only after both pass and finalist freeze",
             ],
-            "relative_ngg_mae_reduction": 0.02,
-            "ngg_spearman_increase": 0.02,
             "per_head_populations": ["NGG", "non-NGG"],
-            "maximum_relative_mae_increase": 0.05,
-            "maximum_spearman_decrease": 0.02,
             "boundaries": "inclusive; baseline MAE zero requires candidate zero",
             "aggregation": "per-head metric mean over three seeds then equal-head mean; relative change of means",
             "missing_or_undefined": "incomplete",
@@ -203,11 +201,8 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
             "test_exposure": "historically inspected; not new external confirmation",
         },
         "ci": {
-            "level": 0.95,
+            **BOOTSTRAP_SETTINGS,
             "method": "percentile protospacer-paired NGG bootstrap",
-            "seed": 20261027,
-            "valid_draws": 2000,
-            "maximum_attempts": 20000,
             "joint_draws": "same sampled clusters for both methods, all heads and all seeds; retain all cluster rows and multiplicity",
             "statistics": [
                 "relative equal-head mean NGG MAE change",
@@ -228,7 +223,16 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
             "partial batch",
             "MSE objective/gradient parity rtol1e-5 atol1e-6",
             "authoritative NGG MAE/Spearman/earlier-epoch selection and reload parity",
+            "exact improvement/protection boundaries and either side; zero MAE denominator",
+            "seed-before-head means; ratios of means; missing seed/metric; representative model failure",
+            "shared protospacer cluster multiplicity across methods/heads/seeds; repeatable CI",
+            "valid joint draw quota shortfall never changes point-estimate eligibility",
         ],
+        "reporting": {
+            "validation": "StudyProtocol.validation_report; reconstruct hash-verified persisted predictions without candidate Test",
+            "training_ngg": "selected checkpoint on measured training NGG rows; diagnostic only",
+            "history": "preserve complete per-run epoch history and selected epoch",
+        },
         "failure_policy": "any failed/interrupted/timed-out fit consumes attempt and stops all later fits; no retry or intermediate resume",
         "readiness": {
             "final_pre_fit_frozen": False,

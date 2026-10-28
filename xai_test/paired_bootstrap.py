@@ -37,8 +37,60 @@ def _metric_fn(metric: str) -> MetricFn:
 
 def _interval(deltas: np.ndarray, ci: float) -> tuple[float, float]:
     alpha = 1 - ci
-    lower, upper = np.quantile(deltas, [alpha / 2, 1 - alpha / 2])
-    return float(lower), float(upper)
+    bounds = np.asarray(np.quantile(deltas, [alpha / 2, 1 - alpha / 2]))
+    return float(bounds[0]), float(bounds[1])
+
+
+def joint_clustered_bootstrap_ci(
+    clusters: np.ndarray,
+    statistic: Callable[[np.ndarray], tuple[float, float] | None],
+    *,
+    n_resamples: int,
+    maximum_attempts: int,
+    ci: float,
+    seed: int,
+) -> dict:
+    """Two jointly valid statistics from one shared cluster/multiplicity draw.
+
+    The caller receives row indices once per attempt and applies them to every
+    compared array. A cluster's observations always travel together. Undefined
+    joint statistics consume an attempt, never a valid-draw slot. A short quota
+    reports unavailable intervals rather than intervals from a smaller sample.
+    """
+    clusters = np.asarray(clusters)
+    if clusters.ndim != 1 or not 0 < ci < 1:
+        raise ValueError("one-dimensional clusters and 0 < ci < 1 required")
+    if n_resamples <= 0 or maximum_attempts <= 0:
+        raise ValueError("positive draw quota and attempt limit required")
+    _, inverse = np.unique(clusters, return_inverse=True)
+    rows_of = [np.flatnonzero(inverse == c) for c in range(len(np.unique(clusters)))]
+    rng = np.random.default_rng(seed)
+    valid: list[tuple[float, float]] = []
+    attempts = 0
+    while rows_of and len(valid) < n_resamples and attempts < maximum_attempts:
+        attempts += 1
+        drawn = rng.integers(0, len(rows_of), size=len(rows_of))
+        idx = np.concatenate([rows_of[c] for c in drawn])
+        values = statistic(idx)
+        if values is not None and np.isfinite(values).all():
+            valid.append(values)
+    complete = len(valid) == n_resamples
+    return {
+        "status": "available" if complete else "unavailable",
+        "valid_draws": len(valid),
+        "attempts": attempts,
+        "invalid_draws": attempts - len(valid),
+        "reason": None
+        if complete
+        else (
+            "no eligible clusters"
+            if not rows_of
+            else "valid joint draw quota unmet at maximum attempts; required summary undefined in rejected draws"
+        ),
+        "intervals": [list(_interval(np.asarray(valid)[:, i], ci)) for i in range(2)]
+        if complete
+        else None,
+    }
 
 
 def paired_bootstrap_delta_ci(

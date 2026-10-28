@@ -311,6 +311,25 @@ def write_predictions(
     return record
 
 
+def validate_prediction_rows(frame: pd.DataFrame, rows: pd.DataFrame) -> None:
+    """Require saved predictions to retain the split's rows, metadata and labels."""
+    try:
+        expected = build_predictions(
+            rows, {head: frame[pred_column(head)].to_numpy() for head in HEAD_NAMES}
+        )
+        pd.testing.assert_frame_equal(
+            frame[expected.columns],
+            expected,
+            check_dtype=False,
+            rtol=1e-12,
+            atol=1e-14,
+        )
+    except (AssertionError, KeyError) as error:
+        raise ValueError(
+            "predictions do not match split rows, metadata or labels"
+        ) from error
+
+
 def _read_predictions(
     path: Path, sidecar: Path, rows: pd.DataFrame, checkpoint_digest: str, split: dict
 ) -> tuple[pd.DataFrame, dict]:
@@ -325,23 +344,9 @@ def _read_predictions(
     ):
         raise ValueError("prediction/checkpoint/split SHA-256 evidence differs")
     frame = pd.read_csv(BytesIO(raw))
-    expected = build_predictions(
-        rows, {head: frame[pred_column(head)].to_numpy() for head in HEAD_NAMES}
-    )
     if record["rows"] != len(frame):
         raise ValueError("prediction sidecar row count differs")
-    try:
-        pd.testing.assert_frame_equal(
-            frame[expected.columns],
-            expected,
-            check_dtype=False,
-            rtol=1e-12,
-            atol=1e-14,
-        )
-    except (AssertionError, KeyError) as error:
-        raise ValueError(
-            "predictions do not match split rows, metadata or labels"
-        ) from error
+    validate_prediction_rows(frame, rows)
     return frame, {
         "input_predictions": str(path.resolve()),
         "input_predictions_sha256": digest,
