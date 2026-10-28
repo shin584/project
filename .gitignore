@@ -16,3 +16,16 @@ xai_test/SpCas9/*.keras
 # (#47).
 xai_test/SpCas9/v2_train/**/*.keras
 xai_test/SpCas9/v2_train/smoke/
+
+# The Cas12a training data (Kim HK et al., "Deep learning improves prediction of
+# CRISPR-Cpf1 guide RNA activity", Nat Biotechnol 36:239-241, 2018 -
+# supplementary table; the raw sheet's 15,002 HEK293T-measured 34 bp targets
+# become 15,000 usable rows once the two with no target are dropped). 2MB, already
+# covered by `*.xlsx` above; spelled out because it is required to train and is
+# deliberately absent from the repo. The project's shared copy lives in Google
+# Drive under `project_shared/data/`.
+cas12a/dataset/*.xlsx
+
+# Test fixtures are the exception to the `*.csv` rule at the top of this file:
+# they are small, synthetic, and `cas12a/test/` cannot run without them.
+!cas12a/test/fixtures/*.csv
