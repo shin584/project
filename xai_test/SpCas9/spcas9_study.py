@@ -1,7 +1,7 @@
 """Research protocol for fresh 9-Hydra validation runs (issue #51).
 
-Planning and report-only inspection never import a training backend. Selection
-freeze and final Test evaluation are explicit, closed stages until later tickets.
+Planning and report-only inspection never import a training backend. Final Test
+inference requires both passing validation comparisons and an intact finalist freeze.
 """
 
 import json
@@ -95,6 +95,20 @@ def _validation_report(frame: pd.DataFrame, *, metrics_schema_version: int = 2) 
     return {**report, "split": "val", "population": "9-Hydra validation"}
 
 
+def _validation_run_evidence(run_id: str, run: dict) -> dict:
+    """One representation for producing and verifying required validation evidence."""
+    return {
+        "run_id": run_id,
+        "prediction_sha256": run["evidence"]["files"]["predictions.csv"],
+        "checkpoint_sha256": run["evidence"]["files"][CHECKPOINT_FILENAME],
+        "manifest": run["evidence"],
+        "history": run["training"]["history"],
+        "stopping": run["training"]["stopping"],
+        "environment": run["training"]["environment"],
+        "training_ngg": run.get("training_ngg"),
+    }
+
+
 def _predictions(outputs: dict, rows: int) -> dict[str, np.ndarray]:
     predictions = predictions_by_head(outputs)
     for head, values in predictions.items():
@@ -154,7 +168,7 @@ def _protocol(inputs: StudyInputs, checkpoint_selection: str = "reference_mse") 
         )
     if checkpoint_selection == "ngg":
         params["early_stopping"]["restore_best_weights"] = False
-    record = {
+    record: dict = {
         "schema_version": 1,
         "issue": 51,
         "model": "9-Hydra v2",
@@ -188,7 +202,13 @@ def _protocol(inputs: StudyInputs, checkpoint_selection: str = "reference_mse") 
         "deferred_stages": ["freeze_selection", "evaluate_test"],
     }
     if checkpoint_selection == "ngg":
-        record.update(schema_version=2, issue=84)
+        record.update(schema_version=2, issue=87)
+        record["implemented_stages"] += [
+            "freeze_selection",
+            "evaluate_test",
+            "test_report",
+        ]
+        record["deferred_stages"] = []
         del record["reference_validation_loss"]
         record["checkpoint_policy"] = {
             "monitor": NGG_MAE,
@@ -213,7 +233,15 @@ class StudyProtocol:
         checkpoint_selection: str = "reference_mse",
         execution_mode: str | None = None,
         synthetic_ledger: Path | None = None,
+        verification_stored_checkpoint: Path | None = None,
     ) -> "StudyProtocol":
+        if (
+            verification_stored_checkpoint is not None
+            and execution_mode != "verification"
+        ):
+            raise ValueError(
+                "disposable stored-checkpoint identity requires verification mode"
+            )
         inputs = inputs or StudyInputs()
         inputs.validate()
         protocol = _protocol(inputs, checkpoint_selection)
@@ -226,6 +254,10 @@ class StudyProtocol:
                     synthetic_handoff(Path(synthetic_ledger))
                 )
                 config = configuration(protocol, execution_mode, synthetic)
+                if verification_stored_checkpoint is not None:
+                    config["acceptance"]["historical_checkpoint_sha256"] = file_sha256(
+                        Path(verification_stored_checkpoint)
+                    )
             path = Path(output_root) / _identifier(
                 study_id or f"study-{uuid.uuid4().hex}"
             )
@@ -861,18 +893,7 @@ class StudyProtocol:
                         BytesIO(checked_bytes(path, sha256))
                     )
                     validate_prediction_rows(runs[recipe][seed], rows)
-                    evidence[recipe][seed] = {
-                        "run_id": run_id,
-                        "prediction_sha256": sha256,
-                        "checkpoint_sha256": run["evidence"]["files"][
-                            CHECKPOINT_FILENAME
-                        ],
-                        "manifest": run["evidence"],
-                        "history": run["training"]["history"],
-                        "stopping": run["training"]["stopping"],
-                        "environment": run["training"]["environment"],
-                        "training_ngg": run.get("training_ngg"),
-                    }
+                    evidence[recipe][seed] = _validation_run_evidence(run_id, run)
                 except (ValueError, FileNotFoundError, KeyError) as error:
                     runs[recipe].pop(seed, None)
                     unavailable[run_id] = f"{type(error).__name__}: {error}"
@@ -928,10 +949,35 @@ class StudyProtocol:
         )
         return report
 
-    def freeze_selection(self) -> None:
-        raise NotImplementedError("finalist selection/freeze is a later protocol stage")
+    def freeze_selection(
+        self,
+        validation: Path | None = None,
+        *,
+        stored_checkpoint: Path | None = None,
+    ) -> dict:
+        """Freeze six completed runs and seed42 only after both validation gates pass."""
+        from SpCas9.spcas9_finalist import freeze_selection
 
-    def evaluate_test(self) -> None:
-        raise PermissionError(
-            "Test prediction requires a valid finalist freeze; stage not implemented"
-        )
+        if validation is None or stored_checkpoint is None:
+            raise PermissionError(
+                "finalist freeze requires validation evidence and stored checkpoint"
+            )
+        return freeze_selection(self, validation, stored_checkpoint)
+
+    def evaluate_test(
+        self,
+        destination: Path | None = None,
+        *,
+        backend: "TrainingBackend | None" = None,
+    ) -> dict:
+        """Score exactly the frozen seven models; Test cannot reselect a recipe/seed."""
+        from SpCas9.spcas9_finalist import evaluate_test
+
+        return evaluate_test(self, destination, backend)
+
+    def test_report(self, destination: Path) -> dict:
+        """Verify saved Test results without inference or training."""
+        from SpCas9.spcas9_finalist import test_report
+
+        with self.evaluation_timing():
+            return test_report(self, destination)

@@ -301,7 +301,7 @@ def test_inputs_are_rechecked_before_backend_use_and_test_prediction_remains_clo
     run_id = study.plan_run(seed=42)
     with pytest.raises(PermissionError, match="freeze"):
         study.evaluate_test()
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(PermissionError, match="validation evidence"):
         study.freeze_selection()
     test_path = inputs.split_dir / "test.csv"
     original = test_path.read_bytes()

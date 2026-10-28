@@ -291,12 +291,34 @@ def build_report(
     bootstrap_settings: dict | None = None,
 ) -> dict:
     """Study reporting boundary: both fixed comparisons, without candidate Test."""
+    return _build_report(
+        runs,
+        stored_v2,
+        split="val",
+        bootstrap=bootstrap,
+        bootstrap_settings=bootstrap_settings,
+    )
+
+
+def _build_report(
+    runs: dict[str, dict[int, pd.DataFrame]],
+    stored_v2: pd.DataFrame | None,
+    *,
+    split: str,
+    bootstrap: bool = True,
+    bootstrap_settings: dict | None = None,
+) -> dict:
+    """Shared arithmetic; Test inference remains owned by the finalist guard."""
+    if split not in ("val", "test"):
+        raise ValueError("unknown comparison split")
     frames = [f for r in ("baseline", "candidate") for f in runs.get(r, {}).values()]
     if stored_v2 is not None:
         frames.append(stored_v2)
     for frame in frames:
-        if "split" not in frame or not frame["split"].eq("val").all():
-            raise PermissionError("only validation predictions may enter this report")
+        if "split" not in frame or not frame["split"].eq(split).all():
+            raise PermissionError(
+                f"only {'validation' if split == 'val' else 'Test'} predictions may enter this report"
+            )
         if frame["row_index"].isna().any() or frame["row_index"].duplicated().any():
             raise ValueError("prediction rows require unique aligned row identities")
         if not frame["sequence"].str.fullmatch("[ACGT]{30}").all():
@@ -344,7 +366,7 @@ def build_report(
     return {
         "schema_version": 1,
         "issue": 86,
-        "split": "val",
+        "split": split,
         "decision": decision,
         "candidate_test_eligible": decision == "pass",
         "test_access": "requires separate finalist freeze; this report never reads candidate Test",
