@@ -46,6 +46,7 @@ ENVIRONMENT_KEYS = (
     "TF_CUDNN_DETERMINISTIC",
     "PYTHONHASHSEED",
     "CUBLAS_WORKSPACE_CONFIG",
+    "TF_ENABLE_ONEDNN_OPTS",
 )
 
 
@@ -161,7 +162,7 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
         )
     return {
         "schema_version": 1,
-        "issue": 85,
+        "issue": 88,
         "mode": mode,
         "protocol": protocol,
         "source": source_record(),
@@ -237,9 +238,7 @@ def configuration(protocol: dict, mode: str, synthetic: dict) -> dict:
         "readiness": {
             "final_pre_fit_frozen": False,
             "blocked_by": [
-                "#86 validation acceptance and paired-bootstrap CI",
-                "#87 finalist freeze and guarded Test evaluation",
-                "#88 report readiness before final pre-fit freeze",
+                "verified essential fixtures and final pre-fit freeze",
             ],
             "verification_only": mode == "verification",
         },

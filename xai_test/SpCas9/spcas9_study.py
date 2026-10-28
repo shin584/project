@@ -306,11 +306,13 @@ class StudyProtocol:
             raise ValueError("execution/protocol identity mismatch")
         return config
 
-    def freeze_execution(self) -> None:
-        self.execution_configuration()
-        raise PermissionError(
-            "full-fit readiness requires verified #86 acceptance/CI, #87 finalist/Test and #88 report stages"
-        )
+    def freeze_execution(
+        self, *, readiness: Path | None = None, stored_checkpoint: Path | None = None
+    ) -> dict:
+        """Seal verified essential checks and input/environment identities before fitting."""
+        from SpCas9.spcas9_readiness import freeze_execution
+
+        return freeze_execution(self, readiness, stored_checkpoint)
 
     def budget_status(self) -> dict:
         ledger = BudgetLedger(self.path)
@@ -444,9 +446,6 @@ class StudyProtocol:
     ) -> dict:
         """One reserved fit; interrupted/failed evidence remains explicitly ineligible."""
         if self._controlled():
-            config = self.execution_configuration()
-            if config["mode"] == "full":
-                self.freeze_execution()
             return self._controlled_train(run_id, backend=backend)
         from SpCas9.spcas9_study_backend import KerasV2Backend
 
@@ -457,15 +456,24 @@ class StudyProtocol:
         return self._train_validation(run_id, backend=backend)
 
     def _controlled_train(self, run_id: str, *, backend) -> dict:
-        from SpCas9.spcas9_study_backend import KerasV2Backend
+        from SpCas9.spcas9_study_backend import KerasNggBackend, KerasV2Backend
 
-        if backend is None or isinstance(backend, KerasV2Backend):
-            raise PermissionError(
-                "verification mode requires a disposable fake backend; full training readiness is blocked"
-            )
         ledger = BudgetLedger(self.path)
         with ledger.locked():
             config = self.execution_configuration()
+            if config["mode"] == "full":
+                from SpCas9.spcas9_readiness import verify_execution
+
+                try:
+                    verify_execution(self)
+                except FileNotFoundError as error:
+                    raise PermissionError(
+                        "final pre-fit readiness freeze is required"
+                    ) from error
+            elif backend is None or isinstance(backend, KerasV2Backend):
+                raise PermissionError(
+                    "verification mode requires a disposable fake backend"
+                )
             if (
                 source_record() != config["source"]
                 or environment_record() != config["environment"]
@@ -494,6 +502,23 @@ class StudyProtocol:
             identity = {key: plan[key] for key in ("recipe", "seed")}
             if identity != config["run_order"][index]:
                 raise ValueError("fixed baseline/candidate seed run order required")
+            if config["mode"] == "full":
+                required_backend = (
+                    KerasV2Backend
+                    if identity["recipe"] == "baseline"
+                    else KerasNggBackend
+                )
+                backend = backend or required_backend()
+                if (
+                    type(backend) is not required_backend
+                    or backend.epochs != 50
+                    or backend.selection != "ngg"
+                    or (
+                        isinstance(backend, KerasNggBackend)
+                        and backend.auxiliary_weight != 0.01
+                    )
+                ):
+                    raise ValueError("backend differs from the frozen full-fit recipe")
             if status["remaining_seconds"] <= 0:
                 raise ValueError("training time budget exhausted")
             for previous in status["attempts"]:
@@ -981,3 +1006,18 @@ class StudyProtocol:
 
         with self.evaluation_timing():
             return test_report(self, destination)
+
+    def research_report(
+        self,
+        destination: Path,
+        *,
+        validation: Path | None = None,
+        test: Path | None = None,
+        scanner: Path | None = None,
+    ) -> dict:
+        """Report implementation, V2-A and independent V2-B without retraining."""
+        from SpCas9.spcas9_research import research_report
+
+        return research_report(
+            self, destination, validation=validation, test=test, scanner=scanner
+        )

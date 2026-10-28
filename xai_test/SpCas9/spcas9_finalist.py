@@ -33,7 +33,9 @@ def _seal(record: dict, path: Path, name: str) -> None:
     )
 
 
-def _validation_snapshot(study, validation: Path, stored_checkpoint: Path) -> dict:
+def _validation_snapshot(
+    study, validation: Path, stored_checkpoint: Path, *, executing: bool = True
+) -> dict:
     """Recompute required gates; a saved 'pass' flag alone never grants access."""
     from SpCas9.spcas9_study import _validation_run_evidence
 
@@ -42,8 +44,8 @@ def _validation_snapshot(study, validation: Path, stored_checkpoint: Path) -> di
         config["representative_seed"] != 42
         or config["run_order"] != RUN_ORDER
         or any(config["acceptance"][k] != v for k, v in GATE_SETTINGS.items())
-        or source_record() != config["source"]
-        or environment_record() != config["environment"]
+        or (executing and source_record() != config["source"])
+        or (executing and environment_record() != config["environment"])
     ):
         raise ValueError("changed recipe/seed/source/environment configuration")
     inputs = StudyInputs.from_record(config["protocol"]["inputs"])
@@ -178,7 +180,7 @@ def freeze_selection(study, validation: Path, stored_checkpoint: Path) -> dict:
     return snapshot
 
 
-def _verify_selection(study) -> dict:
+def _verify_selection(study, *, executing: bool = True) -> dict:
     path = study.path / "finalist"
     if not (path / "freeze.json").is_file() or not (path / "checksum.json").is_file():
         raise PermissionError("valid finalist freeze is required before Test")
@@ -218,6 +220,7 @@ def _verify_selection(study) -> dict:
         study,
         Path(frozen["validation"]["path"]),
         Path(frozen["stored_v2"]["checkpoint"]),
+        executing=executing,
     )
     if frozen != current:
         raise ValueError("changed finalist freeze/model/input/evidence/config identity")
@@ -250,6 +253,12 @@ def evaluate_test(study, destination: Path | None, backend=None) -> dict:
         backend is None or isinstance(backend, KerasV2Backend)
     ):
         raise PermissionError("verification mode requires a disposable backend double")
+    if (
+        frozen["execution_mode"] == "full"
+        and backend is not None
+        and type(backend) is not KerasV2Backend
+    ):
+        raise PermissionError("full Test evaluation requires the actual Keras backend")
     backend = backend or KerasV2Backend()
     inputs = StudyInputs.from_record(frozen["inputs"])
     destination = Path(destination)
@@ -312,7 +321,7 @@ def evaluate_test(study, destination: Path | None, backend=None) -> dict:
 
 def test_report(study, destination: Path) -> dict:
     """Reopen results without a backend, verifying gates and all consumed bytes."""
-    frozen = _verify_selection(study)
+    frozen = _verify_selection(study, executing=False)
     destination = Path(destination)
     report = _sealed(destination, "results.json")
     identity = report["identity"]
