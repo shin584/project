@@ -124,3 +124,13 @@ large/local artifacts are supplied by a checkout. Compact reviewable records:
 - [Essential test results](evidence/issue88-essential-tests.xml)
 - [Source-drift and preserved-source evidence](evidence/issue88-source-drift.json)
 - [Independent review](evidence/issue88-code-review.md)
+
+## Subsequent user-authorized retry
+
+The user subsequently requested a V2-A retry. The original failed attempt and
+time were retained under a one-time seven-attempt aggregate exception, with the
+same six-hour cumulative limit. Six fresh runs completed in a detached worktree;
+both validation comparisons failed the frozen adoption criteria. The new outcome
+is `negative_validation`, with V2-A unresolved and stored v2 retained. Candidate
+Test was not accessed. The original incomplete execution above remains intact;
+see the [retry authorization, protocol and final results](issue88-retry.md).

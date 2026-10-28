@@ -1,0 +1,445 @@
+{
+  "schema_version": 1,
+  "issue": 88,
+  "mode": "full",
+  "protocol": {
+    "schema_version": 2,
+    "issue": 87,
+    "model": "9-Hydra v2",
+    "architecture": {
+      "trunk": [
+        "Conv1D(128,3,relu,same)",
+        "BatchNormalization",
+        "LSTM(64)",
+        "Dropout(0.3)",
+        "Dense(64,relu)"
+      ],
+      "each_head": [
+        "Dense(32,relu)",
+        "Dense(1,linear)"
+      ]
+    },
+    "rows": {
+      "train": 29134,
+      "val": 3676,
+      "test": 5186
+    },
+    "inputs": {
+      "source_path": "C:\\project\\MC_project\\.scratch\\issue88-retry-isolated\\xai_test\\dataset\\kim_2020_table_s8.xlsx",
+      "split_dir": "C:\\project\\MC_project\\.scratch\\issue88-retry-isolated\\xai_test\\SpCas9\\published_split",
+      "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+      "sidecar_sha256": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+      "files": {
+        "train.csv": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+        "val.csv": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+        "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+      }
+    },
+    "head_names": [
+      "SpCas9",
+      "SpCas9-NG",
+      "VRQR variant",
+      "xCas",
+      "Sniper-Cas9",
+      "SpCas9-HF.1",
+      "eSpCas9(1.1)",
+      "HypaCas9",
+      "evoCas9"
+    ],
+    "predictor_input": "normalized 30bp sequence only, one-hot A/C/G/T",
+    "label_scale": "published percentage / 100; no clipping",
+    "head_coefficients": {
+      "SpCas9": 1.0,
+      "SpCas9-NG": 1.0,
+      "VRQR variant": 1.0,
+      "xCas": 1.0,
+      "Sniper-Cas9": 1.0,
+      "SpCas9-HF.1": 1.0,
+      "eSpCas9(1.1)": 1.0,
+      "HypaCas9": 1.0,
+      "evoCas9": 1.0
+    },
+    "training_weights": "binary measured-label mask; metadata does not condition sampling or weights",
+    "hyperparameters": {
+      "optimizer": "Adam",
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "epochs": 50,
+      "seed": 42,
+      "loss": "mse",
+      "weighted_metrics": "mae",
+      "early_stopping": {
+        "monitor": "val_equal_head_ngg_mae",
+        "patience": 5,
+        "restore_best_weights": false
+      },
+      "reduce_lr_on_plateau": {
+        "monitor": "val_equal_head_ngg_mae",
+        "factor": 0.2,
+        "patience": 3,
+        "min_lr": 1e-06
+      }
+    },
+    "checkpoint_selection": "ngg",
+    "optimization_loss": "recipe_optimization_loss",
+    "save_reload_parity": {
+      "split": "val",
+      "rtol": 1e-05,
+      "atol": 1e-06
+    },
+    "training_seeds": [
+      42,
+      43,
+      44
+    ],
+    "implemented_stages": [
+      "plan",
+      "train_validation",
+      "report_only",
+      "freeze_selection",
+      "evaluate_test",
+      "test_report"
+    ],
+    "deferred_stages": [],
+    "checkpoint_policy": {
+      "monitor": "val_equal_head_ngg_mae",
+      "definition": "equal-head measured NGG MAE; exact ties prefer higher mean NGG Spearman, then earlier epoch",
+      "weights_owner": "NGG selector",
+      "required_monitor_failure": "missing, stale or non-finite values fail the run"
+    }
+  },
+  "source": {
+    "revision": "445fbb9cfc6be75cd673fcec268fa07bab022404",
+    "dirty": true,
+    "snapshot_sha256": "b827b2fc1962f9afba1051fa982ba78a0485af24fc596cda1e33a63776bff354",
+    "files": {
+      "ruff.toml": "7482fa4194bc716836e5ce424c503f9ba81911593e9bcce9e9e9ecb9a7acfb02",
+      "xai_test/ablation.py": "84dd5a558fb6e8904cbcd29c4ac4395942768ebf454894df4ec77863ee9037d2",
+      "xai_test/analysis_export.py": "51bf56bc65607e6c8ba3fc11bf5f276a688567357d76b21da639dbb39885f48b",
+      "xai_test/attention_rollout.py": "32e79e255510a40b9a2c965ac2e38932ad414a1d65cdbaa4ac61dc98e33edbfc",
+      "xai_test/build_colab_grouped_model_b.py": "64e85cc2c2a2329edb000a14dc7b1ea78f12f285c5fc1ccecb20ce395cc6a388",
+      "xai_test/case_study_selection.py": "315f187ad918f5a599510d4baa410e8f00bc61d5d1c835b5d508e1aa30f7e0bf",
+      "xai_test/CONTEXT.md": "3f614490306820bec160f2f299ac83949405f116c269a4a4cc2cef5031f28eab",
+      "xai_test/dev_split.py": "cb501e2938b6f555b6f74d5233315d8ba5aa2253759eeadf7f2f4381276d056c",
+      "xai_test/docs/adr/0001-separate-xai-predictor-class.md": "89b44eef1c87514c6949c4458d06cec0eb02658adb9c328d8e9da313526fb982",
+      "xai_test/docs/adr/0002-dashboard-explains-model-b-only.md": "856773d39a87c9db0f6c33818e3a282ef9e1b500d754b89964bec793fd68137b",
+      "xai_test/docs/adr/0003-demo-cli-compares-model-a-and-model-b.md": "5721b2bdcca8bb2542ace09362ca36f05fd52acd5cc6f89a3b5422f376e970c5",
+      "xai_test/docs/adr/0004-honor-kim-2020-use-column.md": "2230c5a073cc276727a50b833771dfc55a46b2a490c03d2dc4308f95d4ac1a9e",
+      "xai_test/export_model_b_testset.py": "2f42c652a849dfb942b8e727c50e52a8c1d8da37ef36b1fdbcdf54d95ee1a5f9",
+      "xai_test/grouped_model_b.py": "cb81d9a95675bfc3ade7a1b578a5b1d079ae3c96e7ce2f9ccfbfdaee13c8651c",
+      "xai_test/grouped_model_b_eval.py": "bbd2db094826603193f2826d47bb8545f642429949ca6261f2d8138d7bf34238",
+      "xai_test/grouped_split.py": "6185496db6feda92c6ee4305df4e02deae165e3c11b4ef9a20fa826941c8d222",
+      "xai_test/grouped_testset.py": "167f60471ac90d337745b6282dc5eef18760dcc87f3b5808550452d50df0a2ad",
+      "xai_test/integrated_gradients.py": "081a5ad8170f846c28ad238fc94b246a3627ea99369197cedd35ddd3b57dada7",
+      "xai_test/ism_sweep.py": "2cba30a0ab15ad375acae0399274fc0bc93f7565efe062ca712bcde40313295e",
+      "xai_test/leakage_check.py": "e5562a99a3572b47e24590f0c01563a1bedeef8274cc0d858a1e925860b2c07f",
+      "xai_test/mismatch_profiling.py": "602c8d9f868d6959b14186f9db6cef09c5e071050ec9d96b28290532e1f7fdc3",
+      "xai_test/model_a_wrapper.py": "e589d5fe05af2157567335d5fae925fdee77a3c67649ce7f666e4a4ec5faef61",
+      "xai_test/model_b_testset_export.py": "4528bf6d2637b80288a797be9ccfe228d07ccb65ec0afff330af4382425150a7",
+      "xai_test/model_b_wrapper.py": "885e3a683dad344b07c4200d469dc00eec38d63b6b7b3288077c8c236ba9f9b5",
+      "xai_test/model_b_xai_wrapper.py": "023cd1fef74c0c7c656523bef516ec6cbffc56310d6c8b808c9eb2a62758fbef",
+      "xai_test/paired_bootstrap.py": "7a99aa349da9a1d5e28b44d7dfc8afb74c3488a55802bb0f38ce6a3c643e4f44",
+      "xai_test/shap_analysis.py": "f48874ba247fb46892b43adc68ff7d2eed9b2a718704870d93004a6237ad23e2",
+      "xai_test/shap_grouping.py": "f3ca8666d8eb9b4704ad52ec7745c559b0a600c083cc8bc6f7a1c43c5a9032f1",
+      "xai_test/SpCas9/__init__.py": "8068dc86db76f6e2a7c87ffd7fd0c3672fda46e4ce0050ef6e94f2eae79d17e5",
+      "xai_test/SpCas9/spcas9_acceptance.py": "e5588a999b84870f30a858938ca47426169f3d0b3d9300db84cb859e0b2c4417",
+      "xai_test/SpCas9/spcas9_budget.py": "a7eb7044213ad7f12b19075b067fe708277227e4d8da5953e93a4c4ea04a9e7c",
+      "xai_test/SpCas9/spcas9_compare.py": "a3dea0f903e6401514869f9a99c7072750ae0b497af3785f289e77c2881c5fe0",
+      "xai_test/SpCas9/spcas9_data.py": "298fa8519770dee2489d778cdcfa80595fefa7d6fc9fb8586e91150ab41494b5",
+      "xai_test/SpCas9/spcas9_diagnostics.py": "e80c0be8ea1bf8bec4d23f7693b9105df3678788f787cf5d1547b1dfaab2d302",
+      "xai_test/SpCas9/spcas9_eval.py": "52e94934678fb17c76fbe714003954f304ab345813c5e4ba6edadc707349c778",
+      "xai_test/SpCas9/spcas9_execution.py": "b092bc9dd0ed547c76c3af460e3e781e1f04b8afa6707fe1f4f3b382df79003e",
+      "xai_test/SpCas9/spcas9_finalist.py": "6368e354f59d6540640587f34ab08ede5f2b9fd58bbb17bd04cc9410cafb3d06",
+      "xai_test/SpCas9/spcas9_metrics.py": "d64705b9a1f1b938300f654c76c5b66c8334c2cf0c12e9dcc827359d320d8486",
+      "xai_test/SpCas9/spcas9_ranking.py": "238ac9d53f872eec75b54025982f4e2f4540e0db5e4a746743cce2a6350b0558",
+      "xai_test/SpCas9/spcas9_ranking_checks.py": "c44c0364cdc7db46d95a8a24daeeaaeef95de54d6977953d2b3e41036e0ae72e",
+      "xai_test/SpCas9/spcas9_readiness.py": "3aa7037e41a6dbe9958bafb806e116ca4b032ffc978a4543a0d71b6cb6689c3b",
+      "xai_test/SpCas9/spcas9_research.py": "a7eead2100821aee83c4f22af936a618513404513b5140fd93eb9e0da1ad5663",
+      "xai_test/SpCas9/spcas9_research_run.py": "55bfe1d8b6bff335bcde12397346f161155182537afb614d10fd05bbdc792487",
+      "xai_test/SpCas9/spcas9_retry.py": "5ce18539ceee04b2116ec3b11fa4f6da1a435282f7c498b928789225e99527a2",
+      "xai_test/SpCas9/spcas9_selection.py": "85821d211fe60904a5751dde73922e8a16d2554a535abcf74dc481ac1f44133c",
+      "xai_test/SpCas9/spcas9_split.py": "8d9f10e5f6b2e05e8339b955d5fdbe2cad2586aea868905e8e8f39cf75394ba1",
+      "xai_test/SpCas9/spcas9_study.py": "08f1a340b5120e9773cf2acd873dc2479959540307863c0f7ed6ffda8d90ae4f",
+      "xai_test/SpCas9/spcas9_study_backend.py": "8803ac34baf9bc9814781cea67d42118bcfdf4204487fd24e1722b41fe5c8fb3",
+      "xai_test/SpCas9/spcas9_study_inputs.py": "8d9c3d8783413509e28454ab7ef850ec6aeaf083f837cca48eb0272de928228c",
+      "xai_test/SpCas9/spcas9_train.py": "a4832616e3192109dbde10d4b0295bf8041d64b6c03144c022601b7992c82a47",
+      "xai_test/SpCas9/spcas9_v1_audit.py": "4aa6cbba66bcf769a727194469a490bc8008851e945aaee5c8396751f1b7ea05",
+      "xai_test/SpCas9/spcas9_v1_membership.py": "9d0956c7a34aefa315fd29ce1c5988cf453761c538552481d52c346bd637a6c3",
+      "xai_test/step3_ism.py": "8f7c5407f9736864e690994998506b8a40192c49c7cad138c669ea1acdde204c",
+      "xai_test/step3_mismatch.py": "0810b6f50c4f7b35b3f76ef4baf4026e0b243a66de5491a0848658f4e35a9ff0",
+      "xai_test/step4_ablation.py": "e1fa05da041e676d6a7b29db61155e4c20fcb69870240c8945c693c8724e94e3",
+      "xai_test/step4_attention_rollout.py": "36c723684575e0bb4ae9d9c9df3cd0acd5fc69277f3a09489b13d2ca59017376",
+      "xai_test/step4_shap.py": "16a212511c937aeceacc4abd4d81641fe49d402f665cace5f7377cc3e8cdc414",
+      "xai_test/step5_export.py": "2df89f5748c2ac36496cfd1db4c71b42aa02a79dce8c35f8e5455e13eafbc253",
+      "xai_test/test_ablation.py": "09860730cfd441cbbd0fbacc09afff9e109a13c6f6e47e4bd8a63b443ed3e8ad",
+      "xai_test/test_analysis_export.py": "77ffb90937b9c9b7eea971f1c51338b9f8f4cc4e752a8e5042e470c0913c1528",
+      "xai_test/test_attention_rollout.py": "44f93bea0124e94d6f256301941b2681db2e1a4b95824114f74cbe3c811f48ef",
+      "xai_test/test_case_study_selection.py": "3910ed2f85553bbe45a18a4428c7b91eecdf569d1620fe0c4a67bd88060bec9b",
+      "xai_test/test_dev_split.py": "77d266b37f0a44e895d93edad3cb6464f04f7b549fd649399477350d46e5699c",
+      "xai_test/test_grouped_model_b.py": "8eb124366381a6e09aa2492c6c0c84d505b2afc27b63ba1be0fe7cd8013aca5f",
+      "xai_test/test_grouped_model_b_eval.py": "88a61c506e296d9b7464ab3f08923b55e6cb1f2920a0feb4d4b188b07ce05b81",
+      "xai_test/test_grouped_split.py": "78236e08d22b68d7061e8db0f6b69b6d47ab765409588b7d9198bd3e46a53e86",
+      "xai_test/test_grouped_testset.py": "a841000d16f11630e4d0b627e14a3e177da7e35162aa9a50922ea6a76a6e22ea",
+      "xai_test/test_integrated_gradients.py": "d5041fbd9a849f501a297156d4ccf96d5adad93165ea78f48012f9df78c1dcd2",
+      "xai_test/test_ism_sweep.py": "a9923452a3f3d2684070f204357946a6d2a1f4f635394deafbc0175ac2debfd1",
+      "xai_test/test_leakage_check.py": "9daa11636a86d0cace5df8123cb0456cd81e55dad8d46517c20cabc5de3820d7",
+      "xai_test/test_mismatch_profiling.py": "9941cbfc18e301a0d4369f6fca96783b2a1e99a6c31a0ec59aebb57b4cad4737",
+      "xai_test/test_model_b_testset_export.py": "663307f50574929f2937969a0ebcde60f99a71228ff6d4494c16b839ecd577e1",
+      "xai_test/test_model_b_xai_wrapper.py": "03068b12e8ee684b389375d65858c33d19d64fb035bbdbdd435f388a44d73acb",
+      "xai_test/test_multi_cas_scanner.py": "62d98e3c7200b42fd16d9bf980ce5de16042716e1377035a2c75fd0e99ad9254",
+      "xai_test/test_paired_bootstrap.py": "1378b4cc6a968708265fae5f54b45c3c6bd50e50291bb269c8c0f06b126e1300",
+      "xai_test/test_shap_analysis.py": "3e38a2fe6251b16080a7826298b407de335218f51ad4313251bcc6df7f426765",
+      "xai_test/test_shap_grouping.py": "a4f0e0fcab9f1e666ea1aff4ee196b24f32b68506ee541abe87f2e4c28a37efb",
+      "xai_test/test_spcas9_acceptance.py": "c35e1068494503f80b409f7aa65142c4c7681015c4cbb459786fb1d6851ba3f2",
+      "xai_test/test_spcas9_budget.py": "f606e8fe73364950aa76f7ce1255932f69e874dfa016543f9add849447585432",
+      "xai_test/test_spcas9_compare.py": "88cc692dcb326f168c7ed25e3e87b8eca1a30a70bc93a58135941fcb149063b3",
+      "xai_test/test_spcas9_data.py": "ec45e00d8cf695b236c83a098ce14fd5e31ae92224c91d0cebbf5f6ed36278f7",
+      "xai_test/test_spcas9_diagnostics.py": "de05a218556367c4916e9b22fbb37913f3aae881be3cd5e594b1b0c0a8b7ef74",
+      "xai_test/test_spcas9_eval.py": "b973f08e0e91554cbb66991c47c3d1e714153ad001191e86b79d66f2aad8287f",
+      "xai_test/test_spcas9_finalist.py": "7182341fabd289f4a1f9072d33254b056f16840739013a4c131ef77dbfc186ac",
+      "xai_test/test_spcas9_metrics.py": "00bd17c49713e67e30e722a986ec51919d480af55b4a72f71a5024ad3b0c1eac",
+      "xai_test/test_spcas9_ranking.py": "ed4cd9a7d646d8cd21fc4ee2ecc1874e20620b83f30f9ed3ef9e5833362e5fca",
+      "xai_test/test_spcas9_ranking_checks.py": "d698b9c35bbf0e195f4a262a4a23193faefeb0ae2cee423ffe9f0a5e51254365",
+      "xai_test/test_spcas9_research.py": "9ad520e00dc9bdbc416f6e846760bf4c4dcffdb28f8f1880204b94aa26b1138e",
+      "xai_test/test_spcas9_retry.py": "73e92988bf6d8054d33a4bf09d2fe77b61bb0ea54f01b9c0cff2f4c6d070ac4c",
+      "xai_test/test_spcas9_selection.py": "dda31a26f4fc8be1209a30e572c01d4a913b89a11e6f7984c7ad97de87d70ac1",
+      "xai_test/test_spcas9_split.py": "1e4e399f5b545414207b5539c1368bf5617cb9597dc5b75d50fc71c1347a0bbb",
+      "xai_test/test_spcas9_study.py": "da28c253d645ffac30b3db6aab5700b7ec451aa9a03530df8d80d82c31c03eb1",
+      "xai_test/test_spcas9_train.py": "1ca4ae351e268ac3f249717dde58a75c6da78e837f10522c04fdecc4c3da9c5a",
+      "xai_test/test_spcas9_v1_audit.py": "4c82807ec697796c2fb2dd4fddbe31f38dd0470ece9c80c80428f8c1fa395e7e",
+      "xai_test/test_spcas9_v1_membership.py": "7c95030df70829ddf0945bd4aace7abb1587fd09b502c8f197d0082c61b16f2f",
+      "xai_test/test_xai_demo.py": "ccab23c69a1fb55230e373cb79b2ca90b0d51b4617609f8ade60f5ec8d5d1df0",
+      "xai_test/test_xai_session.py": "802039e78dc208e1f17c7bc9f9b94a2185c18b6e3ff3b57ba7b218d6386b6243",
+      "xai_test/xai_demo.py": "e33e8dd411dacc046c2eb0ca9e0f1cea3f8627e14e52d1362b7851a899c2843a",
+      "xai_test/xai_session.py": "8b1bd02dcdf59339134a943f5871ab1af5329dca303bcee47a3592d6f49d3660"
+    }
+  },
+  "environment": {
+    "interpreter": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "versions": {
+      "tensorflow": "2.21.0",
+      "keras": "3.14.1",
+      "numpy": "2.3.2",
+      "pandas": "2.3.3",
+      "scipy": "1.16.1",
+      "scikit-learn": "1.7.1"
+    },
+    "settings": {
+      "KERAS_BACKEND": "unknown/default",
+      "CUDA_VISIBLE_DEVICES": "unknown/default",
+      "OMP_NUM_THREADS": "unknown/default",
+      "MKL_NUM_THREADS": "unknown/default",
+      "TF_NUM_INTRAOP_THREADS": "unknown/default",
+      "TF_NUM_INTEROP_THREADS": "unknown/default",
+      "TF_DETERMINISTIC_OPS": "unknown/default",
+      "TF_CUDNN_DETERMINISTIC": "unknown/default",
+      "PYTHONHASHSEED": "unknown/default",
+      "CUBLAS_WORKSPACE_CONFIG": "unknown/default",
+      "TF_ENABLE_ONEDNN_OPTS": "unknown/default"
+    },
+    "device": "unknown until backend initialization; no historical equivalence asserted",
+    "determinism": "only recorded settings; effective runtime determinism unverified"
+  },
+  "synthetic": {
+    "path": "C:\\project\\MC_project\\.scratch\\issue83-synthetic-budget.json",
+    "sha256": "db0469631d2a6648402a3c865513a1f5ead5269f811b25a0bd64e9b6d356d8ff",
+    "record": {
+      "optimizer_updates_charged": 6,
+      "training_seconds_charged": 395.993219800191,
+      "sessions": [
+        {
+          "status": "finished",
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 30.22,
+          "result": "initial missing-module red; no model constructed"
+        },
+        {
+          "status": "finished",
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 19.93,
+          "result": "MSE scalar and every trainable-weight gradient parity passed"
+        },
+        {
+          "status": "finished",
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 24.46,
+          "result": "ranking fields missing red"
+        },
+        {
+          "status": "finished",
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 25.786960900062695
+        },
+        {
+          "status": "finished",
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 27.674637200077996
+        },
+        {
+          "status": "interrupted",
+          "optimizer_updates_reserved": 6,
+          "started_at_local": "2026-10-27T18:50:03+09:00",
+          "confirmed_stopped_not_later_than_local": "2026-10-27T18:53:33.2870555+09:00",
+          "elapsed_upper_bound_seconds": 211,
+          "actual_elapsed_seconds": null,
+          "accounting": "Conservative ceiling of process creation to first confirmed post-interruption clock; includes import/evaluation overhead. No retry or further optimizer update authorized."
+        },
+        {
+          "status": "completed",
+          "kind": "user_approved_checkpoint_verification",
+          "authorization": "User replied y to maximum 120 additional seconds, no optimizer updates or full fits",
+          "started_at": "2026-10-27T10:43:07.688314+00:00",
+          "wall_time_limit_seconds": 120,
+          "optimizer_updates_reserved": 0,
+          "duration_seconds": 56.92162170005031,
+          "finished_at": "2026-10-27T10:44:04.611319+00:00"
+        }
+      ],
+      "budget_status": "original allowance exhausted; completed with explicit user-approved <=120-second zero-update verification exception",
+      "validation_status": "completed_under_user_approved_checkpoint_verification_exception"
+    },
+    "training_seconds": 395.993219800191,
+    "optimizer_updates": 6,
+    "original_allowance_exceeded": true
+  },
+  "run_order": [
+    {
+      "recipe": "baseline",
+      "seed": 42
+    },
+    {
+      "recipe": "baseline",
+      "seed": 43
+    },
+    {
+      "recipe": "baseline",
+      "seed": 44
+    },
+    {
+      "recipe": "candidate",
+      "seed": 42
+    },
+    {
+      "recipe": "candidate",
+      "seed": 43
+    },
+    {
+      "recipe": "candidate",
+      "seed": 44
+    }
+  ],
+  "representative_seed": 42,
+  "budgets": {
+    "full_fits": 6,
+    "training_seconds": 21600,
+    "synthetic_updates": 10,
+    "synthetic_seconds": 300
+  },
+  "recipes": {
+    "baseline": "original binary-masked MSE, sum measured SSE / actual batch rows, sum nine heads",
+    "candidate": {
+      "base": "baseline",
+      "weight": 0.01,
+      "temperature": 0.1,
+      "pairs": "all unordered within batch; same measured head; both NGG; distinct 30mers; unequal labels",
+      "normalization": "gap-weighted softplus / sum gaps per head; empty=0; fixed nine-head mean"
+    },
+    "base_rows": "batch32, original row sampling/shuffle; paired-seed initial weights and row order"
+  },
+  "acceptance": {
+    "relative_ngg_mae_reduction": 0.02,
+    "ngg_spearman_increase": 0.02,
+    "maximum_relative_mae_increase": 0.05,
+    "maximum_spearman_decrease": 0.02,
+    "comparisons": [
+      "three paired seeds vs refitted baseline",
+      "candidate seed42 vs stored v2"
+    ],
+    "stages": [
+      "validation first",
+      "Test only after both pass and finalist freeze"
+    ],
+    "per_head_populations": [
+      "NGG",
+      "non-NGG"
+    ],
+    "boundaries": "inclusive; baseline MAE zero requires candidate zero",
+    "aggregation": "per-head metric mean over three seeds then equal-head mean; relative change of means",
+    "missing_or_undefined": "incomplete",
+    "pooled": "context only; not a head-average correlation",
+    "historical_checkpoint_sha256": "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6",
+    "historical_test_predictions_sha256": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+    "test_exposure": "historically inspected; not new external confirmation"
+  },
+  "ci": {
+    "level": 0.95,
+    "seed": 20261027,
+    "valid_draws": 2000,
+    "maximum_attempts": 20000,
+    "method": "percentile protospacer-paired NGG bootstrap",
+    "joint_draws": "same sampled clusters for both methods, all heads and all seeds; retain all cluster rows and multiplicity",
+    "statistics": [
+      "relative equal-head mean NGG MAE change",
+      "equal-head mean NGG Spearman change"
+    ],
+    "invalid_draw": "reject jointly when either required summary is undefined",
+    "insufficient_draws": "CI unavailable; report attempted/valid counts and reason",
+    "scope": "supplementary, fixed three seeds; no CI adoption gate or arbitrary-seed claim"
+  },
+  "fixture_specification": [
+    "measured zero",
+    "missing/nonfinite masked labels",
+    "different per-head masks",
+    "mixed NGG/non-NGG",
+    "repeated exact inputs",
+    "tied/near-tied labels",
+    "head without eligible pairs",
+    "partial batch",
+    "MSE objective/gradient parity rtol1e-5 atol1e-6",
+    "authoritative NGG MAE/Spearman/earlier-epoch selection and reload parity",
+    "exact improvement/protection boundaries and either side; zero MAE denominator",
+    "seed-before-head means; ratios of means; missing seed/metric; representative model failure",
+    "shared protospacer cluster multiplicity across methods/heads/seeds; repeatable CI",
+    "valid joint draw quota shortfall never changes point-estimate eligibility"
+  ],
+  "reporting": {
+    "validation": "StudyProtocol.validation_report; reconstruct hash-verified persisted predictions without candidate Test",
+    "training_ngg": "selected checkpoint on measured training NGG rows; diagnostic only",
+    "history": "preserve complete per-run epoch history and selected epoch"
+  },
+  "failure_policy": "any failed/interrupted/timed-out fit consumes attempt and stops all later fits; no retry or intermediate resume",
+  "readiness": {
+    "final_pre_fit_frozen": false,
+    "blocked_by": [
+      "verified essential fixtures and final pre-fit freeze"
+    ],
+    "verification_only": false
+  },
+  "retry": {
+    "authorization": "2026-10-28 user explicitly requested V2-A retry after shared-workspace source drift; original failed attempt retained; one exception only",
+    "parent_study": "C:\\project\\MC_project\\.scratch\\issue88-execution\\studies\\ngg-issue88",
+    "parent_config_sha256": "13b2b75f6944a40ce4c8bf6cb7c83028e3bab73e7f65b988ac01d9618bf5b03b",
+    "parent_protocol_sha256": "cbd336e5969b528f2cde73df4bb206ccb538e7d17173ff972d82b7414f640b8b",
+    "parent_journal_bytes": 58704,
+    "parent_journal_sha256": "71d8f03ae713ef90cde7c59a3b4e6d46ad6e38123d9220e13161e6c7279d4f7d",
+    "parent_event_count": 254,
+    "parent_attempts": [
+      {
+        "kind": "finished",
+        "recipe": "baseline",
+        "run_id": "baseline-42",
+        "seed": 42,
+        "started_at": "2026-10-28T09:31:56.167815+00:00",
+        "status": "failed",
+        "elapsed_seconds": 259.8795030999463,
+        "error": "RuntimeError: training worker abnormal exit: 4294967295"
+      }
+    ],
+    "carried_training_seconds": 655.8727229001373,
+    "parent_mode": "full",
+    "aggregate_attempt_cap": 7,
+    "policy": "one user-authorized retry; six fresh runs; previous failed attempt and all elapsed time retained; further failure stops all later fits; no nested retry"
+  }
+}
