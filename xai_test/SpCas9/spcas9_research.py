@@ -211,6 +211,7 @@ def research_report(
     report = {
         "issue": 88,
         "execution_mode": config["mode"],
+        "retry": config.get("retry"),
         "implementation": implementation,
         "v2_a": {"status": outcome, "unresolved": outcome != "improved"},
         "v2_b": scanner_result(

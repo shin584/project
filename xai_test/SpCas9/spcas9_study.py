@@ -234,7 +234,15 @@ class StudyProtocol:
         execution_mode: str | None = None,
         synthetic_ledger: Path | None = None,
         verification_stored_checkpoint: Path | None = None,
+        retry_from: Path | None = None,
+        retry_authorization: str | None = None,
     ) -> "StudyProtocol":
+        if (retry_from is None) != (retry_authorization is None):
+            raise ValueError(
+                "retry parent and explicit authorization are both required"
+            )
+        if retry_from is not None and execution_mode is None:
+            raise ValueError("retry requires a controlled execution mode")
         if (
             verification_stored_checkpoint is not None
             and execution_mode != "verification"
@@ -247,13 +255,31 @@ class StudyProtocol:
         protocol = _protocol(inputs, checkpoint_selection)
         with ExitStack() as ownership:
             config = None
+            retry = None
             if execution_mode is not None:
                 if synthetic_ledger is None:
                     raise ValueError("synthetic ledger evidence is required")
-                synthetic = ownership.enter_context(
-                    synthetic_handoff(Path(synthetic_ledger))
-                )
+                if retry_from is not None:
+                    from SpCas9.spcas9_retry import retry_handoff
+
+                    synthetic, retry = ownership.enter_context(
+                        retry_handoff(
+                            Path(retry_from),
+                            Path(synthetic_ledger),
+                            retry_authorization or "",
+                        )
+                    )
+                    if execution_mode != retry["parent_mode"]:
+                        raise ValueError(
+                            "retry must retain the original execution mode"
+                        )
+                else:
+                    synthetic = ownership.enter_context(
+                        synthetic_handoff(Path(synthetic_ledger))
+                    )
                 config = configuration(protocol, execution_mode, synthetic)
+                if retry is not None:
+                    config["retry"] = retry
                 if verification_stored_checkpoint is not None:
                     config["acceptance"]["historical_checkpoint_sha256"] = file_sha256(
                         Path(verification_stored_checkpoint)
@@ -261,7 +287,11 @@ class StudyProtocol:
             path = Path(output_root) / _identifier(
                 study_id or f"study-{uuid.uuid4().hex}"
             )
-            reserve_destination(path, (inputs.source_path, inputs.split_dir))
+            reserve_destination(
+                path,
+                (inputs.source_path, inputs.split_dir)
+                + ((Path(retry["parent_study"]),) if retry else ()),
+            )
             protocol_path = write_json(protocol, path / "protocol.json")
             write_json(
                 {
@@ -282,15 +312,26 @@ class StudyProtocol:
                 study["execution_config_sha256"] = file_sha256(config_path)
                 _state(path / "study.json", study)
                 BudgetLedger(path).initialize(
-                    file_sha256(config_path), config["synthetic"]["training_seconds"]
+                    file_sha256(config_path),
+                    retry["carried_training_seconds"]
+                    if retry
+                    else config["synthetic"]["training_seconds"],
                 )
-                with Path(config["synthetic"]["path"] + ".study-owner.json").open(
-                    "x", encoding="utf-8"
-                ) as handle:
+                owner_path = (
+                    Path(retry["parent_study"]) / "authorized-retry.json"
+                    if retry
+                    else Path(config["synthetic"]["path"] + ".study-owner.json")
+                )
+                with owner_path.open("x", encoding="utf-8") as handle:
                     json.dump(
                         {
                             "study": str(path.resolve()),
                             "config_sha256": file_sha256(config_path),
+                            **(
+                                {"authorization": retry["authorization"]}
+                                if retry
+                                else {}
+                            ),
                         },
                         handle,
                     )
@@ -304,6 +345,10 @@ class StudyProtocol:
         config = read(self.path / "execution-config.json")
         if config["protocol"] != self._protocol():
             raise ValueError("execution/protocol identity mismatch")
+        if "retry" in config:
+            from SpCas9.spcas9_retry import verify_retry
+
+            verify_retry(config, self.path)
         return config
 
     def freeze_execution(
@@ -482,7 +527,11 @@ class StudyProtocol:
             synthetic = config["synthetic"]
             if file_sha256(Path(synthetic["path"])) != synthetic["sha256"]:
                 raise ValueError("changed synthetic evidence")
-            if read(Path(synthetic["path"] + ".study-owner.json")) != {
+            if "retry" in config:
+                from SpCas9.spcas9_retry import verify_retry
+
+                verify_retry(config, self.path)
+            elif read(Path(synthetic["path"] + ".study-owner.json")) != {
                 "study": str(self.path.resolve()),
                 "config_sha256": file_sha256(self.path / "execution-config.json"),
             }:

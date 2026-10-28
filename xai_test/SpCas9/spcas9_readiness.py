@@ -30,6 +30,7 @@ REQUIRED_TESTS = (
     "test_spcas9_acceptance.py",
     "test_spcas9_finalist.py",
     "test_spcas9_research.py",
+    "test_spcas9_retry.py",
 )
 SYNTHETIC_EVIDENCE = BASE_DIR / "docs/evidence/issue83-synthetic-checks.json"
 SYNTHETIC_SHA256 = "38bd4aa82cd60643a1d5d54d40fd61636e15611789c1e3cb54f7ba1f3f7232cd"
@@ -119,14 +120,21 @@ def _snapshot(study, readiness: Path, stored_checkpoint: Path) -> dict:
     for key in ("sessions", "optimizer_updates_charged", "training_seconds_charged"):
         if synthetic[key] != ledger["record"][key]:
             raise ValueError("synthetic validation/accounting evidence differs")
-    if read(Path(ledger["path"] + ".study-owner.json")) != {
+    if "retry" in config:
+        from SpCas9.spcas9_retry import verify_retry
+
+        verify_retry(config, study.path)
+    elif read(Path(ledger["path"] + ".study-owner.json")) != {
         "study": str(study.path.resolve()),
         "config_sha256": file_sha256(study.path / "execution-config.json"),
     }:
         raise ValueError("synthetic budget ownership differs")
     # Rebuilding the expected contract detects a re-sealed, modified recipe,
     # threshold, seed, budget or bootstrap configuration before the first fit.
-    if config != configuration(config["protocol"], "full", ledger):
+    expected_config = configuration(config["protocol"], "full", ledger)
+    if "retry" in config:
+        expected_config["retry"] = config["retry"]
+    if config != expected_config:
         raise ValueError("execution configuration differs from the fixed protocol")
     if config["protocol"]["inputs"] != StudyInputs().record():
         raise ValueError("full execution requires the pinned published inputs")

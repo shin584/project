@@ -24,6 +24,8 @@ def execute(
     readiness: Path,
     synthetic_ledger: Path,
     scanner: Path | None = None,
+    retry_from: Path | None = None,
+    retry_authorization: str | None = None,
 ) -> dict:
     """One fresh execution; failed fits still produce partial evidence reports."""
     from SpCas9.spcas9_eval import CHECKPOINT_PATH
@@ -38,6 +40,8 @@ def execute(
         checkpoint_selection="ngg",
         execution_mode="full",
         synthetic_ledger=synthetic_ledger,
+        retry_from=retry_from,
+        retry_authorization=retry_authorization,
     )
     study.freeze_execution(readiness=readiness, stored_checkpoint=CHECKPOINT_PATH)
     runs = [
@@ -124,6 +128,8 @@ def main(argv: list[str] | None = None) -> dict:
     run.add_argument("--destination", type=Path, required=True)
     run.add_argument("--readiness", type=Path, required=True)
     run.add_argument("--synthetic-ledger", type=Path, required=True)
+    run.add_argument("--retry-from", type=Path)
+    run.add_argument("--retry-authorization")
     run.add_argument(
         "--scanner",
         type=Path,
@@ -148,6 +154,8 @@ def main(argv: list[str] | None = None) -> dict:
             readiness=args.readiness,
             synthetic_ledger=args.synthetic_ledger,
             scanner=args.scanner,
+            retry_from=args.retry_from,
+            retry_authorization=args.retry_authorization,
         )
     study = StudyProtocol(args.study)
     # Reconcile only abandoned training records; this never authorizes fits.
