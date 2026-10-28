@@ -5,7 +5,9 @@ targets), so every defensive branch below is driven by
 `fixtures/synthetic_cas12a.csv` instead. See `cas12a/docs/cas12a-model-review.md` §1.
 """
 
+import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -20,6 +22,7 @@ from cas12a.features import (
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "synthetic_cas12a.csv"
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Row positions in the fixture, which doubles as the list of branches covered.
 NORMAL_ROWS = list(range(10))
@@ -52,9 +55,29 @@ def table():
 
 
 def test_loading_the_table_does_not_pull_in_a_deep_learning_framework():
-    # `cas12a/test/` has to pass without TensorFlow installed (#91).
-    assert "tensorflow" not in sys.modules
-    assert "torch" not in sys.modules
+    """`cas12a/test/` has to pass without TensorFlow installed (#91).
+
+    Asserting on *this* process's `sys.modules` would pass here and fail in a
+    full-suite run, where an `xai_test` module has already imported TensorFlow
+    and torch for its own reasons. A clean interpreter is the only honest way
+    to ask what `cas12a` itself pulls in.
+    """
+    probe = textwrap.dedent(f"""
+        import sys
+
+        from cas12a.data import read_cas12a_table
+
+        read_cas12a_table(r"{FIXTURE}")
+        print([m for m in ("tensorflow", "torch") if m in sys.modules])
+    """)
+    result = subprocess.run(
+        [sys.executable, "-c", probe],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+        check=True,
+    )
+    assert result.stdout.strip() == "[]"
 
 
 def test_rows_without_a_usable_sequence_or_target_are_dropped(table):
