@@ -37,6 +37,10 @@ def main(argv=None) -> int:
             )
         )
     try:
+        if Path(str(path) + ".study-owner.json").exists():
+            raise ValueError(
+                "synthetic ledger transferred to fixed study; further optimizer checks are closed"
+            )
         return _run_checks(path)
     finally:
         lock.unlink()

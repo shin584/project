@@ -93,6 +93,14 @@ class StudyInputs:
             )
             if not frame[SEQUENCE_COLUMN].str.len().eq(30).all():
                 raise ValueError(f"{name}: requires 30bp sequences")
+            if not frame[SEQUENCE_COLUMN].str.fullmatch("[ACGT]{30}").all():
+                raise ValueError(f"{name}: requires A/C/G/T sequences")
+            if (
+                not frame["protospacer"]
+                .eq(frame[SEQUENCE_COLUMN].str.slice(4, 24))
+                .all()
+            ):
+                raise ValueError(f"{name}: protospacer differs from consumed sequence")
             if (
                 not frame["split"].eq(name).all()
                 or frame["row_index"].duplicated().any()
@@ -106,4 +114,8 @@ class StudyInputs:
                 raise ValueError(f"{name}: invalid measured labels")
             frame[list(HEAD_NAMES)] = values
             frames[name] = frame
+        for left, right in (("train", "val"), ("train", "test"), ("val", "test")):
+            for column in ("row_index", SEQUENCE_COLUMN, "protospacer"):
+                if set(frames[left][column]) & set(frames[right][column]):
+                    raise ValueError(f"{left}/{right}: {column} overlap")
         return frames

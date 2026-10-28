@@ -5,11 +5,13 @@ freeze and final Test evaluation are explicit, closed stages until later tickets
 """
 
 import json
+import os
 import platform
 import re
 import sys
 import time
 import uuid
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -17,6 +19,14 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from SpCas9.spcas9_budget import (
+    BudgetedBackend,
+    BudgetLedger,
+    configuration,
+    environment_record,
+    read,
+    synthetic_handoff,
+)
 from SpCas9.spcas9_data import HEAD_NAMES, library_versions, output_name
 from SpCas9.spcas9_eval import build_predictions, build_report
 from SpCas9.spcas9_execution import reserve_destination, source_record
@@ -186,43 +196,190 @@ class StudyProtocol:
         *,
         study_id: str | None = None,
         checkpoint_selection: str = "reference_mse",
+        execution_mode: str | None = None,
+        synthetic_ledger: Path | None = None,
     ) -> "StudyProtocol":
         inputs = inputs or StudyInputs()
         inputs.validate()
         protocol = _protocol(inputs, checkpoint_selection)
-        path = Path(output_root) / _identifier(study_id or f"study-{uuid.uuid4().hex}")
-        reserve_destination(path)
-        protocol_path = write_json(protocol, path / "protocol.json")
-        write_json(
-            {
-                "created_at": _now(),
-                "protocol_sha256": file_sha256(protocol_path),
-                "source": source_record(),
-                "environment": {
-                    "python": sys.version,
-                    "platform": platform.platform(),
-                    "libraries": library_versions(),
+        with ExitStack() as ownership:
+            config = None
+            if execution_mode is not None:
+                if synthetic_ledger is None:
+                    raise ValueError("synthetic ledger evidence is required")
+                synthetic = ownership.enter_context(
+                    synthetic_handoff(Path(synthetic_ledger))
+                )
+                config = configuration(protocol, execution_mode, synthetic)
+            path = Path(output_root) / _identifier(
+                study_id or f"study-{uuid.uuid4().hex}"
+            )
+            reserve_destination(path, (inputs.source_path, inputs.split_dir))
+            protocol_path = write_json(protocol, path / "protocol.json")
+            write_json(
+                {
+                    "created_at": _now(),
+                    "protocol_sha256": file_sha256(protocol_path),
+                    "source": source_record(),
+                    "environment": {
+                        "python": sys.version,
+                        "platform": platform.platform(),
+                        "libraries": library_versions(),
+                    },
                 },
-            },
-            path / "study.json",
-        )
+                path / "study.json",
+            )
+            if config is not None:
+                config_path = write_json(config, path / "execution-config.json")
+                study = read(path / "study.json")
+                study["execution_config_sha256"] = file_sha256(config_path)
+                _state(path / "study.json", study)
+                BudgetLedger(path).initialize(
+                    file_sha256(config_path), config["synthetic"]["training_seconds"]
+                )
+                with Path(config["synthetic"]["path"] + ".study-owner.json").open(
+                    "x", encoding="utf-8"
+                ) as handle:
+                    json.dump(
+                        {
+                            "study": str(path.resolve()),
+                            "config_sha256": file_sha256(config_path),
+                        },
+                        handle,
+                    )
+                    handle.flush()
+                    os.fsync(handle.fileno())
         return cls(path)
+
+    def execution_configuration(self) -> dict:
+        """Inspect the immutable draft without importing a training backend."""
+        BudgetLedger(self.path).events()
+        config = read(self.path / "execution-config.json")
+        if config["protocol"] != self._protocol():
+            raise ValueError("execution/protocol identity mismatch")
+        return config
+
+    def freeze_execution(self) -> None:
+        self.execution_configuration()
+        raise PermissionError(
+            "full-fit readiness requires verified #86 acceptance/CI, #87 finalist/Test and #88 report stages"
+        )
+
+    def budget_status(self) -> dict:
+        ledger = BudgetLedger(self.path)
+        with ledger.locked():
+            self.execution_configuration()
+            return ledger.status()
+
+    @contextmanager
+    def evaluation_timing(self, *, bootstrap: bool = False):
+        """Keep report/evaluation/bootstrap work outside the training allowance."""
+        ledger = BudgetLedger(self.path)
+        with ledger.locked():
+            self.execution_configuration()
+            started = time.monotonic()
+            try:
+                yield
+            finally:
+                ledger.append(
+                    {
+                        "kind": "bootstrap" if bootstrap else "evaluation",
+                        "seconds": time.monotonic() - started,
+                    }
+                )
+
+    def recover_reports(self, destination: Path) -> dict:
+        """Reconcile an abandoned attempt and copy verified reports to a fresh location.
+
+        A missing child termination receipt means unknown training time. Even a
+        known upper bound never authorizes another fit after an interruption.
+        Earlier evidence, including incomplete runs, is preserved verbatim.
+        """
+        ledger = BudgetLedger(self.path)
+        with ledger.locked():
+            config = self.execution_configuration()
+            status = ledger.status()
+            if status["attempts"] and status["attempts"][-1]["status"] == "running":
+                attempt = status["attempts"][-1]
+                receipt = self.path / "runs" / attempt["run_id"] / "fit-ended.json"
+                elapsed = None
+                if receipt.exists():
+                    evidence = read(receipt)
+                    value = evidence["elapsed_seconds"]
+                    if (
+                        not isinstance(value, (int, float))
+                        or not np.isfinite(value)
+                        or value < 0
+                    ):
+                        raise ValueError("invalid termination elapsed bound")
+                    elapsed = max(attempt["elapsed_seconds"], value)
+                ledger.append(
+                    {
+                        "kind": "recovered",
+                        "status": "interrupted",
+                        "elapsed_seconds": elapsed,
+                        "accounting": "verified child termination upper bound"
+                        if elapsed is not None
+                        else "unknown elapsed bound; training blocked",
+                    }
+                )
+                status = ledger.status()
+            completed = {}
+            for attempt in status["attempts"]:
+                report = self._report_only(attempt["run_id"])
+                if report["eligible"]:
+                    completed[attempt["run_id"]] = report
+            inputs = StudyInputs.from_record(config["protocol"]["inputs"])
+            reserve_destination(
+                Path(destination), (self.path, inputs.source_path, inputs.split_dir)
+            )
+            recovered = {
+                "source_study": str(self.path.resolve()),
+                "execution_config_sha256": file_sha256(
+                    self.path / "execution-config.json"
+                ),
+                "budget": status,
+                "completed": completed,
+                "training_permitted": False,
+            }
+            write_json(recovered, Path(destination) / "recovery.json")
+            return recovered
 
     def _protocol(self) -> dict:
         study = _read(self.path / "study.json")
         if file_sha256(self.path / "protocol.json") != study["protocol_sha256"]:
             raise ValueError("corrupted protocol evidence")
+        if (
+            "execution_config_sha256" in study
+            and file_sha256(self.path / "execution-config.json")
+            != study["execution_config_sha256"]
+        ):
+            raise ValueError("changed execution configuration")
         return _read(self.path / "protocol.json")
 
-    def plan_run(self, *, seed: int, run_id: str | None = None) -> str:
+    def _controlled(self) -> bool:
+        return "execution_config_sha256" in read(self.path / "study.json")
+
+    def plan_run(
+        self, *, seed: int, run_id: str | None = None, recipe: str = "v2"
+    ) -> str:
         protocol = self._protocol()
+        controlled = self._controlled()
+        if controlled:
+            config = self.execution_configuration()
+            if {"recipe": recipe, "seed": seed} not in config["run_order"]:
+                raise ValueError("fixed recipe/seed required")
+        elif recipe != "v2":
+            raise ValueError(
+                "ranking recipes require a controlled execution configuration"
+            )
         if seed not in protocol["training_seeds"]:
             raise ValueError("training seed must be 42, 43 or 44")
         run_id = _identifier(run_id or f"v2-{seed}-{uuid.uuid4().hex}")
         path = self.path / "runs" / run_id
         reserve_destination(path)
         write_json(
-            {"recipe": "v2", "seed": seed, "created_at": _now()}, path / "plan.json"
+            {"recipe": recipe, "seed": seed, "created_at": _now()}, path / "plan.json"
         )
         write_json(
             {
@@ -239,9 +396,130 @@ class StudyProtocol:
         self, run_id: str, *, backend: "TrainingBackend | None" = None
     ) -> dict:
         """One reserved fit; interrupted/failed evidence remains explicitly ineligible."""
+        if self._controlled():
+            config = self.execution_configuration()
+            if config["mode"] == "full":
+                self.freeze_execution()
+            return self._controlled_train(run_id, backend=backend)
+        from SpCas9.spcas9_study_backend import KerasV2Backend
+
+        if backend is None or isinstance(backend, KerasV2Backend):
+            raise PermissionError(
+                "full fits require fixed execution configuration and verified readiness"
+            )
+        return self._train_validation(run_id, backend=backend)
+
+    def _controlled_train(self, run_id: str, *, backend) -> dict:
+        from SpCas9.spcas9_study_backend import KerasV2Backend
+
+        if backend is None or isinstance(backend, KerasV2Backend):
+            raise PermissionError(
+                "verification mode requires a disposable fake backend; full training readiness is blocked"
+            )
+        ledger = BudgetLedger(self.path)
+        with ledger.locked():
+            config = self.execution_configuration()
+            if (
+                source_record() != config["source"]
+                or environment_record() != config["environment"]
+            ):
+                raise ValueError("changed source/environment configuration")
+            synthetic = config["synthetic"]
+            if file_sha256(Path(synthetic["path"])) != synthetic["sha256"]:
+                raise ValueError("changed synthetic evidence")
+            if read(Path(synthetic["path"] + ".study-owner.json")) != {
+                "study": str(self.path.resolve()),
+                "config_sha256": file_sha256(self.path / "execution-config.json"),
+            }:
+                raise ValueError(
+                    "synthetic history belongs to another study; budget reset refused"
+                )
+            self._report_only(run_id)
+            status = ledger.status()
+            if status["blocked"]:
+                raise ValueError(
+                    "attempt history blocks all subsequent training; no retry/resume"
+                )
+            index = len(status["attempts"])
+            if index >= 6:
+                raise ValueError("six-fit budget exhausted")
+            plan = read(self.path / "runs" / _identifier(run_id) / "plan.json")
+            identity = {key: plan[key] for key in ("recipe", "seed")}
+            if identity != config["run_order"][index]:
+                raise ValueError("fixed baseline/candidate seed run order required")
+            if status["remaining_seconds"] <= 0:
+                raise ValueError("training time budget exhausted")
+            for previous in status["attempts"]:
+                if not self._report_only(previous["run_id"])["eligible"]:
+                    raise ValueError("previous completed run evidence is missing")
+            run_path = self.path / "runs" / run_id
+            if (
+                read(run_path / "state.json")["status"] != "planned"
+                or (run_path / "started.json").exists()
+            ):
+                raise FileExistsError("run already attempted; no retry/resume")
+            receipt = {"run_id": run_id, **identity}
+            with (self.path / f"attempt-{index + 1}.json").open(
+                "x", encoding="utf-8"
+            ) as handle:
+                json.dump(receipt, handle)
+                handle.flush()
+                os.fsync(handle.fileno())
+            started = time.monotonic()
+            ledger.append({"kind": "started", **receipt, "started_at": _now()})
+            guarded = BudgetedBackend(
+                backend, ledger, started, status["remaining_seconds"]
+            )
+            try:
+                result = self._train_validation(run_id, backend=guarded)
+                if guarded.fit_seconds is None:
+                    raise ValueError("missing elapsed training evidence")
+                # Persist completion only after all run evidence and parity pass.
+                ledger.append(
+                    {
+                        "kind": "finished",
+                        "status": "completed",
+                        "elapsed_seconds": guarded.fit_seconds,
+                    }
+                )
+                ledger.append(
+                    {
+                        "kind": "evaluation",
+                        "seconds": time.monotonic() - started - guarded.fit_seconds,
+                    }
+                )
+                return result
+            except (Exception, KeyboardInterrupt, SystemExit) as error:
+                elapsed = time.monotonic() - started
+                state = (
+                    "timed_out"
+                    if isinstance(error, TimeoutError)
+                    else "interrupted"
+                    if isinstance(error, KeyboardInterrupt)
+                    else "failed"
+                )
+                ledger.append(
+                    {
+                        "kind": "finished",
+                        "status": state,
+                        "elapsed_seconds": guarded.fit_seconds
+                        if guarded.fit_seconds is not None
+                        else elapsed,
+                        "error": f"{type(error).__name__}: {error}",
+                    }
+                )
+                if guarded.fit_seconds is not None:
+                    ledger.append(
+                        {"kind": "evaluation", "seconds": elapsed - guarded.fit_seconds}
+                    )
+                raise
+
+    def _train_validation(
+        self, run_id: str, *, backend: "TrainingBackend | None" = None
+    ) -> dict:
         from SpCas9.spcas9_study_backend import KerasV2Backend, TrainingRows
 
-        self.report_only(run_id)
+        self._report_only(run_id)
         path = self.path / "runs" / _identifier(run_id)
         state = _read(path / "state.json")
         if state["status"] != "planned" or {p.name for p in path.iterdir()} != {
@@ -259,6 +537,14 @@ class StudyProtocol:
             protocol = self._protocol()
             frames = StudyInputs.from_record(protocol["inputs"]).validate()
             source = source_record()
+            frozen = self.execution_configuration() if self._controlled() else None
+            if frozen is not None and (
+                source != frozen["source"]
+                or environment_record() != frozen["environment"]
+            ):
+                raise ValueError(
+                    "consumed source/environment differs from frozen configuration"
+                )
             execution = {
                 "source": source,
                 "inputs": protocol["inputs"],
@@ -379,6 +665,11 @@ class StudyProtocol:
                 {"files": {name: file_sha256(path / name) for name in files}},
                 path / "evidence.json",
             )
+            if frozen is not None and (
+                source_record() != frozen["source"]
+                or environment_record() != frozen["environment"]
+            ):
+                raise ValueError("source/environment changed during training execution")
             state.update(
                 status="completed",
                 eligible=True,
@@ -386,7 +677,7 @@ class StudyProtocol:
                 finished_at=_now(),
             )
             _state(path / "state.json", state)
-            return self.report_only(run_id)
+            return self._report_only(run_id)
         except BaseException as error:
             state.update(
                 status="failed",
@@ -399,6 +690,12 @@ class StudyProtocol:
             raise
 
     def report_only(self, run_id: str) -> dict:
+        if self._controlled():
+            with self.evaluation_timing():
+                return self._report_only(run_id)
+        return self._report_only(run_id)
+
+    def _report_only(self, run_id: str) -> dict:
         protocol = self._protocol()
         path = self.path / "runs" / _identifier(run_id)
         state = _read(path / "state.json")
@@ -413,6 +710,17 @@ class StudyProtocol:
         if file_sha256(path / "evidence.json") != state["evidence_sha256"]:
             raise ValueError("corrupted evidence manifest")
         evidence = _read(path / "evidence.json")
+        required = {
+            "plan.json",
+            "started.json",
+            "execution.json",
+            CHECKPOINT_FILENAME,
+            "predictions.csv",
+            "validation.json",
+            "training.json",
+        }
+        if set(evidence["files"]) != required:
+            raise ValueError("missing or unexpected required run evidence")
         for name, expected in evidence["files"].items():
             if name != Path(name).name or file_sha256(path / name) != expected:
                 raise ValueError(f"corrupted run evidence: {name}")

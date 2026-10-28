@@ -63,11 +63,12 @@ def inputs(tmp_path):
     rows = {"train": 29134, "val": 3676, "test": 5186}
     for name, count in rows.items():
         index = np.arange(count)
+        sequence = {"train": "a" * 30, "val": "acgt" * 7 + "ac", "test": "t" * 30}[name]
         frame = pd.DataFrame(
             {
                 "row_index": index + {"train": 0, "val": 29134, "test": 32810}[name],
-                "sequence": ["  " + "acgt" * 7 + "ac  "] * count,
-                "protospacer": ["ACGT" * 5] * count,
+                "sequence": ["  " + sequence + "  "] * count,
+                "protospacer": [sequence[4:24].upper()] * count,
                 "in_pam_library": index % 2 == 0,
                 "trna_feature": index % 2,
                 "use": "Test" if name == "test" else "Training",

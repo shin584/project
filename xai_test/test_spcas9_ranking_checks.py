@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -16,6 +17,25 @@ def test_check_runner_requires_exclusive_ledger_ownership(tmp_path):
         main(["--ledger", str(path)])
     assert lock.read_text(encoding="utf-8") == "another parent owns this ledger"
     assert not path.exists()
+
+
+def test_check_runner_rechecks_handoff_after_acquiring_reservation(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / "budget.json"
+    owner = tmp_path / "budget.json.study-owner.json"
+    original_open = Path.open
+
+    def handoff_before_lock_acquisition(candidate, *args, **kwargs):
+        if candidate == path.with_suffix(".json.lock"):
+            owner.write_text("study claimed history before lock was acquired")
+        return original_open(candidate, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", handoff_before_lock_acquisition)
+    with pytest.raises(ValueError, match="transferred"):
+        main(["--ledger", str(path)])
+    assert not path.exists()
+    assert not path.with_suffix(".json.lock").exists()
 
 
 @pytest.mark.parametrize(
