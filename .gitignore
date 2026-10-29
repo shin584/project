@@ -29,3 +29,10 @@ cas12a/dataset/*.xlsx
 # Test fixtures are the exception to the `*.csv` rule at the top of this file:
 # they are small, synthetic, and `cas12a/test/` cannot run without them.
 !cas12a/test/fixtures/*.csv
+
+# Cas12a 5-fold output (#92). The checkpoint is ignored and its metrics JSON is
+# tracked, the same split 9-Hydra's `training_log.json` uses above: the JSON is
+# small and is the only source of this model's performance numbers, while the
+# weights are large and matter only once something decides to adopt them (at
+# which point they go under `models/`, like every other adopted checkpoint).
+cas12a/artifacts/*.keras

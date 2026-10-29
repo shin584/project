@@ -174,3 +174,40 @@ P1(지표 없음), P2(epochs=5, 콜백 미연결), P4(산출물·시드), P5, P6
 **CPU 비용**: 1 epoch 약 10초, 5-fold 전체 257.5초(4분 18초). 상세는
 `cas12a/docs/cas12a-training-cost.md`. #92 를 로컬에서 돌릴지
 Colab 으로 되돌릴지의 판단 근거다.
+
+## 7. #92 이후 상태 — 성능 측정과 gate 판정
+
+**이 모델의 성능 수치가 처음으로 존재한다. 채택 gate 는 통과했다** —
+Spearman **0.7509 ± 0.0085**, ridge 기준선 0.738 대비 +0.0129 로 fold 표준편차
+0.0085 의 1.52배. 전체 수치와 조건은 `cas12a/docs/cas12a-5fold-metrics.md`,
+유일한 출처는 `cas12a/artifacts/cas12a_5fold_metrics.json` 이다.
+
+**§3 해소 항목**:
+
+- **P1 해소.** `cas12a/metrics.py` 가 fold 별 Spearman/Pearson/R²/MAE/MSE 와
+  보정(slope·intercept·bias)을 기록하고, `train_5fold` 의 `fold_results` 는 더 이상
+  비어 있지 않다. §2 표의 "미측정" 칸이 채워졌다.
+- **P2 해소.** `EarlyStopping(val_loss, patience=10, restore_best_weights=True)` 와
+  `ReduceLROnPlateau` 가 `model.fit(callbacks=...)` 에 실제로 연결됐고 epoch 상한은
+  100 이다 (실제로는 13~19 에서 멈췄으므로 상한은 구속 조건이 아니다).
+  **5개 fold 전부 best epoch 이 마지막 epoch 이 아니었다** — 리뷰의 지적이 특정
+  fold 의 사고가 아니라 구조적 문제였음이 확인됐다.
+- **P3**: #91 이 이미 제거 (§6 참조). #92 에서 할 일은 없었다.
+- **P4 해소.** val Spearman 최고 fold 의 `.keras` 와 지표 JSON 이 같은 디렉터리에
+  저장된다. 시드(Python/NumPy/TF)는 고정하고 라이브러리 버전을 JSON 에 기록했다.
+  `enable_op_determinism()` 은 의도적으로 적용하지 않았다 — 근거는 ADR 0003.
+  별도 held-out test 는 두지 않았으며, 그 결정과 재검토 발동 조건도 ADR 0003 에 있다.
+
+**남은 항목**:
+
+- **P5** (타깃 클리핑 미문서화) — ADR 0001 이 데이터 쪽 결정을 기록했으나
+  zero-inflated 분포 + sigmoid/MSE 조합 자체는 그대로다.
+- **P6** (dinuc 피처 중복) — **이번 측정으로 반박되지도 입증되지도 않았다.** gate 는
+  넘었지만 96,513 파라미터가 선형 모델 대비 얻은 것은 Spearman +0.013 이므로,
+  "별도 Dense 분기가 새 정보를 주지 않는다"는 가설은 여전히 살아 있다.
+- **`GlobalAveragePooling1D`** 가 BiLSTM 출력의 위치 정보를 평균으로 소거하는 문제도
+  그대로다. P6 와 함께 구조 개선 여지이며, 다루려면 별도 이슈여야 한다.
+
+**다음 구조 변경부터는 held-out 분리가 선행 조건이다.** 이번 수치는 구조를 고르는 데
+쓰이지 않았으므로 아직 오염되지 않았지만, P6 나 pooling 교체를 fold 지표로 판정하기
+시작하면 이 수치는 성능 추정치가 아니게 된다 (ADR 0003).

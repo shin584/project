@@ -32,6 +32,16 @@ and the conversion belongs to the display layer.
 _Avoid_: "score" unqualified when the unit matters; mixing ratios and
 percentages in one comparison
 
+**adoption gate**:
+The rule that decides whether a trained model may replace the one in use. For
+Cas12a it is **relative**: 5-fold mean Spearman must beat the RidgeCV baseline
+of 0.738 — same features, same split — by at least one fold standard deviation.
+`cas12a/metrics.py` computes it and ADR 0003 records why it carries no held-out
+split. Other models' gates are their own.
+_Avoid_: calling DeepCpf1's ≈0.77 a gate (it is a reference line, measured on a
+different split and preprocessing); quoting a mean Spearman as a pass without
+its fold spread; "beats the baseline" for a margin narrower than that spread
+
 **Cas12a library**:
 The Kim 2018 dataset the Cas12a model is trained on: 15,000 usable 34 bp
 synthetic targets measured in HEK293T, one row per unique protospacer. Its PAM

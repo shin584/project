@@ -1,0 +1,179 @@
+{
+  "issue": 92,
+  "generated_utc": "2026-10-29T06:10:08+00:00",
+  "dataset": {
+    "path": "C:\\project\\MC_project\\cas12a\\dataset\\kim_2018_cas12a_dataset.xlsx",
+    "rows": 15000
+  },
+  "split": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "training": {
+    "epochs_max": 100,
+    "batch_size": 32,
+    "seed": 42,
+    "early_stopping": {
+      "monitor": "val_loss",
+      "patience": 10,
+      "restore_best_weights": true
+    },
+    "reduce_lr_on_plateau": {
+      "monitor": "val_loss",
+      "factor": 0.5,
+      "patience": 5,
+      "min_lr": 1e-05
+    },
+    "op_determinism_enabled": false
+  },
+  "library_versions": {
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "scipy": "1.16.1",
+    "scikit-learn": "1.7.1",
+    "tensorflow": "2.21.0"
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "val_rows": 3000,
+      "epochs_ran": 13,
+      "best_epoch": 3,
+      "best_val_loss": 0.047184642404317856,
+      "final_val_loss": 0.05015033483505249,
+      "wall_clock_s": 178.3,
+      "spearman": 0.7346391639458023,
+      "pearson": 0.7432348519279491,
+      "r2": 0.5468908004956674,
+      "mae": 0.16403585709264978,
+      "mse": 0.0471846514559756,
+      "calibration_slope": 1.0072463741909436,
+      "calibration_intercept": 0.02103788775684283,
+      "mean_bias": -0.02388558467029117
+    },
+    {
+      "fold": 2,
+      "val_rows": 3000,
+      "epochs_ran": 17,
+      "best_epoch": 7,
+      "best_val_loss": 0.043674129992723465,
+      "final_val_loss": 0.04809439927339554,
+      "wall_clock_s": 178.9,
+      "spearman": 0.7538832252828697,
+      "pearson": 0.7617106454733685,
+      "r2": 0.5788740694099327,
+      "mae": 0.1549318550920149,
+      "mse": 0.04367413002422737,
+      "calibration_slope": 0.9633363046570002,
+      "calibration_intercept": 0.022217018159650468,
+      "mean_bias": -0.007118535106152235
+    },
+    {
+      "fold": 3,
+      "val_rows": 3000,
+      "epochs_ran": 18,
+      "best_epoch": 8,
+      "best_val_loss": 0.044047124683856964,
+      "final_val_loss": 0.04796718433499336,
+      "wall_clock_s": 227.8,
+      "spearman": 0.7509622147589448,
+      "pearson": 0.7586058749290798,
+      "r2": 0.5691612634850256,
+      "mae": 0.1537517647865546,
+      "mse": 0.04404713056386456,
+      "calibration_slope": 0.90513422482237,
+      "calibration_intercept": 0.039096080218226074,
+      "mean_bias": -5.655222195127818e-05
+    },
+    {
+      "fold": 4,
+      "val_rows": 3000,
+      "epochs_ran": 19,
+      "best_epoch": 9,
+      "best_val_loss": 0.0449298694729805,
+      "final_val_loss": 0.047796525061130524,
+      "wall_clock_s": 191.4,
+      "spearman": 0.7575852137413243,
+      "pearson": 0.7609505100149405,
+      "r2": 0.5710125932222754,
+      "mae": 0.157073826815762,
+      "mse": 0.04492987089611135,
+      "calibration_slope": 0.9539900748695965,
+      "calibration_intercept": 0.04446495499441028,
+      "mean_bias": -0.026462766658685688
+    },
+    {
+      "fold": 5,
+      "val_rows": 3000,
+      "epochs_ran": 16,
+      "best_epoch": 6,
+      "best_val_loss": 0.04516400769352913,
+      "final_val_loss": 0.04850544407963753,
+      "wall_clock_s": 190.8,
+      "spearman": 0.7575728815510295,
+      "pearson": 0.7603436644935149,
+      "r2": 0.5682468821765609,
+      "mae": 0.15443483026411498,
+      "mse": 0.04516400143584813,
+      "calibration_slope": 0.8934821552194485,
+      "calibration_intercept": 0.03182005172451652,
+      "mean_bias": 0.013173486240678045
+    }
+  ],
+  "aggregate": {
+    "spearman": {
+      "mean": 0.7509285398559942,
+      "std": 0.008515088388154748
+    },
+    "pearson": {
+      "mean": 0.7569691093677706,
+      "std": 0.006943056487983371
+    },
+    "r2": {
+      "mean": 0.5668371217578925,
+      "std": 0.010654271085621671
+    },
+    "mae": {
+      "mean": 0.15684562681021924,
+      "std": 0.003762922565094641
+    },
+    "mse": {
+      "mean": 0.0449999568752054,
+      "std": 0.0012223262978391998
+    },
+    "calibration_slope": {
+      "mean": 0.9446378267518718,
+      "std": 0.04131431986271173
+    },
+    "calibration_intercept": {
+      "mean": 0.03172719857072923,
+      "std": 0.009178936477382844
+    },
+    "mean_bias": {
+      "mean": -0.008869990483280465,
+      "std": 0.014843402563771748
+    }
+  },
+  "gate": {
+    "metric": "spearman",
+    "baseline": 0.738,
+    "mean": 0.7509285398559942,
+    "std": 0.008515088388154748,
+    "margin": 0.012928539855994181,
+    "passed": true,
+    "reference_only": {
+      "deepcpf1_spearman": 0.77
+    }
+  },
+  "saved_model": {
+    "filename": "cas12a_best_fold4.keras",
+    "fold": 4,
+    "selected_by": "highest validation spearman",
+    "spearman": 0.7575852137413243,
+    "mae": 0.157073826815762,
+    "best_val_loss": 0.0449298694729805
+  }
+}
