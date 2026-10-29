@@ -151,3 +151,26 @@ sigmoid 출력 + MSE 손실 조합에서 zero-inflated 분포가 되므로, 의�
 Nat Biotechnol 36:239-241 (2018) 의 보충 표(HEK293T 측정 34bp 타깃 15,002행)다.
 2MB로 커밋하지 않고 `.gitignore` 에 등록했으며, 공용 사본은 Google Drive
 `project_shared/data/` 에 있다.
+
+## 6. #93 이후 상태 — 학습 경로 포팅
+
+학습 경로가 노트북에서 `cas12a/model.py`(`create_cas12a_model`)·`cas12a/train.py`
+(`train_5fold` + 진입점)로 분리됐다. `python -m cas12a.train` 으로 로컬 CPU 에서
+끝까지 실행되며, Drive 마운트와 `/content/...` 경로는 사라졌다. 노트북은
+그 진입점을 호출하는 Colab 래퍼로 남았다(삭제하지 않음 — 근거는 ADR 0002).
+
+**§3 의 수정 항목 중 바뀐 것은 P3 하나뿐이다.** `bean_input` 죽은 분기는 #91 이
+이미 제거했다(린트 F821 때문이며 동작·파라미터 수 영향 없음). 나머지는 그대로다:
+P1(지표 없음), P2(epochs=5, 콜백 미연결), P4(산출물·시드), P5, P6 — **전부 #92 범위**다.
+포팅과 설정 수정을 같은 커밋에 섞으면 성능 변화의 원인을 분리할 수 없기 때문에
+의도적으로 손대지 않았고, `cas12a/test/test_train.py`·`test_model.py` 가 이 값들을
+핀으로 고정해 #92 의 변경이 눈에 보이게 만든다.
+
+**검증 범위**: 학습은 확률적이고 CPU/GPU 커널이 달라 bit-exact 비교가 불가능하다.
+결정적인 부분만 검증했다 — 전처리(#91 에서 실데이터 15,000행 bit-exact 확인, 재측정 안 함),
+분할(fold 인덱스 골든), 구조(21개 레이어 테이블 + 파라미터 96,513개). 노트북 보고치
+`val_loss 0.0481`(fold 4, epoch 5)은 참고용이며 어디에도 단정으로 쓰지 않는다.
+
+**CPU 비용**: 1 epoch 약 10초, 5-fold 전체 257.5초(4분 18초). 상세는
+`cas12a/docs/cas12a-training-cost.md`. #92 를 로컬에서 돌릴지
+Colab 으로 되돌릴지의 판단 근거다.
