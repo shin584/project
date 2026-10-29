@@ -1,0 +1,3 @@
+# Preserve the exact bytes checked by the published split SHA-256 pins.
+published_split/*.csv -text
+published_split/split_checksum.json -text
