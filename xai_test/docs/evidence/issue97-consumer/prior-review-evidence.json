@@ -1,0 +1,27 @@
+{
+  "verification_mode": "existing AST function bodies with controlled model and array substitutes; real source gaussian_penalty",
+  "real_checkpoint_inference_executed": false,
+  "tensorflow_loaded": false,
+  "numpy_dtype_verified": false,
+  "python": "3.14.4",
+  "source_sha256": {
+    "e_system\\predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+    "e_system\\pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8"
+  },
+  "first_site_crash": {
+    "exception": "UnboundLocalError",
+    "message": "cannot access local variable 'best_raw' where it is not associated with a value",
+    "all_head_raw": -0.02,
+    "distance": 0,
+    "penalty": 1.0,
+    "all_head_final": -2.0
+  },
+  "later_site_stale_state": {
+    "first_site_raw": 0.2,
+    "second_site_actual_raw": -0.02,
+    "second_site_actual_final": -2.0,
+    "second_site_stored_raw": 0.2,
+    "second_site_stored_final": -1.0
+  },
+  "scope": "conditional consumer defect reproduction; does not establish actual trained-model trigger frequency or integer dtype acceptance"
+}

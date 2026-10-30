@@ -1,0 +1,4 @@
+# Preserve forensic source and prior-record bytes across checkout platforms.
+source/*.py -text
+prior-review-evidence.json -text
+verification-code.py -text

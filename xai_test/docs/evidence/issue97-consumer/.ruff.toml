@@ -1,0 +1,3 @@
+# These Python files are byte-for-byte forensic artifacts, not editable code.
+force-exclude = true
+exclude = ["source", "verification-code.py"]

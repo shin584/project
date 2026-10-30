@@ -1,0 +1,4106 @@
+{
+  "issue": 97,
+  "status": "verified",
+  "created_utc": "2026-10-30T10:48:39.172396+00:00",
+  "verification_code_sha256": "6d3a30f5782c5819923d9bb3c45c2e15bb40f7629e2109f0b2bc6daf3bb6f0f7",
+  "verification_mode": "actual imported run_prediction with controlled model argument",
+  "source_directory": "C:\\project\\MC_project\\e_system",
+  "source_sha256": {
+    "predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+    "pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8",
+    "adapters.py": "f7ec6183c985e9b9ffc8e701505cf53efe44de109ee956ee675be102ad80f218",
+    "backbones.py": "6eb0fc1589de9e6bba581a74613d2d5549ab18e7fbfee062163245af9070e4be",
+    "app.py": "79c5da497ccc2e228dd5a2bf40ae9da48cc231e25b28986c5516e4c3a35a2ed1"
+  },
+  "source_preserved": true,
+  "environment": {
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.3.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.14.1",
+    "torch": "2.12.0",
+    "streamlit": "1.51.0"
+  },
+  "real_checkpoint_inference_executed": false,
+  "keras_dtype_acceptance_verified": false,
+  "models_loaded": false,
+  "channels": [
+    "A",
+    "C",
+    "G",
+    "T"
+  ],
+  "cases": {
+    "distinct_heads": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 10,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 1.5,
+          "final_score": 90.97959895689502
+        }
+      ],
+      "controlled_raw": [
+        [
+          0,
+          -0.25,
+          1.5,
+          0.3,
+          0.4,
+          0.56,
+          0.67,
+          0.8,
+          0.9
+        ]
+      ],
+      "expected_final": [
+        [
+          0.0,
+          -15.163266492815836,
+          90.97959895689502,
+          18.195919791379005,
+          24.26122638850534,
+          33.96571694390747,
+          40.637554200746436,
+          48.52245277701068,
+          54.587759374137015
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.0,
+          "final_score": 0.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": -0.25,
+          "final_score": -15.163266492815836
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 1.5,
+          "final_score": 90.97959895689502
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.3,
+          "final_score": 18.195919791379005
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.4,
+          "final_score": 24.26122638850534
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.56,
+          "final_score": 33.96571694390747
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.67,
+          "final_score": 40.637554200746436
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.8,
+          "final_score": 48.52245277701068
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 10,
+          "strand": "+",
+          "raw_score": 0.9,
+          "final_score": 54.587759374137015
+        }
+      ],
+      "exception": null
+    },
+    "first_below_minus_one": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.0,
+          "final_score": 0.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02
+        ]
+      ],
+      "expected_final": [
+        [
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        }
+      ],
+      "exception": {
+        "type": "UnboundLocalError",
+        "message": "cannot access local variable 'best_raw' where it is not associated with a value"
+      }
+    },
+    "exact_minus_one": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.0,
+          "final_score": 0.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01,
+          -0.01
+        ]
+      ],
+      "expected_final": [
+        [
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.01,
+          "final_score": -1.0
+        }
+      ],
+      "exception": {
+        "type": "UnboundLocalError",
+        "message": "cannot access local variable 'best_raw' where it is not associated with a value"
+      }
+    },
+    "consecutive_negative": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "pam_seq": "TG",
+          "model_input_seq": "TGCATGCATGCATGCATGCATGCATGAATC",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.2,
+          "final_score": -1.0
+        },
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "pam_seq": "CG",
+          "model_input_seq": "CATGGATTACAGATTACAGATTACCGTGTC",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.2,
+          "final_score": -1.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        [
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02,
+          -0.02
+        ],
+        [
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04,
+          -0.04
+        ]
+      ],
+      "expected_final": [
+        [
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0
+        ],
+        [
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0,
+          -2.0
+        ],
+        [
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0,
+          -4.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        {
+          "window": "TGCATGCATGCATGCATGCATGCATGAATC",
+          "window_sha256": "fc183984b9bd3adad12cc3bb652aeafb6f0b570abb1a55732a344c55da031817",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        {
+          "window": "CATGGATTACAGATTACAGATTACCGTGTC",
+          "window_sha256": "4cfdd7fb8f29b7d3e8bbb61ae569952906c29b73eb559ff76fe50d6dfa158f39",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "TG",
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "CG",
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        }
+      ],
+      "exception": null
+    },
+    "zero_and_tie": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.0,
+          "final_score": 0.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          0,
+          0,
+          -0.02,
+          -0.03,
+          -0.04,
+          -0.05,
+          -0.06,
+          -0.07,
+          -0.08
+        ]
+      ],
+      "expected_final": [
+        [
+          0.0,
+          0.0,
+          -2.0,
+          -3.0,
+          -4.0,
+          -5.0,
+          -6.0,
+          -7.000000000000001,
+          -8.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.0,
+          "final_score": 0.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.0,
+          "final_score": 0.0
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.02,
+          "final_score": -2.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.03,
+          "final_score": -3.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.04,
+          "final_score": -4.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.05,
+          "final_score": -5.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.06,
+          "final_score": -6.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.07,
+          "final_score": -7.000000000000001
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": -0.08,
+          "final_score": -8.0
+        }
+      ],
+      "exception": null
+    },
+    "nan_head": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.2,
+          "final_score": 20.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          0.2,
+          "NaN",
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ],
+      "expected_final": [
+        [
+          20.0,
+          "NaN",
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": "NaN",
+          "final_score": "NaN"
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        }
+      ],
+      "exception": null
+    },
+    "positive_infinity_head": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": "Infinity",
+          "final_score": "Infinity"
+        }
+      ],
+      "controlled_raw": [
+        [
+          0.2,
+          "Infinity",
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ],
+      "expected_final": [
+        [
+          20.0,
+          "Infinity",
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": "Infinity",
+          "final_score": "Infinity"
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        }
+      ],
+      "exception": null
+    },
+    "negative_infinity_head": {
+      "inputs": [
+        {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "must not be consumed"
+          ],
+          "raw_score": 0.2,
+          "final_score": 20.0
+        }
+      ],
+      "controlled_raw": [
+        [
+          0.2,
+          "-Infinity",
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ],
+      "expected_final": [
+        [
+          20.0,
+          "-Infinity",
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ]
+      ],
+      "model_calls": [
+        {
+          "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "cas_name": "SpCas9(WT)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.2,
+          "final_score": 20.0
+        },
+        {
+          "cas_name": "SpCas9-NG",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": "-Infinity",
+          "final_score": "-Infinity"
+        },
+        {
+          "cas_name": "VRQR",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "xCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "Sniper",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "SpCas9-HF1",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "eSpCas9(1.1)",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "HypaCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        },
+        {
+          "cas_name": "evoCas9",
+          "pam_seq": "AG",
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "distance": 0,
+          "strand": "+",
+          "raw_score": 0.1,
+          "final_score": 10.0
+        }
+      ],
+      "exception": null
+    }
+  },
+  "selection_status": "known_defect_present",
+  "ng_discovery": [
+    {
+      "three_base_pam": "AGG",
+      "matched_pam": "AG",
+      "input_region": "AAAAAAAAAAAAAAAACGTACGTACGTACGTACGTACGTAGGTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "site": {
+        "cas_type": "SpCas9",
+        "strand": "+",
+        "pam_start": 39,
+        "cut_pos": 36,
+        "distance": 4,
+        "guide_seq": "ACGTACGTACGTACGTACGT",
+        "pam_seq": "AG",
+        "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+        "encoded_seq": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "raw_score": 0.0,
+        "final_score": 0.0
+      }
+    },
+    {
+      "three_base_pam": "AGA",
+      "matched_pam": "AG",
+      "input_region": "AAAAAAAAAAAAAAAACGTACGTACGTACGTACGTACGTAGATCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "site": {
+        "cas_type": "SpCas9",
+        "strand": "+",
+        "pam_start": 39,
+        "cut_pos": 36,
+        "distance": 4,
+        "guide_seq": "ACGTACGTACGTACGTACGT",
+        "pam_seq": "AG",
+        "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGATCA",
+        "encoded_seq": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "raw_score": 0.0,
+        "final_score": 0.0
+      }
+    },
+    {
+      "three_base_pam": "AGC",
+      "matched_pam": "AG",
+      "input_region": "AAAAAAAAAAAAAAAACGTACGTACGTACGTACGTACGTAGCTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "site": {
+        "cas_type": "SpCas9",
+        "strand": "+",
+        "pam_start": 39,
+        "cut_pos": 36,
+        "distance": 4,
+        "guide_seq": "ACGTACGTACGTACGTACGT",
+        "pam_seq": "AG",
+        "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGCTCA",
+        "encoded_seq": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "raw_score": 0.0,
+        "final_score": 0.0
+      }
+    },
+    {
+      "three_base_pam": "AGT",
+      "matched_pam": "AG",
+      "input_region": "AAAAAAAAAAAAAAAACGTACGTACGTACGTACGTACGTAGTTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "site": {
+        "cas_type": "SpCas9",
+        "strand": "+",
+        "pam_start": 39,
+        "cut_pos": 36,
+        "distance": 4,
+        "guide_seq": "ACGTACGTACGTACGTACGT",
+        "pam_seq": "AG",
+        "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGTTCA",
+        "encoded_seq": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ]
+        ],
+        "raw_score": 0.0,
+        "final_score": 0.0
+      }
+    }
+  ],
+  "prior_evidence": {
+    "path": "C:\\project\\MC_project\\xai_test\\docs\\planning\\issue94-review-evidence.json",
+    "sha256": "ea98fe233c5c8d377ac8f029463549d1c3a1bc5a0dbd5e665050be7a9a47b64d",
+    "record": {
+      "verification_mode": "existing AST function bodies with controlled model and array substitutes; real source gaussian_penalty",
+      "real_checkpoint_inference_executed": false,
+      "tensorflow_loaded": false,
+      "numpy_dtype_verified": false,
+      "python": "3.14.4",
+      "source_sha256": {
+        "e_system\\predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+        "e_system\\pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8"
+      },
+      "first_site_crash": {
+        "exception": "UnboundLocalError",
+        "message": "cannot access local variable 'best_raw' where it is not associated with a value",
+        "all_head_raw": -0.02,
+        "distance": 0,
+        "penalty": 1.0,
+        "all_head_final": -2.0
+      },
+      "later_site_stale_state": {
+        "first_site_raw": 0.2,
+        "second_site_actual_raw": -0.02,
+        "second_site_actual_final": -2.0,
+        "second_site_stored_raw": 0.2,
+        "second_site_stored_final": -1.0
+      },
+      "scope": "conditional consumer defect reproduction; does not establish actual trained-model trigger frequency or integer dtype acceptance"
+    }
+  }
+}
