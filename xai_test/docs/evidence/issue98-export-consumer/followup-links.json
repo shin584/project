@@ -1,0 +1,17 @@
+﻿{
+    "checked_utc":  "2026-10-30T12:00:54.1817992Z",
+    "parent":  {
+                   "number":  94,
+                   "url":  "https://github.com/shin584/project/issues/94",
+                   "state":  "OPEN",
+                   "updatedAt":  "2026-10-30T07:07:13Z",
+                   "links95":  true
+               },
+    "follow_up":  {
+                      "number":  95,
+                      "url":  "https://github.com/shin584/project/issues/95",
+                      "state":  "OPEN",
+                      "updatedAt":  "2026-10-30T07:05:55Z",
+                      "links94":  true
+                  }
+}

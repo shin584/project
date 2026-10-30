@@ -1,0 +1,118 @@
+{
+  "issue": 98,
+  "created_utc": "2026-10-30T12:29:57.185019+00:00",
+  "focused": {
+    "command": "python -m pytest xai_test/test_spcas9_export_acceptance.py -q -p no:cacheprovider --basetemp .scratch/issue98-final-focused",
+    "result": "1 passed, 47 warnings in 58.60s",
+    "native_exit_code": 0,
+    "log_sha256": "43c77b457415bb46690cadb494165eb254baea8e1c1209b96b5efc7b9b496a5a"
+  },
+  "acceptance_cli": {
+    "command": "python -m SpCas9.spcas9_export_acceptance --source SpCas9/test_run/9hydra_v2.keras --consumer ../e_system --destination ../.scratch/issue98-acceptance-handoff",
+    "cwd": "C:\\project\\MC_project\\xai_test",
+    "native_exit_code": 0,
+    "log_sha256": "89b5e51ac861c5003d44dae668023dc43de1cd9d749fb9cf6decf34294b846f1",
+    "report_sha256": "a2664e5056459b6f74f23c1a35b17f85caddcf1b13d0c19b57032bd35c955880",
+    "artifact_sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+    "rejections": [
+      {
+        "case": "missing_arguments",
+        "arguments": [],
+        "exit_code": 2,
+        "stderr": "usage: issue98-check-cli.py [-h] --source SOURCE --consumer CONSUMER\n                            --destination DESTINATION\nissue98-check-cli.py: error: the following arguments are required: --source, --consumer, --destination\n"
+      },
+      {
+        "case": "missing_checkpoint",
+        "arguments": [
+          "--source",
+          "C:\\project\\MC_project\\.scratch\\issue98-missing.keras",
+          "--consumer",
+          "C:\\project\\MC_project\\e_system",
+          "--destination",
+          "C:\\project\\MC_project\\.scratch\\issue98-rejected-cli-output"
+        ],
+        "exit_code": 1,
+        "stderr": "Acceptance unavailable or failed: [WinError 2] \uc9c0\uc815\ub41c \ud30c\uc77c\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4: 'C:\\\\project\\\\MC_project\\\\.scratch\\\\issue98-missing.keras'\n"
+      },
+      {
+        "case": "wrong_checkpoint_identity",
+        "arguments": [
+          "--source",
+          "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\9hydra_v2.keras",
+          "--consumer",
+          "C:\\project\\MC_project\\e_system",
+          "--destination",
+          "C:\\project\\MC_project\\.scratch\\issue98-rejected-cli-output"
+        ],
+        "exit_code": 1,
+        "stderr": "Acceptance unavailable or failed: Acceptance source SHA-256 differs from the agreed manual run\n"
+      },
+      {
+        "case": "existing_destination",
+        "arguments": [
+          "--source",
+          "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\9hydra_v2.keras",
+          "--consumer",
+          "C:\\project\\MC_project\\e_system",
+          "--destination",
+          "C:\\project\\MC_project\\.scratch\\issue98-acceptance-handoff"
+        ],
+        "exit_code": 1,
+        "stderr": "Acceptance unavailable or failed: [WinError 183] \ud30c\uc77c\uc774 \uc774\ubbf8 \uc788\uc73c\ubbc0\ub85c \ub9cc\ub4e4 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4: 'C:\\\\project\\\\MC_project\\\\.scratch\\\\issue98-acceptance-handoff'\n"
+      }
+    ]
+  },
+  "subtree": {
+    "command": "python -m pytest xai_test -q -p no:cacheprovider --basetemp .scratch/issue98-subtree-tests",
+    "result": "8 failed, 804 passed, 7 skipped, 1288 warnings, 13 errors in 1753.86s (0:29:13)",
+    "problems": [
+      "FAILED xai_test/test_dev_split.py::test_compute_split_indices_reproduces_the_existing_isolated_testset",
+      "FAILED xai_test/test_dev_split.py::test_build_dev_split_is_disjoint_from_the_isolated_testset",
+      "FAILED xai_test/test_dev_split.py::test_build_dev_split_sizes_match_the_10pct_convention",
+      "FAILED xai_test/test_dev_split.py::test_build_dev_split_has_required_columns",
+      "FAILED xai_test/test_dev_split.py::test_build_dev_split_is_reproducible_under_the_same_seed",
+      "FAILED xai_test/test_dev_split.py::test_build_dev_split_different_seed_produces_a_different_split",
+      "FAILED xai_test/test_model_b_xai_wrapper.py::test_model_b_predictor_predict_unchanged",
+      "FAILED xai_test/test_spcas9_study.py::test_validation_run_persists_named_measured_predictions_and_reopens_without_backend",
+      "ERROR xai_test/test_attention_rollout.py::test_attention_rollout_nucleotide_matrix_shape",
+      "ERROR xai_test/test_attention_rollout.py::test_attention_rollout_nucleotide_matrix_row_mass_is_bounded_by_one",
+      "ERROR xai_test/test_attention_rollout.py::test_attention_rollout_nucleotide_matrix_is_non_negative",
+      "ERROR xai_test/test_attention_rollout.py::test_attention_rollout_nucleotide_matrix_batch_size_does_not_change_values",
+      "ERROR xai_test/test_attention_rollout.py::test_run_attention_rollout_returns_the_expected_bundle",
+      "ERROR xai_test/test_integrated_gradients.py::test_integrated_gradients_model_b_tokens_shape",
+      "ERROR xai_test/test_integrated_gradients.py::test_integrated_gradients_model_b_tokens_malformed_input_raises",
+      "ERROR xai_test/test_integrated_gradients.py::test_integrated_gradients_model_b_tokens_batch_size_does_not_change_values",
+      "ERROR xai_test/test_integrated_gradients.py::test_integrated_gradients_model_b_tokens_approximately_satisfies_completeness",
+      "ERROR xai_test/test_integrated_gradients.py::test_run_integrated_gradients_returns_the_full_comparison_bundle",
+      "ERROR xai_test/test_model_b_xai_wrapper.py::test_token_embeddings_shape_and_requires_grad",
+      "ERROR xai_test/test_model_b_xai_wrapper.py::test_token_embeddings_malformed_input_raises",
+      "ERROR xai_test/test_model_b_xai_wrapper.py::test_attentions_per_layer_with_cls_present"
+    ],
+    "problems_not_in_prior_subtree_record": [],
+    "prior_record": "../issue97-consumer/commit-validation.json",
+    "log_sha256": "6ff65c19d815f1ab60aeabe48198b49bddc61268d358f3b961a46d365cde76ed",
+    "repository_wide_suite_run": false
+  },
+  "review": {
+    "standards_findings": 0,
+    "spec_findings": 0
+  },
+  "post_test_preservation": {
+    "status": "unchanged",
+    "file_count": 78,
+    "files_authority": "report.json#/preservation/files",
+    "source_final": {
+      "sha256": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+      "size": 1029813,
+      "mtime_ns": 1793277087264599900,
+      "device": 3081771383301508127,
+      "inode": 5066549581864088
+    },
+    "unrelated_modified_tracked_files_unchanged": 14
+  },
+  "hooks": {
+    "command": "python -m pre_commit run --files xai_test/SpCas9/spcas9_export_acceptance.py xai_test/test_spcas9_export_acceptance.py",
+    "ruff_format": "passed",
+    "ruff": "passed"
+  }
+}

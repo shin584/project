@@ -1,0 +1,2 @@
+# The acceptance report identifies these verification source bytes by SHA-256.
+spcas9_export_acceptance.py -text
