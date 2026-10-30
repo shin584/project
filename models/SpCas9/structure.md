@@ -1,7 +1,9 @@
-# SpCas9 9-Hydra v2 훈련·평가 구조
+# SpCas9 9-Hydra v2 훈련·평가·추론 export 구조
 
 `models/SpCas9/` 안의 코드와 기존 published split으로 9개 head의 모델을 새로 훈련하고 평가한다.
 원본 Excel이나 다른 프로젝트 모듈은 훈련·평가 실행에 필요하지 않다.
+훈련된 checkpoint를 e_system 호환 9-head 리스트 모델로 변환하는 절차는
+[README.md](README.md)의 추론 모델 export 안내를 따른다.
 
 ## 파일 구조
 
@@ -16,6 +18,10 @@ models/                              # 명령 실행 위치
    ├─ spcas9_execution.py            # 실행 이력·출력 경로 관리
    ├─ spcas9_split.py                # split 관련 상수·체크섬·파일 처리
    ├─ spcas9_study_inputs.py         # 독립 평가의 고정 split 검증
+   ├─ spcas9_export.py               # 학습된 예측을 보존하는 별도 추론 모델 export
+   ├─ README.md                     # export·입출력·검증·e_system 인계 안내
+   ├─ test/test_spcas9_export.py     # export 계약·실패 보존·실제 checkpoint 테스트
+   ├─ docs/evidence/                # 이식 전 #98의 실제 연동 검증 기록
    ├─ .gitattributes                # 입력 파일의 줄바꿈 변환 방지
    ├─ structure.md
    │
@@ -39,7 +45,8 @@ models/                              # 명령 실행 위치
       └─ predictions_checksum.json
 ```
 
-CSV 데이터셋, 모델 가중치, 기존 실행 결과는 이 코드 업로드에 포함하지 않는다.
+CSV 데이터셋과 모델 가중치는 이 코드 업로드에 포함하지 않는다.
+`docs/evidence/`에는 이식 전 #98의 검증 report·manifest만 보존한다.
 훈련 전에 기존 `train.csv`, `val.csv`, `test.csv`를 `published_split/`에 별도로 배치한다.
 이 파일들은 `split_checksum.json`에 기록된 원본 바이트와 일치해야 한다.
 `.gitattributes`는 Git이 입력 파일의 줄바꿈을 바꿔 체크섬이 달라지는 것을 방지한다.
