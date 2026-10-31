@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from cas12a import nt_storage as storage
 from cas12a.nt_data import (
     SERIALIZATION,
     SplitConfig,
@@ -83,6 +84,7 @@ class NTWorkflow:
     local_work_root: Path
     drive_output_root: Path
     split: SplitConfig = field(default_factory=SplitConfig)
+    drive_mount_root: Path = Path("/content/drive")
 
     def __post_init__(self):
         for name in (
@@ -90,9 +92,12 @@ class NTWorkflow:
             "partition_path",
             "local_work_root",
             "drive_output_root",
+            "drive_mount_root",
         ):
             object.__setattr__(self, name, Path(getattr(self, name)).resolve())
         local, durable = self.local_work_root, self.drive_output_root
+        if local.is_relative_to(self.drive_mount_root):
+            raise ValueError("local work/checkpoints must be outside the Drive mount")
         if local.is_relative_to(durable) or durable.is_relative_to(local):
             raise ValueError(
                 "local work and durable output roots must be separate, non-overlapping locations"
@@ -134,6 +139,7 @@ class NTWorkflow:
             "partition_path": str(self.partition_path),
             "local_work_root": str(self.local_work_root),
             "drive_output_root": str(self.drive_output_root),
+            "drive_mount_root": str(self.drive_mount_root),
             "checkpoint_dir": str(local_dir / "checkpoints"),
             "split": {
                 "counts": partition["counts"],
@@ -149,18 +155,22 @@ class NTWorkflow:
             "run_kind": self.split.run_kind,
             "state": "preparing",
             "model_completed": False,
+            "local_export_validated": False,
+            "durable_export_validated": False,
+            "final_evaluation_completed": False,
+            "durable_evaluation_validated": False,
             "created_utc": datetime.now(timezone.utc).isoformat(),
             "configuration_sha256": digest(configuration),
         }
         # mkdir without exist_ok is the final, race-safe reservation check.
         local_dir.mkdir(parents=True)
         reserved = [local_dir]
+        run = PreparedRun(run_id, local_dir, durable_dir, status)
         try:
             durable_dir.mkdir(parents=True)
             reserved.append(durable_dir)
             (local_dir / "checkpoints").mkdir()
-            for directory in (local_dir, durable_dir):
-                (directory / "status.json").write_bytes(canonical_bytes(status))
+            self._record(run, "status.json", status)
             for filename, value in (
                 ("data.json", data),
                 ("partition.json", partition),
@@ -175,23 +185,14 @@ class NTWorkflow:
                             f"artifact verification failed: {directory / filename}"
                         )
             status["state"] = "prepared"
-            for directory in (local_dir, durable_dir):
-                (directory / "status.json").write_bytes(canonical_bytes(status))
-                if (directory / "status.json").read_bytes() != canonical_bytes(status):
-                    raise OSError(f"status verification failed: {directory}")
-        except Exception as error:
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
             status.update(
                 state="preparation_failed", error=f"{type(error).__name__}: {error}"
             )
             # Only touch destinations reserved by this call. If storage is
             # unavailable, report what survived without masking the cause.
-            for directory in reserved:
-                try:
-                    (directory / "status.json").write_bytes(canonical_bytes(status))
-                except OSError as status_error:
-                    error.add_note(
-                        f"Could not record failure in {directory}: {status_error}"
-                    )
+            storage.record_failure(run, status, error, directories=reserved)
             raise
         return PreparedRun(run_id, local_dir, durable_dir, status)
 
@@ -204,12 +205,15 @@ class NTWorkflow:
             documents[filename] = json.loads(local)
         return documents
 
-    def _verified_run(self, run, allowed_states):
+    def _check_run_location(self, run):
         if (
             run.local_dir != self.local_work_root / run.run_id
             or run.durable_dir != self.drive_output_root / run.run_id
         ):
             raise ValueError("run does not belong to this workflow")
+
+    def _verified_run(self, run, allowed_states):
+        self._check_run_location(run)
         documents = self._read_evidence(
             run,
             (
@@ -242,11 +246,11 @@ class NTWorkflow:
         return data, partition, status
 
     def _record(self, run, filename, value):
-        encoded = canonical_bytes(value)
+        if filename == "status.json":
+            storage.record_status(run, value)
+            return
         for directory in (run.local_dir, run.durable_dir):
-            (directory / filename).write_bytes(encoded)
-            if (directory / filename).read_bytes() != encoded:
-                raise OSError(f"artifact verification failed: {directory / filename}")
+            storage.write_verified(directory / filename, value)
 
     def preflight(self, run, *, model=None, device=None):
         """Validate all input tokens and measure two training updates + validation.
@@ -339,17 +343,14 @@ class NTWorkflow:
                 model_completed=False,
                 error=f"{type(error).__name__}: {error}",
             )
-            for filename, value in (
-                ("preflight.json", evidence),
-                ("status.json", status),
-            ):
-                for directory in (run.local_dir, run.durable_dir):
-                    try:
-                        (directory / filename).write_bytes(canonical_bytes(value))
-                    except OSError as storage_error:
-                        error.add_note(
-                            f"Could not record {filename} in {directory}: {storage_error}"
-                        )
+            for directory in (run.local_dir, run.durable_dir):
+                try:
+                    storage.write_verified(directory / "preflight.json", evidence)
+                except (OSError, ValueError, TypeError) as storage_error:
+                    error.add_note(
+                        f"Could not record preflight in {directory}: {storage_error}"
+                    )
+            storage.record_failure(run, status, error)
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
 
@@ -403,13 +404,7 @@ class NTWorkflow:
             model_completed=False,
             error=f"{type(error).__name__}: {error}",
         )
-        for directory in (run.local_dir, run.durable_dir):
-            try:
-                (directory / "status.json").write_bytes(canonical_bytes(status))
-            except OSError as storage_error:
-                error.add_note(
-                    f"Could not record failure in {directory}: {storage_error}"
-                )
+        storage.record_failure(run, status, error)
 
     def fit(self, run, *, fixture=None):
         """Train the fixed recipe and retain the best/latest local resume states.
@@ -454,6 +449,154 @@ class NTWorkflow:
                 if isinstance(error, KeyboardInterrupt)
                 else "training_failed",
             )
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def persist_export(self, run):
+        """Copy a reload-validated selected export to its fresh durable destination."""
+        _, _, status = self._verified_run(run, {"export_validated"})
+        for name in (
+            "selected_export",
+            ".selected_export.incomplete",
+            "durable_export.json",
+        ):
+            if (run.durable_dir / name).exists():
+                raise FileExistsError(
+                    f"durable export destination already exists: {name}"
+                )
+        self.verify_export(run)
+        try:
+            report = self._read_evidence(run, ("export.json",))["export.json"]
+            status.update(state="persisting_export", durable_export_validated=False)
+            self._record(run, "status.json", status)
+            receipt = storage.publish_export(run, report)
+            self._record(run, "durable_export.json", receipt)
+            status.update(
+                state="durable_export_validated",
+                durable_export_validated=True,
+                durable_export_sha256=digest(receipt),
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            self._durable_failure(run, status, error)
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def _durable_failure(self, run, status, error):
+        status.update(
+            durable_export_validated=False,
+            final_evaluation_completed=False,
+            durable_evaluation_validated=False,
+        )
+        storage.invalidate_receipt(run, "durable_export.json", error)
+        storage.invalidate_receipt(run, "durable_evaluation.json", error)
+        self._runtime_failure(run, status, error, "durable_export_failed")
+
+    def verify_durable_export(self, run):
+        """Recheck the copied hashes without importing the model runtime."""
+        self._check_run_location(run)
+        status = dict(run.status)
+        if not status.get("durable_export_validated"):
+            raise ValueError(
+                "run state/configuration is incompatible with this operation"
+            )
+        try:
+            _, _, status = self._verified_run(
+                run,
+                {
+                    "durable_export_validated",
+                    "final_evaluation_completed",
+                    "final_evaluation_failed",
+                },
+            )
+            documents = self._read_evidence(run, ("export.json", "durable_export.json"))
+            receipt = documents["durable_export.json"]
+            if digest(receipt) != status["durable_export_sha256"]:
+                raise ValueError("durable export receipt identity changed")
+            storage.verify_export(run, documents["export.json"], receipt)
+        except (Exception, KeyboardInterrupt) as error:
+            self._durable_failure(run, status, error)
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def persist_evaluation(self, run):
+        """Publish the later evaluator's validated, identity-linked local evidence.
+
+        The evaluator owns prediction/metric validity and collapse checks. This
+        storage handoff never computes Testset metrics or changes selection.
+        """
+        _, _, status = self._verified_run(run, {"durable_export_validated"})
+        for name in (
+            "final_evaluation",
+            ".final_evaluation.incomplete",
+            "durable_evaluation.json",
+        ):
+            if (run.durable_dir / name).exists():
+                raise FileExistsError(
+                    f"durable evaluation destination already exists: {name}"
+                )
+        self.verify_durable_export(run)
+        try:
+            documents = self._read_evidence(
+                run, ("durable_export.json", "configuration.json")
+            )
+            status.update(
+                state="persisting_evaluation", final_evaluation_completed=False
+            )
+            self._record(run, "status.json", status)
+            receipt = storage.publish_evaluation(
+                run, documents["durable_export.json"], documents["configuration.json"]
+            )
+            self._record(run, "durable_evaluation.json", receipt)
+            status.update(
+                state="final_evaluation_completed",
+                final_evaluation_completed=True,
+                durable_evaluation_validated=True,
+                durable_evaluation_sha256=digest(receipt),
+                model_completed=not self.split.is_fixture,
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            self._evaluation_failure(run, status, error)
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def _evaluation_failure(self, run, status, error):
+        status.update(
+            final_evaluation_completed=False, durable_evaluation_validated=False
+        )
+        storage.invalidate_receipt(run, "durable_evaluation.json", error)
+        self._runtime_failure(run, status, error, "final_evaluation_failed")
+
+    def verify_durable_evaluation(self, run):
+        """Recheck model and evaluation bundle identities, revoking stale success."""
+        self.verify_durable_export(run)
+        status = dict(run.status)
+        if not status.get("final_evaluation_completed"):
+            raise ValueError(
+                "run state/configuration is incompatible with this operation"
+            )
+        try:
+            _, _, status = self._verified_run(run, {"final_evaluation_completed"})
+            documents = self._read_evidence(
+                run,
+                (
+                    "durable_export.json",
+                    "durable_evaluation.json",
+                    "configuration.json",
+                ),
+            )
+            receipt = documents["durable_evaluation.json"]
+            if digest(receipt) != status["durable_evaluation_sha256"]:
+                raise ValueError("durable evaluation receipt identity changed")
+            storage.verify_evaluation(
+                run,
+                receipt,
+                documents["durable_export.json"],
+                documents["configuration.json"],
+            )
+        except (Exception, KeyboardInterrupt) as error:
+            self._evaluation_failure(run, status, error)
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
 
