@@ -22,7 +22,18 @@ from cas12a.nt_data import (
     save_or_verify_partition,
 )
 
-__all__ = ["FitFixture", "ModelSource", "NTWorkflow", "PreparedRun", "SplitConfig"]
+__all__ = [
+    "FitFixture",
+    "ModelSource",
+    "NTWorkflow",
+    "PreparedRun",
+    "RecoveryUnavailable",
+    "SplitConfig",
+]
+
+
+class RecoveryUnavailable(FileNotFoundError):
+    """No completed local training state survived; fresh fitting must be explicit."""
 
 
 @dataclass(frozen=True)
@@ -232,9 +243,9 @@ class NTWorkflow:
                 "run state/configuration is incompatible with this operation"
             )
         data = read_library(self.source, self.split)
-        partition = save_or_verify_partition(
-            self.partition_path, partition_library(data, self.split)
-        )
+        partition = partition_library(data, self.split)
+        if json.loads(self.partition_path.read_bytes()) != partition:
+            raise ValueError("prepared partition identity changed; refusing to resplit")
         if (
             digest(data) != configuration["data_sha256"]
             or digest(partition) != configuration["partition_manifest_sha256"]
@@ -361,6 +372,21 @@ class NTWorkflow:
         progress; preflight status never implies completed model training.
         """
         data, partition, status = self._verified_run(run, {"preflight_passed"})
+        execution, tokenizer = self._verified_execution(run, data, status)
+        from cas12a import nt_runtime as runtime
+
+        state = runtime.initialize(
+            execution["source"],
+            execution["settings"],
+            train_rows=len(partition["partitions"]["train"]),
+            tokenizer=tokenizer,
+        )
+        if state.initialization_sha256 != execution["initialization_sha256"]:
+            raise ValueError("generic initialization differs from preflight")
+        state.execution = execution
+        return state
+
+    def _verified_execution(self, run, data, status):
         documents = self._read_evidence(
             run, ("execution.json", "preflight.json", "tokenization.json")
         )
@@ -387,16 +413,7 @@ class NTWorkflow:
         _, tokenization = runtime.tokenize_library(tokenizer, data["rows"])
         if digest(tokenization) != execution["tokenization_sha256"]:
             raise ValueError("tokenizer identity changed since preflight")
-        state = runtime.initialize(
-            execution["source"],
-            execution["settings"],
-            train_rows=len(partition["partitions"]["train"]),
-            tokenizer=tokenizer,
-        )
-        if state.initialization_sha256 != execution["initialization_sha256"]:
-            raise ValueError("generic initialization differs from preflight")
-        state.execution = execution
-        return state
+        return execution, tokenizer
 
     def _runtime_failure(self, run, status, error, state):
         status.update(
@@ -449,6 +466,109 @@ class NTWorkflow:
                 if isinstance(error, KeyboardInterrupt)
                 else "training_failed",
             )
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def resume(self, run):
+        """Explicitly continue the latest compatible completed same-VM state.
+
+        Accept a PreparedRun or its run_id after losing the in-memory handle.
+        No checkpoint or missing local state never triggers a fresh fit.
+        """
+        if isinstance(run, str):
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", run):
+                raise ValueError("invalid resume run_id")
+            run = PreparedRun(
+                run, self.local_work_root / run, self.drive_output_root / run, {}
+            )
+        self._check_run_location(run)
+        status_path = run.local_dir / "status.json"
+        if not status_path.exists():
+            status_path = run.durable_dir / "status.json"
+        if not status_path.exists():
+            raise RecoveryUnavailable(
+                "recovery unavailable: no recorded local/durable run"
+            )
+        status = json.loads(status_path.read_bytes())
+        allowed = {
+            "training",
+            "training_interrupted",
+            "training_failed",
+            "resuming",
+            "resume_failed",
+            "recovery_unavailable",
+        }
+        if status["state"] not in allowed:
+            raise ValueError(
+                "recovery unavailable: run state is incompatible with resume"
+            )
+        # A completed export/evaluation can never become a training input.
+        if any(
+            (directory / name).exists()
+            for directory in (run.local_dir, run.durable_dir)
+            for name in ("selected_export", "final_evaluation", "export.json")
+        ):
+            raise ValueError("resume cannot modify a selected/exported run")
+        try:
+            if not run.checkpoint_dir.exists() or not any(
+                re.fullmatch(r"checkpoint-\d+", path.name)
+                for path in run.checkpoint_dir.iterdir()
+            ):
+                raise RecoveryUnavailable(
+                    "recovery unavailable: no completed local checkpoint"
+                )
+            if not self.partition_path.is_file():
+                raise ValueError(
+                    "resume requires the existing verified partition; refusing to resplit"
+                )
+            data, partition, status = self._verified_run(run, allowed)
+            execution, tokenizer = self._verified_execution(run, data, status)
+            recipe = self._read_evidence(run, ("training.json",))["training.json"]
+            fixture = FitFixture(**recipe["fixture"]) if recipe["fixture"] else None
+            if fixture is not None and not self.split.is_fixture:
+                raise ValueError("production cannot resume fixture training")
+            from cas12a import nt_recovery, nt_training
+
+            expected = nt_training.training_recipe(execution, partition, fixture)
+            if digest(recipe) != digest(expected):
+                raise ValueError("frozen resolved training settings changed")
+            state, recovered, checkpoint_hash = nt_recovery.restore(
+                run, execution, tokenizer, partition, recipe
+            )
+            status.pop("error", None)
+            status.update(
+                state="resuming",
+                model_completed=False,
+                resumed_from_global_step=state.global_step,
+                resumed_checkpoint_sha256=checkpoint_hash,
+            )
+            self._record(run, "status.json", status)
+            nt_training.retain_checkpoints(
+                run, recovered["progress"]["selected_global_step"], state.global_step
+            )
+            history = nt_training.fit(
+                state,
+                data,
+                partition,
+                run,
+                fixture,
+                record=lambda name, value: self._record(run, name, value),
+                recovered=recovered,
+            )
+            status.update(
+                state="training_completed",
+                history_sha256=digest(history),
+                selected_global_step=history["selected_global_step"],
+                selected_checkpoint_sha256=history["selected_checkpoint_sha256"],
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            failure = "resume_failed"
+            if isinstance(error, KeyboardInterrupt):
+                failure = "training_interrupted"
+            elif isinstance(error, RecoveryUnavailable):
+                failure = "recovery_unavailable"
+            self._runtime_failure(run, status, error, failure)
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
 

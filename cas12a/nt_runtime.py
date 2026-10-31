@@ -216,8 +216,8 @@ def _weight_identity(model):
     return hasher.hexdigest()
 
 
-def initialize(source, settings, *, train_rows, tokenizer=None):
-    """Reload generic weights and reseed; never reuse a probed model or trainer."""
+def initialize(source, settings, *, train_rows, tokenizer=None, checkpoint=None):
+    """Build runtime components from generic or verified recovery weights."""
     gc.collect()
     if settings["device"] == "cuda":
         torch.cuda.empty_cache()
@@ -235,9 +235,29 @@ def initialize(source, settings, *, train_rows, tokenizer=None):
         raise ValueError("original NT 500m model/config contract mismatch")
     config.num_labels = 1
     config.problem_type = "regression"
-    model = EsmForSequenceClassification.from_pretrained(
-        location, config=config, **options
-    )
+    if checkpoint is None:
+        model = EsmForSequenceClassification.from_pretrained(
+            location, config=config, **options
+        )
+    else:
+        model, loading = EsmForSequenceClassification.from_pretrained(
+            checkpoint, local_files_only=True, output_loading_info=True
+        )
+        # Serialization changes metadata and the task architecture name. All
+        # operational config, including dropout and token IDs, must still match.
+        metadata = {
+            "architectures",
+            "_name_or_path",
+            "transformers_version",
+            "dtype",
+            "torch_dtype",
+        }
+        expected = {k: v for k, v in config.to_dict().items() if k not in metadata}
+        actual = {k: v for k, v in model.config.to_dict().items() if k not in metadata}
+        if any(loading.values()) or actual != expected:
+            raise ValueError(
+                "resume checkpoint model/config is incomplete or incompatible"
+            )
     if not all(parameter.requires_grad for parameter in model.parameters()):
         raise ValueError("all encoder/head parameters must be trainable")
     if settings["gradient_checkpointing"]:

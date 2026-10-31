@@ -68,6 +68,8 @@ def record_status(run, status):
 
 def status_journal(run, status):
     journal_path = run.local_dir / "lifecycle.json"
+    if not journal_path.exists():
+        journal_path = run.durable_dir / "lifecycle.json"
     journal = (
         json.loads(journal_path.read_bytes())
         if journal_path.exists()

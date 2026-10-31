@@ -11,6 +11,7 @@ import random
 import re
 import shutil
 from dataclasses import asdict
+from uuid import uuid4
 
 import numpy as np
 import torch
@@ -163,7 +164,9 @@ def _save_checkpoint(state, run, progress, history, generator, recipe):
     step = state.global_step
     temporary = root / f".checkpoint-{step}.incomplete"
     destination = root / f"checkpoint-{step}"
-    if temporary.exists() or destination.exists():
+    if temporary.exists():
+        temporary = root / f".checkpoint-{step}.{uuid4().hex}.incomplete"
+    if destination.exists():
         raise FileExistsError(f"checkpoint destination already exists: {destination}")
     temporary.mkdir()
     state.model.save_pretrained(temporary, safe_serialization=True)
@@ -194,35 +197,33 @@ def _save_checkpoint(state, run, progress, history, generator, recipe):
     }
     (temporary / "checkpoint.json").write_bytes(canonical_bytes(manifest))
     temporary.rename(destination)
+    retain_checkpoints(run, progress["selected_global_step"], step)
+    return digest(manifest)
+
+
+def retain_checkpoints(run, selected_step, latest_step):
+    """Finish retention even when publication succeeded just before interruption."""
+    root = run.checkpoint_dir
     # The completed best and latest remain, even when the best is much earlier.
-    keep = {f"checkpoint-{progress['selected_global_step']}", destination.name}
+    keep = {f"checkpoint-{selected_step}", f"checkpoint-{latest_step}"}
     for path in root.iterdir():
         if re.fullmatch(r"checkpoint-\d+", path.name) and path.name not in keep:
             if path.is_symlink() or path.resolve().parent != root.resolve():
                 raise ValueError("checkpoint pruning target escaped the run")
             shutil.rmtree(path)
-    return digest(manifest)
 
 
-def fit(state, data, partition, run, fixture, *, record):
-    execution = state.execution
-    settings = execution["settings"]
+def training_recipe(execution, partition, fixture):
     train = partition["partitions"]["train"]
-    validation = partition["partitions"]["validation"]
-    reload_ids = validation[:8]
-    allowed = set(train + validation)
-    rows = [r for r in data["rows"] if r["source_row"] in allowed]
-    targets = {r["source_row"]: r["target"] for r in rows}
-    encoded, _ = runtime.tokenize_library(state.tokenizer, rows)
     updates_per_epoch = math.ceil(len(train) / runtime.EFFECTIVE_BATCH)
     interval = fixture.interval_updates if fixture else INTERVAL_UPDATES
-    recipe = {
+    return {
         "run_kind": partition["run_kind"],
         "execution_sha256": digest(execution),
         "configuration_sha256": execution["configuration_sha256"],
         "optimizer": execution["optimizer"],
         "schedule": execution["schedule"],
-        "settings": settings,
+        "settings": execution["settings"],
         "gradient_scaling": execution["gradient_scaling"],
         "updates_per_epoch": updates_per_epoch,
         "validation_interval_updates": interval,
@@ -237,6 +238,20 @@ def fit(state, data, partition, run, fixture, *, record):
         "loss_reduction": "per-example MSE; partial batches weighted by example count",
         "fixture": asdict(fixture) if fixture else None,
     }
+
+
+def fit(state, data, partition, run, fixture, *, record, recovered=None):
+    execution = state.execution
+    settings = execution["settings"]
+    train = partition["partitions"]["train"]
+    validation = partition["partitions"]["validation"]
+    reload_ids = validation[:8]
+    allowed = set(train + validation)
+    rows = [r for r in data["rows"] if r["source_row"] in allowed]
+    targets = {r["source_row"]: r["target"] for r in rows}
+    encoded, _ = runtime.tokenize_library(state.tokenizer, rows)
+    recipe = training_recipe(execution, partition, fixture)
+    interval = recipe["validation_interval_updates"]
     record("training.json", recipe)
     history = {
         "training_sha256": digest(recipe),
@@ -265,11 +280,28 @@ def fit(state, data, partition, run, fixture, *, record):
         "non_improving_validations": 0,
     }
     generator = np.random.default_rng(runtime.SEED)
+    if recovered is not None:
+        history, progress = recovered["history"], recovered["progress"]
+        generator.bit_generator.state = recovered["rng"]["data_order"]
+        history["stopping_reason"] = "running"
     record("history.json", history)
     try:
-        for epoch in range(execution["schedule"]["max_epochs"]):
-            order = generator.permutation(train).tolist()
-            for offset in range(0, len(order), runtime.EFFECTIVE_BATCH):
+        if progress["non_improving_validations"] >= PATIENCE:
+            history["stopping_reason"] = "early_stopping"
+            return history
+        for epoch in range(
+            progress["epoch_index"], execution["schedule"]["max_epochs"]
+        ):
+            continuing = (
+                bool(progress["epoch_order"]) and epoch == progress["epoch_index"]
+            )
+            order = (
+                progress["epoch_order"]
+                if continuing
+                else generator.permutation(train).tolist()
+            )
+            start = progress["next_example_offset"] if continuing else 0
+            for offset in range(start, len(order), runtime.EFFECTIVE_BATCH):
                 ids = order[offset : offset + runtime.EFFECTIVE_BATCH]
                 update = _update(state, ids, encoded, targets, settings)
                 fractional_epoch = epoch + min(offset + len(ids), len(order)) / len(
@@ -354,6 +386,9 @@ def fit(state, data, partition, run, fixture, *, record):
                 if progress["non_improving_validations"] >= PATIENCE:
                     history["stopping_reason"] = "early_stopping"
                     return history
+            progress.update(
+                epoch_index=epoch + 1, next_example_offset=0, epoch_order=[]
+            )
         if history["selected_global_step"] is None:
             raise ValueError(
                 "no validation checkpoint; use a shorter explicit fixture interval"

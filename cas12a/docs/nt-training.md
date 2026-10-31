@@ -62,8 +62,8 @@ completed save receives its final checkpoint name. Retention then preserves the
 best-validation and latest completed checkpoints, at most two. Interrupted writes
 remain identifiable as incomplete. Selected export and evidence are outside this
 pruning area. Routine full checkpoints never go to the durable/Drive destination.
-Compatible local resume is a later lifecycle operation; another `fit` does not
-silently restart an interrupted or completed run.
+Use the explicit [same-VM resume operation](nt-resume.md) for compatible local
+recovery; another `fit` does not silently restart an interrupted or completed run.
 
 `export_selected` verifies the selected checkpoint hashes, loads its model and
 matching original-revision tokenizer, and checks validation predictions against
