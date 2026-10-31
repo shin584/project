@@ -33,7 +33,7 @@ def _files(directory):
     }
 
 
-def _predict(model, encoded, identities, settings):
+def _predict(model, encoded, identities, settings, *, require_finite=True):
     model.eval()
     predictions = []
     with torch.no_grad(), runtime._autocast(settings):
@@ -46,9 +46,40 @@ def _predict(model, encoded, identities, settings):
                 for key in ("input_ids", "attention_mask")
             }
             values = model(**batch).logits.float().flatten()
-            runtime._finite(values, "validation/reload prediction")
+            if require_finite:
+                runtime._finite(values, "validation/reload prediction")
             predictions.extend(values.cpu().tolist())
     return predictions
+
+
+def predict_testset(run, rows, execution, report):
+    """Inference from the frozen export; no optimizer, selection or fitting."""
+    settings = execution["settings"]
+    if (
+        runtime.runtime_environment(settings["device"], run.status["run_kind"])
+        != execution["environment"]
+    ):
+        raise ValueError("runtime configuration changed since fit")
+    export = run.local_dir / "selected_export"
+    tokenizer = AutoTokenizer.from_pretrained(export, local_files_only=True)
+    if digest(tokenizer.get_vocab()) != report["vocabulary_sha256"]:
+        raise ValueError("selected tokenizer identity changed")
+    encoded, _ = runtime.tokenize_library(tokenizer, rows)
+    model = EsmForSequenceClassification.from_pretrained(export, local_files_only=True)
+    try:
+        model.to(settings["device"])
+        return _predict(
+            model,
+            encoded,
+            [r["source_row"] for r in rows],
+            settings,
+            require_finite=False,
+        )
+    finally:
+        del model
+        gc.collect()
+        if settings["device"] == "cuda":
+            torch.cuda.empty_cache()
 
 
 def _update(state, identities, encoded, targets, settings):

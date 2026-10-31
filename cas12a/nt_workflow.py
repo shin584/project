@@ -1,4 +1,4 @@
-"""Public NT-Cas12a data preparation, runtime preflight and fit initialization.
+"""Public NT-Cas12a preparation, training, selected export and final evaluation.
 
 This module does not import a training runtime. Prepared runs are not trained
 models. Heavy dependencies load only when runtime operations are requested.
@@ -505,6 +505,7 @@ class NTWorkflow:
                 run,
                 {
                     "durable_export_validated",
+                    "final_evaluation_validated",
                     "final_evaluation_completed",
                     "final_evaluation_failed",
                 },
@@ -519,13 +520,86 @@ class NTWorkflow:
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
 
+    def evaluate(self, run):
+        """Evaluate only the reserved Testset, then validate local final evidence.
+
+        Publication remains a separate verified copy. Failed numerical results
+        are retained locally and can never become successful model completion.
+        """
+        self._check_run_location(run)
+        if run.status["state"] != "durable_export_validated":
+            raise ValueError(
+                "final evaluation requires a frozen durable selected export"
+            )
+        self.verify_durable_export(run)
+        directory = run.local_dir / "final_evaluation"
+        if directory.exists():
+            raise FileExistsError(
+                f"final evaluation destination already exists: {directory}"
+            )
+        status = dict(run.status)
+        try:
+            data, partition, status = self._verified_run(
+                run, {"durable_export_validated"}
+            )
+            documents = self._read_evidence(
+                run,
+                (
+                    "execution.json",
+                    "history.json",
+                    "export.json",
+                    "durable_export.json",
+                    "configuration.json",
+                ),
+            )
+            from cas12a import nt_evaluation, nt_training
+
+            execution, report = documents["execution.json"], documents["export.json"]
+            nt_training.verify_export(
+                run, data, partition, execution, documents["history.json"], report
+            )
+            status.update(
+                state="evaluating",
+                model_completed=False,
+                final_evaluation_completed=False,
+            )
+            self._record(run, "status.json", status)
+            by_id = {row["source_row"]: row for row in data["rows"]}
+            rows = [by_id[i] for i in partition["partitions"]["test"]]
+            predictions = nt_training.predict_testset(run, rows, execution, report)
+            # Bind results only after rechecking the consumed weights/tokenizer
+            # and frozen metadata, including changes during the inference pass.
+            if storage.files(run.local_dir / "selected_export") != report["files"]:
+                raise ValueError("selected export identity changed during evaluation")
+            storage.verify_export(run, report, documents["durable_export.json"])
+            if self._read_evidence(run, tuple(documents)) != documents:
+                raise ValueError("frozen evaluation evidence identity changed")
+            identity = storage.evaluation_identity(
+                run, documents["durable_export.json"], documents["configuration.json"]
+            )
+            result = nt_evaluation.write_bundle(
+                run, rows, predictions, partition, identity
+            )
+            if not result["validated"]:
+                raise ValueError("; ".join(result["failure_reasons"]))
+            status.update(
+                state="final_evaluation_validated", evaluation_sha256=digest(result)
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            self._evaluation_failure(run, status, error)
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
     def persist_evaluation(self, run):
         """Publish the later evaluator's validated, identity-linked local evidence.
 
         The evaluator owns prediction/metric validity and collapse checks. This
         storage handoff never computes Testset metrics or changes selection.
         """
-        _, _, status = self._verified_run(run, {"durable_export_validated"})
+        _, _, status = self._verified_run(
+            run, {"durable_export_validated", "final_evaluation_validated"}
+        )
         for name in (
             "final_evaluation",
             ".final_evaluation.incomplete",
@@ -540,6 +614,14 @@ class NTWorkflow:
             documents = self._read_evidence(
                 run, ("durable_export.json", "configuration.json")
             )
+            if status["state"] == "final_evaluation_validated":
+                report = json.loads(
+                    (
+                        run.local_dir / "final_evaluation" / "evaluation.json"
+                    ).read_bytes()
+                )
+                if digest(report) != status["evaluation_sha256"]:
+                    raise ValueError("local evaluation report identity changed")
             status.update(
                 state="persisting_evaluation", final_evaluation_completed=False
             )

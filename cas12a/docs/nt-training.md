@@ -84,8 +84,8 @@ claim a validated local export. Existing export destinations are never overwritt
 Training completion and `export_validated` describe separate local stages.
 `durable_export_validated` and `model_completed` remain false at this point.
 Continue with the [durable export workflow](nt-durable-export.md) to copy and
-verify the selected export on Drive. Numerical final Testset evaluation belongs
-to [#107](https://github.com/shin584/project/issues/107). Neither fixture checks nor
+verify the selected export on Drive, then run the
+[final Testset evaluator](nt-evaluation.md). Neither fixture checks nor
 this implementation establish real NT-500M GPU training or a measured model
 outcome. Colab execution remains unexecuted until actual GPU evidence is saved.
 

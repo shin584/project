@@ -48,9 +48,9 @@ storage errors are attached as notes to the original exception. A disconnected
 Drive can leave only local failure evidence. Neither local nor durable status is
 a guarantee that an unavailable storage device accepted a write.
 
-Validated export is distinct from final Testset evaluation. The evaluator in
-[#107](https://github.com/shin584/project/issues/107) can write a local
-`final_evaluation/` bundle and call `workflow.persist_evaluation(run)` after its
+Validated export is distinct from final Testset evaluation. The
+[final evaluator](nt-evaluation.md) writes a local `final_evaluation/` bundle via
+`workflow.evaluate(run)`. Call `workflow.persist_evaluation(run)` after its
 scientific checks pass. The bundle contract is:
 
 - `metrics.json`: the evaluator's final model and baseline metrics.
