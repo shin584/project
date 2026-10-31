@@ -95,6 +95,8 @@ writable, and propagates the original error. Pre-existing destinations are never
 modified. Source/manifest validation failures occur before run reservation.
 Prepared status establishes data/run readiness only: GPU preflight, training,
 model export/reload and final evaluation remain separate lifecycle work.
+Continue with [model validation and GPU preflight](nt-preflight.md) through
+`NTWorkflow.preflight` before creating fresh fit state with `initialize_fit`.
 
 For offline synthetic tables, explicitly opt into a fixture split:
 
