@@ -21,7 +21,35 @@ from cas12a.nt_data import (
     save_or_verify_partition,
 )
 
-__all__ = ["ModelSource", "NTWorkflow", "PreparedRun", "SplitConfig"]
+__all__ = ["FitFixture", "ModelSource", "NTWorkflow", "PreparedRun", "SplitConfig"]
+
+
+@dataclass(frozen=True)
+class FitFixture:
+    """Explicit offline controls; production never accepts shortened intervals.
+
+    Optional monitor values replace only the selection monitor, while real
+    validation predictions and measured losses are still checked and recorded.
+    """
+
+    interval_updates: int = 1
+    validation_losses: tuple | None = None
+
+    def __post_init__(self):
+        import math
+
+        if (
+            type(self.interval_updates) is not int
+            or not 1 <= self.interval_updates <= 125
+        ):
+            raise ValueError("fixture interval must be an integer from 1 to 125")
+        if self.validation_losses is not None:
+            values = tuple(self.validation_losses)
+            if not values or any(not math.isfinite(v) or v < 0 for v in values):
+                raise ValueError(
+                    "fixture validation losses must be finite and nonnegative"
+                )
+            object.__setattr__(self, "validation_losses", values)
 
 
 @dataclass(frozen=True)
@@ -368,3 +396,147 @@ class NTWorkflow:
             raise ValueError("generic initialization differs from preflight")
         state.execution = execution
         return state
+
+    def _runtime_failure(self, run, status, error, state):
+        status.update(
+            state=state,
+            model_completed=False,
+            error=f"{type(error).__name__}: {error}",
+        )
+        for directory in (run.local_dir, run.durable_dir):
+            try:
+                (directory / "status.json").write_bytes(canonical_bytes(status))
+            except OSError as storage_error:
+                error.add_note(
+                    f"Could not record failure in {directory}: {storage_error}"
+                )
+
+    def fit(self, run, *, fixture=None):
+        """Train the fixed recipe and retain the best/latest local resume states.
+
+        No state from preflight enters fit. A run can be fitted only once; local
+        resume is a separate lifecycle operation, not an implicit fresh fit.
+        """
+        if fixture is not None and (
+            not self.split.is_fixture or not isinstance(fixture, FitFixture)
+        ):
+            raise ValueError(
+                "fit fixture controls require an explicitly marked fixture run"
+            )
+        data, partition, status = self._verified_run(run, {"preflight_passed"})
+        try:
+            state = self.initialize_fit(run)
+            from cas12a import nt_training
+
+            status.update(state="training", model_completed=False)
+            self._record(run, "status.json", status)
+            history = nt_training.fit(
+                state,
+                data,
+                partition,
+                run,
+                fixture,
+                record=lambda name, value: self._record(run, name, value),
+            )
+            status.update(
+                state="training_completed",
+                history_sha256=digest(history),
+                selected_global_step=history["selected_global_step"],
+                selected_checkpoint_sha256=history["selected_checkpoint_sha256"],
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            self._runtime_failure(
+                run,
+                status,
+                error,
+                "training_interrupted"
+                if isinstance(error, KeyboardInterrupt)
+                else "training_failed",
+            )
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def export_selected(self, run):
+        """Export the selected local checkpoint and verify a fresh model/tokenizer.
+
+        Large artifacts stay local. Validated local export does not establish
+        durable export or completed final-Testset evaluation.
+        """
+        data, partition, status = self._verified_run(run, {"training_completed"})
+        try:
+            from cas12a import nt_training
+
+            documents = self._read_evidence(
+                run, ("execution.json", "history.json", "training.json")
+            )
+            if (
+                digest(documents["execution.json"]) != status["execution_sha256"]
+                or digest(documents["history.json"]) != status["history_sha256"]
+                or digest(documents["training.json"])
+                != documents["history.json"]["training_sha256"]
+            ):
+                raise ValueError("training/export evidence identity changed")
+            status.update(state="exporting", local_export_validated=False)
+            self._record(run, "status.json", status)
+            report = nt_training.export_selected(
+                run,
+                data,
+                partition,
+                documents["execution.json"],
+                documents["history.json"],
+            )
+            self._record(run, "export.json", report)
+            status.update(
+                state="export_validated",
+                local_export_validated=True,
+                durable_export_validated=False,
+                export_sha256=digest(report),
+            )
+            self._record(run, "status.json", status)
+        except (Exception, KeyboardInterrupt) as error:
+            status["local_export_validated"] = False
+            self._runtime_failure(run, status, error, "export_failed")
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def verify_export(self, run):
+        """Recheck saved identities and reload before consuming a selected export."""
+        data, partition, status = self._verified_run(run, {"export_validated"})
+        try:
+            from cas12a import nt_training
+
+            documents = self._read_evidence(
+                run, ("execution.json", "history.json", "export.json")
+            )
+            if (
+                digest(documents["execution.json"]) != status["execution_sha256"]
+                or digest(documents["history.json"]) != status["history_sha256"]
+                or digest(documents["export.json"]) != status["export_sha256"]
+            ):
+                raise ValueError("selected export evidence identity changed")
+            nt_training.verify_export(
+                run,
+                data,
+                partition,
+                documents["execution.json"],
+                documents["history.json"],
+                documents["export.json"],
+            )
+        except (Exception, KeyboardInterrupt) as error:
+            # Revoke a previous success if either evidence or artifact changed.
+            try:
+                try:
+                    report = json.loads((run.local_dir / "export.json").read_bytes())
+                except (OSError, ValueError):
+                    report = {}
+                if not isinstance(report, dict):
+                    report = {}
+                report.update(validated=False, error=f"{type(error).__name__}: {error}")
+                self._record(run, "export.json", report)
+            except (OSError, ValueError) as storage_error:
+                error.add_note(f"Could not record export invalidation: {storage_error}")
+            status["local_export_validated"] = False
+            self._runtime_failure(run, status, error, "export_failed")
+            raise
+        return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)

@@ -94,7 +94,8 @@ huggingface-hub 1.15.0, safetensors 0.7.0 and NumPy 2.3.2. This is CPU fixture
 evidence, not a validated Colab CUDA dependency set. The real Colab session must
 pass the production preflight and retain its actual compatible dependency and
 GPU evidence before fit. This ticket provides preflight and fresh initialization;
-full training, checkpoint selection and final evaluation are later stages.
+continue with [training, checkpoint selection and local reload](nt-training.md).
+Final Testset evaluation is a later stage.
 
 API references: [original NT configuration](https://huggingface.co/InstaDeepAI/nucleotide-transformer-500m-human-ref/blob/main/config.json),
 [ESM regression model](https://huggingface.co/docs/transformers/model_doc/esm#transformers.EsmForSequenceClassification),
