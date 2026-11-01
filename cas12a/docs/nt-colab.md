@@ -53,7 +53,10 @@ stdlib only (importing NumPy in the check would trigger the failure it reports):
 
 - `install` calls `begin_installation` first and `record_installation` last. The
   marker `/content/nt-colab-install.json` records the installing kernel's
-  identity (pid, process start, boot id) outside the re-cloned checkout.
+  identity (pid, process start, boot id) outside the re-cloned checkout. It is
+  written *before* the first package is replaced as well as after the last one,
+  so an installation that dies midway still owes the restart it has made
+  necessary; `installation_completed` distinguishes the two.
 - `restart-check`, before any `cas12a.nt_workflow` import, calls
   `require_restarted_session`. It raises `SessionRestartRequired` when the marker
   names the live kernel, or when a loaded module's release version no longer
@@ -61,7 +64,9 @@ stdlib only (importing NumPy in the check would trigger the failure it reports):
   compared, because the CUDA wheel reports a local build tag its metadata drops
   (`2.12.0+cu126` installed as `2.12.0`) and that agreement must not read as a
   mismatch. A restarted session, and a VM with no recorded installation, both
-  pass; the returned evidence is kept in the session JSON.
+  pass; the returned evidence is kept in the session JSON. The `configuration`
+  cell repeats the call ahead of its own `cas12a.nt_workflow` import, so the
+  boundary holds even when `restart-check` is skipped rather than run in order.
 - **Re-running `install` after the restart reproduces the same failure.** It
   removes the torch extensions and replaces torch/NumPy underneath the modules
   the restarted kernel has loaded, so another restart becomes necessary and the
@@ -158,7 +163,8 @@ instead of changing it in notebook cells. See [preflight](nt-preflight.md),
 | `training_completed` | Continue local export/reload, then durable export, then final evaluation; do not call fit/resume again |
 | Disk exhaustion | Preserve incomplete saves and best/latest checkpoints. Stop; inspect available VM space. Retention is at most best/latest completed states and does not eliminate temporary-save headroom requirements |
 | Drive disconnect, copy failure, `.incomplete` destination | Stop; preserve local failure/status evidence and traceback, reconnect/authorize Drive and inspect both stores. Do not delete destinations to force a retry or treat an incomplete copy as valid. Publication retry/reconciliation is not automated; investigate before continuing |
-| `export_failed`/`durable_export_failed` | Do not evaluate or claim durability. Inspect reload/file/receipt identities. Preserve the existing output; never retrain automatically to repair export |
+| `export_failed` | Do not evaluate or claim durability. Read `export_failure.json` for the failing comparison, both prediction arrays and the applied tolerance, then inspect reload/file identities. `workflow.retry_export(run)` re-exports the same training once any partial `selected_export/`/`export.json` has been deliberately removed; never retrain to repair export |
+| `durable_export_failed` | Do not evaluate or claim durability. Inspect reload/file/receipt identities. Preserve the existing output; never retrain automatically to repair export |
 | `final_evaluation_validated` | Local results only; publish and verify the durable evaluation |
 | `final_evaluation_failed` | Preserve numerical/identity failure evidence. Raw collapse and nonfinite results cannot complete. Do not retune or refit based on final values |
 | `final_evaluation_completed` | Reverify durable artifacts and collect evidence. No extra experiment is started |

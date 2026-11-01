@@ -64,11 +64,26 @@ def test_absent_marker_does_not_block_but_records_the_unknown_installation(tmp_p
     assert report["stale_imports"] == {}
 
 
-def test_unreadable_marker_stops_instead_of_guessing(tmp_path):
+@pytest.mark.parametrize(
+    "content", ["{not json", '{"no": "kernel"}', '{"kernel": "not a mapping"}']
+)
+def test_unreadable_marker_stops_instead_of_guessing(tmp_path, content):
     marker = tmp_path / "install.json"
-    marker.write_text("{not json", encoding="utf-8")
+    marker.write_text(content, encoding="utf-8")
     with pytest.raises(RuntimeError, match="nt-colab install marker"):
         require_restarted_session(marker)
+
+
+def test_watched_distributions_stay_a_subset_of_the_pinned_recipe(tmp_path):
+    requirements = Path(__file__).parents[1] / "requirements-nt.txt"
+    pinned = {
+        line.split("==")[0].strip().lower()
+        for line in requirements.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    from cas12a.nt_session import WATCHED
+
+    assert {name.lower() for name in WATCHED} <= pinned
 
 
 def test_marker_records_the_kernel_and_a_pending_restart(tmp_path):
@@ -81,9 +96,21 @@ def test_marker_records_the_kernel_and_a_pending_restart(tmp_path):
     assert recorded["recorded_utc"].endswith("+00:00")
 
 
+def test_an_interrupted_installation_still_demands_a_restart(tmp_path):
+    # The marker is written before packages are replaced, so a failure midway
+    # cannot leave the session looking untouched.
+    marker = tmp_path / "install.json"
+    begin_installation(marker)
+    recorded = json.loads(marker.read_text(encoding="utf-8"))
+    assert recorded["installation_completed"] is False
+    with pytest.raises(SessionRestartRequired, match="Restart"):
+        require_restarted_session(marker)
+
+
 def test_loaded_module_older_than_the_installed_distribution_demands_a_restart(
     tmp_path, monkeypatch
 ):
+    pytest.importorskip("numpy")
     monkeypatch.setitem(
         sys.modules, "numpy", SimpleNamespace(__version__="0.0.0-stale")
     )
@@ -94,6 +121,8 @@ def test_loaded_module_older_than_the_installed_distribution_demands_a_restart(
 
 
 def test_matching_loaded_and_installed_versions_are_not_stale():
+    numpy = pytest.importorskip("numpy")  # Loaded, so the check is not vacuous.
+    assert sys.modules["numpy"] is numpy
     assert "numpy" not in stale_imports()
 
 
@@ -126,6 +155,7 @@ def _installed(name):
 
 def test_a_local_wheel_build_tag_is_not_treated_as_staleness(monkeypatch):
     # The Colab recipe installs torch==2.12.0+cu126, whose metadata is 2.12.0.
+    pytest.importorskip("torch")
     installed = _installed("torch")
     monkeypatch.setitem(
         sys.modules, "torch", SimpleNamespace(__version__=f"{installed}+cu126")

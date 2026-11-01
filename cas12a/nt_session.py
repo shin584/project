@@ -18,9 +18,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 MARKER_NAME = "nt-colab-install.json"
-MARKER_VERSION = 1
+IDENTITY_KEYS = ("pid", "started", "boot")
 
 # Pinned distributions whose loaded binaries the installation can invalidate.
+# A subset of requirements-nt.txt: extend it when a compiled pin is added there.
 WATCHED = (
     "numpy",
     "torch",
@@ -61,9 +62,7 @@ def kernel_identity():
 
 def same_kernel(recorded, current):
     """Whether the recorded installation ran in the interpreter running now."""
-    return all(
-        recorded.get(key) == current.get(key) for key in ("pid", "started", "boot")
-    )
+    return all(recorded.get(key) == current.get(key) for key in IDENTITY_KEYS)
 
 
 def stale_imports():
@@ -95,31 +94,33 @@ def _release(version):
 
 def read_marker(marker_path=None):
     """The recorded installation, or None when none was recorded on this VM."""
-    path = Path(marker_path) if marker_path is not None else default_marker()
+    path = _marker_path(marker_path)
     try:
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError:
         return None
     try:
         marker = json.loads(text)
-        kernel = marker["kernel"]
+        marker["kernel"] = dict(marker["kernel"])
     except (ValueError, KeyError, TypeError) as error:
         raise RuntimeError(
             f"Unreadable nt-colab install marker {path}: {error}. Inspect it; "
             "the installation state of this VM cannot be determined."
         ) from error
-    marker["kernel"] = dict(kernel)
     return marker
 
 
-def record_installation(marker_path=None, identity=None, packages=None):
-    """Record which kernel installed the recipe, so the restart is checkable."""
-    path = Path(marker_path) if marker_path is not None else default_marker()
+def record_installation(marker_path=None, identity=None, completed=True):
+    """Record which kernel installed the recipe, so the restart is checkable.
+
+    Written before the installation starts as well as after it finishes: a run
+    that dies midway has already replaced NumPy, so it still owes a restart.
+    """
+    path = _marker_path(marker_path)
     marker = {
-        "marker_version": MARKER_VERSION,
         "recorded_utc": datetime.now(timezone.utc).isoformat(),
         "kernel": identity or kernel_identity(),
-        "packages": packages,
+        "installation_completed": completed,
         "restart_required": True,
     }
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,9 +129,14 @@ def record_installation(marker_path=None, identity=None, packages=None):
 
 
 def begin_installation(marker_path=None, force=False):
-    """Refuse a repeat installation; re-running the cell is never a repair."""
+    """Refuse a repeat installation; re-running the cell is never a repair.
+
+    Records the attempt before any package is replaced, so an interrupted
+    installation still demands the restart it has already made necessary.
+    """
     marker = read_marker(marker_path)
     if marker is None or force:
+        record_installation(marker_path, completed=False)
         return
     if same_kernel(marker["kernel"], kernel_identity()):
         raise InstallationAlreadyCompleted(
@@ -158,8 +164,8 @@ def require_restarted_session(marker_path=None):
     """
     marker = read_marker(marker_path)
     current = kernel_identity()
-    restarted = None if marker is None else not same_kernel(marker["kernel"], current)
-    if restarted is False:
+    installed_here = marker is not None and same_kernel(marker["kernel"], current)
+    if installed_here:
         raise SessionRestartRequired(
             f"The dependency installation ran in this live Python session "
             f"(pid {current['pid']}, recorded {marker['recorded_utc']}). Its "
@@ -180,11 +186,16 @@ def require_restarted_session(marker_path=None):
         )
     return {
         "installation_recorded": marker is not None,
-        "restarted": restarted,
-        "installation_recorded_utc": marker and marker["recorded_utc"],
+        # None where no installation was recorded on this VM: nothing to restart.
+        "restarted": None if marker is None else True,
+        "installation_recorded_utc": None if marker is None else marker["recorded_utc"],
         "kernel": current,
         "stale_imports": stale,
     }
+
+
+def _marker_path(marker_path=None):
+    return Path(marker_path) if marker_path is not None else default_marker()
 
 
 def _process_start():

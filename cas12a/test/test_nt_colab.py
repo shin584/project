@@ -7,6 +7,12 @@ from pathlib import Path
 
 import pytest
 
+from cas12a.nt_session import (
+    InstallationAlreadyCompleted,
+    SessionRestartRequired,
+    kernel_identity,
+    record_installation,
+)
 from cas12a.nt_workflow import ModelSource, NTWorkflow, SplitConfig
 from cas12a.test.test_nt_resume import interrupted
 from cas12a.test.test_nt_workflow import synthetic_table
@@ -133,10 +139,11 @@ def test_notebook_resume_uses_original_id_without_preparing_or_preflighting(
     assert namespace["run"].status["local_export_validated"] is True
 
 
-def test_notebook_requires_an_explicit_execution_choice():
+def test_notebook_requires_an_explicit_execution_choice(tmp_path):
     cells = notebook_cells()
+    unused = {"Path": Path, "INSTALL_MARKER": tmp_path / "nt-colab-install.json"}
     with pytest.raises(ValueError, match="Explicitly choose fresh or resume"):
-        execute(cells, "configuration", {"Path": Path})
+        execute(cells, "configuration", unused)
     with pytest.raises(ValueError, match="Explicitly choose fresh or resume"):
         execute(cells, "train", {"mode": "choose"})
 
@@ -155,6 +162,12 @@ def test_the_restart_check_precedes_every_workflow_import():
         name for name, source in cells.items() if "cas12a.nt_workflow" in source
     ]
     assert importing and all(order.index(name) > checked for name in importing)
+    # Ordering alone is skippable, so each importing cell checks for itself.
+    for name in importing:
+        source = cells[name]
+        assert source.index("require_restarted_session") < source.index(
+            "cas12a.nt_workflow"
+        )
     # The added cell checks the environment only; no workflow logic is copied.
     assert "workflow" not in cells["restart-check"]
     assert len(cells["restart-check"].splitlines()) <= 6
@@ -163,8 +176,6 @@ def test_the_restart_check_precedes_every_workflow_import():
 def test_the_restart_check_cell_stops_a_session_that_installed_without_restarting(
     tmp_path,
 ):
-    from cas12a.nt_session import SessionRestartRequired, record_installation
-
     marker = tmp_path / "nt-colab-install.json"
     record_installation(marker)
     with pytest.raises(SessionRestartRequired, match="Restart"):
@@ -172,8 +183,6 @@ def test_the_restart_check_cell_stops_a_session_that_installed_without_restartin
 
 
 def test_the_restart_check_cell_passes_a_restarted_session(tmp_path):
-    from cas12a.nt_session import kernel_identity, record_installation
-
     marker = tmp_path / "nt-colab-install.json"
     identity = dict(kernel_identity(), pid=kernel_identity()["pid"] + 1)
     record_installation(marker, identity=identity)
@@ -182,9 +191,14 @@ def test_the_restart_check_cell_passes_a_restarted_session(tmp_path):
     assert namespace["session_preconditions"]["restarted"] is True
 
 
-def test_the_install_cell_refuses_a_repeat_before_touching_packages(tmp_path):
-    from cas12a.nt_session import InstallationAlreadyCompleted, record_installation
+def test_the_configuration_cell_refuses_a_session_that_never_restarted(tmp_path):
+    marker = tmp_path / "nt-colab-install.json"
+    record_installation(marker)
+    with pytest.raises(SessionRestartRequired, match="Restart"):
+        execute(notebook_cells(), "configuration", {"INSTALL_MARKER": marker})
 
+
+def test_the_install_cell_refuses_a_repeat_before_touching_packages(tmp_path):
     marker = tmp_path / "nt-colab-install.json"
     record_installation(marker)
     namespace = {"INSTALL_MARKER": marker, "subprocess": None, "sys": None}
