@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -204,3 +205,36 @@ def test_the_install_cell_refuses_a_repeat_before_touching_packages(tmp_path):
     namespace = {"INSTALL_MARKER": marker, "subprocess": None, "sys": None}
     with pytest.raises(InstallationAlreadyCompleted):
         execute(notebook_cells(), "install", namespace)
+
+
+class RecordedPip:
+    """Stand in for pip so the cell runs to its end without replacing packages."""
+
+    def __init__(self):
+        self.commands = []
+
+    def check_call(self, command, **kwargs):
+        self.commands.append(command)
+
+    def check_output(self, command, **kwargs):
+        self.commands.append(command)
+        return ""
+
+
+def test_the_install_cell_runs_to_completion_against_the_session_api(tmp_path):
+    # The refusal test above stops inside the first call, so nothing else
+    # executes the rest of this cell: a drifted helper signature would reach
+    # Colab unnoticed, which is how `packages=` survived its own removal.
+    marker = tmp_path / "nt-colab-install.json"
+    pip = RecordedPip()
+    namespace = {"INSTALL_MARKER": marker, "subprocess": pip, "sys": sys}
+    execute(notebook_cells(), "install", namespace)
+    assert [command[3] for command in pip.commands] == [
+        "uninstall",
+        "install",
+        "install",
+    ]
+    recorded = json.loads(marker.read_bytes())
+    assert recorded["installation_completed"] is True
+    assert recorded["restart_required"] is True
+    assert recorded["kernel"] == kernel_identity()
