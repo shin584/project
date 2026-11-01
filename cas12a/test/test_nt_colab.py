@@ -139,3 +139,54 @@ def test_notebook_requires_an_explicit_execution_choice():
         execute(cells, "configuration", {"Path": Path})
     with pytest.raises(ValueError, match="Explicitly choose fresh or resume"):
         execute(cells, "train", {"mode": "choose"})
+
+
+def code_cell_order():
+    notebook = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
+    return [cell["id"] for cell in notebook["cells"] if cell["cell_type"] == "code"]
+
+
+def test_the_restart_check_precedes_every_workflow_import():
+    order = code_cell_order()
+    cells = notebook_cells()
+    checked = order.index("restart-check")
+    assert checked < order.index("configuration")
+    importing = [
+        name for name, source in cells.items() if "cas12a.nt_workflow" in source
+    ]
+    assert importing and all(order.index(name) > checked for name in importing)
+    # The added cell checks the environment only; no workflow logic is copied.
+    assert "workflow" not in cells["restart-check"]
+    assert len(cells["restart-check"].splitlines()) <= 6
+
+
+def test_the_restart_check_cell_stops_a_session_that_installed_without_restarting(
+    tmp_path,
+):
+    from cas12a.nt_session import SessionRestartRequired, record_installation
+
+    marker = tmp_path / "nt-colab-install.json"
+    record_installation(marker)
+    with pytest.raises(SessionRestartRequired, match="Restart"):
+        execute(notebook_cells(), "restart-check", {"INSTALL_MARKER": marker})
+
+
+def test_the_restart_check_cell_passes_a_restarted_session(tmp_path):
+    from cas12a.nt_session import kernel_identity, record_installation
+
+    marker = tmp_path / "nt-colab-install.json"
+    identity = dict(kernel_identity(), pid=kernel_identity()["pid"] + 1)
+    record_installation(marker, identity=identity)
+    namespace = {"INSTALL_MARKER": marker}
+    execute(notebook_cells(), "restart-check", namespace)
+    assert namespace["session_preconditions"]["restarted"] is True
+
+
+def test_the_install_cell_refuses_a_repeat_before_touching_packages(tmp_path):
+    from cas12a.nt_session import InstallationAlreadyCompleted, record_installation
+
+    marker = tmp_path / "nt-colab-install.json"
+    record_installation(marker)
+    namespace = {"INSTALL_MARKER": marker, "subprocess": None, "sys": None}
+    with pytest.raises(InstallationAlreadyCompleted):
+        execute(notebook_cells(), "install", namespace)

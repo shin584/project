@@ -15,15 +15,62 @@ not launch an actual run, purchase GPU capacity or provision Windows CUDA.
    commit; keep `REPO_ROOT` on the VM under `/content`. For an uploaded checkout,
    skip the clone cell and set the working directory/import path to that copy;
    record its commit and any changes. Never replace code during an active run.
-2. Execute environment installation, then restart the Python session when
-   required before importing the workflow. Re-run source setup, skip installation
-   and authorize `drive.mount` interactively. Do not use Run all before configuring
-   the run and inspecting each stage.
+2. Execute environment installation exactly once on this VM, then **always**
+   restart the Python session before importing the workflow. Re-run source setup,
+   skip installation, run the `restart-check` cell and authorize `drive.mount`
+   interactively. Do not use Run all before configuring the run and inspecting
+   each stage. The restart is enforced, not advisory: see
+   [the restart boundary](#the-installation-restart-boundary) below.
 3. Supply the original source and locations, choose fresh/resume explicitly,
    inspect preparation/preflight evidence, and execute the training cell when
    ready. Only this human action starts production fitting. Inspect each later
    stage before advancing. Do not automatically run another experiment after
    final evaluation.
+
+## The installation restart boundary
+
+Installation replaces NumPy and torch **on disk** while the running kernel still
+holds their already-loaded compiled extensions. The pure-Python half then
+disagrees with the binary half and the first deep import fails. The restart is
+therefore mandatory after installation, not a Colab suggestion to accept when
+offered.
+
+[#110](https://github.com/shin584/project/issues/110)'s first run
+`20261031-nt500m-full` is the recorded case: installation ran, the session was
+not restarted, and the run died with
+
+```text
+ImportError: cannot import name '_slice' from 'numpy._core.umath'
+```
+
+`prepare` used NumPy shallowly and passed; preflight reached
+`numpy.strings` through transformers and failed. The run was recorded
+`preflight_failed`, `evidence_kind: "unexecuted"` — no training happened. The
+boundary was already written here, and reading it was not enough.
+
+[nt_session.py](../nt_session.py) now makes the notebook enforce it, with
+stdlib only (importing NumPy in the check would trigger the failure it reports):
+
+- `install` calls `begin_installation` first and `record_installation` last. The
+  marker `/content/nt-colab-install.json` records the installing kernel's
+  identity (pid, process start, boot id) outside the re-cloned checkout.
+- `restart-check`, before any `cas12a.nt_workflow` import, calls
+  `require_restarted_session`. It raises `SessionRestartRequired` when the marker
+  names the live kernel, or when a loaded module's release version no longer
+  matches the distribution installed on disk. Only the release portion is
+  compared, because the CUDA wheel reports a local build tag its metadata drops
+  (`2.12.0+cu126` installed as `2.12.0`) and that agreement must not read as a
+  mismatch. A restarted session, and a VM with no recorded installation, both
+  pass; the returned evidence is kept in the session JSON.
+- **Re-running `install` after the restart reproduces the same failure.** It
+  removes the torch extensions and replaces torch/NumPy underneath the modules
+  the restarted kernel has loaded, so another restart becomes necessary and the
+  expensive CUDA wheel download is repeated. `begin_installation` refuses a
+  repeat with `InstallationAlreadyCompleted` rather than proceeding quietly;
+  `REINSTALL = True` is a deliberate choice that still requires a restart after.
+
+Do not reinstall or restart during a run: resume requires the same VM, GPU and
+frozen runtime environment.
 
 ## Fixed environment and configurable locations
 
@@ -182,9 +229,15 @@ this holdout, so it is not a leakage-free direct comparison.
 With the existing scientific Python environment, run:
 
 ```text
+python -m pytest cas12a/test/test_nt_session.py -q
 python -m pytest cas12a/test/test_nt_colab.py -q
 python -m pytest cas12a/test -q
 ```
+
+The session tests cover the restart boundary offline: a marker naming the live
+kernel, a restarted kernel, an absent or unreadable marker, a loaded/installed
+version mismatch, and the refused repeat installation. They drive the notebook's
+own `install` and `restart-check` cells and need no Colab session, Drive or GPU.
 
 The notebook integration test executes the actual workflow cells using the same
 public interface, synthetic source, temporary local/durable destinations and a
