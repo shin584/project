@@ -40,6 +40,9 @@ def _validate_progress(payload, step, partition, recipe):
         not {
             "selected_predictions",
             "reload_validation_predictions",
+            # The export anchor must survive resume; a history that lost it
+            # cannot verify the selected checkpoint it was recorded from.
+            "selected_weight_identities",
             "selected_fractional_epoch",
             "initial_global_step",
             "initial_optimizer_entries",

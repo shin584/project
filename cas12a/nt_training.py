@@ -5,6 +5,7 @@ build a target mapping containing final-Testset labels.
 """
 
 import gc
+import hashlib
 import json
 import math
 import random
@@ -22,8 +23,164 @@ from cas12a.nt_data import canonical_bytes, digest
 
 INTERVAL_UPDATES = 125
 PATIENCE = 3
-RELOAD_ATOL = 1e-6
-RELOAD_RTOL = 1e-5
+# Unit roundoff of each autocast compute dtype: half the gap between 1.0 and the
+# next representable value. FP16 reaches 4.9e-4, so a single representable step
+# near 1.0 is three orders of magnitude wider than any 1e-6 absolute bound.
+UNIT_ROUNDOFF = {"float32": 2.0**-24, "float16": 2.0**-11, "bfloat16": 2.0**-9}
+# Identical weights do not guarantee an identical kernel or reduction order
+# between a live instance and a freshly loaded one, and the drift compounds over
+# the backbone's reduction depth. This budget bounds that drift only; loading
+# correctness is asserted exactly and separately by parameter/buffer identity,
+# so the forward bound never has to carry it.
+FORWARD_ULP_BUDGET = 128
+# How many mismatching tensors a single failure report names.
+MISMATCH_EVIDENCE_LIMIT = 16
+
+
+class ReloadMismatch(ValueError):
+    """A reload comparison failure that carries its own diagnosable evidence.
+
+    The evidence must survive the checkpoint it describes: once a VM is
+    reclaimed, this payload is the only way to tell a numerical variation apart
+    from a real loading defect.
+    """
+
+    def __init__(self, message, evidence):
+        super().__init__(message)
+        self.evidence = evidence
+
+
+def forward_tolerance(precision):
+    """Derive the reload forward tolerance from the frozen execution precision."""
+    if precision not in UNIT_ROUNDOFF:
+        raise ValueError(f"unsupported execution precision: {precision}")
+    roundoff = UNIT_ROUNDOFF[precision]
+    rtol = FORWARD_ULP_BUDGET * roundoff
+    return {
+        "precision": precision,
+        "unit_roundoff": roundoff,
+        "ulp_budget": FORWARD_ULP_BUDGET,
+        "rtol": rtol,
+        "atol": rtol / 10.0,
+        "basis": (
+            "rtol = ulp_budget * unit_roundoff of the autocast compute dtype; "
+            "atol anchors near-zero logits at one tenth of rtol. The budget is "
+            "a deliberate margin against reduction-order drift, not a measured "
+            "error bound. It bounds forward reproducibility only: loading "
+            "correctness rests on exact parameter/buffer identity against the "
+            "live selection state, so this bound never carries it."
+        ),
+    }
+
+
+def _json_number(value):
+    """Keep a non-finite magnitude legible: canonical evidence forbids NaN/Inf."""
+    value = float(value)
+    return value if math.isfinite(value) else repr(value)
+
+
+def _deviation(actual, expected):
+    """Numerical evidence for a prediction comparison, finite and JSON-safe."""
+    left = np.asarray(actual, dtype=np.float64)
+    right = np.asarray(expected, dtype=np.float64)
+    if left.shape != right.shape:
+        return {
+            "comparable": False,
+            "actual_shape": list(left.shape),
+            "expected_shape": list(right.shape),
+        }
+    difference = np.abs(left - right)
+    nonzero = right != 0
+    relative = difference[nonzero] / np.abs(right[nonzero])
+    return {
+        "comparable": True,
+        "count": int(left.size),
+        "zero_reference_count": int((~nonzero).sum()),
+        "max_absolute_difference": (
+            _json_number(difference.max()) if left.size else 0.0
+        ),
+        "max_relative_difference": (
+            _json_number(relative.max()) if relative.size else 0.0
+        ),
+    }
+
+
+def _compare_forward(message, comparison, actual, expected, tolerance):
+    """Judge forward reproducibility alone, at the precision-derived bound."""
+    deviation = _deviation(actual, expected)
+    acceptable = deviation["comparable"] and np.allclose(
+        actual, expected, atol=tolerance["atol"], rtol=tolerance["rtol"]
+    )
+    if not acceptable:
+        raise ReloadMismatch(
+            message,
+            {
+                "kind": "forward_reproducibility",
+                "comparison": comparison,
+                "tolerance": tolerance,
+                "deviation": deviation,
+                "actual_predictions": [_json_number(v) for v in actual],
+                "expected_predictions": [_json_number(v) for v in expected],
+            },
+        )
+    return deviation
+
+
+def weight_identities(model):
+    """Exact per-tensor content digests, independent of dtype and of kernels.
+
+    Raw bytes are hashed through a uint8 view, so no dtype needs a NumPy
+    equivalent and no value is ever cast or rounded on the way in.
+    """
+    identities = {}
+    for name, value in sorted(model.state_dict().items()):
+        tensor = value.detach().cpu().contiguous()
+        identities[name] = {
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "sha256": hashlib.sha256(
+                tensor.flatten().view(torch.uint8).numpy().tobytes()
+            ).hexdigest(),
+        }
+    return identities
+
+
+def _identity_mismatches(reloaded, expected):
+    mismatches = []
+    for name in sorted(set(expected) | set(reloaded)):
+        if name not in reloaded:
+            mismatches.append({"tensor": name, "reason": "missing_after_reload"})
+        elif name not in expected:
+            mismatches.append({"tensor": name, "reason": "unexpected_after_reload"})
+        elif reloaded[name] != expected[name]:
+            mismatches.append(
+                {
+                    "tensor": name,
+                    "reason": "content_differs",
+                    "expected": expected[name],
+                    "reloaded": reloaded[name],
+                }
+            )
+    return mismatches
+
+
+def _verify_weight_identity(model, expected, comparison):
+    """Reject any load whose parameters or buffers are not bit-identical."""
+    identities = weight_identities(model)
+    mismatches = _identity_mismatches(identities, expected)
+    if mismatches:
+        raise ReloadMismatch(
+            "loaded parameters/buffers differ from the selection state",
+            {
+                "kind": "weight_identity",
+                "comparison": comparison,
+                "expected_tensor_count": len(expected),
+                "reloaded_tensor_count": len(identities),
+                "mismatching_tensor_count": len(mismatches),
+                "mismatches": mismatches[:MISMATCH_EVIDENCE_LIMIT],
+            },
+        )
+    return identities
 
 
 def _files(directory):
@@ -364,6 +521,11 @@ def fit(state, data, partition, run, fixture, *, record, recovered=None):
                         reload_validation_predictions=_predict(
                             state.model, encoded, reload_ids, settings
                         ),
+                        # The live model is the only anchor that does not come
+                        # from the load path export has to verify. Without it, a
+                        # checkpoint load that silently re-initializes a head
+                        # would agree with every later reload of itself.
+                        selected_weight_identities=weight_identities(state.model),
                     )
                 else:
                     progress["non_improving_validations"] += 1
@@ -429,9 +591,20 @@ def _verified_checkpoint(run, history, execution):
 
 
 def _reload_predictions(
-    export, rows, ids, settings, tokenization, vocabulary_hash, expected
+    export,
+    rows,
+    ids,
+    settings,
+    tokenization,
+    vocabulary_hash,
+    expected,
+    expected_identities,
 ):
-    """Verify a fresh model and tokenizer against the selected sample reference."""
+    """Verify a fresh model and tokenizer against the selected sample reference.
+
+    Weight identity is judged exactly; only the forward pass is judged at the
+    precision-derived tolerance.
+    """
     tokenizer = AutoTokenizer.from_pretrained(export, local_files_only=True)
     encoded, _ = runtime.tokenize_library(tokenizer, rows)
     if {str(i): encoded[i] for i in ids} != tokenization or digest(
@@ -440,14 +613,24 @@ def _reload_predictions(
         raise ValueError("selected export tokenizer identity changed")
     model = EsmForSequenceClassification.from_pretrained(export, local_files_only=True)
     try:
+        # On CPU, before any device copy: a re-initialized or partially restored
+        # head fails here however its forward pass happens to land.
+        _verify_weight_identity(
+            model, expected_identities, "export_reload_vs_selection_state"
+        )
         model.to(settings["device"])
         predictions = _predict(model, encoded, ids, settings)
     finally:
         del model
         gc.collect()
-    if not np.allclose(predictions, expected, atol=RELOAD_ATOL, rtol=RELOAD_RTOL):
-        raise ValueError("export reload predictions differ from selected checkpoint")
-    return predictions
+    deviation = _compare_forward(
+        "export reload predictions differ from selected checkpoint",
+        "export_reload_vs_selection_state",
+        predictions,
+        expected,
+        forward_tolerance(settings["precision"]),
+    )
+    return predictions, deviation
 
 
 def export_selected(run, data, partition, execution, history):
@@ -468,17 +651,30 @@ def export_selected(run, data, partition, execution, history):
     by_id = {r["source_row"]: r for r in data["rows"]}
     rows = [by_id[i] for i in sample_ids]
     encoded, _ = runtime.tokenize_library(tokenizer, rows)
+    tolerance = forward_tolerance(settings["precision"])
     model = EsmForSequenceClassification.from_pretrained(
         checkpoint, local_files_only=True
+    )
+    # Exact, before any forward pass: a missing or renamed key that the loader
+    # quietly re-initializes fails here, against the live selection state.
+    selected_identities = _verify_weight_identity(
+        model,
+        history["selected_weight_identities"],
+        "selected_checkpoint_vs_selection_state",
     )
     model.to(settings["device"])
     selected = _predict(model, encoded, sample_ids, settings)
     # Exact sample/batch shape avoids false BF16/FP16 mismatches with full eval.
-    expected = history["reload_validation_predictions"]
-    if not np.allclose(selected, expected, atol=RELOAD_ATOL, rtol=RELOAD_RTOL):
-        raise ValueError(
-            "selected checkpoint predictions differ from selection history"
-        )
+    # The live selection model is gone by now, so only its recorded predictions
+    # remain to compare against: this one comparison is forward-only and is
+    # judged at the precision's own resolution, never at a global constant.
+    selection_deviation = _compare_forward(
+        "selected checkpoint predictions differ from selection history",
+        "selected_checkpoint_vs_selection_history",
+        selected,
+        history["reload_validation_predictions"],
+        tolerance,
+    )
     export.mkdir()
     model.save_pretrained(export, safe_serialization=True)
     tokenizer.save_pretrained(export)
@@ -490,7 +686,7 @@ def export_selected(run, data, partition, execution, history):
     # Reload both components from the export, independently of the source model.
     tokenization = {str(i): encoded[i] for i in sample_ids}
     vocabulary_hash = digest(tokenizer.get_vocab())
-    reloaded = _reload_predictions(
+    reloaded, reload_deviation = _reload_predictions(
         export,
         rows,
         sample_ids,
@@ -498,6 +694,7 @@ def export_selected(run, data, partition, execution, history):
         tokenization,
         vocabulary_hash,
         selected,
+        selected_identities,
     )
     if _files(export) != files:
         raise ValueError("export artifact identity changed during reload")
@@ -516,9 +713,12 @@ def export_selected(run, data, partition, execution, history):
         "tokenization_matches": True,
         "selected_predictions": selected,
         "reloaded_predictions": reloaded,
-        "atol": RELOAD_ATOL,
-        "rtol": RELOAD_RTOL,
-        "max_absolute_difference": max(abs(a - b) for a, b in zip(selected, reloaded)),
+        "weight_identities": selected_identities,
+        "weight_identity_sha256": digest(selected_identities),
+        "precision": settings["precision"],
+        "forward_tolerance": tolerance,
+        "selection_history_deviation": selection_deviation,
+        "reload_deviation": reload_deviation,
         "files": files,
         "selected_artifact_sha256": digest(files),
     }
@@ -526,16 +726,24 @@ def export_selected(run, data, partition, execution, history):
 
 def verify_export(run, data, partition, execution, history, report):
     export = run.local_dir / "selected_export"
-    if (
-        not report["validated"]
-        or _files(export) != report["files"]
-        or digest(report["files"]) != report["selected_artifact_sha256"]
-        or report["selected_global_step"] != history["selected_global_step"]
-        or report["selected_checkpoint_sha256"] != history["selected_checkpoint_sha256"]
-        or report["execution_sha256"] != digest(execution)
-        or report["history_sha256"] != digest(history)
-        or report["validation_source_rows"] != partition["partitions"]["validation"][:8]
-    ):
+    settings = execution["settings"]
+    # Each pair is one recorded identity beside the value it must still equal.
+    bound = [
+        (report["validated"], True),
+        (_files(export), report["files"]),
+        (digest(report["files"]), report["selected_artifact_sha256"]),
+        (report["selected_global_step"], history["selected_global_step"]),
+        (report["selected_checkpoint_sha256"], history["selected_checkpoint_sha256"]),
+        (report["execution_sha256"], digest(execution)),
+        (report["history_sha256"], digest(history)),
+        (report["validation_source_rows"], partition["partitions"]["validation"][:8]),
+        (digest(report["weight_identities"]), report["weight_identity_sha256"]),
+        # The report cannot substitute its own anchor for the recorded one, nor
+        # loosen the criterion its precision implies.
+        (report["weight_identities"], history["selected_weight_identities"]),
+        (report["forward_tolerance"], forward_tolerance(settings["precision"])),
+    ]
+    if any(actual != expected for actual, expected in bound):
         raise ValueError("selected export artifact identity changed")
     ids = report["validation_source_rows"]
     by_id = {r["source_row"]: r for r in data["rows"]}
@@ -543,8 +751,9 @@ def verify_export(run, data, partition, execution, history, report):
         export,
         [by_id[i] for i in ids],
         ids,
-        execution["settings"],
+        settings,
         report["validation_tokenization"],
         report["vocabulary_sha256"],
         history["reload_validation_predictions"],
+        report["weight_identities"],
     )

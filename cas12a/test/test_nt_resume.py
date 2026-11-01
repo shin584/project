@@ -116,6 +116,7 @@ def test_resume_preserves_updates_selection_patience_rng_and_export(
         "history",
         "history.selected_predictions",
         "history.reload_validation_predictions",
+        "history.selected_weight_identities",
         "history.selected_fractional_epoch",
         "scheduler",
         "scheduler.last_epoch",

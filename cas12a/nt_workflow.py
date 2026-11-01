@@ -808,7 +808,32 @@ class NTWorkflow:
         Large artifacts stay local. Validated local export does not establish
         durable export or completed final-Testset evaluation.
         """
-        data, partition, status = self._verified_run(run, {"training_completed"})
+        return self._export(run, retry=False)
+
+    def retry_export(self, run):
+        """Explicitly re-export the same completed training after an export failure.
+
+        The checkpoint, execution and training identities are verified again from
+        scratch. A partially created export destination or earlier export
+        evidence is never silently overwritten, and no retraining is triggered:
+        a failed export is a reason to re-export, never to refit.
+        """
+        return self._export(run, retry=True)
+
+    def _export(self, run, *, retry):
+        data, partition, status = self._verified_run(
+            run, {"export_failed"} if retry else {"training_completed"}
+        )
+        if retry:
+            # Reclaiming these destinations is a deliberate operator decision,
+            # not something a retry performs on their behalf.
+            for name in ("selected_export", "export.json"):
+                for directory in (run.local_dir, run.durable_dir):
+                    if (directory / name).exists():
+                        raise FileExistsError(
+                            f"remove the previous export attempt first: {directory / name}"
+                        )
+            status.pop("error", None)
         try:
             from cas12a import nt_training
 
@@ -822,7 +847,11 @@ class NTWorkflow:
                 != documents["history.json"]["training_sha256"]
             ):
                 raise ValueError("training/export evidence identity changed")
-            status.update(state="exporting", local_export_validated=False)
+            status.update(
+                state="exporting",
+                local_export_validated=False,
+                export_retry=retry,
+            )
             self._record(run, "status.json", status)
             report = nt_training.export_selected(
                 run,
@@ -840,10 +869,18 @@ class NTWorkflow:
             )
             self._record(run, "status.json", status)
         except (Exception, KeyboardInterrupt) as error:
-            status["local_export_validated"] = False
-            self._runtime_failure(run, status, error, "export_failed")
+            self._export_failure(run, status, error)
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)
+
+    def _export_failure(self, run, status, error):
+        # Numerical/tensor evidence outlives the checkpoint it describes, so it
+        # is stored before the status commit that ends the attempt.
+        evidence = getattr(error, "evidence", None)
+        if evidence is not None:
+            storage.record_export_failure(run, evidence, error)
+        status["local_export_validated"] = False
+        self._runtime_failure(run, status, error, "export_failed")
 
     def verify_export(self, run):
         """Recheck saved identities and reload before consuming a selected export."""
@@ -881,7 +918,6 @@ class NTWorkflow:
                 self._record(run, "export.json", report)
             except (OSError, ValueError) as storage_error:
                 error.add_note(f"Could not record export invalidation: {storage_error}")
-            status["local_export_validated"] = False
-            self._runtime_failure(run, status, error, "export_failed")
+            self._export_failure(run, status, error)
             raise
         return PreparedRun(run.run_id, run.local_dir, run.durable_dir, status)

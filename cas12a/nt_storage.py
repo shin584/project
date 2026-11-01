@@ -66,31 +66,60 @@ def record_status(run, status):
         write_verified(directory / "status.json", status)
 
 
-def status_journal(run, status):
-    journal_path = run.local_dir / "lifecycle.json"
-    if not journal_path.exists():
-        journal_path = run.durable_dir / "lifecycle.json"
+def append_journal(run, filename, key, entry):
+    """Read the surviving append-only journal and add one timestamped entry.
+
+    Local evidence is preferred over durable, so a failed Drive write cannot
+    truncate the history that survived on the VM.
+    """
+    path = run.local_dir / filename
+    if not path.exists():
+        path = run.durable_dir / filename
     journal = (
-        json.loads(journal_path.read_bytes())
-        if journal_path.exists()
-        else {
-            "run_id": run.run_id,
-            "events": [],
-        }
+        json.loads(path.read_bytes())
+        if path.exists()
+        else {"run_id": run.run_id, key: []}
     )
     if (
         not isinstance(journal, dict)
         or journal.get("run_id") != run.run_id
-        or not isinstance(journal.get("events"), list)
+        or not isinstance(journal.get(key), list)
     ):
-        raise ValueError("lifecycle history identity or structure is invalid")
-    journal["events"].append(
-        {
-            "recorded_utc": datetime.now(timezone.utc).isoformat(),
-            "status": dict(status),
-        }
+        raise ValueError(f"{filename} history identity or structure is invalid")
+    journal[key].append(
+        {"recorded_utc": datetime.now(timezone.utc).isoformat(), **entry}
     )
     return journal
+
+
+def status_journal(run, status):
+    return append_journal(run, "lifecycle.json", "events", {"status": dict(status)})
+
+
+def record_export_failure(run, evidence, error):
+    """Append diagnosable export evidence; earlier attempts are never replaced.
+
+    A retried export must not erase why the previous attempt failed, and the
+    checkpoint this evidence describes may already be gone.
+    """
+    entry = {"error": f"{type(error).__name__}: {error}", "evidence": evidence}
+    try:
+        journal = append_journal(run, "export_failure.json", "failures", entry)
+    except (OSError, ValueError, TypeError) as storage_error:
+        error.add_note(f"Could not read export failure history: {storage_error}")
+        journal = {
+            "run_id": run.run_id,
+            "failures": [
+                {"recorded_utc": datetime.now(timezone.utc).isoformat(), **entry}
+            ],
+        }
+    for directory in (run.local_dir, run.durable_dir):
+        try:
+            write_verified(directory / "export_failure.json", journal)
+        except (OSError, ValueError, TypeError) as storage_error:
+            error.add_note(
+                f"Could not record export_failure.json in {directory}: {storage_error}"
+            )
 
 
 def record_failure(run, status, error, *, directories=None):
