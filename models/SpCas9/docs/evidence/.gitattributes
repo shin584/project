@@ -1,0 +1,2 @@
+# Preserve the historical evidence bytes, including CRLF line endings.
+*.json -text whitespace=cr-at-eol

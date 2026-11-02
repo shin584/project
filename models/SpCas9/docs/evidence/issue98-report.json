@@ -1,0 +1,1502 @@
+{
+  "issue": 98,
+  "status": "verified",
+  "created_utc": "2026-10-30T12:05:56.061111+00:00",
+  "environment": {
+    "executable": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.3.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.14.1",
+    "torch": "2.12.0",
+    "streamlit": "1.51.0"
+  },
+  "artifact_directory": "C:\\project\\MC_project\\.scratch\\issue98-acceptance-handoff\\export",
+  "export": {
+    "schema_version": 1,
+    "source": {
+      "path": "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\9hydra_v2.keras",
+      "sha256": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+      "size": 1029813,
+      "mtime_ns": 1793277087264599900,
+      "device": 3081771383301508127,
+      "inode": 5066549581864088
+    },
+    "artifact": {
+      "filename": "model.keras",
+      "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65"
+    },
+    "input": {
+      "name": "In_Seq",
+      "dtype": "float32",
+      "shape": [
+        null,
+        30,
+        4
+      ],
+      "channels": [
+        "A",
+        "C",
+        "G",
+        "T"
+      ]
+    },
+    "output": {
+      "container": "list",
+      "count": 9,
+      "dtype": "float32",
+      "shape_per_head": [
+        null,
+        1
+      ],
+      "activation": "linear",
+      "scale": "published_percentage/100",
+      "transforms": []
+    },
+    "heads": [
+      {
+        "index": 0,
+        "protein": "SpCas9(WT)",
+        "layer": "Output_SpCas9"
+      },
+      {
+        "index": 1,
+        "protein": "SpCas9-NG",
+        "layer": "Output_SpCas9_NG"
+      },
+      {
+        "index": 2,
+        "protein": "VRQR",
+        "layer": "Output_VRQR_variant"
+      },
+      {
+        "index": 3,
+        "protein": "xCas9",
+        "layer": "Output_xCas"
+      },
+      {
+        "index": 4,
+        "protein": "Sniper",
+        "layer": "Output_Sniper_Cas9"
+      },
+      {
+        "index": 5,
+        "protein": "SpCas9-HF1",
+        "layer": "Output_SpCas9_HF_1"
+      },
+      {
+        "index": 6,
+        "protein": "eSpCas9(1.1)",
+        "layer": "Output_eSpCas9_1_1_"
+      },
+      {
+        "index": 7,
+        "protein": "HypaCas9",
+        "layer": "Output_HypaCas9"
+      },
+      {
+        "index": 8,
+        "protein": "evoCas9",
+        "layer": "Output_evoCas9"
+      }
+    ],
+    "fixtures": {
+      "id": "9hydra-complete-acgt-windows-v1",
+      "windows": [
+        "ACGTACGTACGTACGTACGTACGTAGGTCA",
+        "TGCATGCATGCATGCATGCATGCATGGATC",
+        "CATGGATTACAGATTACAGATTACCGAGTC"
+      ],
+      "sha256": "de85fc947df19cef3bf489b77d7dc1c9e105f1468fab35677e472b37bd75be7c"
+    },
+    "validation": {
+      "status": "passed",
+      "rtol": 1e-05,
+      "atol": 1e-06,
+      "batches": [
+        {
+          "fixture": "single",
+          "n": 1,
+          "heads": [
+            {
+              "protein": "SpCas9(WT)",
+              "layer": "Output_SpCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.5581128597259521
+              ],
+              "reloaded_values": [
+                0.5581128597259521
+              ]
+            },
+            {
+              "protein": "SpCas9-NG",
+              "layer": "Output_SpCas9_NG",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.43572306632995605
+              ],
+              "reloaded_values": [
+                0.43572306632995605
+              ]
+            },
+            {
+              "protein": "VRQR",
+              "layer": "Output_VRQR_variant",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.4094918966293335
+              ],
+              "reloaded_values": [
+                0.4094918966293335
+              ]
+            },
+            {
+              "protein": "xCas9",
+              "layer": "Output_xCas",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.4175117015838623
+              ],
+              "reloaded_values": [
+                0.4175117015838623
+              ]
+            },
+            {
+              "protein": "Sniper",
+              "layer": "Output_Sniper_Cas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.5274763703346252
+              ],
+              "reloaded_values": [
+                0.5274763703346252
+              ]
+            },
+            {
+              "protein": "SpCas9-HF1",
+              "layer": "Output_SpCas9_HF_1",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.14267730712890625
+              ],
+              "reloaded_values": [
+                0.14267730712890625
+              ]
+            },
+            {
+              "protein": "eSpCas9(1.1)",
+              "layer": "Output_eSpCas9_1_1_",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.3090905249118805
+              ],
+              "reloaded_values": [
+                0.3090905249118805
+              ]
+            },
+            {
+              "protein": "HypaCas9",
+              "layer": "Output_HypaCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.18805119395256042
+              ],
+              "reloaded_values": [
+                0.18805119395256042
+              ]
+            },
+            {
+              "protein": "evoCas9",
+              "layer": "Output_evoCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.025507695972919464
+              ],
+              "reloaded_values": [
+                0.025507695972919464
+              ]
+            }
+          ]
+        },
+        {
+          "fixture": "distinct_batch",
+          "n": 3,
+          "heads": [
+            {
+              "protein": "SpCas9(WT)",
+              "layer": "Output_SpCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.5581128597259521,
+                0.516192615032196,
+                0.24667680263519287
+              ],
+              "reloaded_values": [
+                0.5581128597259521,
+                0.516192615032196,
+                0.24667680263519287
+              ]
+            },
+            {
+              "protein": "SpCas9-NG",
+              "layer": "Output_SpCas9_NG",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.43572303652763367,
+                0.3985632061958313,
+                0.4164332151412964
+              ],
+              "reloaded_values": [
+                0.43572303652763367,
+                0.3985632061958313,
+                0.4164332151412964
+              ]
+            },
+            {
+              "protein": "VRQR",
+              "layer": "Output_VRQR_variant",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.4094918370246887,
+                0.29638341069221497,
+                0.4715520739555359
+              ],
+              "reloaded_values": [
+                0.4094918370246887,
+                0.29638341069221497,
+                0.4715520739555359
+              ]
+            },
+            {
+              "protein": "xCas9",
+              "layer": "Output_xCas",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.4175117015838623,
+                0.333312064409256,
+                0.21992188692092896
+              ],
+              "reloaded_values": [
+                0.4175117015838623,
+                0.333312064409256,
+                0.21992188692092896
+              ]
+            },
+            {
+              "protein": "Sniper",
+              "layer": "Output_Sniper_Cas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.5274763107299805,
+                0.502373218536377,
+                0.2242540717124939
+              ],
+              "reloaded_values": [
+                0.5274763107299805,
+                0.502373218536377,
+                0.2242540717124939
+              ]
+            },
+            {
+              "protein": "SpCas9-HF1",
+              "layer": "Output_SpCas9_HF_1",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.14267730712890625,
+                0.24973812699317932,
+                0.08308134973049164
+              ],
+              "reloaded_values": [
+                0.14267730712890625,
+                0.24973812699317932,
+                0.08308134973049164
+              ]
+            },
+            {
+              "protein": "eSpCas9(1.1)",
+              "layer": "Output_eSpCas9_1_1_",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.3090905249118805,
+                0.3317336440086365,
+                0.11023890227079391
+              ],
+              "reloaded_values": [
+                0.3090905249118805,
+                0.3317336440086365,
+                0.11023890227079391
+              ]
+            },
+            {
+              "protein": "HypaCas9",
+              "layer": "Output_HypaCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.18805119395256042,
+                0.29292187094688416,
+                0.08465836197137833
+              ],
+              "reloaded_values": [
+                0.18805119395256042,
+                0.29292187094688416,
+                0.08465836197137833
+              ]
+            },
+            {
+              "protein": "evoCas9",
+              "layer": "Output_evoCas9",
+              "max_absolute_error": 0.0,
+              "max_relative_error": 0.0,
+              "source_values": [
+                0.025507695972919464,
+                0.035013217478990555,
+                0.01591438427567482
+              ],
+              "reloaded_values": [
+                0.025507695972919464,
+                0.035013217478990555,
+                0.01591438427567482
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "versions": {
+      "python": "3.13.7",
+      "tensorflow": "2.21.0",
+      "keras": "3.14.1",
+      "numpy": "2.3.2"
+    },
+    "verification_code": {
+      "module": "SpCas9.spcas9_export",
+      "sha256": "2613fd12abe9dd8bcf52aa57a5c2ee45b01eb8eb8e892bdc78331c636ded19ba"
+    }
+  },
+  "export_manifest_sha256": "9f05f38ac36e85e7187625b39f4188294d8e8ae827ecef6b5c69fd4e38845b37",
+  "source_final": {
+    "sha256": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+    "size": 1029813,
+    "mtime_ns": 1793277087264599900,
+    "device": 3081771383301508127,
+    "inode": 5066549581864088
+  },
+  "consumer_sources": {
+    "current_directory": "C:\\project\\MC_project\\e_system",
+    "current_sha256": {
+      "predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+      "pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8",
+      "adapters.py": "f7ec6183c985e9b9ffc8e701505cf53efe44de109ee956ee675be102ad80f218",
+      "backbones.py": "6eb0fc1589de9e6bba581a74613d2d5549ab18e7fbfee062163245af9070e4be",
+      "app.py": "79c5da497ccc2e228dd5a2bf40ae9da48cc231e25b28986c5516e4c3a35a2ed1"
+    },
+    "selected_directory": "C:\\project\\MC_project\\e_system",
+    "selected_sha256": {
+      "predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+      "pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8",
+      "adapters.py": "f7ec6183c985e9b9ffc8e701505cf53efe44de109ee956ee675be102ad80f218",
+      "backbones.py": "6eb0fc1589de9e6bba581a74613d2d5549ab18e7fbfee062163245af9070e4be",
+      "app.py": "79c5da497ccc2e228dd5a2bf40ae9da48cc231e25b28986c5516e4c3a35a2ed1"
+    },
+    "used_preserved_t2": false,
+    "t2_report_sha256": "2167ca64a12544ac0856a5e53fd90f72ffde8c45ec46238fb38db6bf21c13cdb",
+    "t2_selection_status": "known_defect_present"
+  },
+  "consumer": {
+    "mode": "actual imported run_prediction with reloaded Keras model argument",
+    "observation": "transparent predict observer; exact integer array forwarded uncast",
+    "model_input_dtype": "float32",
+    "keras_integer_input_accepted": true,
+    "rtol": 1e-05,
+    "atol": 1e-06,
+    "cases": [
+      {
+        "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+        "window_sha256": "25b0e2fd5ea8f33f6a21bbe4f929d92b757bc7d4a9bb0d80dae81a2a65c1d7f5",
+        "input": {
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "distance": 0,
+        "penalty": 1.0,
+        "heads": [
+          {
+            "index": 0,
+            "protein": "SpCas9(WT)",
+            "layer": "Output_SpCas9",
+            "named_source": 0.5581128597259521,
+            "raw": 0.5581128597259521,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.5581128597259521,
+            "percentage_scale": 100,
+            "final": 55.811285972595215,
+            "expected_final": 55.811285972595215
+          },
+          {
+            "index": 1,
+            "protein": "SpCas9-NG",
+            "layer": "Output_SpCas9_NG",
+            "named_source": 0.43572303652763367,
+            "raw": 0.43572306632995605,
+            "source_absolute_error": 2.9802322387695312e-08,
+            "penalized_raw": 0.43572306632995605,
+            "percentage_scale": 100,
+            "final": 43.572306632995605,
+            "expected_final": 43.572306632995605
+          },
+          {
+            "index": 2,
+            "protein": "VRQR",
+            "layer": "Output_VRQR_variant",
+            "named_source": 0.4094918370246887,
+            "raw": 0.4094918966293335,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.4094918966293335,
+            "percentage_scale": 100,
+            "final": 40.94918966293335,
+            "expected_final": 40.94918966293335
+          },
+          {
+            "index": 3,
+            "protein": "xCas9",
+            "layer": "Output_xCas",
+            "named_source": 0.4175117015838623,
+            "raw": 0.4175117015838623,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.4175117015838623,
+            "percentage_scale": 100,
+            "final": 41.75117015838623,
+            "expected_final": 41.75117015838623
+          },
+          {
+            "index": 4,
+            "protein": "Sniper",
+            "layer": "Output_Sniper_Cas9",
+            "named_source": 0.5274763107299805,
+            "raw": 0.5274763703346252,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.5274763703346252,
+            "percentage_scale": 100,
+            "final": 52.747637033462524,
+            "expected_final": 52.747637033462524
+          },
+          {
+            "index": 5,
+            "protein": "SpCas9-HF1",
+            "layer": "Output_SpCas9_HF_1",
+            "named_source": 0.14267730712890625,
+            "raw": 0.14267730712890625,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.14267730712890625,
+            "percentage_scale": 100,
+            "final": 14.267730712890625,
+            "expected_final": 14.267730712890625
+          },
+          {
+            "index": 6,
+            "protein": "eSpCas9(1.1)",
+            "layer": "Output_eSpCas9_1_1_",
+            "named_source": 0.3090905249118805,
+            "raw": 0.3090905249118805,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.3090905249118805,
+            "percentage_scale": 100,
+            "final": 30.90905249118805,
+            "expected_final": 30.90905249118805
+          },
+          {
+            "index": 7,
+            "protein": "HypaCas9",
+            "layer": "Output_HypaCas9",
+            "named_source": 0.18805119395256042,
+            "raw": 0.18805119395256042,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.18805119395256042,
+            "percentage_scale": 100,
+            "final": 18.805119395256042,
+            "expected_final": 18.805119395256042
+          },
+          {
+            "index": 8,
+            "protein": "evoCas9",
+            "layer": "Output_evoCas9",
+            "named_source": 0.025507695972919464,
+            "raw": 0.025507695972919464,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.025507695972919464,
+            "percentage_scale": 100,
+            "final": 2.5507695972919464,
+            "expected_final": 2.5507695972919464
+          }
+        ],
+        "candidate": {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 0,
+          "guide_seq": "ACGTACGTACGTACGTACGT",
+          "pam_seq": "AG",
+          "model_input_seq": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+          "encoded_seq": [
+            "not the prediction encoder"
+          ],
+          "raw_score": 0.5581128597259521,
+          "final_score": 55.811285972595215
+        }
+      },
+      {
+        "window": "TGCATGCATGCATGCATGCATGCATGGATC",
+        "window_sha256": "652ffa8f39a5608a26a0a6710f704b6194f0c02db8ebc89a5edea9bb4e33eab7",
+        "input": {
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "distance": 10,
+        "penalty": 0.6065306597126334,
+        "heads": [
+          {
+            "index": 0,
+            "protein": "SpCas9(WT)",
+            "layer": "Output_SpCas9",
+            "named_source": 0.516192615032196,
+            "raw": 0.516192615032196,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.3130866473342673,
+            "percentage_scale": 100,
+            "final": 31.308664733426728,
+            "expected_final": 31.308664733426728
+          },
+          {
+            "index": 1,
+            "protein": "SpCas9-NG",
+            "layer": "Output_SpCas9_NG",
+            "named_source": 0.3985632061958313,
+            "raw": 0.3985631763935089,
+            "source_absolute_error": 2.9802322387695312e-08,
+            "penalized_raw": 0.24174078631511764,
+            "percentage_scale": 100,
+            "final": 24.174078631511765,
+            "expected_final": 24.174078631511765
+          },
+          {
+            "index": 2,
+            "protein": "VRQR",
+            "layer": "Output_VRQR_variant",
+            "named_source": 0.29638341069221497,
+            "raw": 0.29638344049453735,
+            "source_absolute_error": 2.9802322387695312e-08,
+            "penalized_raw": 0.17976564369105177,
+            "percentage_scale": 100,
+            "final": 17.976564369105176,
+            "expected_final": 17.976564369105176
+          },
+          {
+            "index": 3,
+            "protein": "xCas9",
+            "layer": "Output_xCas",
+            "named_source": 0.333312064409256,
+            "raw": 0.3333120346069336,
+            "source_absolute_error": 2.9802322387695312e-08,
+            "penalized_raw": 0.20216396824030353,
+            "percentage_scale": 100,
+            "final": 20.21639682403035,
+            "expected_final": 20.21639682403035
+          },
+          {
+            "index": 4,
+            "protein": "Sniper",
+            "layer": "Output_Sniper_Cas9",
+            "named_source": 0.502373218536377,
+            "raw": 0.502373218536377,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.30470475966082766,
+            "percentage_scale": 100,
+            "final": 30.470475966082766,
+            "expected_final": 30.470475966082766
+          },
+          {
+            "index": 5,
+            "protein": "SpCas9-HF1",
+            "layer": "Output_SpCas9_HF_1",
+            "named_source": 0.24973812699317932,
+            "raw": 0.24973806738853455,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.15147379476852596,
+            "percentage_scale": 100,
+            "final": 15.147379476852596,
+            "expected_final": 15.147379476852596
+          },
+          {
+            "index": 6,
+            "protein": "eSpCas9(1.1)",
+            "layer": "Output_eSpCas9_1_1_",
+            "named_source": 0.3317336440086365,
+            "raw": 0.3317335844039917,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.20120658979738965,
+            "percentage_scale": 100,
+            "final": 20.120658979738966,
+            "expected_final": 20.120658979738966
+          },
+          {
+            "index": 7,
+            "protein": "HypaCas9",
+            "layer": "Output_HypaCas9",
+            "named_source": 0.29292187094688416,
+            "raw": 0.2929218113422394,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.177666059477628,
+            "percentage_scale": 100,
+            "final": 17.7666059477628,
+            "expected_final": 17.7666059477628
+          },
+          {
+            "index": 8,
+            "protein": "evoCas9",
+            "layer": "Output_evoCas9",
+            "named_source": 0.035013217478990555,
+            "raw": 0.035013195127248764,
+            "source_absolute_error": 2.2351741790771484e-08,
+            "penalized_raw": 0.021236576339177356,
+            "percentage_scale": 100,
+            "final": 2.1236576339177358,
+            "expected_final": 2.1236576339177358
+          }
+        ],
+        "candidate": {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 10,
+          "guide_seq": "TGCATGCATGCATGCATGCA",
+          "pam_seq": "TG",
+          "model_input_seq": "TGCATGCATGCATGCATGCATGCATGGATC",
+          "encoded_seq": [
+            "not the prediction encoder"
+          ],
+          "raw_score": 0.516192615032196,
+          "final_score": 31.308664733426728
+        }
+      },
+      {
+        "window": "CATGGATTACAGATTACAGATTACCGAGTC",
+        "window_sha256": "b87252e7eaca2e70e083e4d49631ac8fa8f41a28d831d97e0b8135b41d71c865",
+        "input": {
+          "dtype": "int64",
+          "dtype_kind": "i",
+          "shape": [
+            1,
+            30,
+            4
+          ],
+          "encoded_array": [
+            [
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                1,
+                0,
+                0
+              ]
+            ]
+          ]
+        },
+        "distance": 20,
+        "penalty": 0.1353352832366127,
+        "heads": [
+          {
+            "index": 0,
+            "protein": "SpCas9(WT)",
+            "layer": "Output_SpCas9",
+            "named_source": 0.24667680263519287,
+            "raw": 0.24667680263519287,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.033384074952535835,
+            "percentage_scale": 100,
+            "final": 3.3384074952535836,
+            "expected_final": 3.3384074952535836
+          },
+          {
+            "index": 1,
+            "protein": "SpCas9-NG",
+            "layer": "Output_SpCas9_NG",
+            "named_source": 0.4164332151412964,
+            "raw": 0.4164332151412964,
+            "source_absolute_error": 0.0,
+            "penalized_raw": 0.05635810712028062,
+            "percentage_scale": 100,
+            "final": 5.6358107120280625,
+            "expected_final": 5.6358107120280625
+          },
+          {
+            "index": 2,
+            "protein": "VRQR",
+            "layer": "Output_VRQR_variant",
+            "named_source": 0.4715520739555359,
+            "raw": 0.4715520441532135,
+            "source_absolute_error": 2.9802322387695312e-08,
+            "penalized_raw": 0.06381762945627885,
+            "percentage_scale": 100,
+            "final": 6.381762945627885,
+            "expected_final": 6.381762945627885
+          },
+          {
+            "index": 3,
+            "protein": "xCas9",
+            "layer": "Output_xCas",
+            "named_source": 0.21992188692092896,
+            "raw": 0.21992182731628418,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.029763182789762747,
+            "percentage_scale": 100,
+            "final": 2.9763182789762745,
+            "expected_final": 2.9763182789762745
+          },
+          {
+            "index": 4,
+            "protein": "Sniper",
+            "layer": "Output_Sniper_Cas9",
+            "named_source": 0.2242540717124939,
+            "raw": 0.22425401210784912,
+            "source_absolute_error": 5.960464477539063e-08,
+            "penalized_raw": 0.030349480245562534,
+            "percentage_scale": 100,
+            "final": 3.0349480245562535,
+            "expected_final": 3.0349480245562535
+          },
+          {
+            "index": 5,
+            "protein": "SpCas9-HF1",
+            "layer": "Output_SpCas9_HF_1",
+            "named_source": 0.08308134973049164,
+            "raw": 0.08308132737874985,
+            "source_absolute_error": 2.2351741790771484e-08,
+            "penalized_raw": 0.011243834972476855,
+            "percentage_scale": 100,
+            "final": 1.1243834972476856,
+            "expected_final": 1.1243834972476856
+          },
+          {
+            "index": 6,
+            "protein": "eSpCas9(1.1)",
+            "layer": "Output_eSpCas9_1_1_",
+            "named_source": 0.11023890227079391,
+            "raw": 0.11023886501789093,
+            "source_absolute_error": 3.725290298461914e-08,
+            "penalized_raw": 0.014919208020878984,
+            "percentage_scale": 100,
+            "final": 1.4919208020878985,
+            "expected_final": 1.4919208020878985
+          },
+          {
+            "index": 7,
+            "protein": "HypaCas9",
+            "layer": "Output_HypaCas9",
+            "named_source": 0.08465836197137833,
+            "raw": 0.08465832471847534,
+            "source_absolute_error": 3.725290298461914e-08,
+            "penalized_raw": 0.011457258354111991,
+            "percentage_scale": 100,
+            "final": 1.1457258354111992,
+            "expected_final": 1.1457258354111992
+          },
+          {
+            "index": 8,
+            "protein": "evoCas9",
+            "layer": "Output_evoCas9",
+            "named_source": 0.01591438427567482,
+            "raw": 0.01591438241302967,
+            "source_absolute_error": 1.862645149230957e-09,
+            "penalized_raw": 0.0021537774514031383,
+            "percentage_scale": 100,
+            "final": 0.21537774514031383,
+            "expected_final": 0.21537774514031383
+          }
+        ],
+        "candidate": {
+          "cas_type": "SpCas9",
+          "strand": "+",
+          "pam_start": 24,
+          "cut_pos": 21,
+          "distance": 20,
+          "guide_seq": "GATTACAGATTACAGATTAC",
+          "pam_seq": "CG",
+          "model_input_seq": "CATGGATTACAGATTACAGATTACCGAGTC",
+          "encoded_seq": [
+            "not the prediction encoder"
+          ],
+          "raw_score": 0.4715520441532135,
+          "final_score": 6.381762945627885
+        }
+      }
+    ]
+  },
+  "preservation": {
+    "status": "unchanged",
+    "file_count": 78,
+    "files": {
+      "C:\\project\\MC_project\\e_system\\adapters.py": "f7ec6183c985e9b9ffc8e701505cf53efe44de109ee956ee675be102ad80f218",
+      "C:\\project\\MC_project\\e_system\\app.py": "79c5da497ccc2e228dd5a2bf40ae9da48cc231e25b28986c5516e4c3a35a2ed1",
+      "C:\\project\\MC_project\\e_system\\backbones.py": "6eb0fc1589de9e6bba581a74613d2d5549ab18e7fbfee062163245af9070e4be",
+      "C:\\project\\MC_project\\e_system\\check.py": "75cfc34d3a95b1bd819e9dc1a2c36802b3e6d0b0df961eb2bf12d248060e00a5",
+      "C:\\project\\MC_project\\e_system\\models\\cas12a_model_fold_4.keras": "5b9ff8352e8458738af382ea7ded39ff6cd8a2986945da4b6ad182f6c54c6926",
+      "C:\\project\\MC_project\\e_system\\models\\Cas12a_Only.keras": "5c0c5f0c531d8507b6477daf34b996603ea1266554d928bfad8b199228ef883b",
+      "C:\\project\\MC_project\\e_system\\models\\crispr-cleavage-predictor\\best_model_fold1.pth": "4d9c805b304ba3855439dd3ca5cd6e95f6148dceebd23c7b4ee9ff3714ef8fd0",
+      "C:\\project\\MC_project\\e_system\\models\\crispr-cleavage-predictor\\best_model_fold2.pth": "9bdf2143a76cefb9a6827a814b8a49802922fa34f2e58ff4152580b29f8a5d27",
+      "C:\\project\\MC_project\\e_system\\models\\crispr-cleavage-predictor\\best_model_fold3.pth": "e21f849de3457a57aa3fd6c3e30d810ad9286e3b2eecbb81d51182bf5776fce9",
+      "C:\\project\\MC_project\\e_system\\models\\crispr-cleavage-predictor\\best_model_fold4.pth": "2db9222d4cbaef8c3dc1409116acc57295f4cf26b2cd17557ac14b980c4cebf9",
+      "C:\\project\\MC_project\\e_system\\models\\crispr-cleavage-predictor\\best_model_fold5.pth": "cc486aa83a897cfd09b53489af57a6745bb147cb103f5efcdf7f52925c8a3efb",
+      "C:\\project\\MC_project\\e_system\\models\\Multi-Cas_1IN_9Hydra_Divide_Testset.keras": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\best_model_fold1.pth": "d2f7e529d3eb434bf802752ef2921dae22cdc4e94636ed7792ac1d3133c83692",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\best_model_fold2.pth": "84a196809d7460cdccedd004d4fc26f31d3d53011684eb6fabd54ef8c9920ccc",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\best_model_fold3.pth": "f0bf3386cb14bb5419c983ebfe72ae303fda04181f025d40e7ed08c177b89224",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\best_model_fold4.pth": "a9f166daae0f56db615428977894be9f11452ce5190bd8879cdb0a64cb5d846c",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\best_model_fold5.pth": "5b3c788b2d032b6d0ac41f263092b70bff17cdfb5bcf44d314ad95d658cfc568",
+      "C:\\project\\MC_project\\e_system\\models\\SaCas9_model\\data\\spcas9_pretrained_weight.pth": "a3f000ae41dc3a94575426d3ed1a2098e6dbdf1d3087106f1a7e613ef4470f57",
+      "C:\\project\\MC_project\\e_system\\pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8",
+      "C:\\project\\MC_project\\e_system\\predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+      "C:\\project\\MC_project\\multi_cas_scanner_\uc218\uc815.py": "6e06a365e45d5dba07bb44fe8836db25a1c3cd4de764bb879c147e95636fc436",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue96-export.json": "fa04e1e313afeabbd12757b329f0dc5165dad0836859d9d7c2d2838f1856419f",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\.gitattributes": "19d8828206358743fecdbfb5d79c8750c2bb6ce562b7ae9f6a3c8dccdb6b08bb",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\.ruff.toml": "cff9fbf7be8375b4b7c58e008acdf14e82ee01df69e5a93b2f326dc2efcacc5e",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\.ruff_cache\\.gitignore": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\.ruff_cache\\0.16.6\\3238194999276298454": "f9789aaff4cb6b9eccd51e33fb40c24a90dc09ad8087982a36d6139be4f7b3fc",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\.ruff_cache\\CACHEDIR.TAG": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\commit-validation.json": "23f455e60e64bf141a52c1826487469e7723a0145ef357d7a0b5d4b09ff8f94d",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\prior-review-evidence.json": "ea98fe233c5c8d377ac8f029463549d1c3a1bc5a0dbd5e665050be7a9a47b64d",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\report.json": "2167ca64a12544ac0856a5e53fd90f72ffde8c45ec46238fb38db6bf21c13cdb",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\review.md": "026aba451863a1577351ffaec78fa66c3c2791bf4356e94d46427fbfab60aff5",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\source\\adapters.py": "f7ec6183c985e9b9ffc8e701505cf53efe44de109ee956ee675be102ad80f218",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\source\\app.py": "79c5da497ccc2e228dd5a2bf40ae9da48cc231e25b28986c5516e4c3a35a2ed1",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\source\\backbones.py": "6eb0fc1589de9e6bba581a74613d2d5549ab18e7fbfee062163245af9070e4be",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\source\\pam_scanner.py": "bcb73c682ce37818af4d5822df0ccf3b52bef63be13b2ca835661adfbb918fb8",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\source\\predict.py": "de71ae7a27266146f7be040c141e91e729bb951d519350aafa64bdc82880cf7f",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\validation.json": "bfd640591fc56e3f7d3898020898048d1e9075c4b7ca321a74f6693e6a23f425",
+      "C:\\project\\MC_project\\xai_test\\docs\\evidence\\issue97-consumer\\verification-code.py": "6d3a30f5782c5819923d9bb3c45c2e15bb40f7629e2109f0b2bc6daf3bb6f0f7",
+      "C:\\project\\MC_project\\xai_test\\docs\\planning\\evidence\\9hydra-pam-group-baseline.md": "72613998d6d90ac4e0ecad6327c49d191e511e9360f0a7878090012cbe3203c1",
+      "C:\\project\\MC_project\\xai_test\\docs\\planning\\issue94-review-evidence.json": "ea98fe233c5c8d377ac8f029463549d1c3a1bc5a0dbd5e665050be7a9a47b64d",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\Multi-Cas_1IN_9Hydra_Divide_Testset.keras": "65ae2ee259d638da00827f3d37f414916cc9512bafd45d9d718342901c8593b7",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82\\predictions.csv": "3c057286965d1440f8b412edc3c4bfc9f5eb936e2a3793d28d68a93b12e29d30",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82\\predictions_checksum.json": "cb4278944db23f17e01ca5f9a5b5357a1e6aab82c34e63d37ec87634353cb578",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82\\results.json": "8f791d0f71666354850d7f83129750756664afbcf33fa4ffbbc3146d4de1c279",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_final\\predictions.csv": "3c057286965d1440f8b412edc3c4bfc9f5eb936e2a3793d28d68a93b12e29d30",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_final\\predictions_checksum.json": "cb4278944db23f17e01ca5f9a5b5357a1e6aab82c34e63d37ec87634353cb578",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_final\\results.json": "396ecaaee67ccf7669a982b1a433d730116919721de6d7516af185a6925ef3ee",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_verified\\predictions.csv": "3c057286965d1440f8b412edc3c4bfc9f5eb936e2a3793d28d68a93b12e29d30",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_verified\\predictions_checksum.json": "cb4278944db23f17e01ca5f9a5b5357a1e6aab82c34e63d37ec87634353cb578",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\ngg_eval_issue82_verified\\results.json": "922fe7bbf3280c7331d575b5c9b19453dfe1b37de5af949db99d5740c30d3cee",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\published_split\\split_checksum.json": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\published_split\\test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\published_split\\train.csv": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\published_split\\val.csv": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\spcas9_train.py": "830a6ef8d5ed1f801e3662bc5053bead3699fe30939ed4dc21e6c8cb1af8c52d",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\9hydra_v2.keras": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\test_eval\\predictions.csv": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\test_eval\\predictions_checksum.json": "3820c571d064edfce8f247dff5e4a8bcfb6dc39dd90a31b266fbbb2404f9c6ca",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\test_eval\\results.json": "c86ebc590e1217092c464f68a2db9f3d57a8c48ffd5a8d2a65b5eef9aa179644",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run\\training_log.json": "cc7340523ae8acd7c53cd54d47b5bdd94fcc884066c03f0a06677583e41a6c11",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run2\\9hydra_v2.keras": "65fab5921a24663b52375e37ea621635ddfc1184166ea08ce6c9ea7f306ddff7",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run2\\test_eval\\predictions.csv": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run2\\test_eval\\predictions_checksum.json": "0d0d88514bfaf1ea1bf1a12f370a17fe03099d5bc158362c52f004a08d5400bc",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run2\\test_eval\\results.json": "840839a8bdb2e1dd1bbddd0ada0406cdaefdc66eb3ae87194289df3d23ccf455",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\test_run2\\training_log.json": "beff625ba650d45508d82983b669be290f78949e13782d9fef3a3227f8f9c364",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_audit\\predictions.csv": "fca7dacd9cac93d14eaae3fdf6304b0f3a7e40bc244298c65522f08e8e24fa36",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_audit\\predictions_checksum.json": "19737fcafd282c9724f0c092c1c39d12bec01452af2219adbadea66c0f002aa3",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_audit\\results.json": "3c6ff9c2dd7970da15d3b9c4ab7a249e421693e5cc0065b52ef471a02fea560b",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_v2_compare\\basis.csv": "4ae5b1d548535b84df6391afb18b55bee499018b0f6ad6a9beb1e692c71bfdd5",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_v2_compare\\basis_checksum.json": "9e9faf128100c3679f7ae3ce457d4f766d0ad02c3728a2fd8aec1dc811779b76",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v1_v2_compare\\results.json": "5f859393730525513c25ef1a767cf97ebbf19be6bd917b16b6fadb6c75ade887",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions.csv": "2a6d9a70993787c839afe48d0489b8d1542003f0c817a56ac94f35f97bbe296b",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\predictions_checksum.json": "fcf1159bb039d388f7415e62cffa0a81e83c368ddb5f0c504272b0869aa170f5",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_eval\\results.json": "8b1dc69c8d72514c7b965785d5ca6e9b72fb62fb48b2365833417188169e2344",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\9hydra_v2.keras": "ece5009215482d3fd2506688dc8e2423437abdcd28dfe10e4ac21c5bed3d19d6",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\smoke\\9hydra_v2.keras": "e4070c2778d11d5fd795a001208e977cd824ae1119d938db2d92f88bafae9761",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\smoke\\training_log.json": "ffdc26f37ce7bf605f5ba284df674605b013120196136f5cffd1e2ff415c6d10",
+      "C:\\project\\MC_project\\xai_test\\SpCas9\\v2_train\\training_log.json": "813f7ff9efb0b006f7467c63ade693d065fd0d52d9665fcaf610a781547c009e"
+    }
+  },
+  "verification_code": {
+    "module": "SpCas9.spcas9_export_acceptance",
+    "sha256": "d6b4a96929c0b463771c9e071ccfac5caf983d59925ce86c75db832766d2aa47",
+    "consumer_import_helper_sha256": "5ef7bdd19b04795c736b562495e0e3b138727e8b4ed7b425915f1bc85e10b75d"
+  },
+  "follow_up": "https://github.com/shin584/project/issues/95",
+  "limits": [
+    "Format parity is not new training, improved accuracy, biological validation or deployment approval.",
+    "No Testset evaluation, optimizer update, operating model selection or cache change executed.",
+    "T2 all-nine final <= -1 crash/stale-state, nonfinite and 0-100 filter limits remain separate.",
+    "The hardcoded cached v1 loader remains active; #95 repair, selection verification and return-to-v1 preparation precede adoption."
+  ]
+}
