@@ -1,0 +1,12 @@
+# Where `python -m cas12a.cnn_single` writes one run per `run_id` (#116).
+#
+# Same split as the rules above this directory: the evidence JSON is the
+# reproducibility record and is small, so it stays tracked; the checkpoint is
+# large and matters only once something decides to adopt it, at which point it
+# goes under `models/` like every other adopted checkpoint. The repo's
+# top-level `*.csv` rule already covers `validation_predictions.csv`, whose
+# sha256 is recorded in the run's tracked `status.json`.
+#
+# This file lives here rather than in the root `.gitignore` so that the
+# directory exists in a fresh checkout and a run never has to create it.
+*.keras
