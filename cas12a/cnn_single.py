@@ -61,6 +61,7 @@ from cas12a.nt_data import PRODUCTION_COUNTS, digest
 from cas12a.nt_storage import write_verified
 from cas12a.train import (
     BATCH_SIZE,
+    DEFAULT_DATASET,
     EPOCHS,
     SEED,
     library_versions,
@@ -84,9 +85,10 @@ DEFAULT_PARTITION = (
     / "20261101-nt500m-full"
     / "partition.json"
 )
-DEFAULT_SOURCE = (
-    Path(__file__).resolve().parent / "dataset" / "kim_2018_cas12a_dataset.xlsx"
-)
+#: The same sheet the five-fold path trains on, taken from it rather than
+#: spelled again: the manifest was written from this file, and two paths that
+#: disagreed about where it lives would be two libraries.
+DEFAULT_SOURCE = DEFAULT_DATASET
 
 CHECKPOINT_FILENAME = "cas12a_cnn_manifest.keras"
 CONFIGURATION_FILENAME = "configuration.json"
@@ -296,7 +298,11 @@ class SingleFit:
     call raises, and the counts are recorded whatever happens.
     """
 
-    def __init__(self, build=create_cas12a_model):
+    def __init__(self, build=None):
+        # Resolved in `model()` rather than defaulted here, because a default
+        # argument binds `create_cas12a_model` at definition time: patching the
+        # module attribute would then be a silent no-op, and a test that
+        # patches it to prove no model was built would pass without proving it.
         self._build = build
         self.model_builds = 0
         self.fit_calls = 0
@@ -308,7 +314,8 @@ class SingleFit:
                 f"a single-fit run builds one model; build {self.model_builds} "
                 "was requested"
             )
-        return self._build()
+        build = self._build if self._build is not None else create_cas12a_model
+        return build()
 
     def fit(self, model, train, validation, *, epochs, verbose):
         self.fit_calls += 1
@@ -350,36 +357,52 @@ def predict(model, partition):
     return np.asarray(predictions, dtype=np.float64).ravel()
 
 
-def fit_single(prepared, *, epochs=EPOCHS, seed=SEED, verbose=2, budget=None):
+def fit_single(prepared, *, epochs=EPOCHS, seed=SEED, verbose=2, guard=None):
     """Fit one model on the manifest's rows; return `(model, record)`.
 
     `record` separates `best_epoch` from `epochs_ran` and carries the whole
     per-epoch history, the validation predictions of the restored best weights
     and the one-model/one-fit counts.
     """
-    budget = SingleFit() if budget is None else budget
+    guard = SingleFit() if guard is None else guard
     train = prepared["partitions"]["train"]
     validation = prepared["partitions"]["validation"]
 
     set_seeds(seed)
-    model = budget.model()
+    model = guard.model()
     started = time.perf_counter()
-    history = budget.fit(
+    history = guard.fit(
         model, train, validation, epochs=epochs, verbose=verbose
     ).history
     elapsed = time.perf_counter() - started
 
     val_loss = [float(value) for value in history["val_loss"]]
     # `restore_best_weights=True` puts back the minimum-`val_loss` epoch, so
-    # the reported epoch is `argmin` of the history: it has to describe the
+    # the reported epoch is the argmin of the history: it has to describe the
     # weights that are in the model this returns, not where the loop stopped.
-    best_epoch = int(np.argmin(val_loss)) + 1
+    #
+    # `nanargmin`, not `argmin`, and the two disagree exactly where it matters.
+    # `np.argmin` returns the index of a NaN, while Keras decides improvement
+    # with `current < best - min_delta`, which is False against NaN - so a NaN
+    # epoch never becomes the restored one. Plain `argmin` would therefore name
+    # an epoch whose weights nothing restored, which is the defect #116 asked
+    # to be checked, arriving by a different route.
+    if not np.isfinite(val_loss).any():
+        raise ValueError(
+            f"no epoch produced a finite validation loss ({len(val_loss)} ran); "
+            "nothing was selected, so this run has no best epoch to report"
+        )
+    best_epoch = int(np.nanargmin(val_loss)) + 1
+    nonfinite_epochs = [
+        index + 1 for index, value in enumerate(val_loss) if not math.isfinite(value)
+    ]
     record = {
         "epochs_max": epochs,
         "epochs_ran": len(val_loss),
         "best_epoch": best_epoch,
         "best_val_loss": val_loss[best_epoch - 1],
-        "final_val_loss": val_loss[-1],
+        "final_val_loss": _json_number(val_loss[-1]),
+        "nonfinite_val_loss_epochs": nonfinite_epochs,
         "early_stopped": len(val_loss) < epochs,
         "wall_clock_s": round(elapsed, 1),
         "train_rows": len(train["source_rows"]),
@@ -391,7 +414,7 @@ def fit_single(prepared, *, epochs=EPOCHS, seed=SEED, verbose=2, budget=None):
         "validation_predictions": [
             _json_number(value) for value in predict(model, validation)
         ],
-        **budget.counts,
+        **guard.counts,
     }
     return model, record
 

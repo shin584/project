@@ -7,7 +7,8 @@ CNN against the standalone NT-Cas12a regressor, and that comparison is only
 meaningful if both models were fitted on the same rows and neither was selected
 on the rows the comparison is scored on. The five-fold path cannot do that: it
 constructs its own `KFold(5, shuffle=True, random_state=42)`, so every row is
-in some fold's validation set and the NT Testset overlaps its training data.
+in some fold's validation set and the NT-Cas12a Testset overlaps its training
+data.
 
 ```bash
 python -m cas12a.cnn_single \
@@ -101,10 +102,18 @@ counts reach `history.json` either way.
 
 ## Save, reload, and two separate judgements
 
-`best_epoch` is `argmin` of the recorded `val_loss` rather than the callback's
-report, because it has to describe the weights that are actually in the saved
-model; `epochs_ran` and `early_stopped` are recorded beside it, since one
-"epochs" field cannot say whether early stopping fired.
+`best_epoch` is the argmin of the recorded `val_loss` rather than the
+callback's report, because it has to describe the weights that are actually in
+the saved model; `epochs_ran` and `early_stopped` are recorded beside it, since
+one "epochs" field cannot say whether early stopping fired.
+
+It is `nanargmin`, and the distinction is not cosmetic. Keras decides
+improvement with `current < best - min_delta`, which is False against NaN, so a
+NaN epoch is never the one `restore_best_weights` puts back - while `np.argmin`
+returns its index regardless, and would name an epoch whose weights nothing
+restored. Any non-finite validation epochs are listed in
+`nonfinite_val_loss_epochs`, and a fit where no epoch produced a finite
+validation loss fails rather than reporting a selection that never happened.
 
 The reload comparison is two checks, following
 [#111](https://github.com/shin584/project/issues/111):
@@ -139,6 +148,19 @@ The reload comparison is two checks, following
 production manifest fitted at the recipe's own seed and epoch ceiling. A fixture
 run produces every file a real one does, so the file has to be the thing that
 says it is not one.
+
+Two things this path deliberately does not do:
+
+- **It cannot resume.** There is no checkpoint-per-epoch and no restart, so an
+  interrupted fit leaves a run directory with no `status.json` and is not
+  reportable; rerun it under a fresh `run_id`. The design permits recovery only
+  if it "preserve[s] the same run and full compatible training state", which a
+  one-shot `model.fit` cannot offer, so the alternative it names applies:
+  report incomplete training.
+- **It does not choose its own parent directory.** The files above are written
+  flat inside whatever `run_dir` the caller names, so #115 gets the `cnn/`
+  entry of its artifact table by pointing `--output-root`/`--run-id` at it
+  rather than by this module hardcoding a layout for a run it is not part of.
 
 Tests are `cas12a/test/test_cnn_manifest.py` (no TensorFlow: membership,
 identity and encoding) and `cas12a/test/test_cnn_single.py` (the fit, its

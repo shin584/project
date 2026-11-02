@@ -58,7 +58,28 @@ from cas12a.nt_data import (
 )
 from cas12a.test.test_cnn_manifest import FIXTURE_SPLIT, write_source
 
-EPOCHS = 2
+#: Two epochs on the fixture library: enough to exercise the plumbing, and
+#: deliberately not the recipe's ceiling, which `status.json` must then refuse
+#: to call confirmed training.
+FIXTURE_EPOCHS = 2
+
+
+def stub_builder(val_loss):
+    """A model whose `fit` reports exactly this per-epoch validation loss.
+
+    The only way to test how a history is read: a real two-epoch fit on 8 rows
+    cannot be made to produce a chosen loss curve, let alone a NaN one.
+    """
+
+    class Stub:
+        def fit(self, inputs, targets, **kwargs):
+            history = {"loss": list(val_loss), "val_loss": list(val_loss)}
+            return type("History", (), {"history": history})()
+
+        def predict(self, inputs, **kwargs):
+            return np.zeros((len(inputs[0]), 1), dtype=np.float32)
+
+    return Stub
 
 
 @pytest.fixture
@@ -96,7 +117,7 @@ def prepared(library):
 def fitted(prepared):
     """One two-epoch fit on the fixture library, with its record."""
     _, prepared_set = prepared
-    return fit_single(prepared_set, epochs=EPOCHS, verbose=0)
+    return fit_single(prepared_set, epochs=FIXTURE_EPOCHS, verbose=0)
 
 
 @pytest.fixture
@@ -109,7 +130,7 @@ def completed_run(library, tmp_path):
         source,
         partition,
         tmp_path / "runs" / "fixture-run",
-        epochs=EPOCHS,
+        epochs=FIXTURE_EPOCHS,
         verbose=0,
     )
 
@@ -181,11 +202,11 @@ class TestSingleFit:
         assert record["fit_calls"] == 1
 
     def test_a_second_model_raises(self):
-        budget = SingleFit(build=lambda: object())
-        budget.model()
+        guard = SingleFit(build=lambda: object())
+        guard.model()
 
         with pytest.raises(SingleFitViolation, match="builds one model"):
-            budget.model()
+            guard.model()
 
     def test_a_second_fit_raises(self, prepared):
         """The two guards are separate, so the second one is exercised alone.
@@ -196,21 +217,21 @@ class TestSingleFit:
         """
         _, prepared_set = prepared
         partitions = prepared_set["partitions"]
-        budget = SingleFit()
-        model = budget.model()
-        budget.fit(
+        guard = SingleFit()
+        model = guard.model()
+        guard.fit(
             model, partitions["train"], partitions["validation"], epochs=1, verbose=0
         )
 
         with pytest.raises(SingleFitViolation, match="fits once"):
-            budget.fit(
+            guard.fit(
                 model,
                 partitions["train"],
                 partitions["validation"],
                 epochs=1,
                 verbose=0,
             )
-        assert budget.counts == {"model_builds": 1, "fit_calls": 2}
+        assert guard.counts == {"model_builds": 1, "fit_calls": 2}
 
     def test_validation_rows_are_passed_explicitly_not_split_off_training(
         self, prepared, monkeypatch
@@ -220,6 +241,10 @@ class TestSingleFit:
         The rows a model is chosen on have to be the manifest's validation
         membership; this captures the kwargs `fit` actually received and
         checks the validation arrays against that membership row for row.
+
+        The recorder arrives through the patched module attribute, which
+        `SingleFit` resolves per build; a default argument would have bound the
+        real builder at definition time and made the patch a silent no-op.
         """
         manifest, prepared_set = prepared
         seen = {}
@@ -235,12 +260,12 @@ class TestSingleFit:
                 return np.zeros((len(inputs[0]), 1), dtype=np.float32)
 
         monkeypatch.setattr(cnn_single, "create_cas12a_model", Recorder)
-        fit_single(prepared_set, epochs=EPOCHS, verbose=0, budget=SingleFit(Recorder))
+        fit_single(prepared_set, epochs=FIXTURE_EPOCHS, verbose=0, guard=SingleFit())
 
         validation = prepared_set["partitions"]["validation"]
         assert "validation_split" not in seen
         assert seen["batch_size"] == BATCH_SIZE
-        assert seen["epochs"] == EPOCHS
+        assert seen["epochs"] == FIXTURE_EPOCHS
         assert np.array_equal(seen["validation_data"][0][0], validation["X_seq"])
         assert np.array_equal(seen["validation_data"][1], validation["y"])
         assert len(validation["source_rows"]) == FIXTURE_SPLIT.counts[1]
@@ -263,13 +288,54 @@ class TestRecord:
     def test_the_best_epoch_describes_the_weights_that_survived(self, fitted):
         _, record = fitted
 
-        assert record["epochs_ran"] == EPOCHS
+        assert record["epochs_ran"] == FIXTURE_EPOCHS
         assert 1 <= record["best_epoch"] <= record["epochs_ran"]
         assert record["best_val_loss"] <= record["final_val_loss"]
         assert (
             record["best_val_loss"]
             == record["history"]["val_loss"][record["best_epoch"] - 1]
         )
+
+    def test_a_nan_validation_loss_cannot_become_the_reported_best_epoch(
+        self, prepared
+    ):
+        """`np.argmin` would name the NaN epoch; Keras would never restore it.
+
+        Keras decides improvement with `current < best - min_delta`, which is
+        False against NaN, so a NaN epoch is never the one `restore_best_weights`
+        puts back. Plain `argmin` returns its index anyway - which would report
+        an epoch whose weights nothing restored, the exact defect #116 asks to
+        be ruled out, arriving by a route a healthy fixture fit never shows.
+        """
+        _, prepared_set = prepared
+        nan = float("nan")
+
+        _, record = fit_single(
+            prepared_set,
+            epochs=4,
+            verbose=0,
+            guard=SingleFit(stub_builder([0.9, 0.4, nan, 0.8])),
+        )
+
+        assert record["best_epoch"] == 2
+        assert record["best_val_loss"] == pytest.approx(0.4)
+        assert record["nonfinite_val_loss_epochs"] == [3]
+
+    def test_a_fit_with_no_finite_validation_loss_has_no_best_epoch(self, prepared):
+        """Nothing was selected, so there is no epoch to report.
+
+        Reporting epoch 1 here would describe a selection that never happened.
+        """
+        _, prepared_set = prepared
+        nan = float("nan")
+
+        with pytest.raises(ValueError, match="no epoch produced a finite"):
+            fit_single(
+                prepared_set,
+                epochs=2,
+                verbose=0,
+                guard=SingleFit(stub_builder([nan, nan])),
+            )
 
     def test_epochs_run_is_recorded_separately_from_the_ceiling(self, fitted):
         """Two numbers, because they answer different questions.
@@ -280,7 +346,7 @@ class TestRecord:
         """
         _, record = fitted
 
-        assert record["epochs_max"] == EPOCHS
+        assert record["epochs_max"] == FIXTURE_EPOCHS
         assert record["early_stopped"] is False
 
     def test_the_whole_history_is_kept_and_is_json_safe(self, fitted):
@@ -480,7 +546,9 @@ class TestRunArtifacts:
         assert any(
             "fixture manifest" in reason for reason in report["not_confirmed_because"]
         )
-        assert any(str(EPOCHS) in reason for reason in report["not_confirmed_because"])
+        assert any(
+            str(FIXTURE_EPOCHS) in reason for reason in report["not_confirmed_because"]
+        )
         assert "#117 performs the confirmed" in report["note"]
         assert all(report["stages"].values())
 
