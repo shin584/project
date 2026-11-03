@@ -36,3 +36,39 @@ cas12a/dataset/*.xlsx
 # weights are large and matter only once something decides to adopt them (at
 # which point they go under `models/`, like every other adopted checkpoint).
 cas12a/artifacts/*.keras
+
+# NT-Cas12a run output under `cas12a/model/result/<run_id>/` (#105). Same split
+# as the two rules above: the evidence JSON is tracked because it is the only
+# source of this model's performance numbers and its reproducibility record,
+# while the weights are large and matter only once something decides to adopt
+# them (at which point they go under `models/`, like every other adopted
+# checkpoint). The authoritative copy of a whole run is the durable export in
+# Google Drive under `cas12a-nt/runs/`, and every file in it is recoverable by
+# the sha256 recorded in that run's `durable_export.json`.
+#
+# `selected_export/` is the 1.8GiB safetensors model plus its tokenizer.
+cas12a/model/result/**/selected_export/
+# The Drive download, byte-identical to the directory it was extracted into.
+cas12a/model/result/*.zip
+# Bulk per-row inputs, reproducible from the source sheet and the recorded
+# seed-42 split: tokenized sequences (13MB) and the split's row indices (1.6MB).
+# Their sha256 stays in `configuration.json`, which is tracked.
+cas12a/model/result/**/data.json
+cas12a/model/result/**/partition.json
+
+# 9-Hydra v3 run output under `xai_test/SpCas9_NT_analysis/result/` (#129). Same
+# split as the three rules above: the metrics CSV, `config.json`, `mu_sd.npy` and
+# the tokenizer files are tracked because they are the only local source of this
+# model's performance numbers and the only way to reproduce its tokenisation and
+# label scale without the checkpoint, while the weights are large and matter only
+# once something decides to adopt them (at which point they go under `models/`,
+# like every other adopted checkpoint). The authoritative copy lives in Google
+# Drive under `SpCas9/spcas9_v3/nt_v3_seed42`, which is also what the Colab
+# drivers read; nothing local needs the weights.
+#
+# 1.8GiB safetensors checkpoint.
+xai_test/SpCas9_NT_analysis/result/model.safetensors
+# The run's metrics summary is the exception to the `*.csv` rule at the top of
+# this file: it is a single 212-byte row, not bulk per-row data, and it is the
+# only local source of v3's performance numbers.
+!xai_test/SpCas9_NT_analysis/result/nt_v3_seed42_results.csv

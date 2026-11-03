@@ -1,0 +1,3 @@
+# Keep 9-Hydra inference sequence-only
+
+The next 9-Hydra improvement cycle preserves the existing input contract: predictions require only the 30bp sequence, without an additional experimental-condition input. Although tRNA metadata exists in the dataset, conditioning a model on it would require callers to provide it at inference, so the tRNA-conditioned R1 proposal and its fallback router are excluded from this cycle; tRNA remains metadata for stratified analysis. Replacement candidates must improve training or sequence-derived representations within this input boundary; this decision does not establish whether tRNA conditioning would improve prediction.
