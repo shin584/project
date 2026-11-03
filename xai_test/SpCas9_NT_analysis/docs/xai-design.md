@@ -278,15 +278,43 @@ separately**:
 
 1. **Error quantile on `SpCas9`** — well-predicted (lowest quartile of absolute error) and
    badly-predicted (highest quartile) rows.
-2. **Head-ordering reversal** — rows where the measured ordering of the three analysed heads
-   disagrees with the predicted ordering (e.g. measured `SpCas9` > `SpCas9-NG`, predicted the
-   reverse). This is a failure mode that exists only in a multi-head model and needs no second
-   model to define.
+2. **Cross-head error disagreement** — the spread (max − min) of the three analysed heads'
+   absolute errors on a row, taken from **each stratum's own top decile**. The two strata differ
+   about twofold in scale (generalisation median 0.075, library 0.038), so one absolute threshold
+   would be p90 in one and p75 in the other. This is a failure mode that exists only in a
+   multi-head model and needs no second model to define.
+
+**Head-ordering reversal is not a selection criterion.** It was planned as one and does not
+survive measurement: 203 of the 3,851 intersection rows have Kendall tau < 0, but requiring every
+inverted pair to be separated by more than the **replicate noise floor** (pooled median 0.053,
+measured over 79 repeated 30-mers) leaves **one row**. Lowering the margin to manufacture a pool
+would report measurement noise as model failure. Reversal is instead a **reported result** under
+analysis question 3, as a per-stratum rate plus the distribution of inverted-pair gaps against
+that noise floor — and it is a substantive one, since 169 of the 203 fall in the library stratum,
+which is a third of the rows. Reports that lean on the noise floor state that it rests on 79
+groups.
+
+### Budget and identity
+
+Six cells: `{generalisation, pam_library}` x `{ERRLO, ERRHI, HEADGAP}`, **3 cases per cell**, at
+most 18. In the library stratum a cell takes **at most one row per distinct protospacer**, so its
+three cases are three different targets rather than three PAM variants of one; the error-quartile
+cells there span all 5 targets (322 rows each), so the constraint is satisfiable. Every library
+case record carries the "observed in one of 5 targets" qualifier.
+
+`case_id` is `<STRATUM>-<CRITERION>-<NN>` — `GEN-ERRLO-01`, `LIB-HEADGAP-03` — uppercase,
+hyphenated, two-digit zero-padded, prefixes derived from the `v3_strata` constants
+(`GENERALISATION` → `GEN`, `PAM_LIBRARY` → `LIB`). `HEADGAP`, not `DISAG`, because the latter
+reads as the SaCas9 pipeline's `Discordant`. Ties break on `row_index` ascending, asserted by test.
 
 Attribution outliers are **excluded from selection** and used only to describe selected cases:
-selecting cases by the attribution that the case study then explains is circular.
-
-**Open:** the per-stratum case budget and the `case_id` scheme.
+selecting cases by the attribution that the case study then explains is circular. This is enforced
+at the artifact level, not by convention. `artifacts/v3_cases/cases.json` is written locally from
+predictions and labels and **does not reference any attribution artifact**; once the `.npz` files
+exist, `cases_annotated.json` points at it by `case_id` and adds attribution description, and
+**never rewrites the selection**. A reviewer can therefore confirm non-circularity from the
+dependency direction of two files, which is what makes the one-line regression that restores the
+circularity visible.
 
 ## Artifacts
 
@@ -312,7 +340,61 @@ Every artifact carries a metadata sidecar recording the checkpoint digest, the c
 checksums, the `transformers` and `torch` versions, the analysed heads, the stratum, and the
 population or subset membership digest.
 
-**Open:** the `.npz` key schema and array shapes.
+### `.npz` schema
+
+**One `.npz` per analysis, each with its own sidecar** — not one combined archive. The three
+analyses run as separate Colab sessions over different populations, so a combined file would make
+re-running one rewrite another's arrays, and a single sidecar cannot hold three runs'
+`transformers` versions. SaCas9's combined `model_analysis_arrays.npz` existed to join *two
+models* and is not inherited.
+
+```
+artifacts/v3_ism/ism.npz          + ism.sidecar.json
+artifacts/v3_rollout/rollout.npz  + rollout.sidecar.json
+artifacts/v3_ig/ig.npz            + ig.sidecar.json
+```
+
+Every archive carries `row_index` (int64) aligned to axis 0, and axis 0 is ordered **`row_index`
+ascending** in all three. The ordering is asserted by test and the array's digest goes in the
+sidecar. Implicit positional identity — SaCas9's `sample_id`-by-row-order — is the mechanism by
+which a 3,851-row and a 400-row artifact silently mis-join.
+
+| archive | key | shape | dtype |
+|---|---|---|---|
+| `ism.npz` | `delta` | `(3851, 30, 4, 9)` | float32 |
+| | `row_index` | `(3851,)` | int64 |
+| `rollout.npz` | `rollout` | `(3851, 5, 5)` | float32 |
+| | `row_index` | `(3851,)` | int64 |
+| `ig.npz` | `attribution` | `(400, 3, 5)` | float32 |
+| | `completeness_residual` | `(400, 3)` | float64 |
+| | `row_index` | `(400,)` | int64 |
+
+**ISM is `(n, 30, 4, 9)`, ACGT in fixed order, with the reference base's slot exactly 0.** The
+fourth slot costs 33% more (16MB total) and buys an axis that means the same thing in every row;
+SaCas9's `(n, 36, 3)` alt-only layout makes "slot 0" a different base at each position, and this
+analysis indexes PAM bases directly because ADR 0007 assigns base-resolution PAM work to ISM. A
+zero in the reference slot is true, not a sentinel.
+
+**ISM stores all nine heads; IG stores three.** One forward returns all nine, so the extra six
+cost nothing and avoid a re-run; IG needs a backward pass per head, which is what fixes its budget
+at the three analysed heads. The sidecar lists `heads` in axis order, and the ISM sidecar states
+that the six unanalysed heads are **stored but not analysed**, so they are not read as validated
+results.
+
+**Rollout has no head axis** — see ADR 0008. Only the final rollout is stored, not the 24
+per-layer matrices.
+
+**IG's hidden axis is summed away.** Keeping `(400, 3, 5, 1280)` would be 7.7M values with no
+interpretation path. The per-row per-head `completeness_residual` is kept at float64 because it is
+the audit trail for the all-zero-attribution failure ADR 0006 exists to prevent: without it in the
+artifact, the check cannot be re-run after the Colab session ends. The sidecar additionally records
+`f_baseline`, the nine scalars `f(0)` at the zero embedding, for the same reason. No key named
+`pam` exists in `ig.npz`; the token is `pam_plus_right_flank`.
+
+**NaN is forbidden.** Each module asserts `np.isfinite(...).all()` before writing. A head with no
+measurement on a row still has a prediction, so an ISM delta is defined everywhere and a NaN here
+can only be a bug — unlike SaCas9, which masked genuine prediction failures. Measurement coverage
+is handled upstream by the 3,851-row intersection.
 
 ## Validation
 
