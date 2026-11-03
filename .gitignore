@@ -72,3 +72,11 @@ xai_test/SpCas9_NT_analysis/result/model.safetensors
 # this file: it is a single 212-byte row, not bulk per-row data, and it is the
 # only local source of v3's performance numbers.
 !xai_test/SpCas9_NT_analysis/result/nt_v3_seed42_results.csv
+
+# 9-Hydra v3 XAI artifacts (#129). `predictions.csv` is bulk per-row output
+# (5,186 rows, 1.1MB) and stays under the `*.csv` rule at the top of this file:
+# it is exactly reproducible from the pinned checkpoint and the pinned split by
+# `v3_predict.export_predictions`, and its sha256 is recorded in the tracked
+# `predictions_checksum.json` beside it. Same for the bulk `.npz` arrays the
+# ISM, IG and rollout runs will write; their sidecars carry the digests.
+xai_test/SpCas9_NT_analysis/artifacts/**/*.npz

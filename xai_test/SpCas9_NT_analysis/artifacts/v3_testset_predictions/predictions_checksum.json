@@ -1,0 +1,37 @@
+{
+  "model": "9-Hydra v3",
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9",
+    "evoCas9"
+  ],
+  "rows": 5186,
+  "prediction_scale": "fraction",
+  "label_scale_in_split": "percent",
+  "scale_note": "Predictions are fractions of 1; the split's label columns are raw percentages. Divide the labels by 100 before taking an error.",
+  "predictions_sha256": "7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a",
+  "split": {
+    "path": "../SpCas9/published_split/test.csv",
+    "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+  },
+  "checkpoint": {
+    "path": "result",
+    "files": {
+      "config.json": "62028537178f176962cc59530b31abe4947a82ed5053b9f6918c5e9e1a5caf4d",
+      "mu_sd.npy": "a7a5c3ccd2a584752b4dab451889ca2a8f55a2e6c221a3735b9c593ef6cbaf27"
+    },
+    "weights_hashed": false
+  },
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  }
+}

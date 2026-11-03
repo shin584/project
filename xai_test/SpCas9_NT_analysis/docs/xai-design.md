@@ -244,12 +244,28 @@ Consequences:
   (`EsmForSequenceClassification`, `problem_type: regression`, nine `id2label` entries, 24 layers,
   hidden 1280), the tokenizer files, `training_args.bin`, and `mu_sd.npy` as `(2, 9)` float32. The
   weights are not there and are not needed locally.
-- Still missing locally: v3's **per-head Testset predictions** (v2's `predictions.csv` +
-  `predictions_checksum.json` shape). Case selection cannot run on real data without them.
-  **Open:** whether those predictions are on the standardised scale or already de-standardised to
-  the label scale (published percentage / 100). `mu_sd.npy` is on disk either way, so the
-  conversion is available once the file arrives; its mu of 0.249 for `SpCas9` is consistent with
-  the percentage/100 convention v2 uses.
+- v3's **per-head Testset predictions** are produced by `v3_predict.py` into
+  `artifacts/v3_testset_predictions/`, in the `predictions.csv` +
+  `predictions_checksum.json` shape `spcas9_eval.py` uses for v2. The notebook writes only a
+  metrics summary, so this artifact did not previously exist.
+
+**Scale, settled.** Predictions are **fractions of 1** (v3's `predict` path de-standardises with
+`mu_sd.npy`), while the split's label columns are **raw percentages**. Divide the labels by 100
+before taking an error; mixing the two is a 100x mistake. Both scales are named in every sidecar.
+
+The export was validated end to end against the run's own `nt_v3_seed42_results.csv`, recomputed
+from the written predictions:
+
+| reported | recomputed |
+|---|---|
+| `test_Sp_all` 0.9235 | 0.9235 |
+| `test_Sp_ngg` 0.6054 | 0.6054 |
+| `test_mean_all` 0.8554 | 0.8554 |
+| `test_mean_ngg` 0.7020 | 0.7020 |
+| `test_SpCas9_MAE` 0.0510 | 0.05098 |
+
+The consumed split's SHA-256 matches `published_split/split_checksum.json`'s `files/test.csv`
+entry, so the predictions are pinned to the same bytes v3 was evaluated on.
 - The locally installed `transformers` is 5.8.1; Colab's may differ. Version drift inside
   `EsmForSequenceClassification` is the exact mechanism that silently zeroed Model B's IG in the
   SaCas9 pipeline, hence the pin.
