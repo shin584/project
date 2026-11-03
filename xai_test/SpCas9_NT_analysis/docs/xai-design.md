@@ -71,11 +71,36 @@ NGG rows 2,008 / non-NGG 3,178. `trna_feature = 1` on 1,191 rows (metadata only,
 The two strata are analysed **separately and never pooled**, because they answer different
 questions:
 
-- **Non-library stratum** — 2,421 distinct targets. Sequence generalisation: what the model reads
-  from a protospacer it has never seen.
-- **PAM library stratum** — 5 protospacers repeated across 1,297 rows that vary only at positions
-  24-29. This is a natural experiment on the PAM with the protospacer held fixed, and it is where
-  9-Hydra v2 collapsed (`HypaCas9` 0.426 Spearman against 0.843 off-library).
+- **Non-library stratum, restricted to NGG** — sequence generalisation: what the model reads from a
+  protospacer it has never seen, *once the PAM shortcut is unavailable*. On the analysis
+  intersection this is 895 rows over 818 distinct protospacers.
+- **PAM library stratum, all PAMs** — 5 protospacers repeated across 1,297 rows that vary only at
+  positions 24-29 (1,287 on the intersection). A natural experiment on the PAM with the target held
+  fixed, and where 9-Hydra v2 collapsed (`HypaCas9` 0.426 Spearman against 0.843 off-library). The
+  PAM contrast *is* the object of study here, so non-NGG rows are kept deliberately: restricting
+  this stratum to NGG would leave 134 rows over 5 targets and delete the question.
+
+### Why the non-library stratum is NGG-restricted
+
+v3's own metrics report Spearman **0.9235 over all Testset rows** against **0.6054 within NGG**.
+Measured on the `SpCas9` head's 5,021 labelled rows, the reason is in the labels, not the model:
+
+| | n | mean efficiency | median |
+|---|---|---|---|
+| NGG | 1,907 | 47.5 | 49.6 |
+| non-NGG | 3,114 | 7.6 | 1.9 |
+
+The binary `is_NGG` **on its own** reaches Spearman 0.7965 against the label. A predictor that
+emitted nothing but "does the PAM end in GG" would score 0.80 on the pooled set, so the pooled
+0.9235 rests on a floor that requires no sequence understanding beyond a 2nt check, and 0.6054 is
+the figure that reflects ranking targets against each other.
+
+The consequence for attribution is direct: a position profile computed over the pooled population
+is dominated by positions 25-26, and its headline reads "the model uses the PAM" — true before the
+analysis began, and therefore not a finding. Restricting the generalisation question to NGG removes
+that confound so the protospacer signal is visible. This refines the stratum decision rather than
+replacing it: the two strata were already assigned different questions, and each now gets the
+population its question needs.
 
 **Reporting constraint on the library stratum:** its n is **5 targets**, not 1,297 samples. Every
 library-stratum finding is reported as "observed on 5 targets" with the per-target breakdown
@@ -184,11 +209,15 @@ kept separately rather than only the rollout). Sampling an analysis that fits le
 "is this an artifact of the sample?" question for no gain — and ISM in particular carries the PAM
 result, so reducing it would undercut the token-resolution decision above.
 
-**IG subset**: 200 rows per stratum, 400 total, drawn independently within each stratum and
-balanced on NGG / non-NGG and on `SpCas9` error quartile. Seeded and written to disk as a fixed
-membership list with a checksum, so every later IG artifact addresses the same rows. The
-library-stratum 200 are **5 targets' 200 PAM variants** and inherit that stratum's reporting
-constraint.
+**IG subset**: 200 rows per stratum, 400 total, drawn independently within each stratum. Seeded and
+written to disk as a fixed membership list with a checksum, so every later IG artifact addresses
+the same rows.
+
+- Non-library (NGG-restricted, 895 available): balanced on `SpCas9` error quartile only — the
+  stratum is already single-valued on NGG, so there is nothing to balance there.
+- Library (all PAMs, 1,287 available): balanced on NGG / non-NGG and on `SpCas9` error quartile,
+  since the PAM contrast is what this stratum is for. Its 200 rows are **5 targets' 200 PAM
+  variants** and inherit the stratum's reporting constraint.
 
 Precedent for freezing a budget-selected detailed subset:
 `docs/adr/0006-cas12a-xai-freezes-a-budget-selected-detailed-subset.md` (repo root).
