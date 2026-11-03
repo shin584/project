@@ -300,6 +300,41 @@ def test_batching_does_not_change_the_attribution(toy_model, tokenizer, ig_resul
     )
 
 
+def test_the_batch_is_moved_to_the_model_device(toy_model, tokenizer):
+    """IG runs on Colab's GPU; the tokenizer always returns CPU tensors.
+
+    Only the CPU leg is exercisable here, so this pins the plumbing rather
+    than the CUDA behaviour: the device is read off the model, and `encode`
+    moves the batch to whatever `device_of` reports.
+    """
+    assert v3_ig.device_of(toy_model) == next(toy_model.parameters()).device
+    encoded = v3_ig.encode(tokenizer, SEQUENCES[:1], device=v3_ig.device_of(toy_model))
+    assert encoded["input_ids"].device == v3_ig.device_of(toy_model)
+
+
+def test_run_ig_encodes_every_batch_onto_the_model_device(
+    toy_model, tokenizer, monkeypatch
+):
+    seen = []
+    original = v3_ig.encode
+
+    def record(*args, **kwargs):
+        seen.append(kwargs.get("device"))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(v3_ig, "encode", record)
+    v3_ig.run_ig(
+        toy_model,
+        tokenizer,
+        SEQUENCES,
+        row_index=[0, 1, 2],
+        heads=HEADS,
+        steps=2,
+        batch_size=1,
+    )
+    assert seen == [v3_ig.device_of(toy_model)] * len(SEQUENCES)
+
+
 def test_run_ig_rejects_a_sequence_of_the_wrong_length(toy_model, tokenizer):
     with pytest.raises(ValueError, match="length"):
         v3_ig.run_ig(
@@ -373,10 +408,16 @@ def test_write_ig_artifact_round_trips_and_names_no_pam_key(ig_result, tmp_path)
     )
     with np.load(path) as archive:
         keys = set(archive.files)
-        assert keys == {"attribution", "completeness_residual", "row_index"}
+        assert keys == {
+            "attribution",
+            "completeness_residual",
+            "special_attribution",
+            "row_index",
+        }
         v3_ig.validate_artifact_keys(keys)
         assert archive["attribution"].dtype == np.float32
         assert archive["completeness_residual"].dtype == np.float64
+        assert archive["special_attribution"].dtype == np.float64
         assert archive["row_index"].dtype == np.int64
         assert archive["row_index"].tolist() == [7, 11, 23]
         np.testing.assert_array_equal(archive["attribution"], ig_result.attribution)
@@ -398,6 +439,46 @@ def test_write_ig_artifact_round_trips_and_names_no_pam_key(ig_result, tmp_path)
         )
     assert sidecar["completeness"]["pass_rate"] == pytest.approx(1.0)
     assert sidecar["rows"] == len(SEQUENCES)
+
+
+def test_the_completeness_check_is_re_derivable_from_the_artifact(ig_result, tmp_path):
+    """An auditor holding only the written files can recompute f(x).
+
+    This is what "the check cannot be re-run after the Colab session ends"
+    asks for: f(x) = f(0) + attribution.sum() + special + residual. Without
+    `special_attribution` the stored residual could only be re-read, since the
+    <cls> and padding share of the sum is not in the five reported tokens.
+    """
+    path = v3_ig.write_ig_artifact(tmp_path, ig_result, stratum=v3_strata.PAM_LIBRARY)
+    sidecar = json.loads((path.parent / "ig.sidecar.json").read_text(encoding="utf-8"))
+    with np.load(path) as archive:
+        f_baseline = np.array(
+            [sidecar["f_baseline"][head] for head in sidecar["heads"]]
+        )
+        recovered = (
+            f_baseline
+            + archive["attribution"].sum(axis=2)
+            + archive["special_attribution"]
+            + archive["completeness_residual"]
+        )
+    np.testing.assert_allclose(recovered, ig_result.f_x, rtol=1e-5, atol=1e-7)
+
+
+def test_write_ig_artifact_refuses_an_all_zero_attribution(ig_result, tmp_path):
+    """ADR 0006's failure must not reach disk, unlike a tolerance miss.
+
+    The run tolerance is reported and never fatal, but an identically zero
+    profile is the wiring bug itself, and downstream it reads as "the model
+    ignores the sequence".
+    """
+    broken = ig_result.replace(attribution=np.zeros_like(ig_result.attribution))
+    with pytest.raises(ValueError, match="identically zero"):
+        v3_ig.write_ig_artifact(tmp_path, broken, stratum=v3_strata.GENERALISATION)
+
+
+def test_write_ig_artifact_refuses_an_unknown_stratum(ig_result, tmp_path):
+    with pytest.raises(ValueError, match="unknown stratum"):
+        v3_ig.write_ig_artifact(tmp_path, ig_result, stratum="generalization")
 
 
 def test_write_ig_artifact_refuses_a_non_finite_attribution(ig_result, tmp_path):

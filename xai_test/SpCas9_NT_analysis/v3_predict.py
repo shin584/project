@@ -60,6 +60,11 @@ SEQUENCE_LENGTH = 30
 PREDICTION_SCALE = "fraction"
 LABEL_SCALE_IN_SPLIT = "percent"
 
+#: What v3 was trained and evaluated at: `<cls>` plus five 6-mer tokens, padded
+#: to 32. Every path that tokenises for v3 reads it from here, so the window
+#: contract lives in one file rather than in each module's default argument.
+MAX_LENGTH = 32
+
 ForwardFn = Callable[[Sequence[str]], np.ndarray]
 
 
@@ -124,7 +129,7 @@ def make_forward_fn(
     *,
     device: str | None = None,
     batch_size: int = 64,
-    max_length: int = 32,
+    max_length: int = MAX_LENGTH,
 ) -> ForwardFn:
     """Build the real forward pass. Imports torch/transformers lazily."""
     import torch
@@ -166,7 +171,7 @@ def sha256_of(path: str | Path, *, chunk_size: int = 1 << 20) -> str:
     return digest.hexdigest()
 
 
-def _library_versions() -> dict[str, str | None]:
+def library_versions() -> dict[str, str | None]:
     versions: dict[str, str | None] = {
         "numpy": np.__version__,
         "pandas": pd.__version__,
@@ -179,6 +184,34 @@ def _library_versions() -> dict[str, str | None]:
             # injected forward_fn and needs neither library present.
             versions[name] = None
     return versions
+
+
+def checkpoint_digests(
+    checkpoint_dir: str | Path, names: Sequence[str] = ("config.json", "mu_sd.npy")
+) -> dict[str, str]:
+    """SHA-256 of the checkpoint files that exist, keyed by file name."""
+    checkpoint_dir = Path(checkpoint_dir)
+    return {
+        name: sha256_of(checkpoint_dir / name)
+        for name in names
+        if (checkpoint_dir / name).exists()
+    }
+
+
+def write_sidecar(out_dir: str | Path, name: str, payload: dict[str, object]) -> Path:
+    """Write one artifact's JSON sidecar, with the bytes pinned.
+
+    UTF-8, LF and `ensure_ascii=False` are fixed here rather than at each call
+    site so two artifacts' sidecars never differ by their writer's defaults —
+    a sidecar whose bytes depend on the platform cannot be checksummed.
+    """
+    path = Path(out_dir) / name
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return path
 
 
 def export_predictions(
@@ -206,11 +239,7 @@ def export_predictions(
     csv_path = out_dir / "predictions.csv"
     frame.to_csv(csv_path, index=False, lineterminator="\n")
 
-    checkpoint_files = {
-        name: sha256_of(checkpoint_dir / name)
-        for name in ("config.json", "mu_sd.npy")
-        if (checkpoint_dir / name).exists()
-    }
+    checkpoint_files = checkpoint_digests(checkpoint_dir)
     weights = checkpoint_dir / "model.safetensors"
     if hash_weights and weights.exists():
         checkpoint_files["model.safetensors"] = sha256_of(weights)
@@ -232,11 +261,7 @@ def export_predictions(
             "files": checkpoint_files,
             "weights_hashed": bool(hash_weights and weights.exists()),
         },
-        "versions": _library_versions(),
+        "versions": library_versions(),
     }
-    (out_dir / "predictions_checksum.json").write_text(
-        json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    write_sidecar(out_dir, "predictions_checksum.json", sidecar)
     return csv_path

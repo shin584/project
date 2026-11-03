@@ -42,16 +42,24 @@ them and without a checkpoint.
 
 from __future__ import annotations
 
-import json
+import contextlib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import v3_predict
-from v3_predict import HEADS, SEQUENCE_LENGTH, validate_sequences
-from v3_strata import ANALYSED_HEADS
+from v3_predict import (
+    HEADS,
+    MAX_LENGTH,
+    SEQUENCE_LENGTH,
+    checkpoint_digests,
+    library_versions,
+    sha256_of,
+    validate_sequences,
+    write_sidecar,
+)
+from v3_strata import ANALYSED_HEADS, STRATUM_NAMES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only, never imported at runtime
     import torch
@@ -87,8 +95,6 @@ PAM_TOKEN_NAME = TOKEN_NAMES[PAM_TOKEN_INDEX]
 #: after them is padding. Verified against the checkpoint's own tokenizer.
 CLS_TOKEN_COUNT = 1
 SEQUENCE_TOKEN_SLICE = slice(CLS_TOKEN_COUNT, CLS_TOKEN_COUNT + TOKEN_COUNT)
-
-MAX_LENGTH = 32
 
 #: Matches the SaCas9 pipeline's `DEFAULT_IG_STEPS`, and the design's budget
 #: of 400 x 50 x 3 forward+backward passes.
@@ -132,11 +138,6 @@ def tokenize_window(sequence: str) -> tuple[str, ...]:
     """
     validate_sequences([sequence])
     return tuple(sequence[token_slice(index)] for index in range(TOKEN_COUNT))
-
-
-def token_bases(sequence: str, index: int) -> str:
-    """The bases of one token, for reporting a token's content alongside it."""
-    return sequence[token_slice(index)]
 
 
 def validate_artifact_keys(keys: Iterable[str]) -> None:
@@ -272,7 +273,24 @@ def head_indices(heads: Sequence[str]) -> list[int]:
     return [HEADS.index(head) for head in heads]
 
 
-def encode(tokenizer: Any, sequences: Sequence[str], *, max_length: int = MAX_LENGTH):
+def device_of(model: Any) -> Any:
+    """The device the model's weights live on.
+
+    IG runs on Colab's GPU while the tokenizer always returns CPU tensors, so
+    every entry point reads the device off the model rather than taking it as
+    an argument: a mismatch surfaces as a `RuntimeError` on the first forward
+    pass, after the caller has already paid for loading a 500M checkpoint.
+    """
+    return next(model.parameters()).device
+
+
+def encode(
+    tokenizer: Any,
+    sequences: Sequence[str],
+    *,
+    max_length: int = MAX_LENGTH,
+    device: Any = None,
+):
     """Tokenise a batch exactly as the prediction path does, and check it.
 
     The assertion is what lets every later step index the five sequence tokens
@@ -295,10 +313,11 @@ def encode(tokenizer: Any, sequences: Sequence[str], *, max_length: int = MAX_LE
             f"{SEQUENCE_TOKEN_SLICE}: got {tokens[: TOKEN_COUNT + 1]}, "
             f"expected ['<cls>', *{expected}]"
         )
-    return encoded
+    return encoded if device is None else encoded.to(device)
 
 
-def _frozen_parameters(module: Any):
+@contextlib.contextmanager
+def frozen_parameters(module: Any):
     """Disable ``requires_grad`` on a module's weights for the duration.
 
     IG needs a gradient only with respect to the interpolated input. Leaving
@@ -306,20 +325,14 @@ def _frozen_parameters(module: Any):
     for weights nothing reads — the SaCas9 pipeline exhausted host RAM that way
     once IG started replaying the full encoder.
     """
-    import contextlib
-
-    @contextlib.contextmanager
-    def context():
-        original = [p.requires_grad for p in module.parameters()]
-        for parameter in module.parameters():
-            parameter.requires_grad_(False)
-        try:
-            yield
-        finally:
-            for parameter, required in zip(module.parameters(), original):
-                parameter.requires_grad_(required)
-
-    return context()
+    original = [p.requires_grad for p in module.parameters()]
+    for parameter in module.parameters():
+        parameter.requires_grad_(False)
+    try:
+        yield
+    finally:
+        for parameter, required in zip(module.parameters(), original):
+            parameter.requires_grad_(required)
 
 
 def _logits(model: Any, encoded: Any, indices: Sequence[int]) -> torch.Tensor:
@@ -376,7 +389,7 @@ def baseline_outputs(model: Any, encoded: Any) -> dict[str, float]:
             range(len(HEADS)),
             torch.zeros_like(_input_embedding(model, encoded)),
         )
-    return {head: float(logits[0, index]) for index, head in enumerate(HEADS)}
+    return {head: float(logits[0, index].cpu()) for index, head in enumerate(HEADS)}
 
 
 def integrated_gradients_batch(
@@ -403,8 +416,13 @@ def integrated_gradients_batch(
     baseline = torch.zeros_like(x)
     diff = x - baseline
 
-    accumulated = torch.zeros((len(indices), *x.shape), dtype=torch.float64)
-    with _frozen_parameters(model):
+    # float64 on the model's own device: a CPU accumulator would force a
+    # device copy per step per head, and CUDA float64 at (heads, batch, 32,
+    # 1280) is single-digit MB.
+    accumulated = torch.zeros(
+        (len(indices), *x.shape), dtype=torch.float64, device=x.device
+    )
+    with frozen_parameters(model):
         for step in range(steps):
             alpha = (step + 0.5) / steps
             interpolated = (
@@ -429,9 +447,9 @@ def integrated_gradients_batch(
     attribution = (average_gradient * diff.double().unsqueeze(0)).sum(dim=-1)
     return {
         # (batch, heads, positions)
-        "attribution": attribution.permute(1, 0, 2).numpy(),
-        "f_x": f_x.numpy(),
-        "f_baseline": f_baseline.numpy(),
+        "attribution": attribution.permute(1, 0, 2).cpu().numpy(),
+        "f_x": f_x.cpu().numpy(),
+        "f_baseline": f_baseline.cpu().numpy(),
     }
 
 
@@ -465,9 +483,10 @@ def run_ig(
 
     attribution_batches, f_x_batches, baselines = [], [], []
     all_head_baseline: dict[str, float] = {}
+    device = device_of(model)
     for start in range(0, len(sequences), batch_size):
         batch = sequences[start : start + batch_size]
-        encoded = encode(tokenizer, batch, max_length=max_length)
+        encoded = encode(tokenizer, batch, max_length=max_length, device=device)
         if not all_head_baseline:
             all_head_baseline = baseline_outputs(model, encoded)
         computed = integrated_gradients_batch(model, encoded, columns, steps=steps)
@@ -524,17 +543,30 @@ def write_ig_artifact(
 ) -> Path:
     """Write ``ig.npz`` and ``ig.sidecar.json``; return the archive's path.
 
-    ``f_baseline`` goes in the sidecar and ``completeness_residual`` into the
-    archive because they are the audit trail for the all-zero-attribution
-    failure: without them the check cannot be re-run once the Colab session is
-    gone.
+    The archive is the ADR 0006 audit trail, so it has to carry everything the
+    completeness check needs: ``completeness_residual`` and
+    ``special_attribution`` per row and head, with ``f(0)`` in the sidecar.
+    ``f(x)`` is then ``f(0) + attribution.sum() + special_attribution +
+    residual``, which is what makes the check re-derivable rather than merely
+    re-readable once the Colab session is gone.
+
+    An all-zero attribution is refused outright. The completeness *tolerance*
+    is reported and never fatal, but an identically zero profile is the wiring
+    bug ADR 0006 exists to prevent, not a near-zero-signal row — and it reads
+    as "the model ignores the sequence" to anyone who picks the artifact up
+    later.
     """
+    if stratum not in STRATUM_NAMES:
+        raise ValueError(
+            f"unknown stratum {stratum!r}; expected one of {list(STRATUM_NAMES)}"
+        )
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     arrays = {
         "attribution": result.attribution.astype(np.float32),
         "completeness_residual": result.completeness_residual.astype(np.float64),
+        "special_attribution": result.special_attribution.astype(np.float64),
         "row_index": result.row_index.astype(np.int64),
     }
     validate_artifact_keys(arrays)
@@ -543,6 +575,10 @@ def write_ig_artifact(
             raise ValueError(f"{name} holds a non-finite value; NaN is forbidden")
     if np.any(np.diff(arrays["row_index"]) <= 0):
         raise ValueError("row_index must be written strictly ascending")
+    try:
+        assert_nonzero_attribution(result)
+    except AssertionError as zero:
+        raise ValueError(str(zero)) from zero
 
     path = out_dir / "ig.npz"
     with open(path, "wb") as handle:
@@ -580,34 +616,26 @@ def write_ig_artifact(
             "analysed heads' values are the ones the completeness residual is "
             "measured against; the other six are recorded, not analysed."
         ),
-        "special_attribution_mean": [
-            float(value) for value in result.special_attribution.mean(axis=0)
-        ],
         "special_attribution_note": (
-            "Mean attribution landing on <cls> and padding, per head. Not part "
-            "of the reported profile; recorded so the completeness residual "
-            "reads as integration error rather than an accounting gap."
+            "`special_attribution` is the share landing on <cls> and the "
+            "padding, per row and head. It is not part of the reported "
+            "profile; it is stored so the completeness residual reads as "
+            "integration error rather than an accounting gap, and so f(x) is "
+            "recoverable from the artifact alone."
         ),
         "completeness": report,
-        "versions": v3_predict._library_versions(),
+        "versions": library_versions(),
     }
     if checkpoint_dir is not None:
-        checkpoint_dir = Path(checkpoint_dir)
         sidecar["checkpoint"] = {
-            "path": checkpoint_dir.as_posix(),
-            "files": {
-                name: v3_predict.sha256_of(checkpoint_dir / name)
-                for name in ("config.json", "mu_sd.npy", "vocab.txt")
-                if (checkpoint_dir / name).exists()
-            },
+            "path": Path(checkpoint_dir).as_posix(),
+            "files": checkpoint_digests(
+                checkpoint_dir, ("config.json", "mu_sd.npy", "vocab.txt")
+            ),
         }
     if extra:
         sidecar.update(extra)
-    sidecar["attribution_sha256"] = v3_predict.sha256_of(path)
+    sidecar["attribution_sha256"] = sha256_of(path)
 
-    (out_dir / "ig.sidecar.json").write_text(
-        json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    write_sidecar(out_dir, "ig.sidecar.json", sidecar)
     return path

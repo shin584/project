@@ -373,7 +373,14 @@ which a 3,851-row and a 400-row artifact silently mis-join.
 | | `row_index` | `(3851,)` | int64 |
 | `ig.npz` | `attribution` | `(400, 3, 5)` | float32 |
 | | `completeness_residual` | `(400, 3)` | float64 |
+| | `special_attribution` | `(400, 3)` | float64 |
 | | `row_index` | `(400,)` | int64 |
+
+`special_attribution` is the share of the integral that landed on `<cls>` and the padding. It is
+not part of the reported profile, and it is in the archive because without it the completeness
+check can only be *re-read*, not *re-derived*: the residual is taken against the sum over all 32
+token positions, while only the 5 sequence tokens are reported, so `f(x)` is recoverable from the
+artifact alone only as `f(0) + attribution.sum() + special_attribution + completeness_residual`.
 
 **ISM is `(n, 30, 4, 9)`, ACGT in fixed order, with the reference base's slot exactly 0.** The
 fourth slot costs 33% more (16MB total) and buys an axis that means the same thing in every row;
