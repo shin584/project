@@ -166,7 +166,13 @@ Applied:
 
 1. **Integrated Gradients** — token-level attribution, 50 integration steps (matching the SaCas9
    pipeline's `DEFAULT_IG_STEPS`), computed on the **encoder input-embedding tensor** with a
-   zero-embedding baseline. See ADR on attribution depth.
+   zero-embedding baseline. See ADR on attribution depth. Implemented in `v3_ig.py`, which
+   attaches to the embedding by **replacing the word-embedding module's output through a forward
+   hook** rather than by passing `inputs_embeds`: ESM's `token_dropout` rescale is guarded on
+   `input_ids is not None`, so the `inputs_embeds` path skips it and would explain a function the
+   deployed model never computes. The Riemann sum uses the **midpoint** rule — same 50 steps, a
+   markedly smaller completeness residual, and the residual is the audit signal for ADR 0006
+   rather than a diagnostic to be explained away.
 2. **In-silico saturation mutagenesis (ISM)** — all 30 positions x 3 alternative bases, delta
    against wild type. Carries the per-base PAM result.
 3. **Attention rollout** — per-layer `0.5*A + 0.5*I` then row-normalise, `<cls>` removed, reported
