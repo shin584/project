@@ -28,9 +28,13 @@ DNA/protein binding. Attribution describes the model's internal information use,
 **9-Hydra v3** is `InstaDeepAI/nucleotide-transformer-500m-human-ref` fine-tuned as a 9-head
 multi-task regressor (`AutoModelForSequenceClassification`, 9 outputs) on 30bp sequences,
 `max_length=32`, per-head mean/std standardisation (`mu_sd.npy`), and a masked loss so a row
-contributes only to the heads it has measured. Built by `SpCas9_NT_analysis/SpCas9_v3.ipynb`.
-The checkpoint and its evaluation artifacts live on Drive; the analysis consumes them, never
-rebuilds them.
+contributes only to the heads it has measured. Built by `SpCas9_NT_analysis/SpCas9_v3.ipynb`;
+`config.json` confirms `EsmForSequenceClassification` with `problem_type: regression` and nine
+`id2label` entries over a 24-layer, hidden-1280 backbone. The weights live on Drive and are read
+there by the Colab drivers; the analysis consumes the checkpoint, never rebuilds it.
+
+Verified against the checkpoint's **own** tokenizer in `result/`: `30bp -> ['<cls>'] + 5` 6-mer
+tokens.
 
 The **SpCas9 target window** layout (0-indexed over 30bp): left flank 0-3, protospacer 4-23,
 PAM 24-26, right flank 27-29.
@@ -141,7 +145,11 @@ Applied:
 2. **In-silico saturation mutagenesis (ISM)** — all 30 positions x 3 alternative bases, delta
    against wild type. Carries the per-base PAM result.
 3. **Attention rollout** — per-layer `0.5*A + 0.5*I` then row-normalise, `<cls>` removed, reported
-   as **information dependency** between token positions, not physical interaction.
+   as **information dependency** between token positions, not physical interaction. Stored and
+   reported at **5x5 token resolution** and *not* expanded to nucleotide coordinates: attention is
+   a token-to-token quantity, and projecting it onto 30 positions would re-introduce exactly the
+   PAM/flank merge that ADR 0007 rules out. The SaCas9 pipeline did expand its rollout to 36x36
+   nucleotide coordinates; that choice is not carried over.
 4. **Positional / PAM profiling** — aggregate ISM deltas by region and by PAM identity, per
    stratum and per head.
 5. **Cross-head attribution agreement** — rank correlation between heads' ISM profiles on the
@@ -170,10 +178,11 @@ Against the 3,851-row intersection:
 | Integrated Gradients | 400 x 50 x 3 ~ 60K forward+backward | **400-row stratified subset** |
 
 ISM and rollout run exhaustively because they can: at 30bp and ~32 GFLOP per sequence the cost is
-tens of minutes on a single GPU, and the stored arrays are small (ISM delta ~1.4 MB, rollout
-matrices ~14 MB as float32). Sampling an analysis that fits leaves a permanent "is this an artifact
-of the sample?" question for no gain — and ISM in particular carries the PAM result, so reducing it
-would undercut the token-resolution decision above.
+tens of minutes on a single GPU, and the stored arrays are small — ISM delta `(3851, 30, 3)` is
+~1.4 MB as float32, and a rolled-out matrix `(3851, 5, 5)` is ~385 KB (24x that if every layer is
+kept separately rather than only the rollout). Sampling an analysis that fits leaves a permanent
+"is this an artifact of the sample?" question for no gain — and ISM in particular carries the PAM
+result, so reducing it would undercut the token-resolution decision above.
 
 **IG subset**: 200 rows per stratum, 400 total, drawn independently within each stratum and
 balanced on NGG / non-NGG and on `SpCas9` error quartile. Seeded and written to disk as a fixed
@@ -202,10 +211,16 @@ Consequences:
 
 - The local test suite builds a **small randomly-initialised 9-output ESM model inside the test**
   for shape and gradient-flow checks. No download, no checkpoint, no network.
-- Inputs that must reach the local tree: v3's **per-head Testset predictions** (v2's
-  `predictions.csv` + `predictions_checksum.json` shape), and `mu_sd.npy` **unless** those
-  predictions are already de-standardised to the label scale (published percentage / 100).
-  **Open:** which scale the predictions are on.
+- `SpCas9_NT_analysis/result/` holds the checkpoint's **metadata only** — `config.json`
+  (`EsmForSequenceClassification`, `problem_type: regression`, nine `id2label` entries, 24 layers,
+  hidden 1280), the tokenizer files, `training_args.bin`, and `mu_sd.npy` as `(2, 9)` float32. The
+  weights are not there and are not needed locally.
+- Still missing locally: v3's **per-head Testset predictions** (v2's `predictions.csv` +
+  `predictions_checksum.json` shape). Case selection cannot run on real data without them.
+  **Open:** whether those predictions are on the standardised scale or already de-standardised to
+  the label scale (published percentage / 100). `mu_sd.npy` is on disk either way, so the
+  conversion is available once the file arrives; its mu of 0.249 for `SpCas9` is consistent with
+  the percentage/100 convention v2 uses.
 - The locally installed `transformers` is 5.8.1; Colab's may differ. Version drift inside
   `EsmForSequenceClassification` is the exact mechanism that silently zeroed Model B's IG in the
   SaCas9 pipeline, hence the pin.
