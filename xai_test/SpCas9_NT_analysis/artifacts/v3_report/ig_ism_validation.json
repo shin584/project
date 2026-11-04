@@ -1,0 +1,635 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "ig_ism_rank_correlation",
+  "inputs": [
+    "ig",
+    "ism"
+  ],
+  "statistic": "spearman_rank_correlation",
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "token_resolution": 5,
+  "token_names": [
+    "left_flank_plus_protospacer_5prime",
+    "protospacer_6_11",
+    "protospacer_12_17",
+    "protospacer_18_23",
+    "pam_plus_right_flank"
+  ],
+  "token_boundaries": [
+    [
+      0,
+      5
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      12,
+      17
+    ],
+    [
+      18,
+      23
+    ],
+    [
+      24,
+      29
+    ]
+  ],
+  "ism_aggregation": "the ISM profile's mean over each token's six positions. IG attributes to tokens and ISM substitutes bases, so the comparison is made at the coarser of the two resolutions; folding IG's one value onto six bases instead would invent a per-base number ADR 0007 forbids.",
+  "variants": {
+    "magnitude": "|attribution| against the ISM position profile (mean |delta| over a position's three alternative bases), both aggregated to the five tokens. Answers whether the two techniques rank the tokens alike.",
+    "signed": "the signed attribution against the signed ISM delta, mean over a position's three alternative bases, both aggregated to the five tokens. Answers whether they agree about which way a token pushes the prediction. A head can rank alike and sign oppositely, so the two variants are reported apart and neither replaces the other."
+  },
+  "agreement_sign": {
+    "magnitude": 1,
+    "signed": -1
+  },
+  "signed_convention_note": "In the `signed` variant, agreement is a **negative** correlation and `per_row.share_negative` is the share of rows that agree. IG's sign is the contribution of the base that is present; an ISM delta's sign is the effect of substituting it away, so the two run opposite by construction on a token the model relies on. `agreement_sign` carries the expected direction per variant; multiply by it to read a correlation as agreement. The `magnitude` variant has no such convention - there, agreement is positive.",
+  "profile_definition": "mean |ISM delta| over a position's three alternative bases, per row, position and head; the reference base's slot is a true zero and is excluded from the mean",
+  "mismatch_note": "A low correlation is a limit of token-level attribution, not a bug. The last token binds the PAM (24-26) to the right flank (27-29), so base-resolution ISM and token-resolution IG have no reason to coincide there (docs/adr/0007-ism-carries-pam-resolution-not-ig.md). Disagreement is reported as measured; nothing is retried, re-thresholded or dropped to raise it, and neither technique is treated as the other's ground truth.",
+  "population": {
+    "name": "ig_subset",
+    "rows": 400,
+    "population_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+    "swept_rows": 3851,
+    "note": "The correlation is reported on the frozen IG subset, which is the smaller of the two populations: ISM swept the whole analysis intersection and IG ran on the subset. `swept_rows` is the sweep's population and is not this report's denominator."
+  },
+  "pooling": "forbidden",
+  "pooling_note": "One entry per stratum and no combined one. The two strata answer different questions over differently-shaped populations: generalisation is sequence generalisation on unseen protospacers, pam_library is a PAM experiment on 5 targets, so adding their row counts would add a sample size to a replication factor. `population` is not their sum either: the intersection also holds rows that are in **neither** stratum (non-library, non-NGG), which is why it is reported under its own name rather than as a total.",
+  "nan_policy_note": "A correlation over five tokens is undefined, not zero, where a profile is constant; such rows are counted as `undefined_rows` and a single undefined number is written as null.",
+  "rollout_excluded": "Attention rollout is not an input. It has no head axis at all (docs/adr/0008-attention-rollout-is-head-invariant.md), so it cannot describe a per-head reading, and every figure here is per head.",
+  "claim_limit": "Every figure here describes the model's internal information use - which positions or tokens its prediction depends on, and how its heads order one row. None of it is a claim about physical DNA/protein interaction.",
+  "strata": {
+    "generalisation": {
+      "rows": 200,
+      "distinct_protospacers": 193,
+      "by_head": {
+        "SpCas9": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.7,
+              "mean": 0.616,
+              "p10": 0.2,
+              "q1": 0.4,
+              "q3": 0.9,
+              "p90": 0.9,
+              "min": -0.2,
+              "max": 1.0,
+              "share_negative": 0.005
+            },
+            "mean_profile": 1.0,
+            "mean_token_profile": {
+              "ism": [
+                0.016291533836700147,
+                0.022663555330524218,
+                0.02446780079252537,
+                0.03339007448919498,
+                0.11537356005282336
+              ],
+              "ig": [
+                0.14013879626058043,
+                0.1552335308736656,
+                0.17354544578876813,
+                0.27414535181364047,
+                2.0238668763637544
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.7,
+              "mean": -0.684,
+              "p10": -1.0,
+              "q1": -0.9,
+              "q3": -0.5,
+              "p90": -0.3,
+              "min": -1.0,
+              "max": -0.1,
+              "share_negative": 1.0
+            },
+            "mean_profile": -0.6,
+            "mean_token_profile": {
+              "ism": [
+                0.0007372227517488893,
+                0.0034517697095781032,
+                0.0011295643034197327,
+                0.005103947527385466,
+                -0.10123480355965984
+              ],
+              "ig": [
+                0.046005418044514954,
+                -0.03538376327021979,
+                -0.04242078305513133,
+                -0.007290411603171378,
+                2.0238668763637544
+              ]
+            }
+          }
+        },
+        "SpCas9-NG": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.55,
+              "mean": 0.41350000000000003,
+              "p10": -0.3,
+              "q1": 0.1,
+              "q3": 0.8,
+              "p90": 0.9,
+              "min": -0.7,
+              "max": 1.0,
+              "share_negative": 0.17
+            },
+            "mean_profile": 0.9,
+            "mean_token_profile": {
+              "ism": [
+                0.018657830678983207,
+                0.022328407004968725,
+                0.024010922986878746,
+                0.035702209143367886,
+                0.04396236233344905
+              ],
+              "ig": [
+                0.2751416702345887,
+                0.2730981748359045,
+                0.3375095030674129,
+                0.5103891912847758,
+                0.788918193525169
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.7,
+              "mean": -0.58,
+              "p10": -1.0,
+              "q1": -0.9,
+              "q3": -0.3,
+              "p90": 0.0,
+              "min": -1.0,
+              "max": 0.7,
+              "share_negative": 0.88
+            },
+            "mean_profile": -0.3,
+            "mean_token_profile": {
+              "ism": [
+                -9.735083578463817e-06,
+                0.0028336451752421802,
+                0.0003813776669206464,
+                0.003976245269268729,
+                -0.022178509872086975
+              ],
+              "ig": [
+                0.01795498711624532,
+                -0.14999120158085133,
+                0.15273426045750965,
+                0.22841061814688146,
+                0.7747714710584842
+              ]
+            }
+          }
+        },
+        "evoCas9": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.0,
+              "mean": 0.0325,
+              "p10": -0.6,
+              "q1": -0.3,
+              "q3": 0.4,
+              "p90": 0.7,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.44
+            },
+            "mean_profile": 0.1,
+            "mean_token_profile": {
+              "ism": [
+                0.028756622232407252,
+                0.036076904524756016,
+                0.028072885182706626,
+                0.02570309232780295,
+                0.040225721472839114
+              ],
+              "ig": [
+                0.29577701636066195,
+                0.20981018135906196,
+                0.3518958432122599,
+                0.15394544652430342,
+                0.22358009854331612
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.35,
+              "mean": -0.2975,
+              "p10": -0.9,
+              "q1": -0.6,
+              "q3": 0.1,
+              "p90": 0.3,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.715
+            },
+            "mean_profile": -0.6,
+            "mean_token_profile": {
+              "ism": [
+                -0.0026883979377612375,
+                0.0008597424213161275,
+                -0.0019114134201381838,
+                0.0003294877079997609,
+                -0.027154518927045568
+              ],
+              "ig": [
+                0.24784088226559106,
+                -0.057815870469203216,
+                0.3298559826693963,
+                -0.012572912180330605,
+                0.15048125522211195
+              ]
+            }
+          }
+        }
+      }
+    },
+    "pam_library": {
+      "rows": 200,
+      "distinct_protospacers": 5,
+      "by_head": {
+        "SpCas9": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.7,
+              "mean": 0.5835,
+              "p10": 0.1,
+              "q1": 0.4,
+              "q3": 0.9,
+              "p90": 0.9,
+              "min": -0.9,
+              "max": 1.0,
+              "share_negative": 0.03
+            },
+            "mean_profile": 0.7,
+            "mean_token_profile": {
+              "ism": [
+                0.009939091062228473,
+                0.011686324460792754,
+                0.013909220509487018,
+                0.018715964080631056,
+                0.09961904079814453
+              ],
+              "ig": [
+                0.09176167725934647,
+                0.07385040713781564,
+                0.08423178430001599,
+                0.17189469447912414,
+                1.089575035603193
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.7,
+              "mean": -0.5615000000000001,
+              "p10": -0.9,
+              "q1": -0.9,
+              "q3": -0.3,
+              "p90": -0.1,
+              "min": -1.0,
+              "max": 0.6,
+              "share_negative": 0.93
+            },
+            "mean_profile": -0.7,
+            "mean_token_profile": {
+              "ism": [
+                0.0002999767406122881,
+                0.002830317415283491,
+                -0.0007023716191348383,
+                -0.00011740265363149165,
+                -0.04946241645326104
+              ],
+              "ig": [
+                0.027865774504607543,
+                0.005764154443004372,
+                0.019540629892192102,
+                0.01946726646128809,
+                0.9831896405605949
+              ]
+            }
+          }
+        },
+        "SpCas9-NG": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.7,
+              "mean": 0.5685,
+              "p10": 0.1,
+              "q1": 0.5,
+              "q3": 0.8,
+              "p90": 0.9,
+              "min": -0.9,
+              "max": 1.0,
+              "share_negative": 0.065
+            },
+            "mean_profile": 0.7,
+            "mean_token_profile": {
+              "ism": [
+                0.01415940632032011,
+                0.014634198884864833,
+                0.018555120871102174,
+                0.029661208302996244,
+                0.07095703422240854
+              ],
+              "ig": [
+                0.2130448284727754,
+                0.25880600813776256,
+                0.20228309648344292,
+                0.5809223587997258,
+                0.9400441062357277
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.7,
+              "mean": -0.6915,
+              "p10": -1.0,
+              "q1": -0.9,
+              "q3": -0.6,
+              "p90": -0.3,
+              "min": -1.0,
+              "max": 0.7,
+              "share_negative": 0.96
+            },
+            "mean_profile": -0.7,
+            "mean_token_profile": {
+              "ism": [
+                -0.00561039453449287,
+                0.003258863644585182,
+                -0.0017485622567696482,
+                -0.007111735595774842,
+                -0.0017842014891387723
+              ],
+              "ig": [
+                0.1769625474110944,
+                -0.11703373594209551,
+                0.07052393132587895,
+                0.29735281197354196,
+                -0.1262447953503579
+              ]
+            }
+          }
+        },
+        "evoCas9": {
+          "magnitude": {
+            "agreement_sign": 1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": 0.3,
+              "mean": 0.21150000000000002,
+              "p10": -0.5,
+              "q1": -0.125,
+              "q3": 0.7,
+              "p90": 0.9,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.315
+            },
+            "mean_profile": 0.2,
+            "mean_token_profile": {
+              "ism": [
+                0.01855194000450179,
+                0.024572683601551504,
+                0.01759113251732042,
+                0.014713913562884035,
+                0.02880748337522809
+              ],
+              "ig": [
+                0.1993218681747021,
+                0.06003877017675222,
+                0.1334301396164574,
+                0.10348265071370406,
+                0.15114229569444432
+              ]
+            }
+          },
+          "signed": {
+            "agreement_sign": -1,
+            "per_row": {
+              "rows": 200,
+              "undefined_rows": 0,
+              "median": -0.4,
+              "mean": -0.38400000000000006,
+              "p10": -0.9,
+              "q1": -0.7,
+              "q3": -0.1,
+              "p90": 0.2,
+              "min": -1.0,
+              "max": 0.9,
+              "share_negative": 0.785
+            },
+            "mean_profile": 0.5,
+            "mean_token_profile": {
+              "ism": [
+                0.0050333921000762435,
+                0.002637502900422918,
+                0.005623861890477996,
+                -0.004108453828333882,
+                -0.014355043510234198
+              ],
+              "ig": [
+                0.17031757398701303,
+                -0.0035625346079996233,
+                0.12190269075005744,
+                0.009523317025450524,
+                0.03641974397469312
+              ]
+            }
+          }
+        }
+      },
+      "qualifier": "observed on 5 targets",
+      "qualifier_note": "This stratum's rows are PAM variants of 5 protospacers, so its n is 5 targets rather than its row count, and that count is never added to the other stratum's. Every pooled figure in this entry is a figure over variants of those 5 targets, which is why `per_target` repeats it target by target: a rate that holds on the pool because one target carries it is a different result from one that holds on all five.",
+      "per_target": [
+        {
+          "protospacer": "GTTCACGACGTCATGCTCAC",
+          "rows": 45,
+          "per_row_median": {
+            "magnitude": {
+              "SpCas9": 0.7,
+              "SpCas9-NG": 0.7,
+              "evoCas9": 0.1
+            },
+            "signed": {
+              "SpCas9": -0.7,
+              "SpCas9-NG": -0.8,
+              "evoCas9": -0.5
+            }
+          }
+        },
+        {
+          "protospacer": "GTCGCTTCCTCTTCTCCTTC",
+          "rows": 41,
+          "per_row_median": {
+            "magnitude": {
+              "SpCas9": 0.7,
+              "SpCas9-NG": 0.7,
+              "evoCas9": 0.3
+            },
+            "signed": {
+              "SpCas9": -0.5,
+              "SpCas9-NG": -0.8,
+              "evoCas9": -0.3
+            }
+          }
+        },
+        {
+          "protospacer": "GGTCAGGCTCCATGTGCCGC",
+          "rows": 39,
+          "per_row_median": {
+            "magnitude": {
+              "SpCas9": 0.5,
+              "SpCas9-NG": 0.6,
+              "evoCas9": 0.2
+            },
+            "signed": {
+              "SpCas9": -0.6,
+              "SpCas9-NG": -0.8,
+              "evoCas9": 0.0
+            }
+          }
+        },
+        {
+          "protospacer": "GACCCAAGCCACGAACGAGC",
+          "rows": 38,
+          "per_row_median": {
+            "magnitude": {
+              "SpCas9": 0.35,
+              "SpCas9-NG": 0.45,
+              "evoCas9": 0.25
+            },
+            "signed": {
+              "SpCas9": -0.6,
+              "SpCas9-NG": -0.6,
+              "evoCas9": -0.6499999999999999
+            }
+          }
+        },
+        {
+          "protospacer": "GGCGCCCACACTCGTGCAGC",
+          "rows": 37,
+          "per_row_median": {
+            "magnitude": {
+              "SpCas9": 0.8,
+              "SpCas9-NG": 0.7,
+              "evoCas9": 0.3
+            },
+            "signed": {
+              "SpCas9": -0.9,
+              "SpCas9-NG": -0.9,
+              "evoCas9": -0.5
+            }
+          }
+        }
+      ]
+    }
+  },
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  },
+  "consumed": {
+    "ism": {
+      "name": "ism.npz",
+      "sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b",
+      "sidecar": {
+        "code_ref": "8a02f86c8dfba8fc218b8820124b2e6963f7dc96",
+        "population": "analysis_intersection",
+        "population_digest": "e09ad05ee43943fbc1e8b25629d6f456b224bb120a9244e29f318bf3548379a6",
+        "delta_sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b",
+        "delta_scale": "fraction",
+        "versions": {
+          "numpy": "2.4.6",
+          "pandas": "2.2.3",
+          "torch": "2.11.0+cu130",
+          "transformers": "5.8.1"
+        }
+      }
+    },
+    "split": {
+      "name": "test.csv",
+      "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "split_checksum_pin_checked": true
+    },
+    "ig": {
+      "name": "ig.npz",
+      "sha256": "e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2",
+      "sidecar": {
+        "code_ref": "a1999e36b693caf4864838baeb9fc03ebd08f2a8",
+        "rows": 400,
+        "steps": 200,
+        "token_names": [
+          "left_flank_plus_protospacer_5prime",
+          "protospacer_6_11",
+          "protospacer_12_17",
+          "protospacer_18_23",
+          "pam_plus_right_flank"
+        ],
+        "subset": {
+          "manifest": "ig_subset.json",
+          "seed": 129,
+          "rows_per_stratum": 200,
+          "membership_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+          "stratum_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+          "note": "`membership_digest` identifies the whole 400-row manifest; `stratum_digest` is this artifact's own rows within it. Two IG artifacts address the same subset iff the first matches. A combined write addresses the whole manifest, so the two digests coincide — and that equality is the check that this artifact is the full subset rather than one stratum's half."
+        },
+        "attribution_sha256": "e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2",
+        "versions": {
+          "numpy": "2.4.6",
+          "pandas": "2.2.3",
+          "torch": "2.11.0+cu130",
+          "transformers": "5.8.1"
+        }
+      }
+    }
+  }
+}

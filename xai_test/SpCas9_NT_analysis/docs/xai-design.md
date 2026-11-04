@@ -450,6 +450,17 @@ artifacts/v3_noise_floor.json          + v3_noise_floor_checksum.json   # AC14
 The noise floor sits at the artifacts root rather than in a directory of its own, which is where
 the other two live: AC14 names that path outright and AC13's consumer reads it.
 
+The **reports** are tracked JSON for the same reason, written by `python v3_report.py`:
+
+```
+artifacts/v3_report/ig_ism_validation.json      # AC10
+artifacts/v3_report/head_order_reversal.json    # AC13
+artifacts/v3_cases/cases_annotated.json         # the annotation, beside what it points at
+```
+
+`cases_annotated.json` sits in `v3_cases/` rather than in `v3_report/` because the file it
+addresses by `case_id` lives there, and the pair is read together.
+
 The frozen lists are written by `python v3_selection.py` from the split and the prediction export
 alone, and both record those two files' SHA-256 — `test.csv`'s against the pin in
 `published_split/split_checksum.json`, which stops a selection drawn against the wrong bytes at
@@ -554,6 +565,52 @@ Two independent layers, because they catch different failures:
 2. **Interpretation** — rank correlation between each head's IG token profile and its ISM profile
    aggregated to the same 5 tokens, reported per stratum. Disagreement here is not a bug: it marks
    the limit of what the token-level attribution supports, and is reported as such.
+
+**Measured** (`ig_ism_validation.json`, per-row medians over the 200 rows each stratum
+contributes to the frozen subset, magnitude variant): `SpCas9` 0.70 / 0.70,
+`SpCas9-NG` 0.55 / 0.70, `evoCas9` **0.00 / 0.30** (generalisation / library). The two techniques
+line up on the head the analysis is about and do not on `evoCas9` — the same head that is the
+outlier in cross-head agreement and whose replicate noise floor is a seventh of the others'. The
+library stratum's figures are reported per target too (`SpCas9` 0.35-0.80 across the five), since
+200 PAM variants of 5 protospacers are not 200 independent observations.
+That is reported as the limit of token-resolution attribution on a head with little signal to
+attribute, not as a defect to chase: ADR 0007 says the last token merges the PAM with the right
+flank, so base-resolution ISM and token-resolution IG have no reason to coincide.
+
+The comparison is run in **two variants** and they answer different questions. `magnitude` asks
+whether the two rank the tokens alike; `signed` asks whether they agree about direction, and there
+agreement is a **negative** correlation — IG's sign is what the base present contributes, an ISM
+delta's is what substituting it away does, so the two run opposite on a token the model leans on.
+The artifact carries `agreement_sign` per variant rather than leaving a reader to discover that a
+median of -0.70 is the agreeing case.
+
+### Reversal, reported against the floor
+
+`head_order_reversal.json` is AC13. On the 3,851-row intersection, **204** rows have Kendall
+tau < 0 and **one** of those holds a tied measured pair, which has no ordering to reverse — so
+**203** reversals, the figure the case-selection decision rests on. They concentrate in the
+library stratum (169, against 13 in the generalisation stratum), which is the result rather than
+a rounding of it.
+
+The margin is **per head pair**, the larger of its two heads' floors, and never the pooled
+constant — the three floors span 7.1x, so one constant is five times too generous for `evoCas9`.
+Under it **one row** of 203 clears, and it is in the generalisation stratum: **no library-stratum
+reversal clears its floor at all**. The distribution is what carries the finding — the median
+inverted pair is separated by `0.146` of its floor, roughly a seventh of the assay's own spread,
+and the widest reaches only 2.3x. The pooled rule is counted beside it (also one row), for
+continuity with the figure the design doc first quoted.
+
+The library stratum's 169 are reported **per target** as well as pooled, because a pooled rate one
+target carries is a different result from one that holds on all five. It is the second: the rate
+runs from **0.027 to 0.209** across the five targets, so the concentration is real and uneven
+rather than one target's artefact — and no target holds a reversal that clears its own floor.
+
+Reversal is therefore a reported result and **not** a selection pool, which the artifact states
+as `selection_pool: forbidden`; the report carries counts and distributions and no list of rows
+to pick from. The floor's limit — 79 repeated 30-mers over 379 rows, out of the split's 779
+groups and 2,247 rows — is copied out of `v3_noise_floor.json` at read time, and
+`read_noise_floor` refuses a payload that cannot state it or whose bytes do not match the
+checksum beside it.
 
 ## Tracking
 

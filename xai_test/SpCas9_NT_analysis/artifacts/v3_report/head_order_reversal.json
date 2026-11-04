@@ -1,0 +1,544 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "head_order_reversal",
+  "inputs": [
+    "predictions",
+    "labels",
+    "noise_floor"
+  ],
+  "statistic": "kendall_tau_a",
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "head_pairs": [
+    [
+      "SpCas9",
+      "SpCas9-NG"
+    ],
+    [
+      "SpCas9",
+      "evoCas9"
+    ],
+    [
+      "SpCas9-NG",
+      "evoCas9"
+    ]
+  ],
+  "reversal_definition": "A row whose predicted ordering of the analysed heads disagrees with their measured ordering: Kendall tau (tau-a over the three head pairs, concordant minus discordant over 3) below zero, with no tied pair on either side. The tau is taken per row across heads - it says nothing about how the heads rank rows.",
+  "tie_policy": "A pair whose two measured labels are equal has no ordering to reverse, and tau is deflated rather than negative on such a row, so a row with a tied pair (on either side) is counted under `tied_rows` and left out of `reversal_rows`. `tau_negative_rows` counts every negative tau, so the difference between the two is visible rather than silent.",
+  "selection_pool": "forbidden",
+  "selection_pool_note": "Head-order reversal is a reported result and not a case-selection pool (#129 AC9). Requiring every inverted pair to clear the replicate noise floor leaves a single row, so lowering the margin to fill a pool would report measurement noise as model failure. Case selection uses cross-head error disagreement instead, from predictions and labels alone. This report therefore carries counts and distributions, and no list of rows to pick from.",
+  "floor": {
+    "source": "v3_noise_floor.json",
+    "statistic": "median",
+    "by_head": {
+      "SpCas9": 0.06369654084787613,
+      "SpCas9-NG": 0.06968931063858598,
+      "evoCas9": 0.009872877232830207
+    },
+    "pair_floors": {
+      "SpCas9_vs_SpCas9-NG": 0.06968931063858598,
+      "SpCas9_vs_evoCas9": 0.06369654084787613,
+      "SpCas9-NG_vs_evoCas9": 0.06968931063858598
+    },
+    "pair_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+    "pair_floor_note": "The larger of the two, not the mean and never the pooled constant: the pair is ordered within noise unless its gap clears both heads, and the three per-head floors span head_floor_ratio. The pooled rule is counted separately as `pooled_rule_rows` for continuity with the figure the design doc first quoted, and is not what `rows` applies.",
+    "head_floor_ratio": 7.058662737833772,
+    "pooled_median": 0.05305466639679558,
+    "pooled_applied": false,
+    "gap_source": "measured_labels",
+    "gap_note": "The gap is between the two heads' **measured labels**, on the fraction scale: whether the true ordering is resolvable by the assay at all is what the noise floor answers. The predicted gap is summarised beside it and is not what the margin tests - a confident model separating two measurements that the assay cannot separate is the failure mode this margin exists to catch.",
+    "limit": {
+      "source": "v3_noise_floor.json",
+      "groups": 79,
+      "rows": 379,
+      "intersection_rows": 3851,
+      "repeated_groups_in_split": 779,
+      "repeated_rows_in_split": 2247,
+      "note": "The floor rests on the repeated 30-mers of one split, and on the subset of them that survives the analysis intersection: groups and rows against intersection_rows, and against repeated_groups_in_split and repeated_rows_in_split, which are what the uncut split holds. The cut is the sharpest edge of the limit - most repeated 30-mers are not measured on all three analysed heads - so a report that uses the floor states both pairs of counts."
+    }
+  },
+  "label_scale": "fraction",
+  "prediction_scale": "fraction",
+  "population": {
+    "rows": 3851,
+    "distinct_protospacers": 2269,
+    "tau": {
+      "rows": 3851,
+      "undefined_rows": 0,
+      "median": 1.0,
+      "mean": 0.7626590495975072,
+      "p10": 0.3333333333333333,
+      "q1": 0.3333333333333333,
+      "q3": 1.0,
+      "p90": 1.0,
+      "min": -1.0,
+      "max": 1.0,
+      "share_negative": 0.05297325370033758
+    },
+    "tau_negative_rows": 204,
+    "tied_rows": 64,
+    "tied_rows_with_negative_tau": 1,
+    "reversal_rows": 203,
+    "reversal_rate": 0.05271358088808102,
+    "inverted_pairs": {
+      "SpCas9_vs_SpCas9-NG": {
+        "rows": 141,
+        "floor": 0.06968931063858598,
+        "label_gap": {
+          "rows": 141,
+          "undefined_rows": 0,
+          "median": 0.010499323025457762,
+          "mean": 0.014087188594749814,
+          "p10": 0.0023682808983543566,
+          "q1": 0.00479878298983469,
+          "q3": 0.017183003965685013,
+          "p90": 0.03121818709038818,
+          "min": 0.0002470100360527465,
+          "max": 0.12067895448331138,
+          "share_negative": 0.0
+        },
+        "prediction_gap": {
+          "rows": 141,
+          "undefined_rows": 0,
+          "median": 0.016062974013689103,
+          "mean": 0.027911786851864063,
+          "p10": 0.0032337418094420998,
+          "q1": 0.007630565961667498,
+          "q3": 0.0321536354773286,
+          "p90": 0.06083272466353411,
+          "min": 0.00030076276206619963,
+          "max": 0.2281196765678696,
+          "share_negative": 0.0
+        },
+        "rows_clearing_floor": 1
+      },
+      "SpCas9_vs_evoCas9": {
+        "rows": 154,
+        "floor": 0.06369654084787613,
+        "label_gap": {
+          "rows": 154,
+          "undefined_rows": 0,
+          "median": 0.01021319644340067,
+          "mean": 0.014102815003317197,
+          "p10": 0.0019507974000428775,
+          "q1": 0.0053699415585976,
+          "q3": 0.017757120625270417,
+          "p90": 0.029652804000115447,
+          "min": 6.0942292086941467e-05,
+          "max": 0.10978360846202262,
+          "share_negative": 0.0
+        },
+        "prediction_gap": {
+          "rows": 154,
+          "undefined_rows": 0,
+          "median": 0.0113256032976503,
+          "mean": 0.03283965282089726,
+          "p10": 0.0021195287529023306,
+          "q1": 0.006145849563941125,
+          "q3": 0.016484086118872174,
+          "p90": 0.05942996427427604,
+          "min": 5.7934411417500265e-05,
+          "max": 0.4758186057587928,
+          "share_negative": 0.0
+        },
+        "rows_clearing_floor": 1
+      },
+      "SpCas9-NG_vs_evoCas9": {
+        "rows": 172,
+        "floor": 0.06968931063858598,
+        "label_gap": {
+          "rows": 172,
+          "undefined_rows": 0,
+          "median": 0.008340048961601905,
+          "mean": 0.015432108050316177,
+          "p10": 0.001185982299682013,
+          "q1": 0.003534964240061647,
+          "q3": 0.017943659964341285,
+          "p90": 0.02774862530831504,
+          "min": 0.00014166481205492298,
+          "max": 0.16258334781296752,
+          "share_negative": 0.0
+        },
+        "prediction_gap": {
+          "rows": 172,
+          "undefined_rows": 0,
+          "median": 0.02435815713467485,
+          "mean": 0.034401189697749884,
+          "p10": 0.00409257566251238,
+          "q1": 0.01002526004723605,
+          "q3": 0.04367880433818695,
+          "p90": 0.07095357283510113,
+          "min": 0.0003909826757285996,
+          "max": 0.2783289968256728,
+          "share_negative": 0.0
+        },
+        "rows_clearing_floor": 6
+      }
+    },
+    "gap_over_floor": {
+      "rows": 467,
+      "undefined_rows": 0,
+      "median": 0.14608803815728955,
+      "mean": 0.2156030848809872,
+      "p10": 0.025594716980980422,
+      "q1": 0.06114482084125351,
+      "q3": 0.2717759805493186,
+      "p90": 0.45222229870780395,
+      "min": 0.0009567598377514326,
+      "max": 2.3329739715196354,
+      "share_negative": 0.0
+    },
+    "clearing_floor": {
+      "rows": 1,
+      "share_of_reversals": 0.0049261083743842365,
+      "rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+      "pooled_rule_rows": 1,
+      "pooled_rule_note": "The same count under the single pooled median, for continuity with the figure the design doc first quoted. It is reported beside the per-head rule, not in place of it."
+    },
+    "name": "analysis_intersection"
+  },
+  "pooling": "forbidden",
+  "pooling_note": "One entry per stratum and no combined one. The two strata answer different questions over differently-shaped populations: generalisation is sequence generalisation on unseen protospacers, pam_library is a PAM experiment on 5 targets, so adding their row counts would add a sample size to a replication factor. `population` is not their sum either: the intersection also holds rows that are in **neither** stratum (non-library, non-NGG), which is why it is reported under its own name rather than as a total.",
+  "rollout_excluded": "Attention rollout is not an input. It has no head axis at all (docs/adr/0008-attention-rollout-is-head-invariant.md), so it cannot describe a per-head reading, and every figure here is per head.",
+  "claim_limit": "Every figure here describes the model's internal information use - which positions or tokens its prediction depends on, and how its heads order one row. None of it is a claim about physical DNA/protein interaction.",
+  "strata": {
+    "generalisation": {
+      "rows": 895,
+      "distinct_protospacers": 818,
+      "tau": {
+        "rows": 895,
+        "undefined_rows": 0,
+        "median": 1.0,
+        "mean": 0.885661080074488,
+        "p10": 0.3333333333333333,
+        "q1": 1.0,
+        "q3": 1.0,
+        "p90": 1.0,
+        "min": -1.0,
+        "max": 1.0,
+        "share_negative": 0.01452513966480447
+      },
+      "tau_negative_rows": 13,
+      "tied_rows": 1,
+      "tied_rows_with_negative_tau": 0,
+      "reversal_rows": 13,
+      "reversal_rate": 0.01452513966480447,
+      "inverted_pairs": {
+        "SpCas9_vs_SpCas9-NG": {
+          "rows": 6,
+          "floor": 0.06968931063858598,
+          "label_gap": {
+            "rows": 6,
+            "undefined_rows": 0,
+            "median": 0.007488322115713812,
+            "mean": 0.012456088964893551,
+            "p10": 0.0033845461390646404,
+            "q1": 0.004343258981437713,
+            "q3": 0.01038063732861014,
+            "p90": 0.026495398639902204,
+            "min": 0.003020442539313573,
+            "max": 0.04209980001569885,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 6,
+            "undefined_rows": 0,
+            "median": 0.11025220252343185,
+            "mean": 0.11957971075552994,
+            "p10": 0.06945751880359025,
+            "q1": 0.08147324065068577,
+            "q3": 0.13957635917199895,
+            "p90": 0.1790294109395677,
+            "min": 0.060234555982706495,
+            "max": 0.2155079720889843,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 0
+        },
+        "SpCas9_vs_evoCas9": {
+          "rows": 11,
+          "floor": 0.06369654084787613,
+          "label_gap": {
+            "rows": 11,
+            "undefined_rows": 0,
+            "median": 0.01756775575024999,
+            "mean": 0.028034986761497984,
+            "p10": 0.002680965147453083,
+            "q1": 0.005735353693819251,
+            "q3": 0.03358160313329017,
+            "p90": 0.06150952789224756,
+            "min": 0.0004856094015624259,
+            "max": 0.10978360846202262,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 11,
+            "undefined_rows": 0,
+            "median": 0.19887860451709116,
+            "mean": 0.27131025996358676,
+            "p10": 0.14272043811149798,
+            "q1": 0.16612172237032355,
+            "q3": 0.3656552153529322,
+            "p90": 0.44257294764880306,
+            "min": 0.13785579274556709,
+            "max": 0.4758186057587928,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 1
+        },
+        "SpCas9-NG_vs_evoCas9": {
+          "rows": 11,
+          "floor": 0.06968931063858598,
+          "label_gap": {
+            "rows": 11,
+            "undefined_rows": 0,
+            "median": 0.07764976834746157,
+            "mean": 0.08433605697824618,
+            "p10": 0.02905850926366757,
+            "q1": 0.057378718566403836,
+            "q3": 0.11752997414109556,
+            "p90": 0.13736357644921937,
+            "min": 0.010287887201936416,
+            "max": 0.16258334781296752,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 11,
+            "undefined_rows": 0,
+            "median": 0.0642908168753778,
+            "mean": 0.11106776639580797,
+            "p10": 0.04111578204041419,
+            "q1": 0.04735395931403999,
+            "q3": 0.14587209196809692,
+            "p90": 0.2751328936079396,
+            "min": 0.0329426881765133,
+            "max": 0.2783289968256728,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 6
+        }
+      },
+      "gap_over_floor": {
+        "rows": 28,
+        "undefined_rows": 0,
+        "median": 0.42210604792060413,
+        "mean": 0.6866352418346856,
+        "p10": 0.044013126156921885,
+        "q1": 0.1335835163217317,
+        "q3": 1.0043859490264753,
+        "p90": 1.7946140885650574,
+        "min": 0.0076237955012688555,
+        "max": 2.3329739715196354,
+        "share_negative": 0.0
+      },
+      "clearing_floor": {
+        "rows": 1,
+        "share_of_reversals": 0.07692307692307693,
+        "rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "pooled_rule_rows": 1,
+        "pooled_rule_note": "The same count under the single pooled median, for continuity with the figure the design doc first quoted. It is reported beside the per-head rule, not in place of it."
+      }
+    },
+    "pam_library": {
+      "rows": 1287,
+      "distinct_protospacers": 5,
+      "tau": {
+        "rows": 1287,
+        "undefined_rows": 0,
+        "median": 1.0,
+        "mean": 0.5602175602175602,
+        "p10": -0.3333333333333333,
+        "q1": 0.3333333333333333,
+        "q3": 1.0,
+        "p90": 1.0,
+        "min": -1.0,
+        "max": 1.0,
+        "share_negative": 0.13131313131313133
+      },
+      "tau_negative_rows": 169,
+      "tied_rows": 2,
+      "tied_rows_with_negative_tau": 0,
+      "reversal_rows": 169,
+      "reversal_rate": 0.13131313131313133,
+      "inverted_pairs": {
+        "SpCas9_vs_SpCas9-NG": {
+          "rows": 121,
+          "floor": 0.06968931063858598,
+          "label_gap": {
+            "rows": 121,
+            "undefined_rows": 0,
+            "median": 0.01123908599278058,
+            "mean": 0.014337195361358267,
+            "p10": 0.0023682808983543566,
+            "q1": 0.005036019181758604,
+            "q3": 0.017183003965685013,
+            "p90": 0.03121818709038818,
+            "min": 0.0002470100360527465,
+            "max": 0.12067895448331138,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 121,
+            "undefined_rows": 0,
+            "median": 0.014953724609553,
+            "mean": 0.02343054575753928,
+            "p10": 0.0028421881638021,
+            "q1": 0.007023845037078799,
+            "q3": 0.0292340641187642,
+            "p90": 0.0444696148104127,
+            "min": 0.00030076276206619963,
+            "max": 0.2281196765678696,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 1
+        },
+        "SpCas9_vs_evoCas9": {
+          "rows": 128,
+          "floor": 0.06369654084787613,
+          "label_gap": {
+            "rows": 128,
+            "undefined_rows": 0,
+            "median": 0.01130645693980967,
+            "mean": 0.013751881280654736,
+            "p10": 0.002528145479314882,
+            "q1": 0.0056164659563124825,
+            "q3": 0.017843302782823346,
+            "p90": 0.028887719709501714,
+            "min": 6.0942292086941467e-05,
+            "max": 0.055821077679001185,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 128,
+            "undefined_rows": 0,
+            "median": 0.011128364965421599,
+            "mean": 0.013754973967107873,
+            "p10": 0.00262038001921896,
+            "q1": 0.006333882755640025,
+            "q3": 0.014842066661151052,
+            "p90": 0.02025680842418622,
+            "min": 5.7934411417500265e-05,
+            "max": 0.2065380091376657,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 0
+        },
+        "SpCas9-NG_vs_evoCas9": {
+          "rows": 143,
+          "floor": 0.06968931063858598,
+          "label_gap": {
+            "rows": 143,
+            "undefined_rows": 0,
+            "median": 0.0078020706394446825,
+            "mean": 0.010847537757829193,
+            "p10": 0.0011959136485419205,
+            "q1": 0.0035341058555301225,
+            "q3": 0.01570051265805469,
+            "p90": 0.02130408889370698,
+            "min": 0.00014166481205492298,
+            "max": 0.05617225670430266,
+            "share_negative": 0.0
+          },
+          "prediction_gap": {
+            "rows": 143,
+            "undefined_rows": 0,
+            "median": 0.023616275622553598,
+            "mean": 0.028258163658019562,
+            "p10": 0.0037611420714348796,
+            "q1": 0.0096693862637577,
+            "q3": 0.0375291564514949,
+            "p90": 0.05907146926884653,
+            "min": 0.0003909826757285996,
+            "max": 0.1231908667533034,
+            "share_negative": 0.0
+          },
+          "rows_clearing_floor": 0
+        }
+      },
+      "gap_over_floor": {
+        "rows": 392,
+        "undefined_rows": 0,
+        "median": 0.14975287741136817,
+        "mean": 0.19078293732592577,
+        "p10": 0.027755231455821976,
+        "q1": 0.06548263233363177,
+        "q3": 0.25418184425106527,
+        "p90": 0.3985881321669405,
+        "min": 0.0009567598377514326,
+        "max": 1.7316709460531405,
+        "share_negative": 0.0
+      },
+      "clearing_floor": {
+        "rows": 0,
+        "share_of_reversals": 0.0,
+        "rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "pooled_rule_rows": 0,
+        "pooled_rule_note": "The same count under the single pooled median, for continuity with the figure the design doc first quoted. It is reported beside the per-head rule, not in place of it."
+      },
+      "qualifier": "observed on 5 targets",
+      "qualifier_note": "This stratum's rows are PAM variants of 5 protospacers, so its n is 5 targets rather than its row count, and that count is never added to the other stratum's. Every pooled figure in this entry is a figure over variants of those 5 targets, which is why `per_target` repeats it target by target: a rate that holds on the pool because one target carries it is a different result from one that holds on all five.",
+      "per_target": [
+        {
+          "protospacer": "GTCGCTTCCTCTTCTCCTTC",
+          "rows": 268,
+          "reversal_rows": 18,
+          "reversal_rate": 0.06716417910447761,
+          "rows_clearing_floor": 0,
+          "gap_over_floor_median": 0.12346642969711866
+        },
+        {
+          "protospacer": "GTTCACGACGTCATGCTCAC",
+          "rows": 264,
+          "reversal_rows": 7,
+          "reversal_rate": 0.026515151515151516,
+          "rows_clearing_floor": 0,
+          "gap_over_floor_median": 0.11942163149914185
+        },
+        {
+          "protospacer": "GACCCAAGCCACGAACGAGC",
+          "rows": 258,
+          "reversal_rows": 45,
+          "reversal_rate": 0.1744186046511628,
+          "rows_clearing_floor": 0,
+          "gap_over_floor_median": 0.1059894195394831
+        },
+        {
+          "protospacer": "GGTCAGGCTCCATGTGCCGC",
+          "rows": 258,
+          "reversal_rows": 54,
+          "reversal_rate": 0.20930232558139536,
+          "rows_clearing_floor": 0,
+          "gap_over_floor_median": 0.17240579750097246
+        },
+        {
+          "protospacer": "GGCGCCCACACTCGTGCAGC",
+          "rows": 239,
+          "reversal_rows": 45,
+          "reversal_rate": 0.18828451882845187,
+          "rows_clearing_floor": 0,
+          "gap_over_floor_median": 0.17854526840150076
+        }
+      ]
+    }
+  },
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  },
+  "consumed": {
+    "split": "test.csv",
+    "predictions": "predictions.csv",
+    "digests": {
+      "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "predictions.csv": "7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a",
+      "v3_noise_floor.json": "e47cd4beecc86934fe801cbb3c2b7c41ea1c492b10e6d7a75dfb2d7a867183d5"
+    },
+    "split_checksum_pin_checked": true,
+    "noise_floor": "v3_noise_floor.json"
+  }
+}

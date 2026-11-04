@@ -1,0 +1,10 @@
+# Every artifact in this subtree is written by `v3_predict.write_sidecar`,
+# which pins UTF-8 and LF so that "a sidecar whose bytes depend on the
+# platform cannot be checksummed" holds. Three of them are addressed by a
+# SHA-256 in a checksum file beside them — `cases.json`, `ig_subset.json` and
+# `v3_noise_floor.json` — and `core.autocrlf` is true in this repo, so without
+# this line a fresh Windows checkout would materialise CRLF and every one of
+# those digests would stop matching the bytes on disk. `v3_report` verifies
+# the floor's and the case table's digests when it reads them back, so the
+# reports would refuse to build rather than quietly disagree.
+*.json text eol=lf
