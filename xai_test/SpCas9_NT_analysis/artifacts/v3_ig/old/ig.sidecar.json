@@ -1,0 +1,129 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "integrated_gradients",
+  "stratum": "all",
+  "strata": [
+    "generalisation",
+    "pam_library"
+  ],
+  "stratum_note": "One archive over the whole frozen subset: axis 0 is every row of both strata, `row_index` ascending. There is no per-row stratum array — the manifest named by `subset.manifest` carries the stratum, the cell and the selection order per row, and joining them from there keeps one list authoritative instead of copying it into an array that can drift from it.",
+  "rows": 400,
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "steps": 50,
+  "attribution_point": "encoder_input_embedding",
+  "baseline": "zero_embedding",
+  "attribution_note": "Gradients are taken on the encoder input embedding with a zero-embedding baseline (ADR 0006). The hidden axis is summed away, so one value per token per head.",
+  "token_resolution": 5,
+  "token_names": [
+    "left_flank_plus_protospacer_5prime",
+    "protospacer_6_11",
+    "protospacer_12_17",
+    "protospacer_18_23",
+    "pam_plus_right_flank"
+  ],
+  "token_boundaries": [
+    [
+      0,
+      5
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      12,
+      17
+    ],
+    [
+      18,
+      23
+    ],
+    [
+      24,
+      29
+    ]
+  ],
+  "token_resolution_note": "ADR 0007: the last token carries PAM (24-26) and the right flank (27-29) together, so it is named 'pam_plus_right_flank'. No base-level PAM attribution is derivable from this artifact; ISM carries that result.",
+  "f_baseline": {
+    "SpCas9": -0.9914194345474243,
+    "SpCas9-NG": -0.4648137092590332,
+    "VRQR variant": -0.1400119811296463,
+    "xCas": -0.9443535208702087,
+    "Sniper-Cas9": -0.9610062837600708,
+    "SpCas9-HF.1": -0.5956054925918579,
+    "eSpCas9(1.1)": -0.7428500652313232,
+    "HypaCas9": -0.706660270690918,
+    "evoCas9": -0.3936971426010132
+  },
+  "f_baseline_note": "f(0) at the zero embedding, for all nine heads. The three analysed heads' values are the ones the completeness residual is measured against; the other six are recorded, not analysed.",
+  "special_attribution_note": "`special_attribution` is the share landing on <cls> and the padding, per row and head. It is not part of the reported profile; it is stored so the completeness residual reads as integration error rather than an accounting gap, and so f(x) is recoverable from the artifact alone.",
+  "completeness": {
+    "tolerance": {
+      "absolute_floor": 0.01,
+      "relative": 0.05
+    },
+    "rule": "|residual| <= max(absolute_floor, relative * |f(x) - f(0)|)",
+    "rows": 400,
+    "checks": 1200,
+    "passing": 1020,
+    "failing": 180,
+    "pass_rate": 0.85,
+    "max_abs_residual": 0.6901131053523599,
+    "median_abs_residual": 0.010271467644888108,
+    "per_head": {
+      "pass_rate": [
+        0.85,
+        0.8775,
+        0.8225
+      ],
+      "max_abs_residual": [
+        0.6901131053523599,
+        0.33541382033185374,
+        0.14890811027615458
+      ]
+    },
+    "enforced": false,
+    "enforcement_note": "Reported, not enforced: a failing row is recorded and the run continues. The strict 1e-2 relative check lives in the unit tests against the toy model."
+  },
+  "subset": {
+    "manifest": "ig_subset.json",
+    "seed": 129,
+    "rows_per_stratum": 200,
+    "membership_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+    "stratum_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+    "note": "`membership_digest` identifies the whole 400-row manifest; `stratum_digest` is this artifact's own rows within it. Two IG artifacts address the same subset iff the first matches. A combined write addresses the whole manifest, so the two digests coincide — and that equality is the check that this artifact is the full subset rather than one stratum's half."
+  },
+  "code_ref": "10323e26dbc940c0c96ce7a7148961a7089bac20",
+  "split": {
+    "path": "/content/drive/MyDrive/SpCas9/test.csv",
+    "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+  },
+  "versions": {
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.8.1"
+  },
+  "nan_policy": "forbidden",
+  "checkpoint": {
+    "path": "/content/drive/MyDrive/SpCas9/spcas9_v3/nt_v3_seed42",
+    "files": {
+      "config.json": "62028537178f176962cc59530b31abe4947a82ed5053b9f6918c5e9e1a5caf4d",
+      "mu_sd.npy": "a7a5c3ccd2a584752b4dab451889ca2a8f55a2e6c221a3735b9c593ef6cbaf27",
+      "vocab.txt": "f1b544e27897936b50bbd925850fa8a08b421c33bb9c26e3711c140c061d0d4c"
+    }
+  },
+  "code_ref_verified_by": "module_sha256",
+  "module_sha256": {
+    "v3_ig.py": "95f8723baaa43ef7c15e0019a8add2a2cc64dec5ca024aa79e2fbe00b31764c9",
+    "v3_predict.py": "fb18ba0c570e965d75d1f7f9532fc42c8fe1e955d086262421409470530f38fc",
+    "v3_selection.py": "e2543e4d6cd6801ce9968be5c4c344b03d236b15d48e0e2b3a34a6df7485bc3e",
+    "v3_strata.py": "b381e57162520e2af5ecad42e47d8eceedc5a6b550944b40e7ccfb6557a1a9e3"
+  },
+  "batch_size": 8,
+  "attribution_sha256": "1ee923cee387bb58bfb586afc0429b06e85377dadf5d80e74dd1801ec8c8205c"
+}
