@@ -54,10 +54,10 @@ from v3_predict import (
     MAX_LENGTH,
     SEQUENCE_LENGTH,
     checkpoint_digests,
+    device_of,
     library_versions,
-    sha256_of,
     validate_sequences,
-    write_sidecar,
+    write_array_artifact,
 )
 from v3_strata import ANALYSED_HEADS, STRATUM_NAMES
 
@@ -271,17 +271,6 @@ def head_indices(heads: Sequence[str]) -> list[int]:
     if unknown:
         raise ValueError(f"unknown heads {unknown}; v3's heads are {list(HEADS)}")
     return [HEADS.index(head) for head in heads]
-
-
-def device_of(model: Any) -> Any:
-    """The device the model's weights live on.
-
-    IG runs on Colab's GPU while the tokenizer always returns CPU tensors, so
-    every entry point reads the device off the model rather than taking it as
-    an argument: a mismatch surfaces as a `RuntimeError` on the first forward
-    pass, after the caller has already paid for loading a 500M checkpoint.
-    """
-    return next(model.parameters()).device
 
 
 def encode(
@@ -560,9 +549,6 @@ def write_ig_artifact(
         raise ValueError(
             f"unknown stratum {stratum!r}; expected one of {list(STRATUM_NAMES)}"
         )
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
     arrays = {
         "attribution": result.attribution.astype(np.float32),
         "completeness_residual": result.completeness_residual.astype(np.float64),
@@ -570,19 +556,10 @@ def write_ig_artifact(
         "row_index": result.row_index.astype(np.int64),
     }
     validate_artifact_keys(arrays)
-    for name, array in arrays.items():
-        if not np.isfinite(array).all():
-            raise ValueError(f"{name} holds a non-finite value; NaN is forbidden")
-    if np.any(np.diff(arrays["row_index"]) <= 0):
-        raise ValueError("row_index must be written strictly ascending")
     try:
         assert_nonzero_attribution(result)
     except AssertionError as zero:
         raise ValueError(str(zero)) from zero
-
-    path = out_dir / "ig.npz"
-    with open(path, "wb") as handle:
-        np.savez(handle, **arrays)
 
     report = completeness_report(
         result.completeness_residual, result.f_x, result.f_baseline
@@ -635,7 +612,6 @@ def write_ig_artifact(
         }
     if extra:
         sidecar.update(extra)
-    sidecar["attribution_sha256"] = sha256_of(path)
-
-    write_sidecar(out_dir, "ig.sidecar.json", sidecar)
-    return path
+    return write_array_artifact(
+        out_dir, "ig.npz", arrays, sidecar, digest_key="attribution_sha256"
+    )

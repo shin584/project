@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -124,6 +124,53 @@ def build_prediction_frame(
     return frame
 
 
+def device_of(model: object) -> object:
+    """The device the model's weights live on.
+
+    Every entry point reads the device off the model rather than taking it as
+    an argument: on Colab the model is on the GPU while the tokenizer always
+    returns CPU tensors, and a mismatch surfaces as a `RuntimeError` on the
+    first forward pass, after the caller has already paid for loading a 500M
+    checkpoint.
+    """
+    return next(model.parameters()).device
+
+
+def model_forward_fn(
+    model: object,
+    tokenizer: object,
+    *,
+    batch_size: int = 64,
+    max_length: int = MAX_LENGTH,
+) -> ForwardFn:
+    """Wrap a loaded model and tokenizer as a batched `ForwardFn`.
+
+    Separate from :func:`make_forward_fn` so a model that is not a checkpoint
+    directory — the small in-test ESM the IG and ISM unit tests build — reaches
+    the same batching, padding and device handling as the real run, rather than
+    each test re-deriving the loop it is supposed to be testing.
+    """
+    import torch
+
+    def forward_fn(sequences: Sequence[str]) -> np.ndarray:
+        device = device_of(model)
+        outputs = []
+        for start in range(0, len(sequences), batch_size):
+            batch = list(sequences[start : start + batch_size])
+            encoded = tokenizer(
+                batch,
+                padding="max_length",
+                truncation=True,
+                max_length=max_length,
+                return_tensors="pt",
+            ).to(device)
+            with torch.no_grad():
+                outputs.append(model(**encoded).logits.float().cpu().numpy())
+        return np.concatenate(outputs) if outputs else np.empty((0, len(HEADS)))
+
+    return forward_fn
+
+
 def make_forward_fn(
     checkpoint_dir: str | Path,
     *,
@@ -144,23 +191,9 @@ def make_forward_fn(
         .eval()
         .to(device)
     )
-
-    def forward_fn(sequences: Sequence[str]) -> np.ndarray:
-        outputs = []
-        for start in range(0, len(sequences), batch_size):
-            batch = list(sequences[start : start + batch_size])
-            encoded = tokenizer(
-                batch,
-                padding="max_length",
-                truncation=True,
-                max_length=max_length,
-                return_tensors="pt",
-            ).to(device)
-            with torch.no_grad():
-                outputs.append(model(**encoded).logits.float().cpu().numpy())
-        return np.concatenate(outputs) if outputs else np.empty((0, len(HEADS)))
-
-    return forward_fn
+    return model_forward_fn(
+        model, tokenizer, batch_size=batch_size, max_length=max_length
+    )
 
 
 def sha256_of(path: str | Path, *, chunk_size: int = 1 << 20) -> str:
@@ -169,6 +202,20 @@ def sha256_of(path: str | Path, *, chunk_size: int = 1 << 20) -> str:
         while chunk := handle.read(chunk_size):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def population_digest(row_index: Sequence[int] | np.ndarray) -> str:
+    """SHA-256 over the rows an artifact covers, as big-endian int64.
+
+    What a sidecar carries so two artifacts can be shown to address the same
+    population without re-deriving it. Order-sensitive, which is the point:
+    axis 0 is `row_index`-ascending by contract, so a reordered population is
+    a different one. Big-endian is explicit because a digest that differed
+    between a Colab run and a local check would be worse than none.
+    """
+    return hashlib.sha256(
+        np.asarray(row_index, dtype=np.int64).astype(">i8").tobytes(order="C")
+    ).hexdigest()
 
 
 def library_versions() -> dict[str, str | None]:
@@ -211,6 +258,44 @@ def write_sidecar(out_dir: str | Path, name: str, payload: dict[str, object]) ->
         encoding="utf-8",
         newline="\n",
     )
+    return path
+
+
+def write_array_artifact(
+    out_dir: str | Path,
+    name: str,
+    arrays: Mapping[str, np.ndarray],
+    sidecar: dict[str, object],
+    *,
+    digest_key: str,
+) -> Path:
+    """Write one analysis's `.npz` and its sidecar, with the shared guards.
+
+    The design gives all three v3 analyses the same two archive-wide
+    invariants, so they are asserted here rather than once per writer: **no
+    array holds a non-finite value** (a NaN in any of them can only be a bug —
+    every row has a prediction for every head), and **`row_index` is written
+    strictly ascending**, which is the only identity between a 3,851-row
+    artifact and a 400-row one.
+
+    `digest_key` is the sidecar field that takes the archive's SHA-256; it
+    differs per analysis because it names that analysis's principal array.
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for key, array in arrays.items():
+        if not np.isfinite(array).all():
+            raise ValueError(f"{key} holds a non-finite value; NaN is forbidden")
+    if np.any(np.diff(np.asarray(arrays["row_index"])) <= 0):
+        raise ValueError("row_index must be written strictly ascending")
+
+    path = out_dir / name
+    with open(path, "wb") as handle:
+        np.savez(handle, **arrays)
+
+    sidecar[digest_key] = sha256_of(path)
+    write_sidecar(out_dir, f"{path.stem}.sidecar.json", sidecar)
     return path
 
 

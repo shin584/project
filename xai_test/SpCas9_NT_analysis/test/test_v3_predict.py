@@ -240,3 +240,31 @@ def test_export_predictions_is_byte_reproducible(tmp_path):
         )
         digests.append(v3_predict.sha256_of(path))
     assert digests[0] == digests[1]
+
+
+# --- population digest -----------------------------------------------------
+
+
+def test_the_population_digest_is_the_same_whatever_carries_the_rows():
+    assert v3_predict.population_digest([5, 11, 30]) == v3_predict.population_digest(
+        np.array([5, 11, 30], dtype=np.int64)
+    )
+
+
+def test_the_population_digest_distinguishes_the_rows_and_their_order():
+    """Order-sensitive on purpose: axis 0 is `row_index`-ascending by contract,
+    so a reordered population is a different population, not the same one."""
+    base = v3_predict.population_digest([5, 11, 30])
+    assert base != v3_predict.population_digest([5, 11, 31])
+    assert base != v3_predict.population_digest([30, 11, 5])
+    assert base != v3_predict.population_digest([5, 11, 30, 31])
+
+
+def test_the_population_digest_does_not_depend_on_the_machine():
+    # Pinned, not self-consistent: a digest that differed between a Colab run
+    # and a local check would be worse than none, so the byte layout is fixed
+    # (big-endian int64) rather than left to the platform.
+    assert (
+        v3_predict.population_digest([5, 11, 30])
+        == "bff1f1e8fa980d5d270087d5324c4bf8e6b7e055dfee033040959637a932532a"
+    )

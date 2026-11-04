@@ -174,7 +174,15 @@ Applied:
    markedly smaller completeness residual, and the residual is the audit signal for ADR 0006
    rather than a diagnostic to be explained away.
 2. **In-silico saturation mutagenesis (ISM)** — all 30 positions x 3 alternative bases, delta
-   against wild type. Carries the per-base PAM result.
+   against wild type. Carries the per-base PAM result. Implemented in `v3_ism.py`. The delta is
+   **absolute**, on the fraction scale (`(mutant - wild type) * sd`, so `mu` cancels), not
+   SaCas9's relative `(mutant - wt) / |wt|`: that ratio is unbounded as the wild-type score
+   approaches zero, which is why `ism_sweep.py` NaN-masks it — and NaN is forbidden here. The
+   sweep runs in **row shards** written to a checkpoint directory as they complete, so a Colab
+   disconnect or an OOM costs the unfinished shards rather than all ~350K forward passes, and the
+   **batch size is an argument recorded in the sidecar** rather than a constant: `outOfMemory.md`
+   records SaCas9's ISM sweep dying inside a forward pass, and a batch size that is not written
+   down makes that report unactionable.
 3. **Attention rollout** — per-layer `0.5*A + 0.5*I` then row-normalise, `<cls>` removed, reported
    as **information dependency** between token positions, not physical interaction. Stored and
    reported at **5x5 token resolution** and *not* expanded to nucleotide coordinates: attention is
@@ -209,8 +217,8 @@ Against the 3,851-row intersection:
 | Integrated Gradients | 400 x 50 x 3 ~ 60K forward+backward | **400-row stratified subset** |
 
 ISM and rollout run exhaustively because they can: at 30bp and ~32 GFLOP per sequence the cost is
-tens of minutes on a single GPU, and the stored arrays are small — ISM delta `(3851, 30, 3)` is
-~1.4 MB as float32, and a rolled-out matrix `(3851, 5, 5)` is ~385 KB (24x that if every layer is
+tens of minutes on a single GPU, and the stored arrays are small — the ISM delta `(3851, 30, 4, 9)`
+is 16 MB as float32, and a rolled-out matrix `(3851, 5, 5)` is ~385 KB (24x that if every layer is
 kept separately rather than only the rollout). Sampling an analysis that fits leaves a permanent
 "is this an artifact of the sample?" question for no gain — and ISM in particular carries the PAM
 result, so reducing it would undercut the token-resolution decision above.
@@ -235,7 +243,13 @@ The boundary is **whether a model forward pass is required**.
 **Colab (GPU, reads the checkpoint from Drive):** ISM sweep, IG, attention rollout. Each writes
 `.npz` arrays plus a `.json` metadata sidecar and nothing else. The driver notebook pins its
 `CODE_REF` to a reviewed commit and **pins the `transformers` version**, recording it in the
-metadata sidecar.
+metadata sidecar. The pin is enforced where the artifact is written, not only asked for in the
+notebook: `write_ism_artifact` refuses a `code_ref` that is not a 40-character commit sha — a
+branch name moves and cannot address a run — and refuses to write a sidecar whose `transformers`
+or `torch` version it cannot record. The driver additionally checks out `CODE_REF` and asserts
+`git rev-parse HEAD` matches it, and asserts the consumed `test.csv` has the sha256 that
+`SpCas9/published_split/split_checksum.json` pins, so "which split did this run read?" is answered
+before the GPU time is spent rather than after.
 
 **Local (no checkpoint, no GPU, fully tested):** IG subset selection, case selection, all
 aggregation and stratification, cross-head agreement, the IG-vs-ISM validation, and report
@@ -368,6 +382,8 @@ which a 3,851-row and a 400-row artifact silently mis-join.
 | archive | key | shape | dtype |
 |---|---|---|---|
 | `ism.npz` | `delta` | `(3851, 30, 4, 9)` | float32 |
+| | `wt_prediction` | `(3851, 9)` | float32 |
+| | `reference_base` | `(3851, 30)` | int8 |
 | | `row_index` | `(3851,)` | int64 |
 | `rollout.npz` | `rollout` | `(3851, 5, 5)` | float32 |
 | | `row_index` | `(3851,)` | int64 |
@@ -387,6 +403,14 @@ fourth slot costs 33% more (16MB total) and buys an axis that means the same thi
 SaCas9's `(n, 36, 3)` alt-only layout makes "slot 0" a different base at each position, and this
 analysis indexes PAM bases directly because ADR 0007 assigns base-resolution PAM work to ISM. A
 zero in the reference slot is true, not a sentinel.
+
+`reference_base` and `wt_prediction` are in the archive for the same reason `special_attribution`
+is in `ig.npz`: without them the array can only be *re-read*, not *checked*. `reference_base` says
+which slot each row's zero belongs to, so "reference" stays distinguishable from "no effect" for a
+reader holding the artifact alone rather than the artifact plus the split. `wt_prediction` is the
+wild-type prediction per row and head on the fraction scale, so it must equal `predictions.csv` at
+the same `row_index` — which turns a mis-join into a failed comparison instead of a result. Both
+are small: 139 KB and 115 KB against the delta's 16 MB.
 
 **ISM stores all nine heads; IG stores three.** One forward returns all nine, so the extra six
 cost nothing and avoid a re-run; IG needs a backward pass per head, which is what fixes its budget
