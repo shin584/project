@@ -236,9 +236,14 @@ a re-drawn manifest silently reorders an array that was joined to it positionall
 
 "Every later IG artifact addresses the same rows" is enforced rather than asked for:
 `write_ig_artifact` takes the manifest as a **path**, loads it through `load_ig_subset` so the
-checksum is verified, refuses rows that are not that stratum's, and records the membership digest
-in its sidecar. Taking a path rather than an object is the point: a hand-built manifest would
-satisfy a row comparison while proving nothing about which bytes the subset was drawn into.
+checksum is verified, refuses rows that are not the set it claims, and records the membership
+digest in its sidecar. Taking a path rather than an object is the point: a hand-built manifest
+would satisfy a row comparison while proving nothing about which bytes the subset was drawn into.
+Its `stratum` defaults to `ALL_STRATA` — one archive over all 400 rows, which is the `.npz` schema
+below — and a combined write's own rows are the whole manifest's, so its `stratum_digest` equals
+the `membership_digest`. Naming a stratum narrows it to that stratum's 200 rows; what the writer
+enforces either way is that the artifact holds exactly the rows it says it does, so a 200-row
+archive cannot read as the 400-row one.
 
 **Decided in #131, where the AC was silent:** the library stratum's two balancing axes are
 applied as a **nesting** — NGG / non-NGG first, the error quartiles within each half — and a cell
