@@ -198,7 +198,18 @@ Applied:
    reported at **5x5 token resolution** and *not* expanded to nucleotide coordinates: attention is
    a token-to-token quantity, and projecting it onto 30 positions would re-introduce exactly the
    PAM/flank merge that ADR 0007 rules out. The SaCas9 pipeline did expand its rollout to 36x36
-   nucleotide coordinates; that choice is not carried over.
+   nucleotide coordinates; that choice is not carried over. Implemented in `v3_rollout.py`, which
+   takes the token contract from `v3_ig.py` rather than restating it — ADR 0007 governs both
+   analyses, so there is one copy of the boundaries. Two consequences of the above are worth
+   stating because an artifact alone does not show them: the run must hold the model on the
+   **`eager` attention path**, since a fused kernel never forms the probability matrix and
+   `transformers` 5.x answers `output_attentions=True` on one with an *empty tuple* rather than an
+   error (the implementation actually in force is recorded in the sidecar, so a run cannot claim a
+   path it did not set); and each stored row sums to **less than 1**, because `<cls>` takes part in
+   the rollout and is dropped after it, with no renormalisation — rescaling would assert a
+   token-to-token dependency the encoder routed through `<cls>`. The sidecar records the discarded
+   share as `cls_mass`, and the rows are asserted to put no mass on the padding, which is the only
+   symptom an attention mask that stopped reaching the encoder would have.
 4. **Positional / PAM profiling** — aggregate ISM deltas by region and by PAM identity, per
    stratum and per head.
 5. **Cross-head attribution agreement** — rank correlation between heads' ISM profiles on the
@@ -420,11 +431,10 @@ circularity visible.
 Layout, under `SpCas9_NT_analysis/`:
 
 ```
-SpCas9_v3.ipynb          # training (exists)
+SpCas9_v3.ipynb          # training, plus one CODE_REF-pinned GPU driver cell per Colab analysis
 docs/xai-design.md       # this document
 <modules>.py             # analysis logic, no model dependency at import time
 test/                    # local pytest suite
-colab_*.ipynb            # GPU drivers, CODE_REF-pinned
 artifacts/               # .npz + .json outputs
 ```
 
