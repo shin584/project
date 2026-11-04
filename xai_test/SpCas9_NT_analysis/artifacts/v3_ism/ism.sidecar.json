@@ -1,0 +1,79 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "in_silico_saturation_mutagenesis",
+  "population": "analysis_intersection",
+  "population_digest": "e09ad05ee43943fbc1e8b25629d6f456b224bb120a9244e29f318bf3548379a6",
+  "rows": 3851,
+  "positions": 30,
+  "bases": [
+    "A",
+    "C",
+    "G",
+    "T"
+  ],
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9",
+    "evoCas9"
+  ],
+  "analysed_heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "stored_not_analysed": [
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9"
+  ],
+  "stored_not_analysed_note": "One forward pass returns all nine heads, so all nine are stored to avoid a re-run. Only `analysed_heads` are analysed and reported; the rest are stored but not analysed, and no figure, claim or validation covers them.",
+  "delta_definition": "prediction(single-base mutant) - prediction(wild type), per head, at delta[row, position, base, head]",
+  "delta_scale": "fraction",
+  "scale_note": "Deltas and `wt_prediction` are fractions of 1, the scale v3 was trained on and `predictions.csv` reports; the split's label columns are raw percentages.",
+  "reference_slot_note": "The reference base's slot is exactly 0 and that zero is true, not a sentinel: substituting a base for itself changes nothing. `reference_base` gives the reference slot per row and position, so the zero stays distinguishable from a measured no-effect.",
+  "base_axis_note": "ACGT in fixed order at every position, so the base axis means the same thing in every row and a PAM base can be indexed directly (ADR 0007 assigns base-resolution PAM work to ISM).",
+  "wt_prediction_note": "The wild-type prediction per row and head, on the same scale as `predictions.csv`. It joins by `row_index` and is the check that catches a mis-join, instead of a mis-join surfacing as a result.",
+  "row_index_note": "int64, aligned to axis 0 and strictly ascending. The only identity between this artifact and the 400-row IG one.",
+  "variants_per_row": 91,
+  "forwards": 350441,
+  "batch_size": 256,
+  "shard_rows": 256,
+  "reused_shards": [],
+  "resume_note": "The sweep runs in row shards, each written to a checkpoint directory as it completes; `reused_shards` are the shards this run read back rather than recomputed.",
+  "code_ref": "8a02f86c8dfba8fc218b8820124b2e6963f7dc96",
+  "versions": {
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.8.1"
+  },
+  "nan_policy": "forbidden",
+  "split": {
+    "path": "/content/drive/MyDrive/SpCas9/test.csv",
+    "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+  },
+  "checkpoint": {
+    "path": "/content/drive/MyDrive/SpCas9/spcas9_v3/nt_v3_seed42",
+    "files": {
+      "config.json": "62028537178f176962cc59530b31abe4947a82ed5053b9f6918c5e9e1a5caf4d",
+      "mu_sd.npy": "a7a5c3ccd2a584752b4dab451889ca2a8f55a2e6c221a3735b9c593ef6cbaf27",
+      "vocab.txt": "f1b544e27897936b50bbd925850fa8a08b421c33bb9c26e3711c140c061d0d4c"
+    }
+  },
+  "code_ref_verified_by": "module_sha256",
+  "module_sha256": {
+    "v3_ism.py": "beef1e1327bc60faeb57cf2589bcfb952752b08b537f66d6154087c1f56a0c56",
+    "v3_predict.py": "fb18ba0c570e965d75d1f7f9532fc42c8fe1e955d086262421409470530f38fc",
+    "v3_strata.py": "b381e57162520e2af5ecad42e47d8eceedc5a6b550944b40e7ccfb6557a1a9e3"
+  },
+  "delta_sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b"
+}
