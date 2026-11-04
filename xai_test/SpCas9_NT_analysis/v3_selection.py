@@ -775,27 +775,17 @@ def consumed_inputs(
     producing a frozen list against the wrong bytes.
     """
     split_csv, predictions_csv = Path(split_csv), Path(predictions_csv)
-    digests = {
-        "test.csv": v3_predict.sha256_of(split_csv),
-        "predictions.csv": v3_predict.sha256_of(predictions_csv),
-    }
-    pinned = None
-    if split_checksum is not None and Path(split_checksum).exists():
-        pinned = json.loads(Path(split_checksum).read_text(encoding="utf-8"))["files"][
-            "test.csv"
-        ]
-        if pinned != digests["test.csv"]:
-            raise ValueError(
-                "test.csv does not match split_checksum.json: pinned "
-                f"{pinned}, read {digests['test.csv']}"
-            )
+    split_digest, pin_checked = v3_predict.verified_split_digest(
+        split_csv, split_checksum
+    )
     return {
         "split": split_csv.name,
         "predictions": predictions_csv.name,
-        "digests": digests,
-        # "checked", not "matched": a mismatch raises above, so the only thing
-        # False can mean here is that no pin file was there to check against.
-        "split_checksum_pin_checked": pinned is not None,
+        "digests": {
+            "test.csv": split_digest,
+            "predictions.csv": v3_predict.sha256_of(predictions_csv),
+        },
+        "split_checksum_pin_checked": pin_checked,
     }
 
 

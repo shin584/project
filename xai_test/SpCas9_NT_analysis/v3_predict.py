@@ -218,6 +218,32 @@ def population_digest(row_index: Sequence[int] | np.ndarray) -> str:
     ).hexdigest()
 
 
+def verified_split_digest(
+    split_csv: str | Path, split_checksum: str | Path | None
+) -> tuple[str, bool]:
+    """The split's SHA-256, checked against its own pin; `(digest, checked)`.
+
+    Lives here rather than in each consumer because "which split did this
+    artifact read?" has to be answered the same way by all of them: a
+    `test.csv` that does not match `published_split/split_checksum.json`
+    stops the run instead of producing an artifact against the wrong bytes.
+    The flag is "checked", not "matched" — a mismatch raises, so `False` can
+    only mean no pin file was there to check against.
+    """
+    digest = sha256_of(split_csv)
+    if split_checksum is None or not Path(split_checksum).exists():
+        return digest, False
+    pinned = json.loads(Path(split_checksum).read_text(encoding="utf-8"))["files"][
+        "test.csv"
+    ]
+    if pinned != digest:
+        raise ValueError(
+            f"test.csv does not match split_checksum.json: pinned {pinned}, "
+            f"read {digest}"
+        )
+    return digest, True
+
+
 def library_versions() -> dict[str, str | None]:
     versions: dict[str, str | None] = {
         "numpy": np.__version__,

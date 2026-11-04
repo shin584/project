@@ -358,6 +358,21 @@ that noise floor — and it is a substantive one, since 169 of the 203 fall in t
 which is a third of the rows. Reports that lean on the noise floor state that it rests on 79
 groups.
 
+The floor itself is produced by `v3_noise.py` into `artifacts/v3_noise_floor.json` (AC14), from
+**labels only** — the spread of a repeated 30-mer's measurements is a property of the assay, not
+of the model, so a floor measured through predictions would confound the two. The artifact reports
+the floor **per head as well as pooled**, because the three are far apart: `SpCas9` 0.064,
+`SpCas9-NG` 0.070, `evoCas9` 0.0099, a 7.1x span the artifact computes as `head_floor_ratio`
+(the "sixfold" quoted elsewhere is the `SpCas9`/`evoCas9` pair, 6.4x). The pooled median is about
+five times `evoCas9`'s own floor, so a single constant is five times too generous for that head.
+`v3_noise.floor_for_head` is the only lookup and refuses `"pooled"` for that reason.
+
+The 79 groups and 379 rows go into the artifact rather than a hand-written footnote, since AC13
+has to report that limit — and with them the sharper number, which is that the split holds **779**
+repeated 30-mers over 2,247 rows and only 79 of those groups survive the intersection cut. The
+floor is bounded by how few repeated rows have all three analysed heads measured, not by how
+rarely the assay repeats a target.
+
 ### Budget and identity
 
 Six cells: `{generalisation, pam_library}` x `{ERRLO, ERRHI, HEADGAP}`, **3 cases per cell**, at
@@ -413,15 +428,20 @@ colab_*.ipynb            # GPU drivers, CODE_REF-pinned
 artifacts/               # .npz + .json outputs
 ```
 
-The two **frozen lists** are tracked JSON, unlike the `.npz` arrays and the `*.csv` inputs:
+The two **frozen lists** are tracked JSON, unlike the `.npz` arrays and the `*.csv` inputs, and so
+is the measured noise floor:
 
 ```
-artifacts/v3_ig_subset/ig_subset.json  + ig_subset_checksum.json   # AC7
-artifacts/v3_cases/cases.json          + cases_checksum.json       # AC9
+artifacts/v3_ig_subset/ig_subset.json  + ig_subset_checksum.json        # AC7
+artifacts/v3_cases/cases.json          + cases_checksum.json            # AC9
+artifacts/v3_noise_floor.json          + v3_noise_floor_checksum.json   # AC14
 ```
 
-Both are written by `python v3_selection.py` from the split and the prediction export alone, and
-both record those two files' SHA-256 — `test.csv`'s against the pin in
+The noise floor sits at the artifacts root rather than in a directory of its own, which is where
+the other two live: AC14 names that path outright and AC13's consumer reads it.
+
+The frozen lists are written by `python v3_selection.py` from the split and the prediction export
+alone, and both record those two files' SHA-256 — `test.csv`'s against the pin in
 `published_split/split_checksum.json`, which stops a selection drawn against the wrong bytes at
 the point it is drawn. A test redraws them and compares the committed membership digest, so the
 tracked lists are checkable rather than merely trusted.
@@ -435,7 +455,11 @@ cleanly applicable.
 
 Every artifact carries a metadata sidecar recording the checkpoint digest, the consumed split's
 checksums, the `transformers` and `torch` versions, the analysed heads, the stratum, and the
-population or subset membership digest.
+population or subset membership digest. `v3_noise_floor.json` is the one artifact without a
+checkpoint digest or a model library version, and deliberately so: it is measured from labels
+alone, so pinning `torch` there would imply a checkpoint touched a number that is a property of
+the assay. It still carries the split's checksum and the membership digest of the rows it rests
+on.
 
 ### `.npz` schema
 
