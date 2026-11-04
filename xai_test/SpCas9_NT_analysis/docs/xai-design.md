@@ -227,6 +227,30 @@ result, so reducing it would undercut the token-resolution decision above.
 written to disk as a fixed membership list with a checksum, so every later IG artifact addresses
 the same rows.
 
+`v3_selection.py` draws it into `artifacts/v3_ig_subset/ig_subset.json`, under seed 129, with two
+pins that answer different questions: the **membership digest** inside the manifest says which
+rows an IG artifact must address, and `ig_subset_checksum.json` says the manifest's bytes have not
+been edited since it was drawn. The manifest is stored **`row_index` ascending**, with selection
+order, stratum and cell recorded as fields — overlaying the draw order on the storage axis is how
+a re-drawn manifest silently reorders an array that was joined to it positionally.
+
+"Every later IG artifact addresses the same rows" is enforced rather than asked for:
+`write_ig_artifact` takes the manifest as a **path**, loads it through `load_ig_subset` so the
+checksum is verified, refuses rows that are not that stratum's, and records the membership digest
+in its sidecar. Taking a path rather than an object is the point: a hand-built manifest would
+satisfy a row comparison while proving nothing about which bytes the subset was drawn into.
+
+**Decided in #131, where the AC was silent:** the library stratum's two balancing axes are
+applied as a **nesting** — NGG / non-NGG first, the error quartiles within each half — and a cell
+too thin to take its even share has the shortfall redistributed over the cells that have
+capacity. Both choices are forced by the data. The stratum holds only 134 NGG rows and they
+cluster in the high-error quartiles, so evening all eight cells as one flat axis returns
+**80 NGG / 120 non-NGG**, which balances the quartiles by sacrificing the axis the stratum exists
+to contrast; nested, it is **100 / 100** with the NGG half allocated 7 / 14 / 28 / 51 and the
+non-NGG half 25 each. Without redistribution the draw would come back at 183 rows rather than
+200. The per-cell allocation is in the manifest, so a reader can see the unevenness rather than
+infer it.
+
 - Non-library (NGG-restricted, 895 available): balanced on `SpCas9` error quartile only — the
   stratum is already single-valued on NGG, so there is nothing to balance there.
 - Library (all PAMs, 1,287 available): balanced on NGG / non-NGG and on `SpCas9` error quartile,
@@ -327,6 +351,26 @@ hyphenated, two-digit zero-padded, prefixes derived from the `v3_strata` constan
 (`GENERALISATION` → `GEN`, `PAM_LIBRARY` → `LIB`). `HEADGAP`, not `DISAG`, because the latter
 reads as the SaCas9 pipeline's `Discordant`. Ties break on `row_index` ascending, asserted by test.
 
+**Decided in #131, where the AC bounded the pool but not the pick:** the quartile and the decile
+bound the **pool**; within it the three cases are the pool's extremes (lowest error for `ERRLO`,
+highest for `ERRHI`, widest gap for `HEADGAP`). Keeping the two separate is what makes the library
+stratum's distinct-protospacer rule safe: a cell that has to look past a second PAM variant of a
+target it already used walks further down the rank but cannot leave the pool, and a cell that
+cannot fill under the rule comes back **short** rather than reaching outside it — which is what
+the budget's "at most 18" allows for.
+
+**A row is a case once**, and the criteria are taken in `ERRLO, ERRHI, HEADGAP` order, so
+`HEADGAP` yields to the two error cells and takes the widest gaps they did not claim. This was
+not anticipated: the six cells were assumed to be six different rows, and on the real split they
+are not. Taking each cell's own extremes independently put **2 of 3** generalisation and **all 3**
+library `HEADGAP` cases on rows that were already `ERRHI` cases — the widest cross-head gaps are
+the worst-predicted rows. `HEADGAP` is the criterion that moves because a row already reported as
+max-error teaches nothing about multi-head disagreement, which is the only thing that cell is
+for; `ERRLO` and `ERRHI` keep the true extremes a reader will expect of "best" and "worst
+predicted". The collision count is written to `cases.json` as `cell_overlap_before_dedup` rather
+than resolved silently, because "this model's cross-head disagreement is concentrated in its
+high-error tail" is a result under analysis question 3, not an implementation detail.
+
 Attribution outliers are **excluded from selection** and used only to describe selected cases:
 selecting cases by the attribution that the case study then explains is circular. This is enforced
 at the artifact level, not by convention. `artifacts/v3_cases/cases.json` is written locally from
@@ -348,6 +392,19 @@ test/                    # local pytest suite
 colab_*.ipynb            # GPU drivers, CODE_REF-pinned
 artifacts/               # .npz + .json outputs
 ```
+
+The two **frozen lists** are tracked JSON, unlike the `.npz` arrays and the `*.csv` inputs:
+
+```
+artifacts/v3_ig_subset/ig_subset.json  + ig_subset_checksum.json   # AC7
+artifacts/v3_cases/cases.json          + cases_checksum.json       # AC9
+```
+
+Both are written by `python v3_selection.py` from the split and the prediction export alone, and
+both record those two files' SHA-256 — `test.csv`'s against the pin in
+`published_split/split_checksum.json`, which stops a selection drawn against the wrong bytes at
+the point it is drawn. A test redraws them and compares the committed membership digest, so the
+tracked lists are checkable rather than merely trusted.
 
 The subtree does **not** import the root SaCas9 analysis modules (`integrated_gradients.py`,
 `attention_rollout.py`, `ism_sweep.py`, ...). Those are written against a 36bp window, a

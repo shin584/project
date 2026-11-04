@@ -21,9 +21,11 @@ which is what makes the strict 1e-2 completeness assertion load-bearing.
 import json
 
 import numpy as np
+import pandas as pd
 import pytest
 import v3_ig
 import v3_predict
+import v3_selection
 import v3_strata
 from v3_ig import (
     PAM_TOKEN_INDEX,
@@ -102,6 +104,32 @@ def ig_result(toy_model, tokenizer):
         steps=v3_ig.DEFAULT_IG_STEPS,
         batch_size=2,
     )
+
+
+def subset_for(out_dir, stratum: str, rows=(7, 11, 23)):
+    """Write a stand-in manifest naming `rows` as `stratum`'s IG subset.
+
+    `write_ig_artifact` takes the manifest as a **path** and loads it through
+    `load_ig_subset` (#131's AC7), so it has to exist on disk with its
+    checksum file beside it. The real one is 200 rows per stratum drawn by
+    `v3_selection`; what matters here is only that the writer checks the
+    artifact against the pinned bytes.
+    """
+    entries = pd.DataFrame(
+        {
+            "row_index": list(rows),
+            "stratum": stratum,
+            "cell": "errq1",
+            "selection_order": range(1, len(rows) + 1),
+            "error_quartile": 1,
+            "is_ngg": True,
+            "protospacer": "A" * 20,
+        }
+    )
+    manifest = v3_selection.SubsetManifest(
+        entries=entries, seed=7, rows_per_stratum=len(rows)
+    )
+    return v3_selection.write_ig_subset(out_dir / stratum, manifest)
 
 
 # --- token contract (ADR 0007) --------------------------------------------
@@ -404,7 +432,10 @@ def test_the_unit_tolerance_is_strict_where_the_run_tolerance_is_loose(
 
 def test_write_ig_artifact_round_trips_and_names_no_pam_key(ig_result, tmp_path):
     path = v3_ig.write_ig_artifact(
-        tmp_path, ig_result, stratum=v3_strata.GENERALISATION
+        tmp_path,
+        ig_result,
+        stratum=v3_strata.GENERALISATION,
+        subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
     )
     with np.load(path) as archive:
         keys = set(archive.files)
@@ -449,7 +480,12 @@ def test_the_completeness_check_is_re_derivable_from_the_artifact(ig_result, tmp
     `special_attribution` the stored residual could only be re-read, since the
     <cls> and padding share of the sum is not in the five reported tokens.
     """
-    path = v3_ig.write_ig_artifact(tmp_path, ig_result, stratum=v3_strata.PAM_LIBRARY)
+    path = v3_ig.write_ig_artifact(
+        tmp_path,
+        ig_result,
+        stratum=v3_strata.PAM_LIBRARY,
+        subset_manifest=subset_for(tmp_path, v3_strata.PAM_LIBRARY),
+    )
     sidecar = json.loads((path.parent / "ig.sidecar.json").read_text(encoding="utf-8"))
     with np.load(path) as archive:
         f_baseline = np.array(
@@ -473,12 +509,22 @@ def test_write_ig_artifact_refuses_an_all_zero_attribution(ig_result, tmp_path):
     """
     broken = ig_result.replace(attribution=np.zeros_like(ig_result.attribution))
     with pytest.raises(ValueError, match="identically zero"):
-        v3_ig.write_ig_artifact(tmp_path, broken, stratum=v3_strata.GENERALISATION)
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            broken,
+            stratum=v3_strata.GENERALISATION,
+            subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
+        )
 
 
 def test_write_ig_artifact_refuses_an_unknown_stratum(ig_result, tmp_path):
     with pytest.raises(ValueError, match="unknown stratum"):
-        v3_ig.write_ig_artifact(tmp_path, ig_result, stratum="generalization")
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            stratum="generalization",
+            subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
+        )
 
 
 def test_write_ig_artifact_refuses_a_non_finite_attribution(ig_result, tmp_path):
@@ -491,4 +537,60 @@ def test_write_ig_artifact_refuses_a_non_finite_attribution(ig_result, tmp_path)
         ).astype(np.float32)
     )
     with pytest.raises(ValueError, match="finite"):
-        v3_ig.write_ig_artifact(tmp_path, broken, stratum=v3_strata.PAM_LIBRARY)
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            broken,
+            stratum=v3_strata.PAM_LIBRARY,
+            subset_manifest=subset_for(tmp_path, v3_strata.PAM_LIBRARY),
+        )
+
+
+def test_write_ig_artifact_names_the_subset_manifest_it_addresses(ig_result, tmp_path):
+    """AC7: an IG artifact says which frozen manifest its rows came from.
+
+    Two IG artifacts are the same subset's iff their `membership_digest`
+    agrees, which is the only check that survives the Colab session the run
+    happened in.
+    """
+    manifest_path = subset_for(tmp_path, v3_strata.GENERALISATION)
+    subset = v3_selection.load_ig_subset(manifest_path)
+    path = v3_ig.write_ig_artifact(
+        tmp_path,
+        ig_result,
+        stratum=v3_strata.GENERALISATION,
+        subset_manifest=manifest_path,
+    )
+    sidecar = json.loads((path.parent / "ig.sidecar.json").read_text(encoding="utf-8"))
+    assert sidecar["subset"]["manifest"] == v3_selection.IG_SUBSET_NAME
+    assert sidecar["subset"]["membership_digest"] == subset.digest
+    assert sidecar["subset"]["seed"] == 7
+    assert sidecar["subset"]["stratum_digest"] == v3_predict.population_digest(
+        subset.rows_for(v3_strata.GENERALISATION)
+    )
+
+
+def test_write_ig_artifact_refuses_rows_the_manifest_does_not_hold(ig_result, tmp_path):
+    # The run drifted off the frozen subset — one row renumbered. Caught at
+    # the artifact, not left for whoever tries to join it later.
+    with pytest.raises(ValueError, match="frozen subset"):
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            stratum=v3_strata.GENERALISATION,
+            subset_manifest=subset_for(
+                tmp_path, v3_strata.GENERALISATION, rows=(7, 11, 24)
+            ),
+        )
+
+
+def test_write_ig_artifact_refuses_a_different_strata_rows(ig_result, tmp_path):
+    # The manifest holds both strata; writing a generalisation run against the
+    # library stratum's rows is a mis-join that reads as a valid artifact.
+    manifest_path = subset_for(tmp_path, v3_strata.PAM_LIBRARY)
+    with pytest.raises(ValueError, match="frozen subset"):
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            stratum=v3_strata.GENERALISATION,
+            subset_manifest=manifest_path,
+        )

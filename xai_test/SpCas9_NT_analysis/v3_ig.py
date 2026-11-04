@@ -56,9 +56,11 @@ from v3_predict import (
     checkpoint_digests,
     device_of,
     library_versions,
+    population_digest,
     validate_sequences,
     write_array_artifact,
 )
+from v3_selection import load_ig_subset
 from v3_strata import ANALYSED_HEADS, STRATUM_NAMES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only, never imported at runtime
@@ -527,6 +529,7 @@ def write_ig_artifact(
     result: IGResult,
     *,
     stratum: str,
+    subset_manifest: str | Path,
     checkpoint_dir: str | Path | None = None,
     extra: dict[str, Any] | None = None,
 ) -> Path:
@@ -549,6 +552,25 @@ def write_ig_artifact(
         raise ValueError(
             f"unknown stratum {stratum!r}; expected one of {list(STRATUM_NAMES)}"
         )
+
+    # AC7: every IG artifact addresses the frozen manifest, and says which one
+    # it addressed. The manifest is taken as a **path** and loaded here rather
+    # than accepted as an object, so the checksum is always verified: a
+    # hand-built manifest would satisfy a row comparison while proving
+    # nothing about which bytes the subset was drawn into. It is required
+    # rather than optional because an artifact written without it is exactly
+    # the one nobody can later line up against the 400 rows the budget was
+    # spent on.
+    subset = load_ig_subset(subset_manifest)
+    expected = subset.rows_for(stratum)
+    written = np.asarray(result.row_index, dtype=np.int64)
+    if written.size != expected.size or not np.array_equal(np.sort(written), expected):
+        raise ValueError(
+            f"the artifact's {written.size} rows are not the subset manifest's "
+            f"{expected.size} rows for stratum {stratum!r}; IG runs only on the "
+            "frozen subset"
+        )
+
     arrays = {
         "attribution": result.attribution.astype(np.float32),
         "completeness_residual": result.completeness_residual.astype(np.float64),
@@ -601,6 +623,18 @@ def write_ig_artifact(
             "recoverable from the artifact alone."
         ),
         "completeness": report,
+        "subset": {
+            "manifest": Path(subset_manifest).name,
+            "seed": subset.seed,
+            "rows_per_stratum": subset.rows_per_stratum,
+            "membership_digest": subset.digest,
+            "stratum_digest": population_digest(expected),
+            "note": (
+                "`membership_digest` identifies the whole 400-row manifest; "
+                "`stratum_digest` is this artifact's own rows within it. Two "
+                "IG artifacts address the same subset iff the first matches."
+            ),
+        },
         "versions": library_versions(),
     }
     if checkpoint_dir is not None:

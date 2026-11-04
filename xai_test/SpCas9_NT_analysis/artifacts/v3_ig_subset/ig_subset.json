@@ -1,0 +1,3645 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "ig_subset",
+  "seed": 129,
+  "rows": 400,
+  "rows_per_stratum": 200,
+  "membership_digest": "68c3702ce4c811e1dc4e5a5bc897324575e27a6deef902cefd6bee9becfce9a4",
+  "primary_head": "SpCas9",
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "storage_order": "row_index ascending",
+  "storage_order_note": "Selection order, stratum and cell are recorded per entry. They are not the storage axis: overlaying the two is how a re-drawn manifest silently reorders a positionally joined array.",
+  "balancing": {
+    "generalisation": [
+      "error_quartile"
+    ],
+    "pam_library": [
+      "is_ngg",
+      "error_quartile"
+    ]
+  },
+  "balancing_note": "Outer axis first, then the axes inside it. The library stratum's NGG rows cluster, so evening all eight cells as one flat axis would return 80 NGG / 120 non-NGG.",
+  "label_scale": "fraction",
+  "prediction_scale": "fraction",
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  },
+  "entries": [
+    {
+      "row_index": 103,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 290,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 134,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 284,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 354,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 246,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 398,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 49,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TTATCCCAGTGCCTGCCCTG"
+    },
+    {
+      "row_index": 542,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 315,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 635,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 148,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GCCTGCATATTACAACCAAG"
+    },
+    {
+      "row_index": 1060,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 192,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CTGGGGCCTGCAGGCTCCCA"
+    },
+    {
+      "row_index": 1180,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 385,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 1288,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 117,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CAGCTAGCAGAGGCATCTGT"
+    },
+    {
+      "row_index": 1351,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 36,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GATTTCTAAGTTAGATATAA"
+    },
+    {
+      "row_index": 1383,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 363,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 1658,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 75,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGAAGGCAAGGCCGATGGGA"
+    },
+    {
+      "row_index": 1828,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 217,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 1871,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 233,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 1914,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 273,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 1991,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 165,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AAGTGGTTTTCTCTGGAATT"
+    },
+    {
+      "row_index": 2013,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 379,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 2024,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 85,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CCTCTTGGCGCAAGGGCAAG"
+    },
+    {
+      "row_index": 2273,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 79,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AAATGCATGGTTCATTAATT"
+    },
+    {
+      "row_index": 2508,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 231,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 2595,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 212,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 2640,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 136,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGAATGCCTCAGATTTTAGT"
+    },
+    {
+      "row_index": 2641,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 169,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AAGCCCCCAAGAGATGGGGT"
+    },
+    {
+      "row_index": 3059,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 364,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 3259,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 242,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 3300,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 399,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 3370,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 221,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 3408,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 264,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 3445,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 118,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTAAACCTGGAATAACACGA"
+    },
+    {
+      "row_index": 3548,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 296,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 3587,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 103,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCACCTTCTCAAGTGTTCTG"
+    },
+    {
+      "row_index": 3592,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 162,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTGGAATGAGCCACCACGCC"
+    },
+    {
+      "row_index": 3888,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 378,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 4099,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 301,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 4125,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 11,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTACAGTTAGTACTCAGCAG"
+    },
+    {
+      "row_index": 4129,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 377,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 4252,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 325,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 4292,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 116,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GAAAGAAAGTAGTATTGAGT"
+    },
+    {
+      "row_index": 4397,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 102,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GATCGGAGCTCCCTCAGCAC"
+    },
+    {
+      "row_index": 4463,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 336,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 4491,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 55,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CACAACAGGGAGGGCCCTGG"
+    },
+    {
+      "row_index": 4526,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 58,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ACGCTCCATGGCGGAGGCCG"
+    },
+    {
+      "row_index": 4591,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 329,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 4603,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 114,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TGGGTTTTGCTAAGGATGAC"
+    },
+    {
+      "row_index": 4663,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 61,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TTTGGGACATATGTGTACAT"
+    },
+    {
+      "row_index": 4698,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 371,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 5045,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 207,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 5077,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 57,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AGGTATGGAGAAGGAAGAAA"
+    },
+    {
+      "row_index": 5101,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 177,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCCCCAGTGGCTGCTCTGG"
+    },
+    {
+      "row_index": 5107,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 178,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTGCTTTCTCTTCAAGTTT"
+    },
+    {
+      "row_index": 5110,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 83,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TGTTTAATAACCAATAGAGG"
+    },
+    {
+      "row_index": 5351,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 380,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 5370,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 195,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCACCTGCCCTAGTCCTGCC"
+    },
+    {
+      "row_index": 5644,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 137,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GAGCCCTCCCCGACCCACCG"
+    },
+    {
+      "row_index": 5707,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 387,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 5841,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 255,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 5858,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 356,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 5975,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 292,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 6016,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 350,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 6059,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 98,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AGAAATAGCATGGAATCATG"
+    },
+    {
+      "row_index": 6132,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 99,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ATCTATGAAGACCTCAGGCC"
+    },
+    {
+      "row_index": 6134,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 317,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 6161,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 131,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCATTTTGCCTTGAACAGG"
+    },
+    {
+      "row_index": 6376,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 47,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GAATCAGTGGCGTCAGGTGG"
+    },
+    {
+      "row_index": 6485,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 5,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "ACCCTGTCACTCCTGGACCT"
+    },
+    {
+      "row_index": 6580,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 373,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 6615,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 286,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 6678,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 384,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 6764,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 170,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "ATTTTAGTCAAAGATTGATT"
+    },
+    {
+      "row_index": 6865,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 30,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TATAACCCTTGGGTTGTGGG"
+    },
+    {
+      "row_index": 6875,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 247,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 6898,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 171,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CATTGGTATTTTTATATAGA"
+    },
+    {
+      "row_index": 6926,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 24,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGACTCTCTGATGAAGACCC"
+    },
+    {
+      "row_index": 7086,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 276,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 7089,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 266,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 7130,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 166,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TGAGGGTAAAAATGGCTCCT"
+    },
+    {
+      "row_index": 7304,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 50,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AAATTCTGTTATGCTCTTTT"
+    },
+    {
+      "row_index": 7368,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 29,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGGTGGACAAATCATCTCAA"
+    },
+    {
+      "row_index": 7377,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 188,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTCCAGCCCAGCCTGCCTGC"
+    },
+    {
+      "row_index": 7461,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 316,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 7507,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 312,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 7515,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 140,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGCTTGATTTCCCCAGACCG"
+    },
+    {
+      "row_index": 7586,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 198,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTCCAGCAGCATATCTCTTT"
+    },
+    {
+      "row_index": 7648,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 82,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CTACTCTGGGAATTCTCAGT"
+    },
+    {
+      "row_index": 7770,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 189,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "ACATTTATTTCATTTATTTC"
+    },
+    {
+      "row_index": 7877,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 261,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 7927,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 185,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTCTTTGAAGCAACAGAAAA"
+    },
+    {
+      "row_index": 7933,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 360,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 8078,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 225,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 8463,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 293,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 8576,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 73,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GAACAAATACTTCGATGCCT"
+    },
+    {
+      "row_index": 8620,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 283,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 8675,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 134,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GAAAGCGTTCAAGCAGGACA"
+    },
+    {
+      "row_index": 8685,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 263,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 8700,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 133,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCAAACTCCGCCCACCCTCT"
+    },
+    {
+      "row_index": 8740,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 343,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 8839,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 309,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 9050,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 173,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGAATCTGGAGAGCACCCTG"
+    },
+    {
+      "row_index": 9233,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 180,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AGAGGGGTGTCCCAGCCTGC"
+    },
+    {
+      "row_index": 9271,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 348,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 9283,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 205,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 9425,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 120,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTGCATTTTATTCCACTAAA"
+    },
+    {
+      "row_index": 9669,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 345,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 9770,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 14,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TAACACTGTCACAGGGCGAA"
+    },
+    {
+      "row_index": 9777,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 216,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 9900,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 259,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 9914,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 123,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "ATCACTAGGTCCGGAGAGAA"
+    },
+    {
+      "row_index": 10083,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 279,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 10343,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 168,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTTTGCAAATGAACCATGAT"
+    },
+    {
+      "row_index": 10369,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 35,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CCAATTAAGAAAAGGATATC"
+    },
+    {
+      "row_index": 10371,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 294,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 10473,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 76,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TTAGTTCTCACCAGAGCTCT"
+    },
+    {
+      "row_index": 10518,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 46,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "ACATACACACGCAAATGTAC"
+    },
+    {
+      "row_index": 10636,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 191,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCCCCAGTGGCTGCTCTGG"
+    },
+    {
+      "row_index": 10980,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 144,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CAGTGCCAGCAGCTTTTGTT"
+    },
+    {
+      "row_index": 11227,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 40,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CACCAGGAAGAGTAAATGTT"
+    },
+    {
+      "row_index": 11439,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 149,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGGCTTGAGACTTCTTATTT"
+    },
+    {
+      "row_index": 11508,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 56,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGACTCTCTGATGAAGACCC"
+    },
+    {
+      "row_index": 11540,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 220,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 11637,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 208,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 11700,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 353,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 11710,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 335,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 11719,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 125,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CAGGTAATTTTCAATCTGGG"
+    },
+    {
+      "row_index": 11757,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 139,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AAGGGGGCTTTCTGCAGCCA"
+    },
+    {
+      "row_index": 11957,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 128,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGGCCCTTGGTGTCCAGTGG"
+    },
+    {
+      "row_index": 12028,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 38,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AGGAGGTGGTGTGGGAAGTG"
+    },
+    {
+      "row_index": 12066,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 112,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GAGAGGAGGAGCCACCAGCC"
+    },
+    {
+      "row_index": 12231,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 375,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 12360,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 187,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTGCCCTCATTATTCAGCA"
+    },
+    {
+      "row_index": 12630,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 367,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 12773,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 182,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGGCGGGGGCCGCGGCCT"
+    },
+    {
+      "row_index": 12880,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 395,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 12883,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 277,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 12922,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 271,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 13016,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 240,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 13083,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 298,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 13108,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 226,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 13124,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 307,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 13173,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 253,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 13189,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 388,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 13296,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 59,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ATCGTTGAGTGTCGAGGAGC"
+    },
+    {
+      "row_index": 13310,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 4,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TCCTGGGGGATTGAGAGCTG"
+    },
+    {
+      "row_index": 13544,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 44,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AAACCACATAATTTCAGGGC"
+    },
+    {
+      "row_index": 13660,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 308,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 13755,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 89,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TGCCAAAGGCAAGGTACTTG"
+    },
+    {
+      "row_index": 13816,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 199,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCCCAGTTCGAACTTCCTGG"
+    },
+    {
+      "row_index": 13819,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 193,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CCCTGCGTGACCCAGTGGTT"
+    },
+    {
+      "row_index": 14252,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 314,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 14579,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 323,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 14946,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 121,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CAGCCCCAGCCCCACAAGGT"
+    },
+    {
+      "row_index": 14950,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 138,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCGCTCCAGAGTCCCTGCTC"
+    },
+    {
+      "row_index": 14958,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 194,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GAGGCCTTCAGAGTCCGGGG"
+    },
+    {
+      "row_index": 15118,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 254,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 15190,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 132,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TAATATGGCAGTACTCCTGC"
+    },
+    {
+      "row_index": 15197,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 154,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TCACCCTTCACCTCAGGAGG"
+    },
+    {
+      "row_index": 15221,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 238,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 15303,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 87,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GACTCACATCTCCATCTGCC"
+    },
+    {
+      "row_index": 15475,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 278,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 15478,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 230,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 15489,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 289,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 15581,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 86,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GAAGTATGGATTTTACTCCT"
+    },
+    {
+      "row_index": 15689,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 211,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 15989,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 163,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTAAAGAAGATAAATGGCC"
+    },
+    {
+      "row_index": 16070,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 106,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCCAAGAGACTGCAGCAGGT"
+    },
+    {
+      "row_index": 16161,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 122,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGACTCTCTGATGAAGACCC"
+    },
+    {
+      "row_index": 16298,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 63,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AAATAGATGACACTACAAAA"
+    },
+    {
+      "row_index": 16399,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 104,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGGGAGTTTGAGTTGAGGGC"
+    },
+    {
+      "row_index": 16415,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 28,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TGAACGAGGAGCAGAGGCTG"
+    },
+    {
+      "row_index": 16773,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 213,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 16829,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 74,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGTGTCCTCTTCTTTCTCGC"
+    },
+    {
+      "row_index": 16933,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 100,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGCTCAGCCAGGGCTTATCC"
+    },
+    {
+      "row_index": 17067,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 285,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 17068,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 48,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GAGGAAACCAGGTCCTAAGG"
+    },
+    {
+      "row_index": 17083,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 234,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 17162,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 152,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTACATTTAATGTTTCTAAT"
+    },
+    {
+      "row_index": 17229,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 130,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGACAACACAGAACAAGGCC"
+    },
+    {
+      "row_index": 17246,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 324,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 17282,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 167,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGGCTGGCTCTCAGATAACC"
+    },
+    {
+      "row_index": 17308,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 347,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 17378,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 80,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGAGGCTATCAACAAAGAAT"
+    },
+    {
+      "row_index": 17489,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 155,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CCTAACTTGTTTTGGAAGCC"
+    },
+    {
+      "row_index": 17574,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 355,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 17896,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 219,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 17920,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 390,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 17964,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 306,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 18013,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 357,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 18068,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 372,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 18185,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 146,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GCATAGATATGCTATTGCTT"
+    },
+    {
+      "row_index": 18190,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 257,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 18367,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 327,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 18376,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 256,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 18476,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 214,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 18598,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 81,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ACTGGGGTGCCGGGGGTGCC"
+    },
+    {
+      "row_index": 18658,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 32,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTCATAAAACCAGTACTAAC"
+    },
+    {
+      "row_index": 18731,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 115,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TGAATGTCCACTATTGAATA"
+    },
+    {
+      "row_index": 18795,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 394,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 18971,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 202,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 18997,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 299,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 19021,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 291,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 19077,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 334,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 19386,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 361,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 19429,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 237,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 19435,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 69,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CTGTAATTAAAGGTAATTGA"
+    },
+    {
+      "row_index": 19789,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 275,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 20074,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 383,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 20220,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 328,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 20355,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 295,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 20381,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 66,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTTTTAAAAGGCCCTGATA"
+    },
+    {
+      "row_index": 20543,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 78,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GCCCCAGGGAGGCCCAGATC"
+    },
+    {
+      "row_index": 20587,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 16,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGACTCTCTGATGAAGACCC"
+    },
+    {
+      "row_index": 20668,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 228,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 20795,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 243,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 20841,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 245,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 20866,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 267,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 20923,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 197,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AAGTAGTTAATTTGCCTAAT"
+    },
+    {
+      "row_index": 20942,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 258,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 20947,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 151,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AAATGCTAGTACTTGCTGAC"
+    },
+    {
+      "row_index": 20997,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 382,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 21059,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 337,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 21229,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 330,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 21552,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 142,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CTAACTAAATTCTTATTAAT"
+    },
+    {
+      "row_index": 21589,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 95,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GATGTCTGCAGGCCAGATGA"
+    },
+    {
+      "row_index": 21600,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 326,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 21638,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 313,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 21644,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 391,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 21808,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 65,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGCGTAAGGCGGACATGCGC"
+    },
+    {
+      "row_index": 21886,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 45,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TAAGCCCTGAGTTTTGTACT"
+    },
+    {
+      "row_index": 21977,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 269,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 22051,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 366,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 22096,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 241,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 22263,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 352,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 22573,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 2,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TGCACCACAAGATTCTATAC"
+    },
+    {
+      "row_index": 22677,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 15,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTCACCTCCAATGACTAGGG"
+    },
+    {
+      "row_index": 22749,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 135,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGAGTCTGGCCAGAGTCCTA"
+    },
+    {
+      "row_index": 22835,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 244,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 23014,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 362,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 23022,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 338,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 23052,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 349,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 23165,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 201,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 23629,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 232,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 23671,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 25,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TAAAAGTCATCTAAAAAGCC"
+    },
+    {
+      "row_index": 23685,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 51,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GCAGCAAGTCCAGTTCCAGC"
+    },
+    {
+      "row_index": 23848,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 287,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 23863,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 235,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 24031,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 94,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CACAACAAAGATGCCATGCA"
+    },
+    {
+      "row_index": 24279,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 141,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TGGAACAAAATTAGAATTTG"
+    },
+    {
+      "row_index": 24562,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 21,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TGCGTAGCGATCGAGGTGCT"
+    },
+    {
+      "row_index": 24582,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 8,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AAATAAATAAATAAGAACCA"
+    },
+    {
+      "row_index": 24646,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 153,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CATCCATTTTAGGCCCTGCC"
+    },
+    {
+      "row_index": 24825,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 19,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TTGGATGTGGGGGCAGGAGG"
+    },
+    {
+      "row_index": 24838,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 222,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 24885,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 156,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCAGGAAGAACAGTTCAAGA"
+    },
+    {
+      "row_index": 24891,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 172,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACTTTGACTCCCAGGATGG"
+    },
+    {
+      "row_index": 24993,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 196,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTCCTTGCAAAAGAAAAGTT"
+    },
+    {
+      "row_index": 25088,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 282,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 25284,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 297,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 25401,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 93,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GCTGAGGTGCAGAATCCAGG"
+    },
+    {
+      "row_index": 25461,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 42,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GATGTCTGCAGGCCAGATGA"
+    },
+    {
+      "row_index": 25479,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 236,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 25546,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 27,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AACCCTATAAACAAGCTGAC"
+    },
+    {
+      "row_index": 25619,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 398,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 25622,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 331,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 25664,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 108,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCTGCGGGAGAGAGAGTCGC"
+    },
+    {
+      "row_index": 25724,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 288,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 26041,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 12,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CTGGTGACAGTGGCTAGAGA"
+    },
+    {
+      "row_index": 26216,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 368,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 26242,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 272,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 26246,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 161,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCCAACTGTCCAGAGGGCAT"
+    },
+    {
+      "row_index": 26291,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 34,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GATTTGTTTTTAATACAGAG"
+    },
+    {
+      "row_index": 26301,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 304,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 26361,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 126,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GCAATCCTACTCTGTTACTT"
+    },
+    {
+      "row_index": 26531,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 186,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TGGGCCAGCCTTGCCATGTG"
+    },
+    {
+      "row_index": 26617,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 41,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TTGAGGAATCTCTGGCCTAG"
+    },
+    {
+      "row_index": 26788,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 281,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 26800,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 190,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TTGCCAGGTACATGTTTTTC"
+    },
+    {
+      "row_index": 26872,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 1,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GCTGGATGACAGCCTGTATC"
+    },
+    {
+      "row_index": 26972,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 274,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 26985,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 143,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GAACACACGTGTGAGCTGTC"
+    },
+    {
+      "row_index": 27104,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 359,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 27141,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 72,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGACTCTCTGATGAAGACCC"
+    },
+    {
+      "row_index": 27147,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 13,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CACACACCCTTGTGTCAAAC"
+    },
+    {
+      "row_index": 27263,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 6,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGCTAAGAGAGGTTTCCGAA"
+    },
+    {
+      "row_index": 27488,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 369,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 27496,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 77,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TCCAGAGTGAGCCCTGAGGA"
+    },
+    {
+      "row_index": 27545,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 319,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 27610,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 71,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CACTCCAGGCAACTCGAGTG"
+    },
+    {
+      "row_index": 27620,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 17,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CTTAGCTATTAGGTAACTAC"
+    },
+    {
+      "row_index": 27631,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 160,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCAGGAAGAACAGTTCAAGA"
+    },
+    {
+      "row_index": 27868,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 397,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 27979,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 113,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "ATTAAATTAAATTAACTCTA"
+    },
+    {
+      "row_index": 28111,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 223,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 28132,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 37,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TCTTTAGATAAATGCTAATC"
+    },
+    {
+      "row_index": 28235,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 400,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 28269,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 374,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 28385,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 84,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TGAGTAACACCACTTCTCTC"
+    },
+    {
+      "row_index": 28395,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 147,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTTGCGGAAGCTTATGGGC"
+    },
+    {
+      "row_index": 28476,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 248,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 28696,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 101,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGGGTGAAACAAGCAAGAGG"
+    },
+    {
+      "row_index": 28874,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 179,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TCAGCTATAACAAAAGAGAA"
+    },
+    {
+      "row_index": 28889,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 251,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 28981,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 381,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 29079,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 62,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AGACATAAGAATGGGGTTAG"
+    },
+    {
+      "row_index": 29087,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 184,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CAAAAAGCTAAGGCCAGACA"
+    },
+    {
+      "row_index": 29155,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 342,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 29257,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 9,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGAAGAGATTAAGGAAAGAA"
+    },
+    {
+      "row_index": 29298,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 365,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 29449,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 344,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 29491,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 305,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 29655,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 320,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 29740,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 346,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 29812,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 18,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TGAACAATCTTTGTAGCACT"
+    },
+    {
+      "row_index": 30110,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 54,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TGTGGTATGACAATTTCTAG"
+    },
+    {
+      "row_index": 30259,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 127,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGCAAAAAAAAAATCCTAGA"
+    },
+    {
+      "row_index": 30271,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 206,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 30284,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 7,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TGTGACTTTTTTCCCCTGCT"
+    },
+    {
+      "row_index": 30415,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 60,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GCAGTTGTAGGGAAATAGGG"
+    },
+    {
+      "row_index": 30457,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 183,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTGTCAGAGCTGAGGGCCCG"
+    },
+    {
+      "row_index": 30560,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 107,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TCTTGAGGCTGTAACTGCGA"
+    },
+    {
+      "row_index": 30661,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 303,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 30709,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 176,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "ACAGGCAGAGGGTCGAGGCT"
+    },
+    {
+      "row_index": 30736,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 318,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 30909,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 210,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 30919,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 252,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 31065,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 270,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 31276,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 174,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "AAAGAGAGTCTAGGTCTCAC"
+    },
+    {
+      "row_index": 31306,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 53,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TTCTTTCACAGTTCTCCATG"
+    },
+    {
+      "row_index": 31392,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 31,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "ATAGGGACAGAAACTAATCA"
+    },
+    {
+      "row_index": 31470,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 341,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 31488,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 321,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 31494,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 110,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "ACTGTCCTTGATACAATGTT"
+    },
+    {
+      "row_index": 31521,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 39,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CTTTGCCAGGAGGCAGTGGT"
+    },
+    {
+      "row_index": 31682,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 268,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 31735,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 20,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GCCAAAAGGACCATTCTGGA"
+    },
+    {
+      "row_index": 31784,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 158,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TGTTGAGGATGAGCAGGGAC"
+    },
+    {
+      "row_index": 31800,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 229,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 31846,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 265,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 31870,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 386,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 31895,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 204,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 32065,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 262,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 32352,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 310,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 32392,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 300,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 32470,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 260,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 32515,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 332,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 32735,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 105,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CCATAGAACTAATAAACTAG"
+    },
+    {
+      "row_index": 32789,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 215,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 32886,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 322,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 32899,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 227,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 33108,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 70,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ATCAATAGATGAAAATGCAG"
+    },
+    {
+      "row_index": 33111,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 43,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CCCCAGCCCCTAACTTTCCT"
+    },
+    {
+      "row_index": 33125,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 91,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "ATATCCCTCTTCCTCCCACC"
+    },
+    {
+      "row_index": 33127,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 181,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TCCCGGTCCCGGCTGGTGTG"
+    },
+    {
+      "row_index": 33153,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 111,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CTTTTTAGTCCTACAAAGTT"
+    },
+    {
+      "row_index": 33370,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 26,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "ACTACAAATGTCCTTTGACA"
+    },
+    {
+      "row_index": 33429,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 333,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 33469,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 358,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 33631,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 64,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GAGCCCATCTAGGGTATGGC"
+    },
+    {
+      "row_index": 33663,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 209,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTCGCTTCCTCTTCTCCTTC"
+    },
+    {
+      "row_index": 33795,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 68,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "AGGAGAAGTGTGTCTCATGG"
+    },
+    {
+      "row_index": 33957,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 23,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "CTGCTAGCCCACAGCCAAGA"
+    },
+    {
+      "row_index": 34010,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 376,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 34073,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 33,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "AGCCTGCGCTCGGCCACCGC"
+    },
+    {
+      "row_index": 34080,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 351,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 34086,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 392,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 34341,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 90,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGGAGAGCCTGGCAGGGAGG"
+    },
+    {
+      "row_index": 34366,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 88,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGTGTGATTTGAATTTTAAA"
+    },
+    {
+      "row_index": 34429,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 339,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 34621,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 10,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GGAATTTTAGAACTTTTCTG"
+    },
+    {
+      "row_index": 34708,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 370,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 34768,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 22,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "TTCTTCAACATGAAGGCATA"
+    },
+    {
+      "row_index": 34773,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 280,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 35004,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq2",
+      "selection_order": 340,
+      "error_quartile": 2,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 35184,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 97,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GGAGGCCGTGTTGCCAGACT"
+    },
+    {
+      "row_index": 35311,
+      "stratum": "pam_library",
+      "cell": "ngg-errq2",
+      "selection_order": 218,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 35360,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 175,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GCTGGTGTCAATTAAATAGA"
+    },
+    {
+      "row_index": 35437,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 157,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "CTTGTTATTTAAGAGGACGC"
+    },
+    {
+      "row_index": 35629,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 92,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "GAGACTTCCTCATAGTTTCA"
+    },
+    {
+      "row_index": 35641,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 109,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "TTTTAAAATTAAATGTAAGT"
+    },
+    {
+      "row_index": 35672,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 119,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AAGTGGTGAGTGCCTCGGGA"
+    },
+    {
+      "row_index": 36142,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 389,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 36252,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 224,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 36394,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 67,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TGCTGCAGAATTCCTGCCCG"
+    },
+    {
+      "row_index": 36469,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 302,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 36488,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 200,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GAAAATCACTCATGGCTGGG"
+    },
+    {
+      "row_index": 36575,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 150,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGTCCAGGGGGCCGGGGCTC"
+    },
+    {
+      "row_index": 36674,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 239,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 36812,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 124,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "CACAGAGAAGATTCAGATGA"
+    },
+    {
+      "row_index": 36813,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 145,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AAACACAAATAAGCCAGTAT"
+    },
+    {
+      "row_index": 36830,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq1",
+      "selection_order": 311,
+      "error_quartile": 1,
+      "is_ngg": false,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 36850,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 164,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "ACAGGCAAGGGAAGTGACGA"
+    },
+    {
+      "row_index": 37081,
+      "stratum": "pam_library",
+      "cell": "ngg-errq3",
+      "selection_order": 249,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "GGTCAGGCTCCATGTGCCGC"
+    },
+    {
+      "row_index": 37086,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 393,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 37136,
+      "stratum": "generalisation",
+      "cell": "errq1",
+      "selection_order": 3,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GAATTGCAGTCGCTGGAGAT"
+    },
+    {
+      "row_index": 37410,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 96,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "TTTCACCTGTCCACACACAG"
+    },
+    {
+      "row_index": 37424,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq4",
+      "selection_order": 396,
+      "error_quartile": 4,
+      "is_ngg": false,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 37501,
+      "stratum": "generalisation",
+      "cell": "errq3",
+      "selection_order": 129,
+      "error_quartile": 3,
+      "is_ngg": true,
+      "protospacer": "AGCATCCCAGCCATGCCGAA"
+    },
+    {
+      "row_index": 37502,
+      "stratum": "generalisation",
+      "cell": "errq4",
+      "selection_order": 159,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "TACTTAGTTTGATACTCGAA"
+    },
+    {
+      "row_index": 37525,
+      "stratum": "pam_library",
+      "cell": "nonngg-errq3",
+      "selection_order": 354,
+      "error_quartile": 3,
+      "is_ngg": false,
+      "protospacer": "GACCCAAGCCACGAACGAGC"
+    },
+    {
+      "row_index": 37823,
+      "stratum": "pam_library",
+      "cell": "ngg-errq1",
+      "selection_order": 203,
+      "error_quartile": 1,
+      "is_ngg": true,
+      "protospacer": "GTTCACGACGTCATGCTCAC"
+    },
+    {
+      "row_index": 37875,
+      "stratum": "pam_library",
+      "cell": "ngg-errq4",
+      "selection_order": 250,
+      "error_quartile": 4,
+      "is_ngg": true,
+      "protospacer": "GGCGCCCACACTCGTGCAGC"
+    },
+    {
+      "row_index": 37980,
+      "stratum": "generalisation",
+      "cell": "errq2",
+      "selection_order": 52,
+      "error_quartile": 2,
+      "is_ngg": true,
+      "protospacer": "CTTCTCTGTAGTCCTGAGGG"
+    }
+  ],
+  "consumed": {
+    "split": "test.csv",
+    "predictions": "predictions.csv",
+    "digests": {
+      "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "predictions.csv": "7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a"
+    },
+    "split_checksum_pin_checked": true
+  }
+}
