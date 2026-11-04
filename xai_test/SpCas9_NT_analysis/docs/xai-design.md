@@ -210,6 +210,15 @@ Applied:
    token-to-token dependency the encoder routed through `<cls>`. The sidecar records the discarded
    share as `cls_mass`, and the rows are asserted to put no mass on the padding, which is the only
    symptom an attention mask that stopped reaching the encoder would have.
+   **The measured rollout is effectively rank 1** (#136 run, `code_ref` `a5b3393`): within each
+   row's 5x5 matrix the five query rows are near-identical (max row-to-row deviation median 2e-5,
+   worst 0.002; σ₂/σ₁ ≤ 0.004 across all 3,851 rows). This is the known convergence of rollout
+   over 24 multiplied layers, not a defect, but it decides what the artifact can say: **do not read
+   it as a pairwise "token i depends on token j" map** — every query token returns the same
+   distribution. What survives is one 5-token profile per row (any row of the matrix, e.g.
+   `rollout[:, 0, :]`; population mean `[0.120, 0.123, 0.151, 0.141, 0.136]`), which varies
+   between rows (column CV ~10–13%) and so supports between-row and between-stratum comparison
+   only. A 5x5 heatmap figure would display one vector five times.
 4. **Positional / PAM profiling** — aggregate ISM deltas by region and by PAM identity, per
    stratum and per head.
 5. **Cross-head attribution agreement** — rank correlation between heads' ISM profiles on the
