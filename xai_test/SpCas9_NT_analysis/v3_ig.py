@@ -100,9 +100,20 @@ PAM_TOKEN_NAME = TOKEN_NAMES[PAM_TOKEN_INDEX]
 CLS_TOKEN_COUNT = 1
 SEQUENCE_TOKEN_SLICE = slice(CLS_TOKEN_COUNT, CLS_TOKEN_COUNT + TOKEN_COUNT)
 
-#: Matches the SaCas9 pipeline's `DEFAULT_IG_STEPS`, and the design's budget
-#: of 400 x 50 x 3 forward+backward passes.
-DEFAULT_IG_STEPS = 50
+#: Raised from 50 (the SaCas9 pipeline's value) after the first real 400-row
+#: run: at 50 midpoint steps the completeness pass rate was **0.85**, with
+#: ``|residual|`` up to 0.69 on the standardised output scale — about 15
+#: percentage points once multiplied by ``sd``. Re-running three of the worst
+#: rows against the same checkpoint at 200 steps dropped those residuals to
+#: 0.0026 / 0.0194 / 0.0026, a 32-265x fall where the midpoint rule's O(h^2)
+#: predicts 16x. So the residual was dominated by integration error, not by an
+#: accounting gap, and the fix is steps rather than a looser tolerance: a
+#: 15%-failing completeness report cannot tell an IG-vs-ISM disagreement
+#: (#134) apart from its own integration error.
+#:
+#: The cost is the design's IG budget, 4x: 400 x 200 x 3 ~ 240K
+#: forward+backward, still below ISM's ~350K forwards.
+DEFAULT_IG_STEPS = 200
 
 #: Far below a plain forward pass's batch size: IG holds an autograd graph per
 #: step and runs one backward per analysed head on top of it.
@@ -409,9 +420,11 @@ def integrated_gradients_batch(
 
     Returns ``attribution`` ``(batch, heads, positions)`` over *all* token
     positions, plus ``f_x`` and ``f_baseline``. The midpoint Riemann rule is
-    used rather than the right-endpoint sum: it costs the same 50 steps and
-    leaves a markedly smaller completeness residual, which matters because the
-    residual is the audit signal, not a diagnostic to be explained away.
+    used rather than the right-endpoint sum: at the same step count it leaves a
+    markedly smaller completeness residual, which matters because the residual
+    is the audit signal, not a diagnostic to be explained away. It is not
+    enough on its own — see :data:`DEFAULT_IG_STEPS` for what 50 midpoint
+    steps actually left on the real checkpoint.
     """
     import torch
 

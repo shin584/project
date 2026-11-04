@@ -164,15 +164,25 @@ objective. SaCas9 did not hit this: its 36bp window is also a multiple of 6, but
 
 Applied:
 
-1. **Integrated Gradients** — token-level attribution, 50 integration steps (matching the SaCas9
-   pipeline's `DEFAULT_IG_STEPS`), computed on the **encoder input-embedding tensor** with a
+1. **Integrated Gradients** — token-level attribution, **200 integration steps**, computed on the
+   **encoder input-embedding tensor** with a
    zero-embedding baseline. See ADR on attribution depth. Implemented in `v3_ig.py`, which
    attaches to the embedding by **replacing the word-embedding module's output through a forward
    hook** rather than by passing `inputs_embeds`: ESM's `token_dropout` rescale is guarded on
    `input_ids is not None`, so the `inputs_embeds` path skips it and would explain a function the
-   deployed model never computes. The Riemann sum uses the **midpoint** rule — same 50 steps, a
-   markedly smaller completeness residual, and the residual is the audit signal for ADR 0006
-   rather than a diagnostic to be explained away.
+   deployed model never computes. The Riemann sum uses the **midpoint** rule — at the same step
+   count, a markedly smaller completeness residual, and the residual is the audit signal for
+   ADR 0006 rather than a diagnostic to be explained away.
+
+   **The step count is 200 because 50 was measured and found short.** The SaCas9 pipeline's 50
+   midpoint steps gave the first real 400-row run a completeness pass rate of **0.85**, with
+   `|residual|` reaching 0.69 on the standardised scale — ~15 percentage points once multiplied
+   by `sd`. Re-running three of the worst rows against the same checkpoint at 200 steps dropped
+   their residuals to 0.0026 / 0.0194 / 0.0026: a 32-265x fall where the midpoint rule's `O(h^2)`
+   predicts 16x, so the 50-step residual was dominated by integration error rather than by a
+   missing share of the integral. The fix is steps, not a looser tolerance — a completeness
+   report failing 15% of its checks cannot tell an IG-vs-ISM disagreement from its own
+   integration error, which is the one thing the cross-technique comparison needs it to do.
 2. **In-silico saturation mutagenesis (ISM)** — all 30 positions x 3 alternative bases, delta
    against wild type. Carries the per-base PAM result. Implemented in `v3_ism.py`. The delta is
    **absolute**, on the fraction scale (`(mutant - wild type) * sd`, so `mu` cancels), not
@@ -219,7 +229,7 @@ Against the 3,851-row intersection:
 |---|---|---|
 | ISM | 3,851 x 91 ~ 350K forward | **full 3,851** |
 | Attention rollout | 3,851 forward | **full 3,851** |
-| Integrated Gradients | 400 x 50 x 3 ~ 60K forward+backward | **400-row stratified subset** |
+| Integrated Gradients | 400 x 200 x 3 ~ 240K forward+backward | **400-row stratified subset** |
 
 ISM and rollout run exhaustively because they can: at 30bp and ~32 GFLOP per sequence the cost is
 tens of minutes on a single GPU, and the stored arrays are small — the ISM delta `(3851, 30, 4, 9)`

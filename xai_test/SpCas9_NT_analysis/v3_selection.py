@@ -50,7 +50,8 @@ from v3_strata import (
 
 SUBTREE_ROOT = Path(__file__).resolve().parent
 
-#: The design's IG budget: 400 x 50 steps x 3 heads of forward+backward.
+#: The design's IG budget: 400 rows x 3 heads of forward+backward per
+#: integration step (200 steps — see `v3_ig.DEFAULT_IG_STEPS`).
 IG_SUBSET_ROWS_PER_STRATUM = 200
 IG_SUBSET_ROWS = IG_SUBSET_ROWS_PER_STRATUM * len(STRATUM_NAMES)
 
