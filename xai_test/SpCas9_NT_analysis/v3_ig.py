@@ -43,7 +43,8 @@ them and without a checkpoint.
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Iterable, Sequence
+import re
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -57,6 +58,7 @@ from v3_predict import (
     device_of,
     library_versions,
     population_digest,
+    sha256_of,
     validate_sequences,
     write_array_artifact,
 )
@@ -115,6 +117,19 @@ RUN_RELATIVE_TOLERANCE = 0.05
 
 ATTRIBUTION_POINT = "encoder_input_embedding"
 BASELINE = "zero_embedding"
+
+#: The whole frozen subset — both strata's rows in one artifact.
+#:
+#: IG's budget is one run over all 400 rows, and the design's `.npz` schema is
+#: one `(400, 3, 5)` archive, not two `(200, 3, 5)` ones. Per-stratum writes
+#: stay available (`stratum=` a stratum name) because the writer's job is to
+#: refuse a set of rows that is not the one it claims, but the combined write
+#: is the default: two half-artifacts from one GPU session would carry two
+#: sidecars that can only agree, while every downstream join (#134) would have
+#: to concatenate them in an order nothing pins.
+ALL_STRATA = "all"
+
+_COMMIT_SHA = re.compile(r"[0-9a-f]{40}")
 
 #: An artifact key naming the PAM at base resolution is the ADR 0007 mistake
 #: in artifact form, so it is rejected rather than documented against.
@@ -454,12 +469,19 @@ def run_ig(
     steps: int = DEFAULT_IG_STEPS,
     batch_size: int = DEFAULT_IG_BATCH_SIZE,
     max_length: int = MAX_LENGTH,
+    progress: Callable[[dict[str, int]], None] | None = None,
 ) -> IGResult:
     """Token-level IG over ``sequences``, in ascending ``row_index`` order.
 
     ``row_index`` must already be ascending. Implicit positional identity is
     how a 400-row IG artifact silently mis-joins against a 3,851-row ISM one,
     so the ordering is a precondition rather than something this fixes up.
+
+    ``progress`` is called after each batch with ``rows_done`` and
+    ``rows_total``. The run is one call and keeps nothing on disk until it
+    finishes — unlike the ISM sweep, 400 rows are cheap enough to redo — so
+    without it a GPU session goes 50 batches without a line of output and a
+    stall is indistinguishable from slow progress.
     """
     sequences = list(sequences)
     indices = np.asarray(row_index, dtype=np.int64)
@@ -484,6 +506,13 @@ def run_ig(
         attribution_batches.append(computed["attribution"])
         f_x_batches.append(computed["f_x"])
         baselines.append(computed["f_baseline"])
+        if progress is not None:
+            progress(
+                {
+                    "rows_done": start + len(batch),
+                    "rows_total": len(sequences),
+                }
+            )
 
     full = np.concatenate(attribution_batches, axis=0)
     f_x = np.concatenate(f_x_batches, axis=0)
@@ -528,12 +557,25 @@ def write_ig_artifact(
     out_dir: str | Path,
     result: IGResult,
     *,
-    stratum: str,
+    code_ref: str | None,
+    split_csv: str | Path,
+    stratum: str = ALL_STRATA,
     subset_manifest: str | Path,
     checkpoint_dir: str | Path | None = None,
     extra: dict[str, Any] | None = None,
 ) -> Path:
     """Write ``ig.npz`` and ``ig.sidecar.json``; return the archive's path.
+
+    ``stratum`` defaults to :data:`ALL_STRATA`: one archive over the whole
+    400-row subset. A stratum name narrows it to that stratum's rows.
+
+    ``code_ref`` and ``split_csv`` are refused rather than recorded as absent,
+    as in :func:`v3_ism.write_ism_artifact` (AC11): a 40-character commit sha
+    because a branch name moves and cannot address a run, and the split so the
+    sidecar can say which bytes the GPU time was spent on. ``transformers``
+    and ``torch`` must be importable for the same reason — version drift
+    between what wrote an artifact and what reads it back is the mechanism
+    that silently zeroed Model B's IG in the SaCas9 pipeline.
 
     The archive is the ADR 0006 audit trail, so it has to carry everything the
     completeness check needs: ``completeness_residual`` and
@@ -548,9 +590,22 @@ def write_ig_artifact(
     as "the model ignores the sequence" to anyone who picks the artifact up
     later.
     """
-    if stratum not in STRATUM_NAMES:
+    if stratum != ALL_STRATA and stratum not in STRATUM_NAMES:
         raise ValueError(
-            f"unknown stratum {stratum!r}; expected one of {list(STRATUM_NAMES)}"
+            f"unknown stratum {stratum!r}; expected {ALL_STRATA!r} or one of "
+            f"{list(STRATUM_NAMES)}"
+        )
+    if not code_ref or not _COMMIT_SHA.fullmatch(code_ref):
+        raise ValueError(
+            f"CODE_REF must be a 40-character hex commit sha (AC11), got "
+            f"{code_ref!r}; a branch name moves and cannot pin a run"
+        )
+    versions = library_versions()
+    unpinned = [name for name in ("torch", "transformers") if not versions.get(name)]
+    if unpinned:
+        raise ValueError(
+            f"the sidecar cannot record {unpinned} (AC11): an IG run replays "
+            f"the real checkpoint's encoder, so these versions must be present"
         )
 
     # AC7: every IG artifact addresses the frozen manifest, and says which one
@@ -562,7 +617,9 @@ def write_ig_artifact(
     # the one nobody can later line up against the 400 rows the budget was
     # spent on.
     subset = load_ig_subset(subset_manifest)
-    expected = subset.rows_for(stratum)
+    expected = (
+        np.sort(subset.row_index) if stratum == ALL_STRATA else subset.rows_for(stratum)
+    )
     written = np.asarray(result.row_index, dtype=np.int64)
     if written.size != expected.size or not np.array_equal(np.sort(written), expected):
         raise ValueError(
@@ -590,6 +647,20 @@ def write_ig_artifact(
         "model": "9-Hydra v3",
         "analysis": "integrated_gradients",
         "stratum": stratum,
+        "strata": (list(STRATUM_NAMES) if stratum == ALL_STRATA else [stratum]),
+        "stratum_note": (
+            (
+                "One archive over the whole frozen subset: axis 0 is every "
+                "row of both strata, `row_index` ascending."
+                if stratum == ALL_STRATA
+                else f"One stratum's rows only: {stratum!r}, `row_index` ascending."
+            )
+            + " There is no per-row stratum array — the manifest named by "
+            "`subset.manifest` carries the stratum, the cell and the "
+            "selection order per row, and joining them from there keeps one "
+            "list authoritative instead of copying it into an array that can "
+            "drift from it."
+        ),
         "rows": int(result.row_index.size),
         "heads": list(result.heads),
         "steps": result.steps,
@@ -632,10 +703,19 @@ def write_ig_artifact(
             "note": (
                 "`membership_digest` identifies the whole 400-row manifest; "
                 "`stratum_digest` is this artifact's own rows within it. Two "
-                "IG artifacts address the same subset iff the first matches."
+                "IG artifacts address the same subset iff the first matches. "
+                "A combined write addresses the whole manifest, so the two "
+                "digests coincide — and that equality is the check that this "
+                "artifact is the full subset rather than one stratum's half."
             ),
         },
-        "versions": library_versions(),
+        "code_ref": code_ref,
+        "split": {
+            "path": Path(split_csv).as_posix(),
+            "sha256": sha256_of(split_csv),
+        },
+        "versions": versions,
+        "nan_policy": "forbidden",
     }
     if checkpoint_dir is not None:
         sidecar["checkpoint"] = {

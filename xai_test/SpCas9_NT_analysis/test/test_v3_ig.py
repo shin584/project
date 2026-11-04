@@ -52,6 +52,9 @@ SEQUENCES = [
     "GGGCCCAAATTTGGGCCCAAATTTAGGCCA",
 ]
 
+#: AC11's pin, in the shape the writer demands: 40 hex characters.
+CODE_REF = "0" * 40
+
 
 # --- fixtures --------------------------------------------------------------
 
@@ -104,6 +107,18 @@ def ig_result(toy_model, tokenizer):
         steps=v3_ig.DEFAULT_IG_STEPS,
         batch_size=2,
     )
+
+
+def provenance_for(tmp_path):
+    """The split every sidecar has to name (AC11), as a file on disk.
+
+    `write_ig_artifact` takes the split as a path and digests it, so a run
+    cannot leave "which bytes was the GPU time spent on?" unanswered.
+    """
+    split = tmp_path / "provenance" / "test.csv"
+    split.parent.mkdir(parents=True, exist_ok=True)
+    split.write_text("row_index,sequence", encoding="utf-8")
+    return {"split_csv": split}
 
 
 def subset_for(out_dir, stratum: str, rows=(7, 11, 23)):
@@ -434,6 +449,8 @@ def test_write_ig_artifact_round_trips_and_names_no_pam_key(ig_result, tmp_path)
     path = v3_ig.write_ig_artifact(
         tmp_path,
         ig_result,
+        code_ref=CODE_REF,
+        **provenance_for(tmp_path),
         stratum=v3_strata.GENERALISATION,
         subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
     )
@@ -483,6 +500,8 @@ def test_the_completeness_check_is_re_derivable_from_the_artifact(ig_result, tmp
     path = v3_ig.write_ig_artifact(
         tmp_path,
         ig_result,
+        code_ref=CODE_REF,
+        **provenance_for(tmp_path),
         stratum=v3_strata.PAM_LIBRARY,
         subset_manifest=subset_for(tmp_path, v3_strata.PAM_LIBRARY),
     )
@@ -512,6 +531,8 @@ def test_write_ig_artifact_refuses_an_all_zero_attribution(ig_result, tmp_path):
         v3_ig.write_ig_artifact(
             tmp_path,
             broken,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
             stratum=v3_strata.GENERALISATION,
             subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
         )
@@ -522,6 +543,8 @@ def test_write_ig_artifact_refuses_an_unknown_stratum(ig_result, tmp_path):
         v3_ig.write_ig_artifact(
             tmp_path,
             ig_result,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
             stratum="generalization",
             subset_manifest=subset_for(tmp_path, v3_strata.GENERALISATION),
         )
@@ -540,6 +563,8 @@ def test_write_ig_artifact_refuses_a_non_finite_attribution(ig_result, tmp_path)
         v3_ig.write_ig_artifact(
             tmp_path,
             broken,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
             stratum=v3_strata.PAM_LIBRARY,
             subset_manifest=subset_for(tmp_path, v3_strata.PAM_LIBRARY),
         )
@@ -557,6 +582,8 @@ def test_write_ig_artifact_names_the_subset_manifest_it_addresses(ig_result, tmp
     path = v3_ig.write_ig_artifact(
         tmp_path,
         ig_result,
+        code_ref=CODE_REF,
+        **provenance_for(tmp_path),
         stratum=v3_strata.GENERALISATION,
         subset_manifest=manifest_path,
     )
@@ -576,6 +603,8 @@ def test_write_ig_artifact_refuses_rows_the_manifest_does_not_hold(ig_result, tm
         v3_ig.write_ig_artifact(
             tmp_path,
             ig_result,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
             stratum=v3_strata.GENERALISATION,
             subset_manifest=subset_for(
                 tmp_path, v3_strata.GENERALISATION, rows=(7, 11, 24)
@@ -591,6 +620,163 @@ def test_write_ig_artifact_refuses_a_different_strata_rows(ig_result, tmp_path):
         v3_ig.write_ig_artifact(
             tmp_path,
             ig_result,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
             stratum=v3_strata.GENERALISATION,
             subset_manifest=manifest_path,
         )
+
+
+# --- the combined 400-row artifact (#133) ----------------------------------
+
+
+def combined_subset_for(out_dir, rows=((7, 11), (23,))):
+    """A stand-in manifest holding both strata, like the real 400-row one.
+
+    The real manifest is 200 generalisation rows and 200 library rows under
+    seed 129; what matters here is that one manifest holds both, so "the whole
+    subset" and "one stratum's half" are different row sets and the writer has
+    to tell them apart.
+    """
+    generalisation, library = rows
+    entries = pd.DataFrame(
+        {
+            "row_index": [*generalisation, *library],
+            "stratum": [
+                *[v3_strata.GENERALISATION] * len(generalisation),
+                *[v3_strata.PAM_LIBRARY] * len(library),
+            ],
+            "cell": "errq1",
+            "selection_order": range(1, len(generalisation) + len(library) + 1),
+            "error_quartile": 1,
+            "is_ngg": True,
+            "protospacer": "A" * 20,
+        }
+    )
+    manifest = v3_selection.SubsetManifest(
+        entries=entries, seed=129, rows_per_stratum=len(generalisation)
+    )
+    return v3_selection.write_ig_subset(out_dir / "combined", manifest)
+
+
+def test_write_ig_artifact_writes_the_whole_subset_as_one_archive(ig_result, tmp_path):
+    """#133: one `(rows, 3, 5)` archive over both strata, not one per stratum.
+
+    `ALL_STRATA` is the default, so the driver's single call is also the
+    documented shape: two half-artifacts would carry two sidecars that can
+    only agree, and leave every downstream join to concatenate them in an
+    order nothing pins.
+    """
+    manifest_path = combined_subset_for(tmp_path)
+    subset = v3_selection.load_ig_subset(manifest_path)
+    path = v3_ig.write_ig_artifact(
+        tmp_path,
+        ig_result,
+        code_ref=CODE_REF,
+        **provenance_for(tmp_path),
+        subset_manifest=manifest_path,
+    )
+    with np.load(path) as archive:
+        assert archive["attribution"].shape == (3, len(HEADS), TOKEN_COUNT)
+        assert archive["row_index"].tolist() == [7, 11, 23]
+
+    sidecar = json.loads((path.parent / "ig.sidecar.json").read_text(encoding="utf-8"))
+    assert sidecar["stratum"] == v3_ig.ALL_STRATA == "all"
+    assert sidecar["strata"] == list(v3_strata.STRATUM_NAMES)
+    assert sidecar["rows"] == 3
+    # The combined write addresses the whole manifest, so its own rows and the
+    # manifest's are the same set and the two digests coincide. That equality
+    # is what distinguishes a full-subset artifact from one stratum's half.
+    assert sidecar["subset"]["membership_digest"] == subset.digest
+    assert sidecar["subset"]["stratum_digest"] == subset.digest
+
+
+def test_the_combined_write_refuses_one_stratums_rows(ig_result, tmp_path):
+    # Half the subset, written as if it were all of it: a 200-row archive that
+    # reads as the 400-row one is exactly the mis-join AC7 exists to stop.
+    half = combined_subset_for(tmp_path, rows=((7, 11, 23), ()))
+    manifest = v3_selection.load_ig_subset(half)
+    assert manifest.rows_for(v3_strata.PAM_LIBRARY).size == 0
+    with pytest.raises(ValueError, match="frozen subset"):
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
+            stratum=v3_strata.PAM_LIBRARY,
+            subset_manifest=half,
+        )
+
+
+def test_a_per_stratum_write_refuses_the_whole_subsets_rows(ig_result, tmp_path):
+    # The run covered both strata; claiming it is one stratum's artifact would
+    # mislabel 400 rows as 200.
+    with pytest.raises(ValueError, match="frozen subset"):
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            code_ref=CODE_REF,
+            **provenance_for(tmp_path),
+            stratum=v3_strata.GENERALISATION,
+            subset_manifest=combined_subset_for(tmp_path),
+        )
+
+
+def test_the_sidecar_pins_the_code_ref_the_split_and_the_versions(ig_result, tmp_path):
+    """AC11: the driver's two pins land in the sidecar, not just in the cell.
+
+    ISM (#132) and IG (#133) are separate Colab sessions, so their
+    `transformers` versions can differ — which is why each analysis carries
+    its own sidecar rather than sharing one.
+    """
+    provenance = provenance_for(tmp_path)
+    path = v3_ig.write_ig_artifact(
+        tmp_path,
+        ig_result,
+        code_ref=CODE_REF,
+        **provenance,
+        subset_manifest=combined_subset_for(tmp_path),
+    )
+    sidecar = json.loads((path.parent / "ig.sidecar.json").read_text(encoding="utf-8"))
+    assert sidecar["code_ref"] == CODE_REF
+    assert sidecar["versions"]["transformers"] == transformers.__version__
+    assert sidecar["versions"]["torch"] == torch.__version__
+    assert sidecar["split"]["sha256"] == v3_predict.sha256_of(provenance["split_csv"])
+    assert sidecar["nan_policy"] == "forbidden"
+
+
+@pytest.mark.parametrize("missing", [None, "", "model_analysis", "0" * 39, "0" * 41])
+def test_write_ig_artifact_refuses_an_unpinned_code_ref(ig_result, tmp_path, missing):
+    # A branch name moves, so it cannot address the code a run was made with.
+    with pytest.raises(ValueError, match="CODE_REF"):
+        v3_ig.write_ig_artifact(
+            tmp_path,
+            ig_result,
+            code_ref=missing,
+            **provenance_for(tmp_path),
+            subset_manifest=combined_subset_for(tmp_path),
+        )
+
+
+def test_run_ig_reports_progress_per_batch(toy_model, tokenizer):
+    """The 400-row run is one call with nothing on disk until it ends.
+
+    A Colab session that prints nothing for 50 batches cannot be told apart
+    from a stalled one, so the batch loop reports instead of the driver
+    guessing.
+    """
+    seen = []
+    v3_ig.run_ig(
+        toy_model,
+        tokenizer,
+        SEQUENCES,
+        row_index=[7, 11, 23],
+        heads=HEADS,
+        steps=2,
+        batch_size=2,
+        progress=seen.append,
+    )
+    assert seen == [
+        {"rows_done": 2, "rows_total": 3},
+        {"rows_done": 3, "rows_total": 3},
+    ]
