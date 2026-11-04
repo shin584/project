@@ -193,7 +193,12 @@ Applied:
    stratum and per head.
 5. **Cross-head attribution agreement** — rank correlation between heads' ISM profiles on the
    3,851-row intersection. This axis exists only because v3 is multi-head, and it requires no
-   comparison model; it is the analysis's single-model-native contribution.
+   comparison model; it is the analysis's single-model-native contribution. Implemented in
+   `v3_agreement.py`, which reads `ism.npz` and nothing else: rollout has no head axis (ADR 0008)
+   and IG is not a prerequisite, which is why this is its own ticket. It reports per head pair and
+   per position range, with both named in the artifact, and carries analysis question 2 — the
+   `SpCas9` / `SpCas9-NG` PAM contrast — as a **reported finding either way**, under a separation
+   margin recorded beside the verdict.
 
 **Deliberately not applied**, recorded here so the omission is not re-litigated:
 
