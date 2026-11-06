@@ -372,7 +372,9 @@ class Study:
 
     def save_artifact(self, name, payload, coverage, *, kind="predictions", npz=None):
         """Commit a JSON sidecar and optional NPZ together; coverage is per kind."""
-        if kind not in ("predictions", "ism") or (npz is not None and kind != "ism"):
+        if kind not in ("predictions", "ism", "ig-plan", "ig") or (
+            npz is not None and kind not in ("ism", "ig")
+        ):
             raise ValueError("unsupported artifact kind/NPZ combination")
         self.checkpoint()
         state = self.status()
@@ -398,7 +400,7 @@ class Study:
                 files[array_path] = {
                     "sha256": self.store.put(array_path, npz),
                     "coverage": [],
-                    "kind": "ism-array",
+                    "kind": f"{kind}-array",
                 }
                 self.guard()
             checksum = self.store.put(path, canonical_bytes(payload))

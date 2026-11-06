@@ -1,3 +1,4 @@
+import hashlib
 import itertools
 import json
 from types import SimpleNamespace
@@ -81,3 +82,62 @@ def inputs(tmp_path):
         partition=partition,
         rows=data["rows"],
     )
+
+
+@pytest.fixture
+def selection_inputs(tmp_path):
+    from cas12a.nt_data import ALGORITHM, SERIALIZATION, digest
+    from xai_test.cas12a_NT_analysis.test.test_selection import sequence
+
+    partitions = {
+        "train": [0, 1],
+        "validation": [2, 3],
+        "test": list(range(1503, 3, -1)),
+    }
+    partition = {
+        "serialization": SERIALIZATION,
+        "algorithm": ALGORITHM,
+        "seed": 42,
+        "run_kind": "fixture",
+        "counts": {name: len(ids) for name, ids in partitions.items()},
+        "partitions": partitions,
+        "partition_sha256": digest(partitions),
+        "source_file_sha256": "a" * 64,
+        "table_sha256": "b" * 64,
+        "training_partition_sha256": "c" * 64,
+        "rows": [
+            {
+                "source_row": i,
+                "sequence_sha256": hashlib.sha256(sequence(i).encode()).hexdigest(),
+            }
+            for i in range(1504)
+        ],
+        "baseline_train_mean": {
+            "value": 0.5,
+            "training_rows": 2,
+            "training_partition_sha256": "c" * 64,
+        },
+    }
+    identity = {
+        "study_id": "fixture-138",
+        "run_id": "fixture",
+        "model_sha256": "d" * 64,
+        "protocol_sha256": "e" * 64,
+    }
+    decision = {
+        "schema": 1,
+        "partition": "validation",
+        "partition_sha256": partition["partition_sha256"],
+        "analysis_identity": identity,
+        "full_rejected": False,
+        "reason": "Synthetic cost fixture; no GPU executed",
+        "measurement_reference": "fixture://validation-cost",
+        "measurement_sha256": "f" * 64,
+    }
+    partition_path, decision_path = (
+        tmp_path / "partition.json",
+        tmp_path / "decision.json",
+    )
+    partition_path.write_bytes(canonical_bytes(partition))
+    decision_path.write_bytes(canonical_bytes(decision))
+    return partition_path, decision_path, identity

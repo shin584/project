@@ -1,5 +1,6 @@
 """Prediction shards and metric reconstruction without torch or model loading."""
 
+import hashlib
 import math
 
 import numpy as np
@@ -9,6 +10,28 @@ from cas12a.data import SEQUENCE_COLUMN, TARGET_COLUMN
 from cas12a.nt_data import digest
 
 from .nt_inputs import DNA_SPANS, LAYOUT, sequence_hash
+
+
+def read_checked(study, path, checksum):
+    """Check the immediate read bytes, including failures after a ledger scan."""
+    try:
+        data = study.store.read(path)
+        if hashlib.sha256(data).hexdigest() != checksum:
+            raise ValueError(f"artifact hash mismatch: {path}")
+        return data
+    except (OSError, ValueError):
+        study.poisoned = True
+        raise
+
+
+def saved_vocabulary(study, run_id, identity):
+    path = f"runs/{run_id}/snapshot/selected_export/vocab.txt"
+    data = read_checked(study, path, identity["export_files"]["vocab.txt"])
+    tokens = data.decode("utf-8").splitlines()
+    vocabulary = {token: index for index, token in enumerate(tokens)}
+    if len(tokens) != 4107 or len(vocabulary) != 4107:
+        raise ValueError("invalid snapshotted vocabulary")
+    return vocabulary
 
 
 def prediction_rows(source_rows, predictions, tokens):

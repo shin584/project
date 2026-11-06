@@ -281,3 +281,77 @@ them and their charges; create replacement runs within the existing study as
 needed. This ticket supplies CPU implementation evidence. Actual validation
 and 153,000 Testset mutations remain #146/#147 work under the scientific gate.
 See the [ISM contract](docs/planning/issue141-ism-contract.md).
+
+## Raw token IG (#142)
+
+`nt_ig.compute_ig` integrates one source through the full native encoder and
+regression head. It replaces word-embedding outputs while preserving native
+IDs, position construction, token-dropout and attention masks. Alpha=1 must
+match the native and stored FP32 prediction with atol=1e-5, rtol=1e-4. The zero
+reference includes CLS and padding word embeddings; positional processing and
+masks stay native. Signed mass for the nine actual DNA spans and the three
+special positions remains separate. No base projection is produced.
+
+Quality has **no production defaults**. Supply `completeness_atol`,
+`completeness_rtol`, `near_zero`, `convergence_atol`, `convergence_rtol`, and
+`max_steps` (400, 800 or 1600) in a policy object. Midpoint integration starts
+at 200 steps, doubles up to that cap and requires two consecutive resolutions.
+Completeness sums all 12 signed token masses; near-zero output differences use
+absolute tolerance alone and retain a null relative residual with a reason.
+Convergence uses the L1 difference between consecutive signed vectors. See the
+[IG contract](docs/planning/issue142-ig-contract.md) for the exact equations.
+Synthetic test tolerances are not approved actual-NT quality limits.
+
+The Python driver uses the same checked validation inputs, prediction run,
+study root, durable receipts and budget as above:
+
+```python
+import json
+from pathlib import Path
+from xai_test.cas12a_NT_analysis.analyze import run_ig
+from xai_test.cas12a_NT_analysis.nt_ig_artifacts import read_ig
+
+policy = json.loads(Path("frozen-ig-policy.json").read_text())
+report = run_ig(
+    verified_inputs,
+    study,
+    "validation",
+    reserved_seconds=300,
+    batch_size=32,
+    device="cpu",
+    policy=policy,
+    integration_batch_size=16,
+    probe_ids=validation_source_ids,
+)
+# Retain study.receipt outside the study directory after every acknowledgement.
+stored = read_ig(study, "validation", require_complete=True)
+```
+
+The reservation above is an example for a synthetic CPU study, not a measured
+production forecast. The existing production device/Drive rules and #146 gate
+still apply. `run_ig` currently executes validation probes only because its
+prediction driver is validation-only. `plan_ig` additionally accepts verified
+#140 coverage/case manifests and checks the complete Test population and
+partition/model/protocol provenance. Its full/subset work union reuses overlap
+and preserves statistics IDs. Passing a Test coverage manifest to a validation
+prediction run fails before loading. Future Test execution belongs to #148.
+
+One immutable plan per run binds explicit policy, integration batch, intended
+IDs, prediction checksum and coverage/case manifests. Every whole-source
+NPZ/JSON shard binds the plan hash, actual tokens/spans/masks, config-checked
+reference shape, native/endpoint/reference outputs, every completed resolution,
+quality, execution session, units and provenance. Readers reconstruct verdicts,
+DNA/special mass and output from committed files without torch, Transformers,
+the original model or dataset. Changed plans and corrupt/missing committed
+files fail; unreferenced files are ignored. Earlier code identities require a
+replacement run within the same study, retaining all historical charges.
+
+Disconnected/nonfinite gradients and outputs are saved as failed diagnostics.
+Connected zero attribution is valid; zero norm gives undefined normalization
+with a reason. `coverage` includes diagnostic sources; `accepted_coverage`
+includes only successful sources. Failed sources always block `complete` and
+automatic retry under that plan. A handled numerical failure closes and charges
+the job before the driver reports failure. Execution/storage faults instead
+retain unresolved-job settlement or poisoned-manager recovery. Interrupted
+uncommitted sources are recalculated only after explicit termination settlement;
+verified committed sources are reused. No real NT GPU execution was performed.

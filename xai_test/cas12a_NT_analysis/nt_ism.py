@@ -8,7 +8,9 @@ import numpy as np
 
 from cas12a.nt_data import digest
 
+from .nt_artifacts import read_checked as _read_checked
 from .nt_artifacts import read_results
+from .nt_artifacts import saved_vocabulary as _vocabulary
 from .nt_inputs import (
     DNA_SPANS,
     LAYOUT,
@@ -181,27 +183,6 @@ def compute_ism(rows, forward, tokenizer, embedding_rows, *, batch_size=32, guar
         "protocol": PROTOCOL,
         "batch_size": batch_size,
     }
-
-
-def _read_checked(study, path, checksum):
-    try:
-        data = study.store.read(path)
-        if hashlib.sha256(data).hexdigest() != checksum:
-            raise ValueError(f"artifact hash mismatch: {path}")
-        return data
-    except (OSError, ValueError):
-        study.poisoned = True
-        raise
-
-
-def _vocabulary(study, run_id, identity):
-    path = f"runs/{run_id}/snapshot/selected_export/vocab.txt"
-    data = _read_checked(study, path, identity["export_files"]["vocab.txt"])
-    tokens = data.decode("utf-8").splitlines()
-    vocabulary = {token: index for index, token in enumerate(tokens)}
-    if len(tokens) != 4107 or len(vocabulary) != 4107:
-        raise ValueError("invalid snapshotted vocabulary")
-    return vocabulary
 
 
 def _check_result(result, bindings, vocabulary):

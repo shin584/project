@@ -61,6 +61,7 @@ def source_snapshot():
     ]
     paths.append(analysis / "docs" / "planning" / "issue139-execution-contract.md")
     paths.append(analysis / "docs" / "planning" / "issue141-ism-contract.md")
+    paths.append(analysis / "docs" / "planning" / "issue142-ig-contract.md")
     return {path.relative_to(project).as_posix(): path.read_bytes() for path in paths}
 
 
@@ -288,6 +289,7 @@ class NativePredictor:
 
 
 def execution_identity(inputs, environment, snapshots, batch_size):
+    from .nt_ig import PROTOCOL as IG_PROTOCOL
     from .nt_ism import PROTOCOL as ISM_PROTOCOL
 
     return {
@@ -307,5 +309,6 @@ def execution_identity(inputs, environment, snapshots, batch_size):
             "rtol": RTOL,
             "batch_size": batch_size,
             "ism": ISM_PROTOCOL,
+            "ig": IG_PROTOCOL,
         },
     }

@@ -11,12 +11,15 @@ import json
 import logging
 import os
 import uuid
+from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
 
 from cas12a.nt_data import canonical_bytes
 
 from .nt_artifacts import prediction_rows, read_results
+from .nt_ig import compute_ig
+from .nt_ig_artifacts import plan_ig, read_ig, save_ig, save_ig_plan
 from .nt_inputs import check_export_files, encode_sequences, verify_inputs
 from .nt_ism import compute_ism, read_ism, save_ism
 from .nt_predict import (
@@ -26,6 +29,59 @@ from .nt_predict import (
     source_snapshot,
 )
 from .nt_run import DirectoryStore, Study
+
+
+@contextmanager
+def _explanation_session(
+    inputs,
+    study,
+    run_id,
+    environment,
+    *,
+    reserved_seconds,
+    batch_size,
+    device,
+    loader,
+    predictions,
+    before_load=None,
+):
+    """Share session parity, final identity checks and unresolved-fault handling."""
+    study.start(run_id, uuid.uuid4().hex, reserved_seconds, environment)
+    try:
+        study.checkpoint()
+        if before_load is not None:
+            before_load()
+        environment = installed_environment(device, query_gpu=True)
+        predictor = (loader or NativePredictor.load)(
+            inputs.export_dir,
+            device=device,
+            budget_guard=study.guard,
+            expected_files=inputs.identity["export_files"],
+        )
+        predictor.synchronize()
+        study.checkpoint()
+        parity = predictor.parity(
+            [row["sequence"] for row in predictions["rows"][:3]], batch_size=batch_size
+        )
+        predictor.synchronize()
+        study.record_execution(environment, parity)
+        yield predictor
+        predictor.assert_unchanged()
+        predictor.synchronize()
+        study.guard()
+        check_export_files(inputs.export_dir, inputs.identity["export_files"])
+        study.guard()
+        del predictor
+        study.finish()
+    except Exception as error:
+        if not study.poisoned:
+            try:
+                study.record_failure(error)
+            except (OSError, ValueError, KeyError, TypeError) as record_error:
+                logging.getLogger(__name__).warning(
+                    "Could not persist explanation failure: %s", record_error
+                )
+        raise
 
 
 def require_drive(root):
@@ -147,23 +203,17 @@ def run_ism(
     existing = read_ism(study, run_id)
     if existing["complete"]:
         return existing
-    study.start(run_id, uuid.uuid4().hex, reserved_seconds, environment)
-    try:
-        study.checkpoint()
-        environment = installed_environment(device, query_gpu=True)
-        predictor = (loader or NativePredictor.load)(
-            inputs.export_dir,
-            device=device,
-            budget_guard=study.guard,
-            expected_files=inputs.identity["export_files"],
-        )
-        predictor.synchronize()
-        study.checkpoint()
-        parity = predictor.parity(
-            [row["sequence"] for row in predictions["rows"][:3]], batch_size=batch_size
-        )
-        predictor.synchronize()
-        study.record_execution(environment, parity)
+    with _explanation_session(
+        inputs,
+        study,
+        run_id,
+        environment,
+        reserved_seconds=reserved_seconds,
+        batch_size=batch_size,
+        device=device,
+        loader=loader,
+        predictions=predictions,
+    ) as predictor:
         covered = set(existing["coverage"])
         for row in predictions["rows"]:
             if row["source_row"] in covered:
@@ -180,25 +230,89 @@ def run_ism(
             predictor.synchronize()
             predictor.assert_unchanged()
             save_ism(study, run_id, result)
-        predictor.assert_unchanged()
-        predictor.synchronize()
-        study.guard()
-        check_export_files(inputs.export_dir, inputs.identity["export_files"])
-        study.guard()
         if not read_ism(study, run_id)["coverage_complete"]:
             raise ValueError("incomplete ISM coverage")
-        del predictor
-        study.finish()
-        return read_ism(study, run_id, require_complete=True)
-    except Exception as error:
-        if not study.poisoned:
-            try:
-                study.record_failure(error)
-            except (OSError, ValueError, KeyError, TypeError) as record_error:
-                logging.getLogger(__name__).warning(
-                    "Could not persist ISM failure: %s", record_error
-                )
-        raise
+    return read_ism(study, run_id, require_complete=True)
+
+
+def run_ig(
+    inputs,
+    study,
+    run_id,
+    *,
+    reserved_seconds,
+    policy,
+    integration_batch_size=16,
+    probe_ids=None,
+    coverage=None,
+    cases=None,
+    batch_size=32,
+    device="cpu",
+    loader=None,
+):
+    """Resume an immutable IG work plan in the existing prediction run/budget."""
+    environment, _, identity = _prepare_execution(inputs, study, device, batch_size)
+    if run_id not in study.status()["runs"]:
+        raise ValueError("IG requires an existing prediction run")
+    study.register(run_id, identity)
+    predictions = read_results(study, run_id, require_complete=True)
+    plan = plan_ig(
+        predictions,
+        run_id=run_id,
+        policy=policy,
+        integration_batch_size=integration_batch_size,
+        probe_ids=probe_ids,
+        coverage=coverage,
+        cases=cases,
+    )
+    existing = read_ig(study, run_id)
+    if existing["plan"] is not None and canonical_bytes(
+        existing["plan"]
+    ) != canonical_bytes(plan):
+        raise ValueError("immutable IG plan cannot be changed")
+    if existing["failed"]:
+        raise ValueError(
+            "saved IG quality failure blocks this plan; preserve diagnostics"
+        )
+    if existing["complete"]:
+        return existing
+    with _explanation_session(
+        inputs,
+        study,
+        run_id,
+        environment,
+        reserved_seconds=reserved_seconds,
+        batch_size=batch_size,
+        device=device,
+        loader=loader,
+        predictions=predictions,
+        before_load=lambda: save_ig_plan(study, run_id, plan),
+    ) as predictor:
+        covered = set(existing["coverage"])
+        by_id = {row["source_row"]: row for row in predictions["rows"]}
+        for source_id in plan["work"]["ids"]:
+            if source_id in covered:
+                continue
+            study.checkpoint()
+            result = compute_ig(
+                by_id[source_id],
+                predictor,
+                policy=policy,
+                integration_batch_size=integration_batch_size,
+            )
+            predictor.synchronize()
+            predictor.assert_unchanged()
+            save_ig(study, run_id, result)
+            if not result["accepted"]:
+                break
+    report = read_ig(study, run_id)
+    if report["failed"]:
+        raise ValueError(
+            "saved IG quality failure blocks completion; inspect diagnostics"
+        )
+    if not report["complete"]:
+        raise ValueError("incomplete IG coverage")
+    return report
 
 
 def export_report(report, directory):
