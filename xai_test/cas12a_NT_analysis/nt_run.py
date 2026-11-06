@@ -264,14 +264,14 @@ class Study:
     def status(self):
         return copy.deepcopy(self.state)
 
-    def artifacts(self, run_id):
+    def artifacts(self, run_id, *, kind="predictions"):
         self._ensure()
         run = self.state["runs"][run_id]
         try:
             return [
                 (record, json.loads(self.store.read(name)))
                 for name, record in sorted(run["files"].items())
-                if record["kind"] == "predictions"
+                if record["kind"] == kind
             ]
         except Exception:
             self.poisoned = True
@@ -370,7 +370,10 @@ class Study:
         state["open_job"]["failure"] = str(error)
         self._append(state, "failed-job-awaiting-termination-evidence")
 
-    def save_artifact(self, name, payload, coverage):
+    def save_artifact(self, name, payload, coverage, *, kind="predictions", npz=None):
+        """Commit a JSON sidecar and optional NPZ together; coverage is per kind."""
+        if kind not in ("predictions", "ism") or (npz is not None and kind != "ism"):
+            raise ValueError("unsupported artifact kind/NPZ combination")
         self.checkpoint()
         state = self.status()
         run_id = state["open_job"]["run_id"]
@@ -378,7 +381,7 @@ class Study:
         covered = {
             row
             for record in run["files"].values()
-            if record["kind"] == "predictions"
+            if record["kind"] == kind
             for row in record["coverage"]
         }
         if (
@@ -388,7 +391,16 @@ class Study:
         ):
             raise ValueError("overlapping or unordered shard coverage")
         path = f"runs/{run_id}/artifacts/{_name(name)}.json"
+        files = {}
         try:
+            if npz is not None:
+                array_path = path.removesuffix(".json") + ".npz"
+                files[array_path] = {
+                    "sha256": self.store.put(array_path, npz),
+                    "coverage": [],
+                    "kind": "ism-array",
+                }
+                self.guard()
             checksum = self.store.put(path, canonical_bytes(payload))
         except Exception:
             self.poisoned = True
@@ -398,8 +410,9 @@ class Study:
         state["runs"][run_id]["files"][path] = {
             "sha256": checksum,
             "coverage": list(coverage),
-            "kind": "predictions",
+            "kind": kind,
         }
+        state["runs"][run_id]["files"].update(files)
         self._append(state, "commit-shard")
 
     def finish(self, *, outcome="completed"):

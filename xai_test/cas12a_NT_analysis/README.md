@@ -1,4 +1,4 @@
-# Cas12a native NT validation run (#139)
+# Cas12a native NT analysis
 
 This is the CPU-tested implementation of the accepted #139 design. It verifies
 the existing source, frozen partition and selected standalone NT scalar export;
@@ -214,3 +214,70 @@ note `checksum`. Notes refer to the original selection checksum and can name
 only selected cases. The original case artifact remains immutable.
 
 See the [implementation report](docs/reports/issue140-implementation.md).
+
+## Saturation mutagenesis (#141)
+
+`nt_ism.compute_ism` evaluates all 102 non-WT substitutions of a checked 34bp
+input. Every full mutant is retokenized with the saved tokenizer and checked
+for lossless reconstruction, actual spans and embedding-range IDs. The native
+forward remains FP32 and raw. Arrays use `(source_row, position, alternative)`
+with A/C/G/T alternatives and no head axis. WT slots preserve the original
+prediction and exact zero deltas; they do not count as mutations.
+
+`prediction` and `wt_prediction` are float32; raw, clipped and relative deltas
+are float64. Raw delta is mutant minus WT. Clipped delta clips each endpoint
+to [0,1] before subtraction. Relative delta divides by abs(WT); abs(WT)<=1e-4
+yields NaN in the NPZ, an explicit validity mask, and JSON null plus a reason
+in summaries. All other outputs must be finite. These are native fraction
+output units, not predicted percentages.
+
+The non-WT, base-valid and PAM masks preserve sensitivity denominators.
+Substitutions at invariant T positions 4,5,6 are PAM-breaking. Other positions,
+including variable PAM position 7, preserve TTTN. This is an input-pattern tag;
+it does not establish biological validity or an in-distribution input. The
+PAM-preserving sensitivity at invariant positions is undefined because there
+are no eligible alternatives; summaries retain null and the exclusion reason.
+
+The Python driver extends the existing validation run:
+
+```python
+from xai_test.cas12a_NT_analysis.analyze import run_ism
+from xai_test.cas12a_NT_analysis.nt_ism import read_ism
+
+# inputs, study and run_id come from the verified prediction workflow above.
+# First complete run_validation with the same code, packages and batch size.
+# Choose a reservation covering loading, parity, computation and durable saving.
+result = run_ism(
+    inputs,
+    study,
+    run_id,
+    reserved_seconds=reservation_seconds,
+    batch_size=32,
+    device="cpu",  # synthetic fixtures only; production requires CUDA and Drive
+)
+# Independently retain study.receipt after each acknowledged operation.
+selected = read_ism(study, run_id, source_ids=[source_id_b, source_id_a])
+```
+
+Each completed source commits an immutable NPZ plus JSON sidecar to the same
+run and cumulative ledger. The sidecar binds source/prediction identity,
+actual array shapes/dtypes/axes, token records for WT and all mutants, model,
+saved tokenizer, protocol, code, environment and producing session. Prediction
+and ISM coverage are separate. Interrupted sources are recomputed only after
+the existing termination-evidence settlement; committed sources are reused.
+Unreferenced files are ignored. Missing, damaged, incompatible or overlapping
+committed shards fail validation. Storage failures poison the manager.
+
+`read_ism` uses committed study files alone and requires no model, original
+dataset, torch or Transformers. It reconstructs masks, deltas and denominators,
+checks each source against its original prediction, and selects/reorders by
+source ID. `coverage` and `mutant_count` describe all stored results;
+`arrays`, `rows` and `summaries` follow the requested IDs. `require_complete`
+checks the full run population, even when selecting fewer IDs. An unresolved
+job prevents completion even if all source rows have been saved.
+
+Earlier runs cannot silently acquire a new code/protocol identity. Preserve
+them and their charges; create replacement runs within the existing study as
+needed. This ticket supplies CPU implementation evidence. Actual validation
+and 153,000 Testset mutations remain #146/#147 work under the scientific gate.
+See the [ISM contract](docs/planning/issue141-ism-contract.md).

@@ -60,6 +60,7 @@ def source_snapshot():
         )
     ]
     paths.append(analysis / "docs" / "planning" / "issue139-execution-contract.md")
+    paths.append(analysis / "docs" / "planning" / "issue141-ism-contract.md")
     return {path.relative_to(project).as_posix(): path.read_bytes() for path in paths}
 
 
@@ -287,6 +288,8 @@ class NativePredictor:
 
 
 def execution_identity(inputs, environment, snapshots, batch_size):
+    from .nt_ism import PROTOCOL as ISM_PROTOCOL
+
     return {
         **inputs.identity,
         "code_sha256": digest(
@@ -303,5 +306,6 @@ def execution_identity(inputs, environment, snapshots, batch_size):
             "atol": ATOL,
             "rtol": RTOL,
             "batch_size": batch_size,
+            "ism": ISM_PROTOCOL,
         },
     }

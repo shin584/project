@@ -11,12 +11,14 @@ import json
 import logging
 import os
 import uuid
+from functools import partial
 from pathlib import Path
 
 from cas12a.nt_data import canonical_bytes
 
 from .nt_artifacts import prediction_rows, read_results
 from .nt_inputs import check_export_files, encode_sequences, verify_inputs
+from .nt_ism import compute_ism, read_ism, save_ism
 from .nt_predict import (
     NativePredictor,
     execution_identity,
@@ -36,21 +38,18 @@ def require_drive(root):
         )
 
 
-def run_validation(
-    inputs, study, run_id, *, reserved_seconds, batch_size=32, device="cpu", loader=None
-):
-    """Verify/reuse coverage, acknowledge start, then load and export validation only."""
+def _prepare_execution(inputs, study, device, batch_size):
     if type(batch_size) is not int or batch_size < 1:
         raise ValueError("batch size must be a positive integer")
     if inputs.fixture != study.status()["fixture"]:
         raise ValueError("fixture/production study mismatch")
     if inputs.fixture and device != "cpu":
-        raise ValueError("fixture validation is CPU-only")
+        raise ValueError("fixture analysis is CPU-only")
     if not inputs.fixture:
         require_drive(study.store.root)
         if not device.startswith("cuda"):
             raise ValueError(
-                "production validation requires an explicitly selected CUDA device"
+                "production analysis requires an explicitly selected CUDA device"
             )
     # This collects package metadata but does not initialize a CUDA context.
     check_export_files(inputs.export_dir, inputs.identity["export_files"])
@@ -64,6 +63,16 @@ def run_validation(
         }
     )
     identity = execution_identity(inputs, environment, snapshots, batch_size)
+    return environment, snapshots, identity
+
+
+def run_validation(
+    inputs, study, run_id, *, reserved_seconds, batch_size=32, device="cpu", loader=None
+):
+    """Verify/reuse coverage, acknowledge start, then load and export validation only."""
+    environment, snapshots, identity = _prepare_execution(
+        inputs, study, device, batch_size
+    )
     study.register(run_id, identity, snapshots=snapshots)
     existing = read_results(study, run_id)
     if existing["complete"]:
@@ -122,6 +131,72 @@ def run_validation(
             except (OSError, ValueError, KeyError, TypeError) as record_error:
                 logging.getLogger(__name__).warning(
                     "Could not persist the failure record: %s", record_error
+                )
+        raise
+
+
+def run_ism(
+    inputs, study, run_id, *, reserved_seconds, batch_size=32, device="cpu", loader=None
+):
+    """Calculate missing validation ISM in the existing prediction run and budget."""
+    environment, _, identity = _prepare_execution(inputs, study, device, batch_size)
+    if run_id not in study.status()["runs"]:
+        raise ValueError("ISM requires an existing prediction run")
+    study.register(run_id, identity)
+    predictions = read_results(study, run_id, require_complete=True)
+    existing = read_ism(study, run_id)
+    if existing["complete"]:
+        return existing
+    study.start(run_id, uuid.uuid4().hex, reserved_seconds, environment)
+    try:
+        study.checkpoint()
+        environment = installed_environment(device, query_gpu=True)
+        predictor = (loader or NativePredictor.load)(
+            inputs.export_dir,
+            device=device,
+            budget_guard=study.guard,
+            expected_files=inputs.identity["export_files"],
+        )
+        predictor.synchronize()
+        study.checkpoint()
+        parity = predictor.parity(
+            [row["sequence"] for row in predictions["rows"][:3]], batch_size=batch_size
+        )
+        predictor.synchronize()
+        study.record_execution(environment, parity)
+        covered = set(existing["coverage"])
+        for row in predictions["rows"]:
+            if row["source_row"] in covered:
+                continue
+            study.checkpoint()
+            result = compute_ism(
+                [row],
+                partial(predictor.predict, batch_size=batch_size),
+                predictor.tokenizer,
+                predictor.embedding_rows,
+                batch_size=batch_size,
+                guard=study.guard,
+            )
+            predictor.synchronize()
+            predictor.assert_unchanged()
+            save_ism(study, run_id, result)
+        predictor.assert_unchanged()
+        predictor.synchronize()
+        study.guard()
+        check_export_files(inputs.export_dir, inputs.identity["export_files"])
+        study.guard()
+        if not read_ism(study, run_id)["coverage_complete"]:
+            raise ValueError("incomplete ISM coverage")
+        del predictor
+        study.finish()
+        return read_ism(study, run_id, require_complete=True)
+    except Exception as error:
+        if not study.poisoned:
+            try:
+                study.record_failure(error)
+            except (OSError, ValueError, KeyError, TypeError) as record_error:
+                logging.getLogger(__name__).warning(
+                    "Could not persist ISM failure: %s", record_error
                 )
         raise
 
