@@ -372,9 +372,14 @@ class Study:
 
     def save_artifact(self, name, payload, coverage, *, kind="predictions", npz=None):
         """Commit a JSON sidecar and optional NPZ together; coverage is per kind."""
-        if kind not in ("predictions", "ism", "ig-plan", "ig") or (
-            npz is not None and kind not in ("ism", "ig")
-        ):
+        if kind not in (
+            "predictions",
+            "ism",
+            "ig-plan",
+            "ig",
+            "rollout-plan",
+            "rollout",
+        ) or (npz is not None and kind not in ("ism", "ig", "rollout")):
             raise ValueError("unsupported artifact kind/NPZ combination")
         self.checkpoint()
         state = self.status()

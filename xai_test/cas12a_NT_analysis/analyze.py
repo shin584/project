@@ -28,6 +28,13 @@ from .nt_predict import (
     installed_environment,
     source_snapshot,
 )
+from .nt_rollout import compute_rollout
+from .nt_rollout_artifacts import (
+    plan_rollout,
+    read_rollout,
+    save_rollout,
+    save_rollout_plan,
+)
 from .nt_run import DirectoryStore, Study
 
 
@@ -312,6 +319,68 @@ def run_ig(
         )
     if not report["complete"]:
         raise ValueError("incomplete IG coverage")
+    return report
+
+
+def run_rollout(
+    inputs,
+    study,
+    run_id,
+    *,
+    reserved_seconds,
+    policy,
+    batch_size=32,
+    device="cpu",
+    loader=None,
+):
+    """Resume token attention flow under the existing run identity and budget."""
+    environment, _, identity = _prepare_execution(inputs, study, device, batch_size)
+    if run_id not in study.status()["runs"]:
+        raise ValueError("rollout requires an existing prediction run")
+    study.register(run_id, identity)
+    predictions = read_results(study, run_id, require_complete=True)
+    plan = plan_rollout(predictions, run_id=run_id, policy=policy)
+    existing = read_rollout(study, run_id)
+    if existing["plan"] is not None and canonical_bytes(
+        existing["plan"]
+    ) != canonical_bytes(plan):
+        raise ValueError("immutable rollout plan cannot be changed")
+    if existing["failed"]:
+        raise ValueError(
+            "saved rollout quality failure blocks this plan; preserve diagnostics"
+        )
+    if existing["complete"]:
+        return existing
+    with _explanation_session(
+        inputs,
+        study,
+        run_id,
+        environment,
+        reserved_seconds=reserved_seconds,
+        batch_size=batch_size,
+        device=device,
+        loader=loader,
+        predictions=predictions,
+        before_load=lambda: save_rollout_plan(study, run_id, plan),
+    ) as predictor:
+        covered = set(existing["coverage"])
+        for row in predictions["rows"]:
+            if row["source_row"] in covered:
+                continue
+            study.checkpoint()
+            result = compute_rollout(row, predictor, policy=policy)
+            predictor.synchronize()
+            predictor.assert_unchanged()
+            save_rollout(study, run_id, result)
+            if not result["accepted"]:
+                break
+    report = read_rollout(study, run_id)
+    if report["failed"]:
+        raise ValueError(
+            "saved rollout quality failure blocks completion; inspect diagnostics"
+        )
+    if not report["complete"]:
+        raise ValueError("incomplete rollout coverage")
     return report
 
 

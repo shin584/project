@@ -1,5 +1,39 @@
 # Cas12a native NT analysis
 
+Token attention rollout (#143) is available through
+`analyze.run_rollout(inputs, study, run_id, reserved_seconds=..., policy=...)`.
+It shares the checked prediction run, ledger and sequential resume lifecycle.
+Pass an explicit `{"query_l1_threshold": value}` policy frozen before real
+validation; there is no production threshold default. The driver commits an
+immutable all-prediction-ID plan before loading and reuses verified shards.
+`nt_rollout_artifacts.read_rollout(study, run_id, require_complete=True)` reads
+the committed results without torch, Transformers, original source or model.
+Earlier code identities require a replacement run retaining study charges.
+
+`nt_rollout.compute_rollout` checks eager attention probabilities and both
+saved/native and native/attention-enabled FP32 parity (atol=1e-5, rtol=1e-4).
+It averages attention heads, mixes `0.5*A+0.5*I`, row-normalizes and left-multiplies
+in encoder order using float64 accumulation. Padding is excluded; CLS remains
+throughout propagation. Per-source NPZs preserve `(layer,10,10)` valid-token
+attention means, the full `(10,10)` matrix, and its unnormalized DNA `(9,9)`
+block. JSON sidecars bind source ID, actual token IDs/masks/spans, layer order,
+backend class/version, config dimensions, provenance hashes, axes/quantity and
+quality. No regression-output-head or base-coordinate axis is added.
+
+Model-free readers reconstruct full/block matrices, removed CLS mass, retained
+row mass, parity and all 36 DNA-query-pair L1 distances, including min/mean/max,
+near-identical fraction and status on both full-key support and the display
+block. Display row sums need not equal one. Near-identical query rows are valid
+limitations of attention flow; they do not establish output attribution or
+selective token-pair interactions. Failed parity/missing/nonfinite/shape-invalid
+attention is saved with observed finite outputs, null arrays and a stage/reason;
+it blocks completion and automatic retry. Execution/storage/budget faults keep
+the existing explicit settlement or poisoned-manager semantics.
+
+See [the CPU rollout contract](docs/planning/issue143-rollout-contract.md).
+CPU fixtures do not represent the actual 1,500-row rollout: scientific freeze
+and real validation remain #146, and actual Testset rollout remains #147.
+
 This is the CPU-tested implementation of the accepted #139 design. It verifies
 the existing source, frozen partition and selected standalone NT scalar export;
 predicts **validation only** in FP32; writes immutable prediction shards; and
