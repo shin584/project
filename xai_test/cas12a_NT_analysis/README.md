@@ -127,3 +127,90 @@ writers and provides no concurrency detection, locks or distributed coordination
 
 See the [execution contract](docs/planning/issue139-execution-contract.md) and
 [implementation report](docs/reports/issue139-implementation.md).
+
+## Frozen IG coverage and technical cases (#140)
+
+`nt_selection.py` is a model-free Python interface for #146's future coverage
+freeze and #147's subsequent case selection. The implementation has been tested
+with synthetic CPU files. It has not frozen a real population or observed new
+FP32 Test results. Existing FP16 Test results were known when these rules were
+designed; they are not a preregistration against an unseen Testset.
+
+```python
+from xai_test.cas12a_NT_analysis.nt_selection import (
+    freeze_coverage,
+    read_coverage,
+    save_cases,
+    read_cases,
+    ig_work,
+)
+
+# #146 supplies the reviewed validation decision and its trusted byte SHA256.
+# Use new directories and retain returned checksums independently.
+coverage_sha = freeze_coverage(
+    partition_path,
+    decision_path,
+    new_coverage_directory,
+    decision_checksum=accepted_decision_sha,
+    mode="full",
+)
+coverage = read_coverage(new_coverage_directory, checksum=coverage_sha)
+
+# Only after the production freeze: #147 verifies complete FP32 Test predictions.
+# Each row supplies source_row, sequence, label (fraction), raw_prediction.
+cases_sha = save_cases(
+    new_coverage_directory,
+    new_case_directory,
+    coverage_checksum=coverage_sha,
+    predictions=verified_prediction_rows,
+    prediction_identity=coverage["analysis_identity"],
+)
+cases = read_cases(
+    new_coverage_directory,
+    new_case_directory,
+    coverage_checksum=coverage_sha,
+    checksum=cases_sha,
+)
+work = ig_work(coverage, cases)
+```
+
+The decision JSON schema and review boundaries are defined in the
+[#140 selection contract](docs/planning/issue140-selection-contract.md).
+Production reads the pinned existing 1,500-target membership. Synthetic
+partitions require `fixture=True`; fallback retains its 400-target floor even
+in fixtures. This module checks the decision's identity and integrity; #146
+must separately accept its measurement quality and forecast. A reference/hash
+alone does not establish that full IG is unaffordable.
+
+Full mode stores all Test IDs. Only an accepted `full_rejected: true` decision
+permits `mode="subset", size=N`, where 400 <= N < population size. The random
+list is a prefix of a seed-42 PCG64 permutation over ascending source IDs.
+`selection_ids` preserves that order; `storage_ids` is ascending. No label,
+prediction, explanation or PAM quota affects this sample. Copied partition and
+decision bytes, counts, versions, membership digests and rules are verified
+on readback against the independently retained manifest checksum. New writes
+require empty directories; partial or corrupt artifacts are never overwritten.
+Preserve all files and the original returned checksum when transferring a list.
+
+Cases use complete-population raw errors and linear Q25/Q75. They allocate
+out-of-range, high-error, then low-error cases, at most five each, excluding
+previous selections. Shortages and equal-quartile distributions remain
+explicit. The stored normalized inputs contain only IDs, sequences, labels
+and raw predictions; extra caller fields are ignored. Reopening recomputes the
+whole case list. Upstream verification must establish actual FP32 execution
+and label provenance; this selector cannot infer those from numeric values.
+
+`work["ids"]` is the unique IG union, `additional_case_ids` contains case-only
+work, and `rows` retains every ID's roles. Use **only `statistics_ids`** as the
+IG statistics denominator; adding technical cases does not enlarge it.
+Full mode reuses all case IG; subset mode adds only cases outside the sample.
+The coverage/case checksums accompany the plan for downstream artifact binding.
+
+After selection, `save_annotations(coverage_directory, selection_directory,
+new_note_directory, coverage_checksum=..., selection_checksum=...,
+annotations=[{"source_row": case_id, "note": "..."}])` writes separate notes.
+`read_annotations` takes the same directories and checksums plus the returned
+note `checksum`. Notes refer to the original selection checksum and can name
+only selected cases. The original case artifact remains immutable.
+
+See the [implementation report](docs/reports/issue140-implementation.md).
