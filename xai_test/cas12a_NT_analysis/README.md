@@ -1,5 +1,61 @@
 # Cas12a native NT analysis
 
+## Stored IG–ISM agreement (#144)
+
+The model-free reader checks committed predictions, IG and ISM, rebuilds the
+immutable IG population plan and joins actual source/token records by source ID:
+
+```python
+from xai_test.cas12a_NT_analysis.nt_agreement_artifacts import (
+    read_agreement,
+    save_agreement,
+    load_agreement,
+)
+
+result = read_agreement(study, run_id)
+# New empty directory outside the study; independently retain this checksum.
+checksum = save_agreement(study, run_id, new_output_directory)
+replayed = load_agreement(new_output_directory, checksum=checksum)
+assert replayed == result
+```
+
+No model, original dataset, torch, Transformers, GPU reservation or ledger
+mutation is required. The standalone export contains normalized `inputs.json`,
+recomputed `results.json` and a hash manifest. Reload verifies the exact file
+set and trusted checksum, then recomputes every result. Exports never replace
+existing files or write into the study. Their provenance is checked at export
+time; standalone replay does not independently verify remote study history.
+
+Primary is per-sequence Spearman for t1–t5 over all non-WT alternatives,
+comparing absolute token IG / 6 with mean-base mean-alternative absolute raw
+ISM delta. Both token sets (five 6-mers and nine tokens), both PAM versions,
+mass/span-sum comparisons and population mean-profile correlations are saved.
+Every summary records its population IDs, total/valid counts and exclusions.
+`populations.statistics` uses only the frozen full/random membership;
+`additional_cases` and `validation_probes` are separate descriptive populations.
+Source rows retain case roles, including overlap with the statistical population.
+
+Masks, alternative/base counts and actual token spans remain inspectable. PAM
+exclusion nulls positions 4,5,6 and leaves t1/t2 with 4bp/5bp ISM support while
+their IG still covers the full 6bp. Exact ties use midranks; constant/missing
+axes retain null plus a reason. Missing/failed methods or unresolved jobs block
+completion; low or normally undefined correlations remain valid results.
+
+For each PAM version, nine-token density ranks retain separate length-group and
+pure 3′ flank diagnostics: global rank means/differences, within/between
+covariance terms and their contributions normalized by the same global standard
+deviation product. Their sum is checked against the nine-token Spearman. These
+partitions are descriptive diagnostics, with no causal or confound-fraction
+interpretation. The primary five-token ranks cover [0,30), omitting t6–t9.
+
+`sequence_agreement` exposes the numerical boundary; `compare_saved` accepts
+reports already verified by `read_results`, `read_ig` and `read_ism` and checks
+their ID/identity/token/coverage joins. Prefer `read_agreement` for study access
+and committed-byte/quality verification. See the
+[agreement contract](docs/planning/issue144-agreement-contract.md).
+Only synthetic CPU fixtures were used for #144. Scientific freeze and real
+validation remain #146; actual Test agreement remains #148.
+
 Token attention rollout (#143) is available through
 `analyze.run_rollout(inputs, study, run_id, reserved_seconds=..., policy=...)`.
 It shares the checked prediction run, ledger and sequential resume lifecycle.
