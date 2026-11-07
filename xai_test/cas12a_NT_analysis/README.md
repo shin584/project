@@ -1,5 +1,33 @@
 # Cas12a native NT analysis
 
+## Colab validation handoff (#146)
+
+Build the reviewed local source and Korean-guided notebook for human execution:
+
+```sh
+python -m xai_test.cas12a_NT_analysis.nt_colab build --output .scratch/issue146-colab
+```
+
+Upload the generated `Cas12a_NT_validation_colab.ipynb` to Colab and provide its
+matching `cas12a-validation-source.zip`. Configure the existing Drive assets,
+explicit first-study/resume mode and pre-observation protocol hash acceptance.
+The notebook runs validation correctness, separate warmup and three 32-row
+production groups, then replays saved quality, forecasts charged reservations
+and freezes full-first IG coverage. It has no Test/training step. Immutable
+external receipts, failure diagnostics and a returned evidence ZIP are included.
+
+Read the [Korean execution guide](docs/colab-validation.md) before execution.
+The bundle is CPU-tested preparation; real GPU completion of #146 still needs
+the human's returned measurements and a verified feasible freeze. To inspect
+returned evidence without torch/Transformers or the original model/data:
+
+```sh
+python -m xai_test.cas12a_NT_analysis.nt_colab audit --archive returned.zip --sha256 <trusted-sha256> --output .scratch/issue146-returned
+```
+
+Preparation scope, verification and limits are recorded in the
+[implementation report](docs/reports/issue146-implementation.md).
+
 ## Stored IG–ISM agreement (#144)
 
 The model-free reader checks committed predictions, IG and ISM, rebuilds the

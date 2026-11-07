@@ -81,7 +81,7 @@ def _name(value):
 class Study:
     """A single sequential study; every run shares its charges and open job."""
 
-    def __init__(self, root, *, clock=None, store=None):
+    def __init__(self, root, *, clock=None, store=None, receipt_sink=None):
         self.store = store or DirectoryStore(root)
         if self.store.root != Path(root).resolve():
             raise ValueError("storage root mismatch")
@@ -92,10 +92,11 @@ class Study:
         self.poisoned = False
         self.started = None
         self.close_ack = None
+        self.receipt_sink = receipt_sink
 
     @classmethod
-    def create(cls, root, *, fixture=False, clock=None, store=None):
-        study = cls(root, clock=clock, store=store)
+    def create(cls, root, *, fixture=False, clock=None, store=None, receipt_sink=None):
+        study = cls(root, clock=clock, store=store, receipt_sink=receipt_sink)
         if study.store.root.exists() and any(study.store.root.iterdir()):
             raise ValueError("initialize requires a new empty study root")
         study.state = {
@@ -113,8 +114,8 @@ class Study:
         return study
 
     @classmethod
-    def reopen(cls, root, *, receipt, clock=None, store=None):
-        study = cls(root, clock=clock, store=store)
+    def reopen(cls, root, *, receipt, clock=None, store=None, receipt_sink=None):
+        study = cls(root, clock=clock, store=store, receipt_sink=receipt_sink)
         study._load()
         if (
             not isinstance(receipt, dict)
@@ -242,6 +243,12 @@ class Study:
                 new_head,
                 self.index + 1,
             )
+            if event not in (
+                "finish",
+                "settle-with-external-termination-evidence",
+                "budget-overrun-blocked",
+            ):
+                self._acknowledge()
             if self.started is not None:
                 elapsed = self.clock.monotonic() - self.started
                 job = state["open_job"] or state["last_closed"]
@@ -250,6 +257,14 @@ class Study:
         except Exception:
             self.poisoned = True
             raise
+
+    def _acknowledge(self):
+        if self.receipt_sink is not None:
+            try:
+                self.receipt_sink(self.receipt)
+            except Exception:
+                self.poisoned = True
+                raise
 
     @property
     def receipt(self):
@@ -379,6 +394,7 @@ class Study:
             "ig",
             "rollout-plan",
             "rollout",
+            "validation",
         ) or (npz is not None and kind not in ("ism", "ig", "rollout")):
             raise ValueError("unsupported artifact kind/NPZ combination")
         self.checkpoint()
@@ -438,6 +454,10 @@ class Study:
         if elapsed > job["reserved_seconds"]:
             self._overrun(elapsed)
         self.close_ack = {"job_id": job["job_id"], "elapsed_seconds": elapsed}
+        self._acknowledge()
+        elapsed = max(1e-9, self.clock.monotonic() - self.started)
+        if elapsed > job["reserved_seconds"]:
+            self._overrun(elapsed)
         self.started = None
 
     def settle(self, evidence_path, *, terminated_utc, upper_seconds):
@@ -477,4 +497,5 @@ class Study:
         state["open_job"] = None
         self._append(state, "settle-with-external-termination-evidence")
         self.close_ack = {"job_id": job["job_id"], "elapsed_seconds": upper_seconds}
+        self._acknowledge()
         return self.receipt

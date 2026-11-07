@@ -63,6 +63,8 @@ def source_snapshot():
     paths.append(analysis / "docs" / "planning" / "issue141-ism-contract.md")
     paths.append(analysis / "docs" / "planning" / "issue142-ig-contract.md")
     paths.append(analysis / "docs" / "planning" / "issue143-rollout-contract.md")
+    paths.append(analysis / "docs" / "planning" / "issue146-colab-contract.md")
+    paths.append(analysis / "docs" / "reports" / "issue146-design-review.md")
     return {path.relative_to(project).as_posix(): path.read_bytes() for path in paths}
 
 
