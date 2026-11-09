@@ -17,7 +17,7 @@ bytes와 모든 member를 자동 검증합니다. 추출 경로는 `/content/c12
 
 ## 실행 설정과 현재 정책 경계
 
-경로·IG 범위·reservation 설정은 노트북 3셀에 모여 있습니다. 기존 Drive 자산 경로를
+경로·IG 범위 설정은 노트북 3셀에 모여 있습니다. 기존 Drive 자산 경로를
 유지합니다. 전수 Test는 production에서 1,500행을 요구하며 검증용 fixture만 작은 Test
 membership을 허용합니다. validation ID 필드에 Test ID를 넣지 않습니다.
 
@@ -27,12 +27,24 @@ membership을 허용합니다. validation ID 필드에 Test ID를 넣지 않습�
 자동으로 400행으로 정하거나 실행 도중 결과를 보고 바꾸지 않습니다. 모든 선정 사례와
 통계 membership의 합집합을 source ID당 한 번 계산합니다. 사례 전용 ID는 통계에 넣지 않습니다.
 
-기존 overrun·미정산 시간과 간소화된 실행 정책의 관계는 아직 결정되지 않았습니다.
-따라서 `RESERVED_SECONDS=None`으로 배포합니다. production 실행은 **기존** cumulative
-`Study`와 명시적 reservation을 요구합니다. 노트북은 기존 ledger·외부 receipt를 열기만
-하며 새 study를 생성하지 않습니다. 차단·미정산 상태는 기존 관리자가 그대로 거부합니다.
-새 결과 폴더는 예산 reset이나 새 실행 승인을 뜻하지 않습니다. 이 전달물은 정책 변경이나
-실제 Colab GPU 완료 증거가 아닙니다. 추가 예산을 임의 설정하지 않습니다.
+2026-11-09 사용자 승인에 따라 이번 Test 본 분석은 과거 검증의 시간 초과 차단과
+분리했습니다. 기존 study·ledger·외부 receipt를 읽거나 수정하지 않으며 reservation 입력도
+요구하지 않습니다. 세션별 시작·종료·실제 경과 시간과 오류만 새 결과 폴더에 기록합니다.
+기존 미정산 시간을 지우거나 종료 시각을 추정하지 않으며, 자동 실행시간 제한을 새로
+추가하지 않습니다. 이 결정은 [ADR 0011](../../docs/adr/0011-cas12a-main-analysis-runs-independently-of-validation-time-blocks.md)에 기록합니다.
+
+Colab 실행 순서(노트북 코드 셀의 주석 번호 기준):
+
+1. 본 분석 노트북을 열고 GPU 런타임을 선택합니다.
+2. 1번 셀로 의존성을 설치하고 2번 셀에서 **같은 빌드의 소스 ZIP 하나**를 업로드합니다.
+   기존 모델·데이터는 Drive에 있는 파일을 사용합니다.
+3. 3번 셀에서 `SOURCE`, `PARTITION`, `MODEL_RUN` 경로를 확인하고 실행합니다.
+4. 4번 셀로 바로 GPU 본 분석을 시작합니다. 별도 승인·예산 hash 붙여넣기는 없습니다.
+5. 5번 셀로 저장 자료의 보고서를 확인하고 6번 셀로 원시 shard와 보고서 ZIP을 내려받습니다.
+
+기본 결과 경로는 `/content/drive/MyDrive/cas12a-xai/main-test1500/<build>`입니다.
+같은 경로를 동시에 두 런타임에서 실행하지 않습니다. Colab의 자체 런타임 제한이나
+연결 중단은 발생할 수 있으며 저장 완료 shard는 같은 빌드·경로로 재개할 때 재사용합니다.
 
 ## 계산·저장·재개
 
@@ -45,15 +57,14 @@ membership을 허용합니다. validation ID 필드에 Test ID를 넣지 않습�
 FP32/eager·finite 출력, IG endpoint/completeness/수렴, rollout parity입니다.
 IG는 기존 zero reference와 200→400→800→1600 midpoint 기준을 유지하며 parameter
 gradient만 잠시 끄고 원래 flag를 복구합니다. 가벼운 mutation version 확인은 소스마다,
-전체 model state 확인은 방법 경계에서 수행합니다. 예산 guard는 메모리의 경과 시간만
-확인하며 매 소스마다 전체 ledger나 과거 artifact를 읽지 않습니다.
+전체 model state 확인은 방법 경계에서 수행합니다. 본 분석은 과거 ledger를 읽지 않습니다.
 
 `plan.json`은 통계 ID·설정·identity를 고정합니다. `shards/<method>/<source>.json`이
 마지막 저장 완료 확인이며 NPZ가 먼저 저장됩니다. 저장이 중단된 orphan/pending 파일은
 coverage에 포함하지 않습니다. 재접속 시 입력을 다시 검증하고 같은 output으로
 `prepare_main`과 `run_main`을 실행합니다. 호환되지 않는 코드·입력·설정은 거부하며
 정상 완료 shard와 수치 실패 기록은 덮어쓰지 않습니다. 실패 기록을 지우고 성공으로
-재해석하지 않습니다. 오류로 중단된 production 세션의 예산 정산은 기존 정책을 따릅니다.
+재해석하지 않습니다. 강제 종료되어 종료 기록이 없는 세션은 종료 시각을 추정하지 않습니다.
 
 최초 계산 시 `execution.json`에 Python 및 NumPy/SciPy/PyTorch/Transformers/Safetensors
 버전과 FP32/eager·배치 설정을 고정합니다. 재개 시 한 번 비교하며 다른 계산 환경의

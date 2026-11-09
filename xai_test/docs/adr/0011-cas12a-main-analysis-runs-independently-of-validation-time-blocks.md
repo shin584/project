@@ -1,0 +1,9 @@
+# Run Cas12a Test main analysis independently of historical validation time blocks
+
+Status: accepted — on 2026-11-09 the user explicitly approved preserving historical validation records while separating their time-overrun block from the new Test main-analysis execution.
+
+This partially supersedes the shared six-hour cumulative execution gate and mandatory historical-ledger recovery requirements of [ADR 0009](0009-cas12a-xai-follows-completed-spcas9-analysis.md) and [ADR 0010](0010-cas12a-xai-controls-token-groups-and-prefers-full-ig.md) for this main-analysis route. Requiring the blocked validation study to reopen made the delivered Test notebook unusable; the user approved a separate execution route rather than asking them to settle the old run before obtaining Test results.
+
+The main-analysis route does not open, reset, settle or replace the historical study, ledger, external receipts, charges, artifacts or unknown termination times. It records its own session starts, ends, elapsed time, environment and errors beside its durable source shards. There is no inherited reservation input, repeated validation/cost phase or new agent-chosen automatic time cap. Session interruption does not erase completed compatible shards, and an absent end record does not establish a termination time. This separation is an explicit policy change, not a claim that old spending was reconciled or that a new six-hour allowance exists. Colab runtime availability and a completion time are not guaranteed.
+
+Keep the existing Test membership, trained NT, native FP32/eager settings, token/mask/span identity, finite-output checks, IG endpoint/completeness/convergence policy, rollout parity, full-first IG with no automatic subset fallback, case selection, method coverage and artifact-based reporting. Preserve the earlier ADRs as historical records. This decision authorizes the execution route; it is not evidence that Test 1,500-row GPU computation has completed.

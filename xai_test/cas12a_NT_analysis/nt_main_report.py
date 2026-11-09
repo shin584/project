@@ -593,7 +593,7 @@ def report_main(directory, output_dir=None):
         "",
         "TTTV/TTTT는 관측된 각 집단의 행 수를 분모로 사용합니다. 표본 IG의 PAM 차이는 탐색적입니다. 부분 결과는 실제 성공 coverage만 설명하며 전체 완료로 표시하지 않습니다.",
         "validation 근거와 이 Test 결과는 별도입니다. 과거 FP16 평가와 FP32의 동등성을 주장하지 않습니다.",
-        "기존 study·receipt·charge와 종료 시각은 변경하지 않습니다. 이 폴더는 과거 예산 정산이나 추가 GPU 예산 승인을 뜻하지 않습니다.",
+        "사용자 승인에 따라 본 분석은 과거 검증 실행의 시간 초과 차단과 분리했습니다. 기존 study·receipt·charge와 종료 시각은 변경하거나 정산하지 않습니다. 새 실행의 세션별 경과 시간은 별도로 기록합니다.",
         "",
     ]
     case_lines = []

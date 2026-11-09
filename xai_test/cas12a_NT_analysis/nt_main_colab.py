@@ -26,12 +26,12 @@ def main_notebook(checksum, archive_name):
 검증 시연용 노트북이 아닙니다. 전체/TTTV/TTTT 성능과 설명·사례 보고서는 저장 결과에서
 GPU 없이 다시 만들 수 있습니다. 같은 빌드의 아래 ZIP 하나를 업로드하세요.
 
-입력 경로·IG 범위·실행 reservation은 경로 설정 셀 한 곳에 있습니다. IG 기본 범위는
+입력 경로·IG 범위는 경로 설정 셀 한 곳에 있습니다. IG 기본 범위는
 전수 우선이며 affordability가 확인됐다는 뜻은 아닙니다. 자동 400행 fallback은 없습니다.
-기존 초과 study의 정책 결정은 미확정입니다. `RESERVED_SECONDS=None` 상태에서는 GPU를
-실행하지 않습니다. 새 output 폴더로 예산을 초기화하지 않으며 기존 ledger/receipt를
-사용합니다. 기존 study가 차단돼 있으면 그대로 중단합니다. 정책 변경은 별도 결정 사항입니다.
-동일 study는 한 런타임에서 실행하세요. 이 전달물 자체는 실제 Test GPU 완료 증거가 아닙니다.
+사용자 승인에 따라 과거 검증의 시간 초과 차단과 분리해 본 분석을 실행합니다.
+기존 검증 기록은 보존하며 별도 reservation 입력 없이 경로 설정 후 GPU 분석을 시작합니다.
+완료된 소스는 Drive에 저장하고 재접속 시 재사용합니다. 같은 OUTPUT은 한 런타임에서 실행하세요.
+이 전달물 자체는 실제 Test GPU 완료 증거가 아닙니다.
 """
     upload = book["cells"][2]["source"]
     upload = upload.replace("cas12a-validation-source.zip", archive_name)
@@ -62,9 +62,6 @@ GPU 없이 다시 만들 수 있습니다. 같은 빌드의 아래 ZIP 하나를
     PARTITION = BASE / "partition.json"
     MODEL_RUN = BASE / "runs/20261101-nt500m-full"
     OUTPUT = Path("/content/drive/MyDrive/cas12a-xai/main-test1500") / __BUILD__
-    STUDY_ROOT = Path("/content/drive/MyDrive/cas12a-xai/study-138")
-    EVIDENCE_ROOT = Path("/content/drive/MyDrive/cas12a-xai/evidence-146")
-    RESERVED_SECONDS = None  # 기존 누적 예산 안에서 결정된 reservation만 입력. 추가 예산 승인이 아닙니다.
     COVERAGE_DIRECTORY = None  # 사전에 고정한 subset이 있으면 기존 coverage manifest 폴더
     COVERAGE_CHECKSUM = None   # 선택 사항; 해당 manifest의 저장된 checksum.json에서 자동 읽기
     if COVERAGE_DIRECTORY is not None:
@@ -78,15 +75,10 @@ GPU 없이 다시 만들 수 있습니다. 같은 빌드의 아래 ZIP 하나를
     add(
         "code",
         """
-    # 4. 본 분석. 과거 study를 재생성하거나 미정산 시간을 지우지 않습니다.
-    from xai_test.cas12a_NT_analysis.nt_validation import open_study
-    if RESERVED_SECONDS is None:
-        raise ValueError("GPU 실행 정책 미확정: 기존 초과 study와 reservation 결정을 먼저 해결해야 합니다. 준비·보고는 계속 사용할 수 있습니다.")
-    study = open_study(STUDY_ROOT, EVIDENCE_ROOT, initialize=False)
+    # 4. 바로 GPU 본 분석. 과거 검증 ledger/receipt를 열거나 변경하지 않습니다.
     def show_progress(event):
         print(f"{event['method']} {event['completed']}/{event['requested']} · 저장: {event['output_dir']}", flush=True)
-    summary = run_main(inputs, OUTPUT, device="cuda:0", study=study,
-                       reserved_seconds=RESERVED_SECONDS, on_progress=show_progress)
+    summary = run_main(inputs, OUTPUT, device="cuda:0", on_progress=show_progress)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     """,
     )

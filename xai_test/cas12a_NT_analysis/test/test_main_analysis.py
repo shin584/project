@@ -203,25 +203,46 @@ def test_unresolved_ig_numerics_are_failed_and_never_exported_as_zero(inputs, tm
     )
 
 
-def test_main_keeps_unresolved_historical_accounting_blocked(inputs, tmp_path):
+def test_main_runs_while_preserving_blocked_historical_accounting(inputs, tmp_path):
     from xai_test.cas12a_NT_analysis.nt_run import Study
+    from xai_test.cas12a_NT_analysis.test.test_run import Clock
 
     verified = verify_test_inputs(
         inputs.source, inputs.manifest, inputs.export, inputs.receipt, fixture=True
     )
     root = tmp_path / "blocked_main"
     prepare_main(verified, root)
-    study = Study.create(tmp_path / "historical_study", fixture=True)
+    clock = Clock()
+    study = Study.create(tmp_path / "historical_study", fixture=True, clock=clock)
     study.register("old", {"historical": True})
     study.start("old", "old-session", 300, {"device": "cpu"})
+    receipt_path = tmp_path / "historical_receipt.json"
+    receipt_path.write_text(json.dumps(study.receipt), encoding="utf-8")
+    receipt = receipt_path.read_bytes()
+    clock.seconds = 301
+    with pytest.raises(ValueError, match="overrun"):
+        study.guard()
     before = study.status()
-    receipt = study.receipt
-    with pytest.raises(ValueError, match="unresolved"):
-        run_main(verified, root, device="cpu", study=study, reserved_seconds=300)
+    assert before["blocked_reason"] == "reservation overrun"
+    files = {p: p.read_bytes() for p in study.store.root.rglob("*") if p.is_file()}
+    result = run_main(verified, root, device="cpu")
+    assert result["complete"]
     assert study.status() == before
-    assert study.receipt == receipt
-    assert not (root / "shards").exists()
-    assert not report_main(root)["complete"]
+    assert receipt_path.read_bytes() == receipt
+    assert files == {
+        p: p.read_bytes() for p in study.store.root.rglob("*") if p.is_file()
+    }
+    assert not (root / "accounting.json").exists()
+    session = next((root / "sessions").iterdir())
+    start = json.loads((session / "start.json").read_bytes())
+    end = json.loads((session / "end.json").read_bytes())
+    assert start["execution_policy"].startswith("independent-main-analysis-v1")
+    assert start["historical_study_modified"] is False
+    assert "reserved_seconds" not in start
+    assert end["elapsed_seconds"] > 0
+    assert end["error"] is None
+    assert end["historical_budget_settled"] is False
+    assert report_main(root)["complete"]
 
 
 def test_resume_rejects_changed_numerical_environment(inputs, tmp_path, monkeypatch):

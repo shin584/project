@@ -73,7 +73,7 @@ def prepare_main(inputs, directory, *, coverage_directory=None, coverage_checksu
         "batch_size": PRESET["batch_size"],
         "integration_batch_size": PRESET["integration_batch_size"],
         "historical_budget_status": "unresolved; this bundle neither settles nor resets historical spending",
-        "production_execution_policy": "pending explicit decision; no affordability or remaining-budget claim",
+        "production_execution_policy": "independent-main-analysis-v1; user approved separation from historical validation time blocks; record session elapsed time without an automatic time cap",
         "fixture": inputs.fixture,
     }
     store = DirectoryStore(directory)
@@ -95,13 +95,11 @@ def run_main(
     device="cuda:0",
     stages=("ism", "rollout", "ig"),
     on_progress=None,
-    study=None,
-    reserved_seconds=None,
 ):
-    """Run/resume Test work using the existing cumulative accounting for production.
+    """Run/resume Test work independently of historical validation accounting.
 
-    No new allowance is manufactured here. An unresolved/blocked historical study
-    stays blocked; preparation and model-free reports require no GPU allowance.
+    The user approved this execution boundary. Historical study/receipt files are
+    never opened or rewritten; each new session records its own elapsed time.
     """
     from .nt_ig import compute_ig
     from .nt_ism import compute_ism
@@ -136,16 +134,9 @@ def run_main(
     else:
         from .analyze import require_drive
 
-        if study is None or reserved_seconds is None:
-            raise ValueError(
-                "production requires the existing study and an explicit reservation; execution policy is unresolved"
-            )
         require_drive(store.root)
-        require_drive(study.store.root)
         if not device.startswith("cuda"):
             raise ValueError("production main analysis requires CUDA")
-    if study is not None and study.status()["fixture"] != inputs.fixture:
-        raise ValueError("fixture/production accounting mismatch")
     started, predictor, p, error = time.monotonic(), None, None, None
     session = (
         "sessions/"
@@ -153,17 +144,6 @@ def run_main(
         + "-"
         + uuid.uuid4().hex
     )
-    if study is not None:
-        run_id = "main-" + digest(plan)[:20]
-        reference = {"study_root": str(study.store.root), "run_id": run_id}
-        if store.path("accounting.json").exists():
-            if json.loads(store.read("accounting.json")) != reference:
-                raise ValueError(
-                    "main analysis cannot switch cumulative accounting roots"
-                )
-        else:
-            store.put("accounting.json", canonical_bytes(reference))
-    guard = study.guard if study is not None else lambda: None
     environment = installed_environment(device)
     execution = {
         "python": environment["python"],
@@ -187,9 +167,6 @@ def run_main(
     else:
         store.put("execution.json", canonical_bytes(execution))
     binding.update(session=session, execution_sha256=digest(execution))
-    if study is not None:
-        study.register(run_id, {"kind": "test-main-analysis", "plan": plan})
-        study.start(run_id, uuid.uuid4().hex, reserved_seconds, environment)
     store.put(
         session + "/start.json",
         canonical_bytes(
@@ -198,8 +175,8 @@ def run_main(
                 "plan_sha256": digest(plan),
                 "device": device,
                 "fixture": inputs.fixture,
-                "accounting_receipt": study.receipt if study is not None else None,
-                "reserved_seconds": reserved_seconds,
+                "execution_policy": plan["production_execution_policy"],
+                "historical_study_modified": False,
             }
         ),
     )
@@ -210,7 +187,6 @@ def run_main(
             predictor = NativePredictor.load(
                 inputs.export_dir,
                 device=device,
-                budget_guard=guard,
                 expected_files=inputs.identity["export_files"],
             )
             store.put(
@@ -246,7 +222,6 @@ def run_main(
             tokens = encode_sequences(p.tokenizer, sequences, p.embedding_rows)
             p.assert_versions_unchanged()
             for row in prediction_rows(batch, raw, tokens):
-                guard()
                 i = row["source_row"]
                 save_shard(
                     store, binding, "prediction", i, row, roles=["test_population"]
@@ -267,7 +242,6 @@ def run_main(
                     continue
                 row, p = predictions[i], model()
                 p.assert_versions_unchanged()
-                guard()
                 try:
                     if method == "ism":
                         result = compute_ism(
@@ -341,16 +315,8 @@ def run_main(
                 predictor.assert_unchanged()
             predictor.assert_versions_unchanged()
             predictor.synchronize()
-        guard()
     except BaseException as caught:
         error = {"type": type(caught).__name__, "message": str(caught)}
-        if study is not None and not study.poisoned:
-            try:
-                study.record_failure(caught)
-            except (OSError, ValueError) as accounting_error:
-                caught.add_note(
-                    f"Could not persist accounting failure: {accounting_error}"
-                )
         raise
     finally:
         predictor, p = None, None
@@ -370,8 +336,6 @@ def run_main(
         except (OSError, ValueError):
             if error is None:
                 raise
-    if study is not None:
-        study.finish()
     result = read_main(directory)
     return {
         "complete": result["complete"],
