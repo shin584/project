@@ -1,6 +1,7 @@
 """Native-ID word-embedding IG for the complete raw scalar prediction function."""
 
 import math
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -201,7 +202,29 @@ def _integrate(predictor, encoded, embedding, steps, batch_size):
     return mass, batches
 
 
-def compute_ig(row, predictor, *, policy, integration_batch_size=16):
+@contextmanager
+def _parameter_gradients(model, disabled):
+    parameters = [
+        (parameter, parameter.requires_grad) for parameter in model.parameters()
+    ]
+    try:
+        if disabled:
+            for parameter, _ in parameters:
+                parameter.requires_grad_(False)
+        yield
+    finally:
+        for parameter, requires_grad in parameters:
+            parameter.requires_grad_(requires_grad)
+
+
+def compute_ig(
+    row,
+    predictor,
+    *,
+    policy,
+    integration_batch_size=16,
+    disable_parameter_gradients=False,
+):
     """Compute one source, retaining quality failures without hiding execution faults."""
     import torch
 
@@ -279,7 +302,10 @@ def compute_ig(row, predictor, *, policy, integration_batch_size=16):
     masses = []
     active_steps = None
     try:
-        with fp32_context(device):
+        with (
+            _parameter_gradients(model, disable_parameter_gradients),
+            fp32_context(device),
+        ):
             embedding = model.get_input_embeddings()(encoded["input_ids"]).detach()
             if not torch.isfinite(embedding).all():
                 raise NumericalFailure("embedding", "nonfinite word embedding")

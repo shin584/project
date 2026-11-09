@@ -112,6 +112,7 @@ class NativePredictor:
         self.budget_guard = budget_guard or (lambda: None)
         self.export_files = export_files
         self.initial_state = state_digest(model, self.budget_guard)
+        self._initial_versions = self._state_versions()
         self.actual_execution = None
 
     @classmethod
@@ -192,6 +193,31 @@ class NativePredictor:
     def assert_unchanged(self):
         if state_digest(self.model, self.budget_guard) != self.initial_state:
             raise ValueError("model weights/buffers changed during inference")
+
+    def _state_versions(self):
+        return {
+            (kind, name): (
+                id(tensor),
+                tensor._version,
+                tuple(tensor.shape),
+                tensor.dtype,
+                tensor.device,
+            )
+            for kind, tensors in (
+                ("parameter", self.model.named_parameters()),
+                ("buffer", self.model.named_buffers()),
+            )
+            for name, tensor in tensors
+        }
+
+    def assert_versions_unchanged(self):
+        """Cheap per-source check; .data mutate/restore is a documented blind spot."""
+        self.budget_guard()
+        if self._state_versions() != self._initial_versions:
+            raise ValueError(
+                "model parameter/buffer identity or mutation version changed"
+            )
+        self.budget_guard()
 
     def _batch(self, sequences):
         import torch

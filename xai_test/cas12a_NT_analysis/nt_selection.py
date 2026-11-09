@@ -273,6 +273,23 @@ def _cases(coverage, predictions, prediction_identity, numpy_version):
         raise ValueError("prediction analysis identity differs from frozen coverage")
     _text(numpy_version)
     rows = _prediction_inputs(coverage, predictions)
+    return {
+        "schema": 1,
+        "kind": "technical_cases",
+        "protocol": CASE_PROTOCOL,
+        "numpy_version": numpy_version,
+        "fixture": coverage["fixture"],
+        "coverage_checksum": digest(coverage),
+        "prediction_identity": prediction_identity,
+        "predictions": rows,
+        "predictions_sha256": digest(rows),
+        **select_technical_cases(rows),
+        "historical_fp16_test_known": True,
+    }
+
+
+def select_technical_cases(rows):
+    """Select descriptive cases from complete predictions, without explanations."""
     details = []
     for row in rows:
         raw, label = row["raw_prediction"], row["label"]
@@ -343,19 +360,9 @@ def _cases(coverage, predictions, prediction_identity, numpy_version):
             "unfilled": 5 - len(chosen),
         }
     return {
-        "schema": 1,
-        "kind": "technical_cases",
-        "protocol": CASE_PROTOCOL,
-        "numpy_version": numpy_version,
-        "fixture": coverage["fixture"],
-        "coverage_checksum": digest(coverage),
-        "prediction_identity": prediction_identity,
-        "predictions": rows,
-        "predictions_sha256": digest(rows),
         "thresholds": {"q25": q25, "q75": q75, "degenerate": q25 == q75},
         "categories": categories,
         "cases": selected,
-        "historical_fp16_test_known": True,
     }
 
 

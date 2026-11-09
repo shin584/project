@@ -85,12 +85,32 @@ def export_identity(export_dir, receipt_path, *, fixture):
 
 def verify_inputs(source, manifest_path, export_dir, receipt_path, *, fixture=False):
     """Validate existing membership without constructing or writing any partition."""
+    return _verify_partition(
+        source, manifest_path, export_dir, receipt_path, "validation", fixture=fixture
+    )
+
+
+def verify_test_inputs(
+    source, manifest_path, export_dir, receipt_path, *, fixture=False
+):
+    """Read the original Test membership, with a separate Test identity contract."""
+    return _verify_partition(
+        source, manifest_path, export_dir, receipt_path, "test", fixture=fixture
+    )
+
+
+def _verify_partition(
+    source, manifest_path, export_dir, receipt_path, partition, *, fixture
+):
     manifest = json.loads(Path(manifest_path).read_bytes())
     verify_manifest(manifest)
     if (manifest["run_kind"] == "fixture") != bool(fixture):
         raise ValueError("fixture/production input mismatch")
     data = load_library(source, manifest)
     by_id = verify_against_library(manifest, data)
+    ids = sorted(manifest["partitions"][partition])
+    if partition == "test" and not fixture and len(ids) != 1500:
+        raise ValueError("production Cas12a Test membership must contain 1,500 rows")
     files = export_identity(export_dir, receipt_path, fixture=fixture)
     identity = {
         "fixture": bool(fixture),
@@ -100,14 +120,12 @@ def verify_inputs(source, manifest_path, export_dir, receipt_path, *, fixture=Fa
         "manifest_sha256": digest(manifest),
         "export_files": files,
         "receipt_sha256": file_hash(receipt_path),
-        "partition": "validation",
-        "validation_source_rows": sorted(manifest["partitions"]["validation"]),
-        "validation_rows": [
-            row_identity(by_id[i]) for i in sorted(manifest["partitions"]["validation"])
-        ],
+        "partition": partition,
+        f"{partition}_source_rows": ids,
+        f"{partition}_rows": [row_identity(by_id[i]) for i in ids],
     }
     return VerifiedInputs(
-        [by_id[i] for i in identity["validation_source_rows"]],
+        [by_id[i] for i in ids],
         identity,
         Path(export_dir).resolve(),
         bool(fixture),

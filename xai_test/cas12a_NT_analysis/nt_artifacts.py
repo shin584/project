@@ -90,7 +90,7 @@ def prediction_rows(source_rows, predictions, tokens):
     return result
 
 
-def _metrics(rows, field):
+def prediction_metrics(rows, field):
     labels = np.asarray([row["label"] for row in rows], dtype=np.float64)
     predictions = np.asarray([row[field] for row in rows], dtype=np.float64)
     reason = None
@@ -189,7 +189,7 @@ def read_results(study, run_id, *, require_complete=False):
         "rows": rows,
         "metrics": {
             group: {
-                view: _metrics(members, f"{view}_prediction")
+                view: prediction_metrics(members, f"{view}_prediction")
                 for view in ("raw", "clipped")
             }
             for group, members in groups.items()
