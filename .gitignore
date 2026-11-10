@@ -3,3 +3,7 @@
 *.h5
 
 __pycache__/
+
+# Model weights (too large for git; see model_source.py DRIVE_FILES)
+*.safetensors
+*.keras

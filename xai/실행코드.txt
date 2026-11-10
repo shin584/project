@@ -1,0 +1,3 @@
+cd xai_dashboard
+conda activate tf_env
+python -m streamlit run app.py
