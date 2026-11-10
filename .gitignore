@@ -7,3 +7,6 @@ __pycache__/
 # Model weights (too large for git; see model_source.py DRIVE_FILES)
 *.safetensors
 *.keras
+
+# Precomputed Model B (SaCas9) arrays — large binary, feature is disabled
+*.npz
