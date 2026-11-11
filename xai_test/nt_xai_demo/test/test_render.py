@@ -9,6 +9,7 @@ from xai_test.nt_xai_demo.render import (
     Figure,
     RenderRefused,
     Section,
+    Stratum,
     render,
 )
 
@@ -38,26 +39,48 @@ def test_a_figure_prints_all_four_fields_with_its_value():
     assert "분모=200행·193타깃" in lines[1]
 
 
-@pytest.mark.parametrize("field", ["name", "stratum", "head", "statistic"])
+@pytest.mark.parametrize("field", ["name", "head", "statistic"])
 def test_a_figure_without_one_of_the_four_is_refused(field):
     with pytest.raises(RenderRefused):
         figure(**{field: "  "})
 
+    with pytest.raises(RenderRefused):
+        figure(stratum="  ")  # the layer is refused through its own type
 
-@pytest.mark.parametrize(
-    "stratum",
-    [
-        "generalisation+pam_library",
-        "generalisation, pam_library",
-        "pooled",
-        "두 층 합산",
-    ],
-)
-def test_a_stratum_that_names_more_than_one_layer_is_refused(stratum):
+
+def test_a_pooled_population_must_say_what_the_pooling_does():
     with pytest.raises(RenderRefused) as refusal:
-        figure(stratum=stratum)
+        Stratum("all", pooled=True)
 
-    assert "pooling: forbidden" in str(refusal.value)
+    assert "풀링 효과" in str(refusal.value)
+
+    stated = Stratum(
+        "all",
+        pooled=True,
+        pooling_note="TTTV·TTTT 두 군의 평균 효율 차이를 포함한다",
+    )
+    assert "풀링" in stated.text() and "평균 효율 차이" in stated.text()
+
+
+def test_pooling_is_declared_not_guessed_from_the_name():
+    # The old guard sniffed the stratum's spelling: it refused a harmless name
+    # and waved through `all`, which really does pool the two PAM groups.
+    plain = figure(stratum="all")
+    assert plain.lines()[1].count("층=all") == 1
+
+    pooled = figure(
+        stratum=Stratum("all", pooled=True, pooling_note="두 군의 평균 효율 차이 포함"),
+        statistic="spearman_rank_correlation (raw)",
+        denominator=Denominator(rows=1500, unit="행", note="Test 전수"),
+    )
+    assert "풀링" in pooled.lines()[1]
+
+
+def test_a_stratum_cannot_be_nameless_or_explain_a_pooling_it_denies():
+    with pytest.raises(RenderRefused):
+        Stratum("  ")
+    with pytest.raises(RenderRefused):
+        Stratum("generalisation", pooling_note="두 군을 합쳤다")
 
 
 def test_a_denominator_must_be_a_real_count_with_a_unit():

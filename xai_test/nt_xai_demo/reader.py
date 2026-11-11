@@ -81,10 +81,6 @@ def percent_to_fraction(value: float) -> float:
     return value / 100.0
 
 
-def fraction_to_percent(value: float) -> float:
-    return value * 100.0
-
-
 @dataclass(frozen=True)
 class HeadAxis:
     """The head names along one artifact's head axis, in that artifact's order.
@@ -212,7 +208,9 @@ def aggregate_to_tokens(
     """Mean of a per-position profile over each token's inclusive position span.
 
     IG attributes to tokens and ISM substitutes bases, so a comparison between
-    them is made at the coarser of the two resolutions (ADR 0007).
+    them is made at the coarser of the two resolutions (ADR 0007). This exists
+    to put the reader's own ISM profile next to a *recorded* token profile and
+    check they agree; the demo presents the recorded figures, not these.
     """
     profile = np.asarray(profile)
     return np.stack(
@@ -259,7 +257,28 @@ class SpCas9Reader:
         path = self.root / "v3_ig/ig.sidecar.json"
         sidecar = load_json(path)
         expect(sidecar["token_resolution"], 5, what="token_resolution", source=path)
+        # IG declares no scale key; what fixes the scale of its values is where
+        # the gradients were taken and against which baseline. Pinning both is
+        # how `ig_scale` below can state the basis instead of assuming it.
+        expect(
+            sidecar["attribution_point"],
+            "encoder_input_embedding",
+            what="attribution_point",
+            source=path,
+        )
+        expect(sidecar["baseline"], "zero_embedding", what="baseline", source=path)
         return sidecar
+
+    @property
+    def ig_scale(self) -> str:
+        """IG values and the completeness residual are on the standardized output.
+
+        Not fractions: the head's standardized regression output, which is what
+        `f_baseline` and the completeness residual are measured against. A view
+        tags IG figures with this so they are never read next to a prediction
+        as if both were efficiencies.
+        """
+        return "표준화 출력 (fraction 아님)"
 
     @cached_property
     def predictions_checksum(self) -> dict[str, Any]:
@@ -349,6 +368,28 @@ class SpCas9Reader:
     def strata(self) -> tuple[str, ...]:
         return tuple(self.validation["strata"])
 
+    def require_stratum(self, stratum: str) -> str:
+        """A stratum has to be one the artifact declares, and only one of them."""
+        if stratum not in self.strata:
+            raise KeyError(
+                f"SpCas9 층 {stratum!r}이 없다 (있는 층: {', '.join(self.strata)})"
+            )
+        return stratum
+
+    @cached_property
+    def prediction_heads(self) -> HeadAxis:
+        """The head axis of the split and prediction tables, which store all nine.
+
+        Separate from `ism_heads` on purpose: those tables are a different
+        artifact with its own declared head list, and this demo exposes only
+        the analysed three (#155).
+        """
+        return HeadAxis(
+            names=tuple(self.predictions_checksum["heads"]),
+            analysed=self.ism_heads.analysed,
+            source="SpCas9 예측·split 표 (9열)",
+        )
+
     # -- arrays ------------------------------------------------------------- #
 
     @cached_property
@@ -376,18 +417,19 @@ class SpCas9Reader:
         with np.load(self.root / "v3_ig/ig.npz") as archive:
             arrays = {
                 key: archive[key]
-                for key in (
-                    "attribution",
-                    "completeness_residual",
-                    "special_attribution",
-                    "row_index",
-                )
+                for key in ("attribution", "completeness_residual", "row_index")
             }
         if arrays["attribution"].shape[1] != self.ig_heads.width:
             raise ArtifactMismatch(
                 f"IG attribution의 head 축이 {arrays['attribution'].shape[1]}인데 "
                 f"sidecar는 {self.ig_heads.width}개를 선언한다"
             )
+        expect(
+            len(arrays["row_index"]),
+            self.ig_sidecar["rows"],
+            what="IG 행 수",
+            source="ig.npz",
+        )
         return arrays
 
     @cached_property
@@ -478,14 +520,14 @@ class SpCas9Reader:
         The split files store percent; None means that head has no measurement
         on that row, which a view states rather than filling in.
         """
-        self.ism_heads.index(head)
+        self.prediction_heads.index(head)
         found = self._split.get(int(row_id))
         if found is None:
             raise RowNotPresent(f"split 파일에 row_index {row_id}이(가) 없다")
         return found[1][head]
 
     def prediction(self, row_id: int, head: str) -> float:
-        self.ism_heads.index(head)
+        self.prediction_heads.index(head)
         try:
             return self._predictions[int(row_id)][head]
         except KeyError:
@@ -570,10 +612,7 @@ class SpCas9Reader:
         }
 
     def ig_subset_rows(self, stratum: str) -> list[int]:
-        if stratum not in self.strata:
-            raise KeyError(
-                f"SpCas9 층 {stratum!r}이 없다 (있는 층: {', '.join(self.strata)})"
-            )
+        self.require_stratum(stratum)
         return [row_id for row_id, name in self._ig_strata.items() if name == stratum]
 
     # -- recorded validation figures ---------------------------------------- #
@@ -584,24 +623,20 @@ class SpCas9Reader:
         """The recorded IG-ISM agreement for one stratum and head, with its denominator.
 
         One stratum at a time: `ig_ism_validation.json` declares
-        `"pooling": "forbidden"`, so the generalisation layer (200 rows, 193
-        targets) and the PAM library layer (200 rows, 5 targets) are never
+        `"pooling": "forbidden"`, so the generalisation stratum (200 rows, 193
+        targets) and the PAM library stratum (200 rows, 5 targets) are never
         added together, and no figure here spans both.
         """
         self.ig_heads.index(head)
-        if stratum not in self.strata:
-            raise KeyError(
-                f"SpCas9 층 {stratum!r}이 없다 (있는 층: {', '.join(self.strata)})"
-            )
-        layer = self.validation["strata"][stratum]
-        entry = layer["by_head"][head][variant]
+        declared = self.validation["strata"][self.require_stratum(stratum)]
+        entry = declared["by_head"][head][variant]
         return {
             "stratum": stratum,
             "head": head,
             "variant": variant,
             "statistic": self.validation["statistic"],
-            "rows": int(layer["rows"]),
-            "distinct_protospacers": int(layer["distinct_protospacers"]),
+            "rows": int(declared["rows"]),
+            "distinct_protospacers": int(declared["distinct_protospacers"]),
             "per_row": entry["per_row"],
             "mean_profile": entry["mean_profile"],
             "agreement_sign": entry["agreement_sign"],
@@ -780,8 +815,22 @@ class Cas12aReader:
         )
 
     def ism_profile(self, row_id: int) -> np.ndarray:
-        """Per-position mean |raw_delta| over the valid alternative bases."""
+        """Per-position mean |raw_delta| over the valid alternative bases.
+
+        The WT slot is excluded structurally, from `reference_base`, and the
+        divisor that excluding it produces is checked against the artifact's
+        own stored `denominator`. So the exclusion is this reader's own code
+        and the artifact still gets to contradict it.
+        """
         position = self.ism_rows.position(row_id)
+        alternatives = (
+            self._ism["non_wt_mask"][position] & self._ism["base_valid_mask"][position]
+        )
+        stored = self._ism["denominator"][position]
+        if not np.array_equal(alternatives.sum(axis=-1), stored):
+            raise ArtifactMismatch(
+                f"source_row {row_id}: 대체 염기 수가 저장된 denominator와 다르다"
+            )
         return ism_position_profile(
             self._ism["raw_delta"][position],
             self._ism["reference_base"][position],
@@ -802,18 +851,31 @@ class Cas12aReader:
 
     # -- recorded figures --------------------------------------------------- #
 
-    def metrics_for(self, stratum: str, clipping: str = "raw") -> dict[str, Any]:
-        """Performance for one PAM population. `count` is the denominator used."""
+    def require_stratum(self, stratum: str) -> str:
+        """A PAM population has to be one of the three the artifacts hold."""
         if stratum not in self.strata:
             raise KeyError(
                 f"Cas12a 집단 {stratum!r}이 없다 (있는 집단: {', '.join(self.strata)})"
             )
+        return stratum
+
+    def pools_pam_groups(self, stratum: str) -> bool:
+        """Whether this population mixes the TTTV and TTTT groups.
+
+        `all` does, and that is why its Spearman cannot be read as ranking
+        ability: a view renders it with the pooling stated (`render.Stratum`).
+        """
+        return self.require_stratum(stratum) == "all"
+
+    def metrics_for(self, stratum: str, clipping: str = "raw") -> dict[str, Any]:
+        """Performance for one PAM population. `count` is the denominator used."""
+        self.require_stratum(stratum)
         if clipping not in ("raw", "clipped"):
             raise KeyError(f"clipping은 raw 또는 clipped다: {clipping!r}")
         return dict(self.metrics[stratum][clipping])
 
     def position_profile(self, stratum: str) -> dict[str, Any]:
-        entry = self.position_profiles[stratum]
+        entry = self.position_profiles[self.require_stratum(stratum)]
         return {
             "mean_abs_raw_delta": list(entry["mean_abs_raw_delta"]),
             "n_available": int(entry["n_available"]),
@@ -822,7 +884,7 @@ class Cas12aReader:
 
     def rollout_degeneracy(self, stratum: str) -> dict[str, Any]:
         """The near-identical-query count, read as stored: a limit, not a failure."""
-        entry = self.rollout_summary[stratum]
+        entry = self.rollout_summary[self.require_stratum(stratum)]
         return {
             "near_identical_query_count": int(entry["near_identical_query_count"]),
             "n_accepted": int(entry["n_accepted"]),

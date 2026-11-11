@@ -2,21 +2,19 @@
 
 Every view in this demo renders through `Figure`, and a `Figure` cannot be
 built without those four fields. The reason is specific to these artifacts:
-the same statistic exists at two layers over differently-shaped populations
-(SpCas9's generalisation layer is 200 rows over 193 targets, the PAM library
-layer is 200 rows over 5 targets), the head axis differs between ISM and IG,
-and ISM and IG are not the same kind of statistic. A number shown without all
-four reads as a property of the model when it is a property of one layer, one
-head and one denominator.
+the same statistic exists in two strata (CONTEXT.md's term; `층` on screen)
+over differently-shaped populations - SpCas9's generalisation stratum is 200
+rows over 193 targets, the PAM library stratum 200 rows over 5 targets - the
+head axis differs between ISM and IG, and ISM and IG are not the same kind of
+statistic. A number shown without all four reads as a property of the model
+when it is a property of one stratum, one head and one denominator.
 
 The population belongs to the individual figure, not to the analysis: a view
 holds figures with different denominators side by side, so the denominator is
 printed per line rather than once in a header.
 
 `render` always prints the artifact's `claim_limit` at the bottom and refuses
-to render without one. `ig_ism_validation.json` declares
-`"pooling": "forbidden"`, so a stratum field that names more than one layer is
-refused as well.
+to render without one.
 """
 
 from __future__ import annotations
@@ -26,13 +24,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 CLAIM_LIMIT_HEADING = "주장 범위"
-POOLED_MARKERS = ("+", ",", "&", "pooled", "합산", "통합")
-
-#: A stratum value meaning "this figure has no layer axis to choose from".
-#: Cas12a's PAM populations and SpCas9's two layers are real strata; a figure
-#: over a whole population states that population instead of pretending to a
-#: layer, and still has to say which one.
-NO_LAYER = "층 없음"
 
 
 class RenderRefused(ValueError):
@@ -40,11 +31,48 @@ class RenderRefused(ValueError):
 
 
 @dataclass(frozen=True)
+class Stratum:
+    """Which stratum (층) a figure belongs to, and whether it pools.
+
+    A figure over one stratum names it. A figure over a pooled population has
+    to say so *and* say what the pooling does, because that is exactly where
+    these numbers mislead: Cas12a's `all` Spearman of 0.7007 carries the mean
+    efficiency difference between the TTTV and TTTT groups, while ranking
+    within a group is 0.5423 and 0.2995. Declaring the pooling is what makes it
+    visible; it is not detectable from the stratum's name.
+
+    SpCas9's two strata are a different case - `ig_ism_validation.json` declares
+    `"pooling": "forbidden"` - and nothing may pool them. That is enforced
+    where the figures are read, not here: `SpCas9Reader.validation_figures`
+    takes one declared stratum at a time and has no combined entry to return.
+    """
+
+    name: str
+    pooled: bool = False
+    pooling_note: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise RenderRefused("층 이름이 비어 있다")
+        if self.pooled and not (self.pooling_note or "").strip():
+            raise RenderRefused(
+                f"층 {self.name!r}은 풀링된 모집단이다: 풀링 효과를 함께 적어야 한다"
+            )
+        if not self.pooled and self.pooling_note:
+            raise RenderRefused(
+                f"층 {self.name!r}은 풀링이 아니라고 하면서 풀링 설명을 달고 있다"
+            )
+
+    def text(self) -> str:
+        return f"{self.name} (풀링: {self.pooling_note})" if self.pooled else self.name
+
+
+@dataclass(frozen=True)
 class Denominator:
     """The count actually divided by, and what those units are.
 
     `rows` is the number of rows the figure was computed over - not the
-    population that was swept, and not the sum of two layers. `targets` is
+    population that was swept, and not the sum of two strata. `targets` is
     recorded where rows and distinct targets differ (the PAM library's 200 rows
     cover 5 targets), because a reader who sees only the row count will read a
     replication factor as a sample size.
@@ -78,7 +106,7 @@ class Figure:
 
     name: str
     value: Any
-    stratum: str
+    stratum: Stratum | str
     head: str
     statistic: str
     denominator: Denominator
@@ -86,27 +114,26 @@ class Figure:
     note: str | None = None
 
     def __post_init__(self) -> None:
+        if isinstance(self.stratum, str):
+            # A bare name is the single-stratum case; pooling has to be stated.
+            object.__setattr__(self, "stratum", Stratum(self.stratum))
         for label, text in (
             ("이름", self.name),
-            ("층", self.stratum),
             ("head", self.head),
             ("통계 종류", self.statistic),
         ):
             if not str(text).strip():
                 raise RenderRefused(f"{self.name or '표시값'}: {label}이(가) 비어 있다")
-        lowered = str(self.stratum).lower()
-        if any(marker in lowered for marker in POOLED_MARKERS):
-            raise RenderRefused(
-                f"{self.name}: 층 {self.stratum!r}이 둘 이상을 합친 것으로 읽힌다. "
-                "두 층은 모집단 모양이 달라 합치지 않는다 (pooling: forbidden)"
-            )
 
     def value_text(self) -> str:
         return format_value(self.value)
 
     def lines(self) -> list[str]:
+        stratum = (
+            self.stratum if isinstance(self.stratum, Stratum) else Stratum(self.stratum)
+        )
         provenance = (
-            f"층={self.stratum} / head={self.head} / 통계={self.statistic} / "
+            f"층={stratum.text()} / head={self.head} / 통계={self.statistic} / "
             f"분모={self.denominator.text()}"
         )
         if self.scale:

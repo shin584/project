@@ -184,6 +184,8 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
             "analysis": "integrated_gradients",
             "rows": len(IG_ROWS),
             "heads": list(IG_HEADS),
+            "attribution_point": "encoder_input_embedding",
+            "baseline": "zero_embedding",
             "token_resolution": 5,
             "token_names": list(TOKEN_NAMES),
             "token_boundaries": [list(pair) for pair in TOKEN_BOUNDARIES],

@@ -145,7 +145,6 @@ def test_labels_are_converted_from_percent_and_predictions_are_left_alone(spcas9
     assert label == pytest.approx(fx.LABEL_PERCENT[row] / 100.0)
     assert label != pytest.approx(fx.LABEL_PERCENT[row])
     assert spcas9.prediction(row, "SpCas9") == pytest.approx(0.1)
-    assert rd.fraction_to_percent(label) == pytest.approx(fx.LABEL_PERCENT[row])
 
 
 def test_a_label_scale_the_reader_was_not_written_against_is_refused(tmp_path):
@@ -317,3 +316,86 @@ def test_metrics_are_per_pam_population_with_their_own_counts(cas12a):
         cas12a.metrics_for("TTTN")
     with pytest.raises(KeyError):
         cas12a.metrics_for("all", "rounded")
+
+
+def test_the_prediction_table_is_gated_by_its_own_head_axis(spcas9):
+    """The split and prediction tables store nine heads; ISM's axis is not theirs."""
+    assert spcas9.prediction_heads.width == 9
+    assert spcas9.prediction_heads.analysed == spcas9.analysed_heads
+
+    with pytest.raises(rd.UnknownHead):
+        spcas9.label(fx.ISM_ROWS[0], "HypaCas9")
+    with pytest.raises(rd.UnknownHead):
+        spcas9.prediction(fx.ISM_ROWS[0], "HypaCas9")
+
+
+def test_ig_values_carry_their_own_scale_and_are_not_fractions(spcas9):
+    assert "표준화" in spcas9.ig_scale
+    assert "fraction 아님" in spcas9.ig_scale
+    assert spcas9.ig_completeness_residual(fx.IG_ROWS[0], "SpCas9") == pytest.approx(
+        0.001
+    )
+
+
+def test_an_ig_archive_that_disagrees_with_its_declared_row_count_is_refused(
+    spcas9, data_dir
+):
+    np.savez(
+        data_dir / "spcas9/v3_ig/ig.npz",
+        attribution=np.zeros((1, len(fx.IG_HEADS), 5), dtype=np.float32),
+        completeness_residual=np.zeros((1, len(fx.IG_HEADS))),
+        row_index=np.array(fx.IG_ROWS[:1], dtype=np.int64),
+    )
+
+    with pytest.raises(rd.ArtifactMismatch) as refusal:
+        spcas9.ig_tokens(fx.IG_ROWS[0], "SpCas9")
+
+    assert "IG 행 수" in str(refusal.value)
+
+
+def test_a_stratum_outside_the_declared_ones_is_refused_everywhere(spcas9, cas12a):
+    for call in (
+        lambda: spcas9.require_stratum("nope"),
+        lambda: spcas9.ig_subset_rows("nope"),
+        lambda: cas12a.require_stratum("TTTN"),
+        lambda: cas12a.position_profile("TTTN"),
+        lambda: cas12a.rollout_degeneracy("TTTN"),
+    ):
+        with pytest.raises(KeyError):
+            call()
+
+
+def test_cas12a_declares_which_population_pools_the_pam_groups(cas12a):
+    assert cas12a.pools_pam_groups("all") is True
+    assert cas12a.pools_pam_groups("TTTV") is False
+    assert cas12a.pools_pam_groups("TTTT") is False
+
+
+def test_a_divisor_that_contradicts_the_stored_denominator_is_refused(cas12a, data_dir):
+    arrays = dict(np.load(data_dir / "cas12a/ism.npz"))
+    arrays["denominator"] = arrays["denominator"] + 1
+    np.savez(data_dir / "cas12a/ism.npz", **arrays)
+
+    with pytest.raises(rd.ArtifactMismatch) as refusal:
+        cas12a.ism_profile(fx.CAS12A_ROWS[0])
+
+    assert "denominator" in str(refusal.value)
+
+
+def test_the_per_row_reads_views_need_are_each_keyed_by_id(spcas9, cas12a):
+    row = fx.IG_ROWS[0]
+
+    assert spcas9.ig_stratum(row) == "generalisation"
+    assert spcas9.ig_stratum(fx.ISM_ROWS[0]) is None
+    assert len(spcas9.reference_sequence(row)) == fx.POSITIONS
+    assert set(spcas9.reference_sequence(row)) <= set(rd.BASES)
+    assert spcas9.rollout(row).shape == (5, 5)
+    assert spcas9.noise_floor_by_head("SpCas9")["median"] == pytest.approx(0.06)
+    with pytest.raises(rd.UnknownHead):
+        spcas9.noise_floor_by_head("xCas")
+
+    cas_row = fx.CAS12A_ROWS[1]
+    assert cas12a.ig_signed_mass(cas_row).shape == (12,)
+    assert cas12a.rollout(cas_row).shape == (9, 9)
+    assert cas12a.accepted(cas_row) is True
+    assert cas12a.head == rd.CAS12A_HEAD
