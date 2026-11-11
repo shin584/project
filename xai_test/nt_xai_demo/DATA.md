@@ -47,21 +47,24 @@ manifest의 `derived`에 기록된다.
 Cas12a만 준비하고, manifest의 `nucleases.spcas9`에 `"status": "absent"`와 없는 파일
 목록을 쓰며, 콘솔에 SpCas9 부재를 출력한다.
 
-| 배치할 로컬 경로 | 바이트 | sha256 | Drive 위치 |
+| 배치할 로컬 경로 | 바이트 | sha256 | 사본 위치 |
 |---|---:|---|---|
-| `xai_test/SpCas9_NT_analysis/artifacts/v3_ism/ism.npz` | 16,922,326 | `9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b` | `MyDrive/SpCas9/spcas9_v3/artifacts/v3_ism/ism.npz` |
-| `xai_test/SpCas9_NT_analysis/artifacts/v3_ig/ig.npz` | 47,470 | `e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2` | `MyDrive/SpCas9/spcas9_v3/artifacts/v3_ig/ig.npz` |
-| `xai_test/SpCas9_NT_analysis/artifacts/v3_rollout/rollout.npz` | 416,426 | `b42b7b6dbb89db6b1a8a16b631ba62d196d86437799aa38dd0a95a784097c6b4` | `MyDrive/SpCas9/spcas9_v3/artifacts/v3_rollout/rollout.npz` |
-| `xai_test/SpCas9/published_split/test.csv` | 1,206,283 | `1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b` | `MyDrive/SpCas9/test.csv` |
-| `xai_test/SpCas9/published_split/train.csv` | 6,915,393 | `4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01` | Drive 경로 기록 없음 |
-| `xai_test/SpCas9/published_split/val.csv` | 873,210 | `0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d` | Drive 경로 기록 없음 |
-| `xai_test/SpCas9_NT_analysis/artifacts/v3_testset_predictions/predictions.csv` | 1,122,862 | `7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a` | Drive 경로 기록 없음 (로컬 CPU 실행) |
+| `xai_test/SpCas9_NT_analysis/artifacts/v3_ism/ism.npz` | 16,922,326 | `9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b` | Drive `MyDrive/SpCas9/spcas9_v3/artifacts/v3_ism/ism.npz` |
+| `xai_test/SpCas9_NT_analysis/artifacts/v3_ig/ig.npz` | 47,470 | `e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2` | Drive `MyDrive/SpCas9/spcas9_v3/artifacts/v3_ig/ig.npz` |
+| `xai_test/SpCas9_NT_analysis/artifacts/v3_rollout/rollout.npz` | 416,426 | `b42b7b6dbb89db6b1a8a16b631ba62d196d86437799aa38dd0a95a784097c6b4` | Drive `MyDrive/SpCas9/spcas9_v3/artifacts/v3_rollout/rollout.npz` |
+| `xai_test/SpCas9/published_split/test.csv` | 1,206,283 | `1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b` | Drive `MyDrive/SpCas9/test.csv`; 로컬 사본 `xai_test/dataset/SpCas9_v3/test.csv` |
+| `xai_test/SpCas9/published_split/train.csv` | 6,915,393 | `4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01` | 로컬 사본 `xai_test/dataset/SpCas9_v3/train.csv` |
+| `xai_test/SpCas9/published_split/val.csv` | 873,210 | `0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d` | 로컬 사본 `xai_test/dataset/SpCas9_v3/val.csv` |
+| `xai_test/SpCas9_NT_analysis/artifacts/v3_testset_predictions/predictions.csv` | 1,122,862 | `7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a` | 사본 위치 기록 없음 (로컬 CPU 실행) |
 
 Drive 위치는 `SpCas9_v3.ipynb`의 `OUT_DIR`/`SPLIT_CSV` 설정과 각 sidecar의
-`split.path`에서 온 것이다. "기록 없음" 세 파일은 Drive 사본의 위치를 저장소가 적어 둔
-적이 없다. 다시 만들 수는 있다: `train.csv`/`val.csv`는 `split_checksum.json`의
-seed 42 분할, `predictions.csv`는 `v3_predict.export_predictions`(고정 checkpoint +
-`test.csv`)로 재생성되며 위 sha256이 같아야 한다.
+`split.path`에서 온 것이다. `xai_test/dataset/SpCas9_v3/`의 split 사본 3개는 위
+sha256과 바이트 단위로 같음을 확인했다 (2026-11-11). 이 폴더도 `*.csv` 규칙 때문에 Git
+밖이므로, 이 기계 밖에서의 복원 출처는 되지 못한다. 복원할 때는 이 사본을
+`published_split/`로 복사한다 (`prepare`는 `published_split/`만 읽는다).
+
+`predictions.csv`는 사본 위치가 기록된 적이 없다. `v3_predict.export_predictions`(고정
+checkpoint + `test.csv`)로 다시 만들 수 있으며, 위 sha256과 같아야 한다.
 
 `prepare`가 대조하는 SpCas9 고정 해시: 각 sidecar의 `delta_sha256` /
 `attribution_sha256` / `rollout_sha256`과 `population_digest` / `membership_digest`
