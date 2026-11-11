@@ -238,7 +238,12 @@ def test_the_reader_loads_no_model_and_imports_no_analysis_package():
 
     package = Path(rd.__file__).parent
     imported: set[str] = set()
-    for module in (package / "reader.py", package / "render.py"):
+    for module in (
+        package / "reader.py",
+        package / "render.py",
+        package / "shell.py",
+        package / "cas12a_views.py",
+    ):
         for node in ast.walk(ast.parse(module.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Import):
                 imported.update(alias.name.split(".")[0] for alias in node.names)
@@ -260,7 +265,7 @@ def test_the_reader_loads_no_model_and_imports_no_analysis_package():
             sys.executable,
             "-c",
             (
-                "import sys; import xai_test.nt_xai_demo.reader; "
+                "import sys; import xai_test.nt_xai_demo.shell; "
                 "print(sorted({'torch', 'transformers'} & set(sys.modules)))"
             ),
         ],

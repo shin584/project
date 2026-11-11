@@ -535,7 +535,23 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
             "group_diagnostics": {},
             "protocol": {"statistic": "spearman"},
         },
-        "summary.json": {"complete": True, "population_count": 3},
+        "summary.json": {
+            "complete": True,
+            "population_count": 3,
+            "partition": "test",
+            "ig_mode": "full",
+            # Each coverage entry is a list of row IDs, as the real
+            # summary.json stores them: the count is the list's length.
+            "coverage": {
+                method: {
+                    "available": list(CAS12A_ROWS),
+                    "failed": [],
+                    "not_computed": [],
+                    "requested": list(CAS12A_ROWS),
+                }
+                for method in ("prediction", "ism", "ig", "rollout")
+            },
+        },
         "cases_annotated.json": {"cases": [], "selection": {}},
     }.items():
         write_json(name, payload)
