@@ -176,14 +176,16 @@ if vrs:
                 "그러면 자동으로 실제 효율(%) 표시로 바뀝니다.",
             )
 
-tab_best, tab_cmp, tab_detail, tab_xai = st.tabs([
-    "Best Candidates", "변종 비교", "전체 상세 보기", "XAI 설명",
-])
+# 세션에 선택을 유지하고, 선택한 뷰의 본문만 실행한다.
+view = st.radio(
+    "보기", ["Best Candidates", "변종 비교", "전체 상세 보기", "XAI 설명"],
+    horizontal=True, key="active_view",
+)
 
 # ════════════════════════════════════════════════════════
 # 탭1: Best Candidates
 # ════════════════════════════════════════════════════════
-with tab_best:
+if view == "Best Candidates":
     st.markdown("각 사이트에서 **점수가 가장 높은 변종 1개**만 대표로 표시합니다. "
                 "변종별 비교는 '변종 비교' 탭을 확인하세요.")
     a_best = best_per_site(vrs, "A")
@@ -240,7 +242,7 @@ with tab_best:
 # 탭2: 변종 비교 — SpCas9 변종 9종 히트맵
 #       (Cas12a는 변종이 없어 비교 대상이 아니므로 제외)
 # ════════════════════════════════════════════════════════
-with tab_cmp:
+elif view == "변종 비교":
     sp = [vr for vr in vrs if vr.cas_name in SPCAS9_VARIANTS]
     if not sp:
         st.info("SpCas9 PAM 사이트가 발견되지 않았습니다.")
@@ -289,7 +291,7 @@ with tab_cmp:
 # ════════════════════════════════════════════════════════
 # 탭3: 전체 상세 보기
 # ════════════════════════════════════════════════════════
-with tab_detail:
+elif view == "전체 상세 보기":
     st.markdown("원하는 조건을 설정한 뒤 **검색 버튼**을 눌러 결과를 확인하세요.")
 
     all_vr = all_results.sorted_variant_results()
@@ -396,7 +398,7 @@ with tab_detail:
 # 코드(xai/view.render_modelb, xai/data_source.py, xai/charts_modelb.py)와
 # data/ 아래 데이터는 그대로 남아 있으므로, 필요하면 여기서 다시 불러 쓸 수 있다.
 # ════════════════════════════════════════════════════════
-with tab_xai:
+elif view == "XAI 설명":
     st.subheader("모델 예측 근거 상세 분석 (XAI)")
     xai_view.render_glossary()
 
