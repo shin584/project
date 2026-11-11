@@ -1,0 +1,1377 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "case_attribution_annotation",
+  "inputs": [
+    "ism",
+    "ig",
+    "predictions",
+    "labels",
+    "noise_floor"
+  ],
+  "points_at": {
+    "file": "cases.json",
+    "key": "case_id",
+    "sha256": "91b148cb518cc96d8346b8e67cce334f47681db048d9d6d315652e6766576a73"
+  },
+  "selection_authority": "cases.json",
+  "rewrites_selection": false,
+  "non_circularity": "This file depends on cases.json and cases.json depends on nothing downstream, so a reviewer can confirm non-circularity from the two files' dependency direction. The selection is addressed by `case_id` in the order the case table holds it, and no selection score (absolute error, head gap, error quartile, selection rank) is copied here - there is nothing in this file to re-rank on.",
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "token_names": [
+    "left_flank_plus_protospacer_5prime",
+    "protospacer_6_11",
+    "protospacer_12_17",
+    "protospacer_18_23",
+    "pam_plus_right_flank"
+  ],
+  "profile_definition": "mean |ISM delta| over a position's three alternative bases, per row, position and head; the reference base's slot is a true zero and is excluded from the mean",
+  "pam_share_definition": "the case's mean ISM sensitivity over PAM positions 24-26 divided by its mean over the whole 30bp window, per head. Scale-free, because the heads' dynamic ranges differ about sixfold and a raw magnitude would report that difference as a difference in where the model reads. It is a share of the window, not a per-base PAM attribution.",
+  "attribution_outlier": {
+    "definition": "A case whose PAM share of the window's ISM sensitivity sits at or above the 90th percentile of **its own stratum's** rows, per head. Reported to describe a case the selection already made: selecting cases by the attribution the case study then explains is circular.",
+    "threshold_percentile": 90,
+    "use": "description only, never selection"
+  },
+  "ig_coverage": {
+    "cases": 18,
+    "cases_with_ig": 1,
+    "note": "IG ran on the frozen 400-row subset, drawn under its own seed before the cases were selected, so a case carries IG only where the two lists happen to meet. A case without it is recorded as null rather than left out, and no case was chosen or dropped for being in the subset."
+  },
+  "head_order_note": "The per-case ordering is description, not selection: head_order_reversal.json reports the population figures, and reversal is not a selection criterion (#129 AC9).",
+  "rollout_excluded": "Attention rollout is not an input. It has no head axis at all (docs/adr/0008-attention-rollout-is-head-invariant.md), so it cannot describe a per-head reading, and every figure here is per head.",
+  "claim_limit": "Every figure here describes the model's internal information use - which positions or tokens its prediction depends on, and how its heads order one row. None of it is a claim about physical DNA/protein interaction.",
+  "cases": [
+    {
+      "case_id": "GEN-ERRHI-01",
+      "row_index": 12701,
+      "stratum": "generalisation",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.01899721163216681,
+            0.02215243688098983,
+            0.026451296486710716,
+            0.03595428831047482,
+            0.15223202590520185
+          ],
+          "SpCas9-NG": [
+            0.031040964331219178,
+            0.020103212521159246,
+            0.025749430529281706,
+            0.03719509395563768,
+            0.08329447488197023
+          ],
+          "evoCas9": [
+            0.0029984606080688536,
+            0.004596014814321986,
+            0.005149362650829264,
+            0.002746029265431894,
+            0.0036111534540800173
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 15
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_12_17"
+        },
+        "pam_share": {
+          "SpCas9": 5.34050077953139,
+          "SpCas9-NG": 2.8082654684272144,
+          "evoCas9": 1.308542255726278
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 46.59217877094972,
+          "SpCas9-NG": 83.57541899441341,
+          "evoCas9": 38.212290502793294
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": -0.3333333333333333,
+        "reversal": true,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_SpCas9-NG",
+            "label_gap": 0.008849557522123894,
+            "floor": 0.06968931063858598,
+            "clears_floor": false
+          },
+          {
+            "pair": "SpCas9_vs_evoCas9",
+            "label_gap": 0.002680965147453083,
+            "floor": 0.06369654084787613,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-ERRHI-02",
+      "row_index": 36051,
+      "stratum": "generalisation",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.013740164334497726,
+            0.027381301679674327,
+            0.064280583212773,
+            0.03305465239100158,
+            0.1341355594894493
+          ],
+          "SpCas9-NG": [
+            0.01940265943994746,
+            0.030567788206907507,
+            0.0666015875629253,
+            0.04033758709233047,
+            0.0828110422913192
+          ],
+          "evoCas9": [
+            0.004173103016607152,
+            0.006872654900588613,
+            0.006066552004489898,
+            0.004161047855278513,
+            0.0049231672471958315
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 13
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_6_11"
+        },
+        "pam_share": {
+          "SpCas9": 4.676273328550822,
+          "SpCas9-NG": 2.7282911094397093,
+          "evoCas9": 1.1396319649999924
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 26.033519553072626,
+          "SpCas9-NG": 81.34078212290503,
+          "evoCas9": 30.837988826815643
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": -0.3333333333333333,
+        "reversal": true,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_SpCas9-NG",
+            "label_gap": 0.003748649738815708,
+            "floor": 0.06968931063858598,
+            "clears_floor": false
+          },
+          {
+            "pair": "SpCas9_vs_evoCas9",
+            "label_gap": 0.0004856094015624259,
+            "floor": 0.06369654084787613,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-ERRHI-03",
+      "row_index": 17857,
+      "stratum": "generalisation",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.01738548726037455,
+            0.09086302109062672,
+            0.0474418186996546,
+            0.042460811169197164,
+            0.11148623278778463
+          ],
+          "SpCas9-NG": [
+            0.01855657711146503,
+            0.08606845823427041,
+            0.027038632641455885,
+            0.05063595139007602,
+            0.03636493950438711
+          ],
+          "evoCas9": [
+            0.015555942741533121,
+            0.009600992233673524,
+            0.021692884853109717,
+            0.02518635483026325,
+            0.023512566963094946
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 9,
+          "evoCas9": 18
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "protospacer_6_11",
+          "evoCas9": "protospacer_18_23"
+        },
+        "pam_share": {
+          "SpCas9": 3.3355882990060444,
+          "SpCas9-NG": 1.164233989314449,
+          "evoCas9": 0.6759732140335051
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 7.597765363128492,
+          "SpCas9-NG": 13.072625698324023,
+          "evoCas9": 10.391061452513966
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_SpCas9-NG",
+            "label_gap": 0.024807776004642387,
+            "floor": 0.06968931063858598,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-ERRLO-01",
+      "row_index": 13202,
+      "stratum": "generalisation",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.011763783546888992,
+            0.01644396339219788,
+            0.010497367504285648,
+            0.035522360302921795,
+            0.14118654679300055
+          ],
+          "SpCas9-NG": [
+            0.011548612447869448,
+            0.022303617999164593,
+            0.01130017287667013,
+            0.039220679422012635,
+            0.028586323301877003
+          ],
+          "evoCas9": [
+            0.03423826910309597,
+            0.05218823409328858,
+            0.03832756289436171,
+            0.04038114255915086,
+            0.07486265095778638
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 20,
+          "evoCas9": 26
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "protospacer_18_23",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 5.849587509557659,
+          "SpCas9-NG": 1.017506082653966,
+          "evoCas9": 2.4862882830085806
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 69.60893854748603,
+          "SpCas9-NG": 7.597765363128492,
+          "evoCas9": 86.70391061452514
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9-NG_vs_evoCas9",
+            "label_gap": 0.07432068479904475,
+            "floor": 0.06968931063858598,
+            "clears_floor": true
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-ERRLO-02",
+      "row_index": 5317,
+      "stratum": "generalisation",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.014938776093509257,
+            0.014579088152256899,
+            0.015804197374058682,
+            0.0431523080333136,
+            0.13082061211268106
+          ],
+          "SpCas9-NG": [
+            0.017468508873005502,
+            0.028368435418491975,
+            0.012474095908045357,
+            0.035463729071327374,
+            0.030770643116233662
+          ],
+          "evoCas9": [
+            0.0374131063840145,
+            0.038986580705063216,
+            0.01667336243554018,
+            0.03132757989482747,
+            0.043093951470736
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 22,
+          "evoCas9": 4
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "protospacer_18_23",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 5.399900187576746,
+          "SpCas9-NG": 1.829887855921368,
+          "evoCas9": 1.6483293593419146
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 48.71508379888268,
+          "SpCas9-NG": 42.68156424581006,
+          "evoCas9": 53.296089385474865
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_SpCas9-NG",
+            "label_gap": 0.0426637395882129,
+            "floor": 0.06968931063858598,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-ERRLO-03",
+      "row_index": 6610,
+      "stratum": "generalisation",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.017546165537876534,
+            0.0116881095228665,
+            0.018776714294088177,
+            0.04296657137294662,
+            0.08333372641613501
+          ],
+          "SpCas9-NG": [
+            0.02724538588275512,
+            0.009689133265055716,
+            0.012045008870902369,
+            0.05846970918517198,
+            0.02485507995718055
+          ],
+          "evoCas9": [
+            0.004121778177149179,
+            0.01865036486156492,
+            0.006259662805758934,
+            0.008656887346458258,
+            0.008999336436520228
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 19,
+          "evoCas9": 7
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "protospacer_18_23",
+          "evoCas9": "protospacer_6_11"
+        },
+        "pam_share": {
+          "SpCas9": 4.228318688774719,
+          "SpCas9-NG": 1.077433220656822,
+          "evoCas9": 1.1790145880455027
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 16.87150837988827,
+          "SpCas9-NG": 10.167597765363128,
+          "evoCas9": 32.29050279329609
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-HEADGAP-01",
+      "row_index": 14714,
+      "stratum": "generalisation",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.02348074983779548,
+            0.036689859633851386,
+            0.05754487389802105,
+            0.0381510567644404,
+            0.1376548265495027
+          ],
+          "SpCas9-NG": [
+            0.03824028975537253,
+            0.0420274779252294,
+            0.0703923020304905,
+            0.06521765817888081,
+            0.08532188219639163
+          ],
+          "evoCas9": [
+            0.008318056717851302,
+            0.01100785893181132,
+            0.008632317322836671,
+            0.01295830705203116,
+            0.005025154231892278
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 22
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_18_23"
+        },
+        "pam_share": {
+          "SpCas9": 4.475730003117448,
+          "SpCas9-NG": 2.36861223296977,
+          "evoCas9": 0.5682114128293894
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 21.787709497206702,
+          "SpCas9-NG": 68.49162011173185,
+          "evoCas9": 6.256983240223464
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-HEADGAP-02",
+      "row_index": 17068,
+      "stratum": "generalisation",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.015842128273410104,
+            0.01464981929812994,
+            0.013414862284359211,
+            0.027804771257150505,
+            0.10586922450198068
+          ],
+          "SpCas9-NG": [
+            0.027068472021104146,
+            0.013944458552739687,
+            0.018264633396433458,
+            0.042801303452708654,
+            0.05024586757645011
+          ],
+          "evoCas9": [
+            0.04109656169829476,
+            0.11710003300362991,
+            0.031498148783511065,
+            0.039715807912418515,
+            0.05770206473405576
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 27,
+          "evoCas9": 8
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_6_11"
+        },
+        "pam_share": {
+          "SpCas9": 5.694234235211531,
+          "SpCas9-NG": 1.4685278156567276,
+          "evoCas9": 1.1841375082016967
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 61.00558659217877,
+          "SpCas9-NG": 27.48603351955307,
+          "evoCas9": 32.402234636871505
+        }
+      },
+      "ig": {
+        "token_attribution": {
+          "SpCas9": [
+            -0.0408695824444294,
+            -0.12895067036151886,
+            0.15369707345962524,
+            0.12380532920360565,
+            2.088306427001953
+          ],
+          "SpCas9-NG": [
+            0.37590187788009644,
+            -0.19509361684322357,
+            0.6939891576766968,
+            0.1100350022315979,
+            0.06097400560975075
+          ],
+          "evoCas9": [
+            0.6679458618164062,
+            -0.3186182379722595,
+            0.5721403956413269,
+            -0.09235019981861115,
+            0.029645787551999092
+          ]
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "protospacer_12_17",
+          "evoCas9": "left_flank_plus_protospacer_5prime"
+        }
+      },
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9-NG_vs_evoCas9",
+            "label_gap": 0.1857790616626676,
+            "floor": 0.06968931063858598,
+            "clears_floor": true
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "GEN-HEADGAP-03",
+      "row_index": 20544,
+      "stratum": "generalisation",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.010204301550402304,
+            0.01902332733799186,
+            0.01099018776181361,
+            0.030893861238534253,
+            0.11660030388480258
+          ],
+          "SpCas9-NG": [
+            0.009191623546131369,
+            0.022975713713094592,
+            0.012253368515909338,
+            0.02819924079813063,
+            0.034653260417851724
+          ],
+          "evoCas9": [
+            0.0526208346709609,
+            0.0913872394659039,
+            0.03861797061593582,
+            0.042262136496396534,
+            0.07458375386583309
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 9
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_6_11"
+        },
+        "pam_share": {
+          "SpCas9": 5.952830102660803,
+          "SpCas9-NG": 2.4370135755455755,
+          "evoCas9": 2.0249963752017712
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 74.18994413407822,
+          "SpCas9-NG": 71.06145251396649,
+          "evoCas9": 71.8435754189944
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": -0.3333333333333333,
+        "reversal": true,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_evoCas9",
+            "label_gap": 0.014392664780238262,
+            "floor": 0.06369654084787613,
+            "clears_floor": false
+          },
+          {
+            "pair": "SpCas9-NG_vs_evoCas9",
+            "label_gap": 0.16258334781296752,
+            "floor": 0.06968931063858598,
+            "clears_floor": true
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRHI-01",
+      "row_index": 1776,
+      "stratum": "pam_library",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.01750434914073493,
+            0.012520628182553789,
+            0.016848966272340882,
+            0.035856695069621004,
+            0.19948275833545878
+          ],
+          "SpCas9-NG": [
+            0.017311871540894367,
+            0.01338868866150733,
+            0.02111503652607401,
+            0.016771595507937796,
+            0.07840609891961019
+          ],
+          "evoCas9": [
+            0.0064277575858998,
+            0.007260618564840924,
+            0.0054615121836023815,
+            0.0049195156542636035,
+            0.016394695428769205
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 25
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 3.6373626708966773,
+          "SpCas9-NG": 3.0432930744665994,
+          "evoCas9": 2.620110026366084
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 59.12975912975913,
+          "SpCas9-NG": 68.76456876456876,
+          "evoCas9": 64.25796425796426
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRHI-02",
+      "row_index": 17319,
+      "stratum": "pam_library",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.030481583943280075,
+            0.014977656790708553,
+            0.018759548586482804,
+            0.03089133505192068,
+            0.19120688881311151
+          ],
+          "SpCas9-NG": [
+            0.02789033900222017,
+            0.013450194305429855,
+            0.013955997623270376,
+            0.034361111258880965,
+            0.10133518651127817
+          ],
+          "evoCas9": [
+            0.003917283046272739,
+            0.006525549073962289,
+            0.00714297894834696,
+            0.0035406650786171667,
+            0.0197985119280525
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 25
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 3.153074606357337,
+          "SpCas9-NG": 3.05826345612442,
+          "evoCas9": 3.166820922205914
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 42.26884226884227,
+          "SpCas9-NG": 69.23076923076923,
+          "evoCas9": 81.81818181818183
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRHI-03",
+      "row_index": 22310,
+      "stratum": "pam_library",
+      "criterion": "ERRHI",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.015658894579650626,
+            0.01747424674249487,
+            0.015122166860641705,
+            0.025398451621488977,
+            0.09802377327448791
+          ],
+          "SpCas9-NG": [
+            0.011004443039483803,
+            0.017595822069173057,
+            0.015578558202832939,
+            0.028055566081699606,
+            0.07096165206490292
+          ],
+          "evoCas9": [
+            0.0037169148421930405,
+            0.0028610769885643902,
+            0.0022735256514149825,
+            0.0060993893566774204,
+            0.024925445174125746
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 27,
+          "evoCas9": 28
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 3.4642587008741432,
+          "SpCas9-NG": 2.6367409955946775,
+          "evoCas9": 2.180472360438571
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 52.836052836052836,
+          "SpCas9-NG": 43.35664335664335,
+          "evoCas9": 45.45454545454545
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRLO-01",
+      "row_index": 32466,
+      "stratum": "pam_library",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.0031108724510381255,
+            0.0037418451021140856,
+            0.003974148691567178,
+            0.004643009150944029,
+            0.03670025712603496
+          ],
+          "SpCas9-NG": [
+            0.007093421506902411,
+            0.004171238999535692,
+            0.005904831199788734,
+            0.016288920771330595,
+            0.06278602283499721
+          ],
+          "evoCas9": [
+            0.0008765808804835412,
+            0.0011253146233987839,
+            0.001252044812847291,
+            0.001146993246139674,
+            0.003769618016020912
+          ]
+        },
+        "top_position": {
+          "SpCas9": 28,
+          "SpCas9-NG": 28,
+          "evoCas9": 28
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 1.6346787738572963,
+          "SpCas9-NG": 3.0261219996393085,
+          "evoCas9": 2.09397525860888
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 9.401709401709402,
+          "SpCas9-NG": 67.52136752136752,
+          "evoCas9": 41.72494172494173
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_evoCas9",
+            "label_gap": 0.011468971711819145,
+            "floor": 0.06369654084787613,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRLO-02",
+      "row_index": 27043,
+      "stratum": "pam_library",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.003818740893620998,
+            0.003839669187275124,
+            0.003135844109945336,
+            0.0067198004884024476,
+            0.01686967007117346
+          ],
+          "SpCas9-NG": [
+            0.0036417008215923695,
+            0.005309495969817766,
+            0.005601641515062916,
+            0.018430504637459915,
+            0.08363606774299921
+          ],
+          "evoCas9": [
+            0.0014537103393700414,
+            0.0012578897969635567,
+            0.0014413545981773902,
+            0.002891574650574411,
+            0.0026237220267325435
+          ]
+        },
+        "top_position": {
+          "SpCas9": 28,
+          "SpCas9-NG": 29,
+          "evoCas9": 28
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "protospacer_18_23"
+        },
+        "pam_share": {
+          "SpCas9": 1.2578418794312625,
+          "SpCas9-NG": 2.1192321075327087,
+          "evoCas9": 0.9766111937613304
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 4.817404817404817,
+          "SpCas9-NG": 10.567210567210568,
+          "evoCas9": 3.7296037296037294
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-ERRLO-03",
+      "row_index": 29900,
+      "stratum": "pam_library",
+      "criterion": "ERRLO",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.008782676476079764,
+            0.00798039412863242,
+            0.003921537543849101,
+            0.006469119825245193,
+            0.14309630612195987
+          ],
+          "SpCas9-NG": [
+            0.0075028848223155364,
+            0.005925555094209914,
+            0.00549960631017004,
+            0.013444346787284504,
+            0.13229315691731042
+          ],
+          "evoCas9": [
+            0.0022289585548504773,
+            0.003930490445377978,
+            0.002109101231629514,
+            0.0013103664546179061,
+            0.022349913919040575
+          ]
+        },
+        "top_position": {
+          "SpCas9": 25,
+          "SpCas9-NG": 28,
+          "evoCas9": 25
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 2.7870993337036007,
+          "SpCas9-NG": 2.538721730891923,
+          "evoCas9": 3.557479491848512
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 32.78943278943279,
+          "SpCas9-NG": 35.58663558663559,
+          "evoCas9": 87.1017871017871
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 0.3333333333333333,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": [
+          {
+            "pair": "SpCas9_vs_SpCas9-NG",
+            "label_gap": 0.0011733950923192085,
+            "floor": 0.06968931063858598,
+            "clears_floor": false
+          }
+        ]
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-HEADGAP-01",
+      "row_index": 27102,
+      "stratum": "pam_library",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.02834151785807788,
+            0.02513286652619071,
+            0.024435104401264753,
+            0.044202601407758065,
+            0.1598128336037108
+          ],
+          "SpCas9-NG": [
+            0.012850731106785437,
+            0.010332094828805162,
+            0.010727973021049468,
+            0.025257713057928618,
+            0.12141287626905573
+          ],
+          "evoCas9": [
+            0.004584052393005953,
+            0.0036021688501932663,
+            0.006132729494412262,
+            0.003947293476408555,
+            0.015749533103644353
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 28,
+          "evoCas9": 25
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 2.715739299648918,
+          "SpCas9-NG": 2.7949329095356905,
+          "evoCas9": 2.7547350857000206
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 31.46853146853147,
+          "SpCas9-NG": 53.535353535353536,
+          "evoCas9": 70.08547008547008
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-HEADGAP-02",
+      "row_index": 30017,
+      "stratum": "pam_library",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.03428096670864357,
+            0.019515403468782704,
+            0.0326213000031809,
+            0.045487376757793956,
+            0.13597970507625076
+          ],
+          "SpCas9-NG": [
+            0.019102157080649506,
+            0.008490053322424905,
+            0.014491099983893542,
+            0.02019075679385828,
+            0.10272213692466418
+          ],
+          "evoCas9": [
+            0.004139313716021004,
+            0.002487169520463795,
+            0.0036067964328039027,
+            0.0028623709901391217,
+            0.027121995692141354
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 28
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 2.2316107032851376,
+          "SpCas9-NG": 3.484739278050278,
+          "evoCas9": 1.9915048928696035
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 20.35742035742036,
+          "SpCas9-NG": 87.33488733488734,
+          "evoCas9": 36.20823620823621
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    },
+    {
+      "case_id": "LIB-HEADGAP-03",
+      "row_index": 5704,
+      "stratum": "pam_library",
+      "criterion": "HEADGAP",
+      "reporting_qualifier": "observed in one of 5 targets",
+      "ism": {
+        "token_profile": {
+          "SpCas9": [
+            0.017897924253096182,
+            0.013509533062460832,
+            0.005367169515617813,
+            0.016456024255603552,
+            0.05600733506596751
+          ],
+          "SpCas9-NG": [
+            0.013258295405345658,
+            0.017750554562856753,
+            0.015588921307223952,
+            0.03357956620554129,
+            0.09369754421317743
+          ],
+          "evoCas9": [
+            0.006631150964595791,
+            0.004402375446968815,
+            0.0049154978348977035,
+            0.004975650695592373,
+            0.024287629280782614
+          ]
+        },
+        "top_position": {
+          "SpCas9": 26,
+          "SpCas9-NG": 25,
+          "evoCas9": 25
+        },
+        "top_token": {
+          "SpCas9": "pam_plus_right_flank",
+          "SpCas9-NG": "pam_plus_right_flank",
+          "evoCas9": "pam_plus_right_flank"
+        },
+        "pam_share": {
+          "SpCas9": 3.3447032593389743,
+          "SpCas9-NG": 3.2374073889293835,
+          "evoCas9": 2.5732654989789276
+        },
+        "pam_share_percentile_in_stratum": {
+          "SpCas9": 48.64024864024864,
+          "SpCas9-NG": 78.63247863247864,
+          "evoCas9": 62.31546231546231
+        }
+      },
+      "ig": null,
+      "head_order": {
+        "tau": 1.0,
+        "reversal": false,
+        "tied_pair": false,
+        "clears_noise_floor": false,
+        "clears_noise_floor_rule": "every inverted pair's measured label gap exceeds that pair's floor, which is the larger of its two heads' own floors",
+        "inverted_pairs": []
+      },
+      "attribution_outlier": {
+        "SpCas9": false,
+        "SpCas9-NG": false,
+        "evoCas9": false
+      }
+    }
+  ],
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  },
+  "consumed": {
+    "cases": {
+      "name": "cases.json",
+      "sha256": "91b148cb518cc96d8346b8e67cce334f47681db048d9d6d315652e6766576a73"
+    },
+    "ism": {
+      "name": "ism.npz",
+      "sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b"
+    },
+    "ig": {
+      "name": "ig.npz",
+      "sha256": "e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2"
+    },
+    "noise_floor": {
+      "name": "v3_noise_floor.json",
+      "sha256": "e47cd4beecc86934fe801cbb3c2b7c41ea1c492b10e6d7a75dfb2d7a867183d5"
+    },
+    "split": "test.csv",
+    "predictions": "predictions.csv",
+    "digests": {
+      "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "predictions.csv": "7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a"
+    },
+    "split_checksum_pin_checked": true
+  }
+}

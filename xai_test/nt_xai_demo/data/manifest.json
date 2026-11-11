@@ -1,0 +1,334 @@
+{
+  "schema": 1,
+  "restore": "Cas12a ZIP + SpCas9 원본 묶음 (xai_test/nt_xai_demo/DATA.md)",
+  "nucleases": {
+    "cas12a": {
+      "status": "prepared",
+      "archive": "xai_test/cas12a_NT_analysis/result/cas12a-test1500-results-a9e50fa7f668.zip",
+      "archive_sha256": "40cbd2f24f0c19bec42b776282b407a5d9538129d6b5543dcc2c3c29d3ab098f",
+      "audit": "xai_test/cas12a_NT_analysis/result/test1500-a9e50fa7f668-final-audit.json",
+      "pins_checked": [
+        "Cas12a 최종 감사 status",
+        "Cas12a ZIP sha256 (최종 감사)",
+        "plan.json sha256 (plan.sha256)",
+        "ism.npz sha256 (sidecar npz_sha256)",
+        "ism.sidecar plan_sha256",
+        "ism.npz source_row (plan statistics_ids)",
+        "ig.npz sha256 (sidecar npz_sha256)",
+        "ig.sidecar plan_sha256",
+        "ig.npz source_row (plan statistics_ids)",
+        "rollout.npz sha256 (sidecar npz_sha256)",
+        "rollout.sidecar plan_sha256",
+        "rollout.npz source_row (plan statistics_ids)",
+        "predictions.sidecar plan_sha256",
+        "cases.json plan_sha256",
+        "cases_annotated selection.plan_sha256",
+        "agreement statistics_ids (plan)"
+      ]
+    },
+    "spcas9": {
+      "status": "prepared",
+      "pins_checked": [
+        "train.csv sha256 (split_checksum)",
+        "val.csv sha256 (split_checksum)",
+        "test.csv sha256 (split_checksum)",
+        "predictions.csv sha256 (predictions_checksum)",
+        "predictions_checksum split.sha256",
+        "ism.npz sha256 (sidecar delta_sha256)",
+        "ism.npz population_digest (sidecar)",
+        "ig.npz sha256 (sidecar attribution_sha256)",
+        "ig.npz row_index (sidecar membership_digest)",
+        "ig_subset membership_digest (ig sidecar)",
+        "ig_subset entries (membership_digest)",
+        "rollout.npz sha256 (sidecar rollout_sha256)",
+        "rollout.npz population_digest (sidecar)",
+        "v3_ig_subset/ig_subset.json sha256 (v3_ig_subset/ig_subset_checksum.json)",
+        "v3_cases/cases.json sha256 (v3_cases/cases_checksum.json)",
+        "v3_noise_floor.json sha256 (v3_noise_floor_checksum.json)",
+        "cases_annotated consumed.cases",
+        "cases_annotated consumed.ism",
+        "cases_annotated consumed.ig",
+        "cases_annotated consumed.noise_floor",
+        "head_agreement population_digest (ism)",
+        "head_agreement consumed.ism",
+        "ig_ism_validation consumed.ism",
+        "ig_ism_validation consumed.ig",
+        "head_order_reversal consumed test.csv",
+        "head_order_reversal consumed predictions.csv",
+        "head_order_reversal consumed v3_noise_floor.json"
+      ]
+    }
+  },
+  "derived": {
+    "cas12a/agreement.sliced.json": {
+      "source": "zip:reports/745133f240e1/agreement.json",
+      "source_sha256": "d53383569d32c00598d1102930afb3628e8ef2a69fcb4a6dec15211009f7c6fa",
+      "operation": "최상위 키 선택만 함; 값은 원본 그대로이며 산술 없음",
+      "kept": [
+        "populations",
+        "group_diagnostics",
+        "protocol"
+      ],
+      "dropped": [
+        "case_only_ids",
+        "ig_mode",
+        "rows",
+        "statistics_ids"
+      ]
+    }
+  },
+  "files": {
+    "cas12a/agreement.sliced.json": {
+      "sha256": "1d66b4a8653942d40319a32929671f7007413e48af113133f44b9a2df26effd9",
+      "bytes": 576221,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/agreement.json (sliced)"
+    },
+    "cas12a/agreement_distribution.svg": {
+      "sha256": "97750a8e53b5c3cfc51ee03586a620b54cecc4cca7970bc404035428ee079a1e",
+      "bytes": 2140,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/agreement_distribution.svg"
+    },
+    "cas12a/cases.csv": {
+      "sha256": "721a65f608ba2da5469853058768a0d0c5ca9b231e4ffd8d63639104cc028162",
+      "bytes": 2746,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/cases.csv"
+    },
+    "cas12a/cases.json": {
+      "sha256": "90d5b970b9166713c8894840a40b0879883a10611a567bd09d14ba9d29f32646",
+      "bytes": 5840,
+      "git": "tracked",
+      "source": "zip:cases.json"
+    },
+    "cas12a/cases_annotated.json": {
+      "sha256": "444eab9e1d27e5feb177971f5080aca3ae92fc0f16fdbf7f15671da89390957b",
+      "bytes": 142040,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/cases_annotated.json"
+    },
+    "cas12a/execution.json": {
+      "sha256": "3339c3f735e693b6e8c7f7424cb69744d96ebfd1bbb48ea76c6662a368055eb4",
+      "bytes": 270,
+      "git": "tracked",
+      "source": "zip:execution.json"
+    },
+    "cas12a/ig.npz": {
+      "sha256": "695ee71252dba17f44c39c2653c162377180962777772fd5b4e486bc9095747d",
+      "bytes": 120342,
+      "git": "ignored",
+      "source": "zip:reports/745133f240e1/ig.npz"
+    },
+    "cas12a/ism.npz": {
+      "sha256": "04428fd52883218c3bb27ca056cf335c017df37c88785884700563cea5e353f7",
+      "bytes": 3260416,
+      "git": "ignored",
+      "source": "zip:reports/745133f240e1/ism.npz"
+    },
+    "cas12a/metrics.json": {
+      "sha256": "3c43a61108b133839c31a0ba5640bad2408a65ce687b35ee0ae3916a7cb6bb82",
+      "bytes": 1558,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/metrics.json"
+    },
+    "cas12a/plan.json": {
+      "sha256": "ac2cf1e1d3654560f79e66d2d4128758aab02fd5f02285954bcc0886415bff97",
+      "bytes": 355408,
+      "git": "tracked",
+      "source": "zip:plan.json"
+    },
+    "cas12a/plan.sha256": {
+      "sha256": "f757eab91d1fd0aae1068387881db3ce36199c19a40b2736403301f91b393c16",
+      "bytes": 64,
+      "git": "tracked",
+      "source": "zip:plan.sha256"
+    },
+    "cas12a/position_profiles.json": {
+      "sha256": "258d832e5e3d27ac4b0f972074d6fab0eae0c86e3202b902e654eeef5dce67e1",
+      "bytes": 2256,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/position_profiles.json"
+    },
+    "cas12a/position_profiles.svg": {
+      "sha256": "d70fa5ec4c8685715c57255a7ec71f3d1d4ff00f08930c654dcdaf9808d82490",
+      "bytes": 2128,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/position_profiles.svg"
+    },
+    "cas12a/predictions.csv": {
+      "sha256": "4b1874e11fe99ecab9f3e5f52060acb3953357239f391d660aa3e4fe2f085dcd",
+      "bytes": 349721,
+      "git": "ignored",
+      "source": "zip:reports/745133f240e1/predictions.csv"
+    },
+    "cas12a/report.ko.md": {
+      "sha256": "919476236ea4f4b00f9e95ead0e1dda2d477627e214325b8f7760747ff2b6af4",
+      "bytes": 6645,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/report.ko.md"
+    },
+    "cas12a/rollout.npz": {
+      "sha256": "6cdf4a2295aeaf74b17556d40430122beb354dc947a963e03af04971bd57c3e3",
+      "bytes": 1717816,
+      "git": "ignored",
+      "source": "zip:reports/745133f240e1/rollout.npz"
+    },
+    "cas12a/rollout_summary.json": {
+      "sha256": "83e138a7f70f51f62f939b0296a01c7ba528f36f78fc8c18134f426c00a79454",
+      "bytes": 838,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/rollout_summary.json"
+    },
+    "cas12a/summary.json": {
+      "sha256": "25642fc9f9087b1fcb286e05aab0a4bdf4ca251941091c65707c61e5d7fbfa5f",
+      "bytes": 65316,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/summary.json"
+    },
+    "cas12a/token_profiles.json": {
+      "sha256": "76f5ece9d97722781e4defaf4f409bdbc8aea34ecbfd763bec03eae78719b081",
+      "bytes": 743,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/token_profiles.json"
+    },
+    "cas12a/token_profiles.svg": {
+      "sha256": "81a9410105cfffc594495be5bd114b2340a9e5a65461fd09602a00b9a00ef608",
+      "bytes": 1519,
+      "git": "tracked",
+      "source": "zip:reports/745133f240e1/token_profiles.svg"
+    },
+    "spcas9/published_split/split_checksum.json": {
+      "sha256": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+      "bytes": 760,
+      "git": "tracked",
+      "source": "xai_test/SpCas9/published_split/split_checksum.json"
+    },
+    "spcas9/published_split/test.csv": {
+      "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "bytes": 1206283,
+      "git": "ignored",
+      "source": "xai_test/SpCas9/published_split/test.csv"
+    },
+    "spcas9/published_split/train.csv": {
+      "sha256": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+      "bytes": 6915393,
+      "git": "ignored",
+      "source": "xai_test/SpCas9/published_split/train.csv"
+    },
+    "spcas9/published_split/val.csv": {
+      "sha256": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+      "bytes": 873210,
+      "git": "ignored",
+      "source": "xai_test/SpCas9/published_split/val.csv"
+    },
+    "spcas9/v3_cases/cases.json": {
+      "sha256": "91b148cb518cc96d8346b8e67cce334f47681db048d9d6d315652e6766576a73",
+      "bytes": 16455,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_cases/cases.json"
+    },
+    "spcas9/v3_cases/cases_annotated.json": {
+      "sha256": "bc65d38526ff3e09ec882129855434fa1b38410d6f4430de3807f0860162edd7",
+      "bytes": 41921,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_cases/cases_annotated.json"
+    },
+    "spcas9/v3_cases/cases_checksum.json": {
+      "sha256": "5d4c24d149adebfdefe7c8b372ce599c3569f0317414f5ef611a50623a15df50",
+      "bytes": 106,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_cases/cases_checksum.json"
+    },
+    "spcas9/v3_head_agreement/head_agreement.json": {
+      "sha256": "e13cf50ab7e70b393d830a07b16b9d1864e1a14b50d253ef2691a0aebaf33498",
+      "bytes": 93036,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_head_agreement/head_agreement.json"
+    },
+    "spcas9/v3_ig/ig.npz": {
+      "sha256": "e7973fa58fb782c1c9ec6310f3416a12c122e6a27865444608fbe02d53c063f2",
+      "bytes": 47470,
+      "git": "ignored",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ig/ig.npz"
+    },
+    "spcas9/v3_ig/ig.sidecar.json": {
+      "sha256": "397fdb0f2600c9603d9812ff8561019cd95b90c4835c420f119855e30d46c1d5",
+      "bytes": 5096,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ig/ig.sidecar.json"
+    },
+    "spcas9/v3_ig_subset/ig_subset.json": {
+      "sha256": "8193073ea8dbd068344e1b3d48117a4b94c8431e5bbc3c5c7f4a10070fc785e6",
+      "bytes": 89779,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ig_subset/ig_subset.json"
+    },
+    "spcas9/v3_ig_subset/ig_subset_checksum.json": {
+      "sha256": "2afd21a320aea6fec05bd90c57d82e1421fef8aa2d9f47f8bf5a0789e95da100",
+      "bytes": 110,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ig_subset/ig_subset_checksum.json"
+    },
+    "spcas9/v3_ism/ism.npz": {
+      "sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b",
+      "bytes": 16922326,
+      "git": "ignored",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ism/ism.npz"
+    },
+    "spcas9/v3_ism/ism.sidecar.json": {
+      "sha256": "c7b1225d7312a10d055269e2a6d8793026be651b671da5343de98a96dcd29923",
+      "bytes": 3541,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_ism/ism.sidecar.json"
+    },
+    "spcas9/v3_noise_floor.json": {
+      "sha256": "e47cd4beecc86934fe801cbb3c2b7c41ea1c492b10e6d7a75dfb2d7a867183d5",
+      "bytes": 19389,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_noise_floor.json"
+    },
+    "spcas9/v3_noise_floor_checksum.json": {
+      "sha256": "4e7278fcab0572901c91a78016ad84061dfd22cc18ac5cca84ce66053a29ab9f",
+      "bytes": 115,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_noise_floor_checksum.json"
+    },
+    "spcas9/v3_report/head_order_reversal.json": {
+      "sha256": "511c4f3c86a3f26accb5722d67a8b1ea61481bd9dc9e32ade71f3c14fbbb8d5b",
+      "bytes": 20917,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_report/head_order_reversal.json"
+    },
+    "spcas9/v3_report/ig_ism_validation.json": {
+      "sha256": "f8eb34e9918ab9847a6abd8d8a8c114c13ea11d79b32254cbb8f4c59e821bcda",
+      "bytes": 21276,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_report/ig_ism_validation.json"
+    },
+    "spcas9/v3_rollout/rollout.npz": {
+      "sha256": "b42b7b6dbb89db6b1a8a16b631ba62d196d86437799aa38dd0a95a784097c6b4",
+      "bytes": 416426,
+      "git": "ignored",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_rollout/rollout.npz"
+    },
+    "spcas9/v3_rollout/rollout.sidecar.json": {
+      "sha256": "3043c84579bfb35c3f872204a9fa2c8f0567bbdebbf406270c40835de466629b",
+      "bytes": 5502,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_rollout/rollout.sidecar.json"
+    },
+    "spcas9/v3_testset_predictions/predictions.csv": {
+      "sha256": "7b4f9b16c048a2d0ba9abb9699b32a3e181954c6ba35ce7f002cea6f9850974a",
+      "bytes": 1122862,
+      "git": "ignored",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_testset_predictions/predictions.csv"
+    },
+    "spcas9/v3_testset_predictions/predictions_checksum.json": {
+      "sha256": "ba936aa0b7acfee45165a8e93346690cd46b2166fd39c110e10cfc38d0a72ac6",
+      "bytes": 1063,
+      "git": "tracked",
+      "source": "xai_test/SpCas9_NT_analysis/artifacts/v3_testset_predictions/predictions_checksum.json"
+    }
+  }
+}

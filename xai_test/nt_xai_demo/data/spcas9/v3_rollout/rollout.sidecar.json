@@ -1,0 +1,107 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "attention_rollout",
+  "adr": [
+    "0007",
+    "0008"
+  ],
+  "population": "analysis_intersection",
+  "population_digest": "e09ad05ee43943fbc1e8b25629d6f456b224bb120a9244e29f318bf3548379a6",
+  "rows": 3851,
+  "forwards": 3851,
+  "quantity": "information_dependency",
+  "quantity_note": "The connectivity v3's encoder constructs between token positions, not a physical DNA/protein interaction claim.",
+  "head_axis": false,
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9",
+    "evoCas9"
+  ],
+  "head_invariance_note": "There is no head axis (ADR 0008). v3's nine regression heads share one encoder trunk and the rollout is a function of that trunk's attention alone, so one row yields one 5x5 matrix rather than nine. `heads` is recorded only to name the trunk's consumers: no entry of this array belongs to a head, and no per-head rollout figure is derivable from it. The per-head PAM question is answered by ISM (base resolution) and IG (token resolution).",
+  "token_resolution": 5,
+  "token_names": [
+    "left_flank_plus_protospacer_5prime",
+    "protospacer_6_11",
+    "protospacer_12_17",
+    "protospacer_18_23",
+    "pam_plus_right_flank"
+  ],
+  "token_boundaries": [
+    [
+      0,
+      5
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      12,
+      17
+    ],
+    [
+      18,
+      23
+    ],
+    [
+      24,
+      29
+    ]
+  ],
+  "unfolded_to_bases": false,
+  "token_resolution_note": "Stored at five-token resolution and not unfolded to the 30 base coordinates (ADR 0007): attention is a quantity between tokens, and the last token is 'pam_plus_right_flank' — it binds the PAM (24-26) to the right flank (27-29), so an unfold would re-mix what that ADR separates. The SaCas9 pipeline's 36x36 unfold is not inherited.",
+  "layer_operation": "0.5*A + 0.5*I, then row-normalise",
+  "layer_operation_note": "Per layer, averaged over the encoder's attention heads: the identity is added first (the residual connection's implicit contribution) and the row normalised second. The reverse order gives a different matrix. Layers are combined by left-multiplying each later layer onto the running product.",
+  "layers_combined": 24,
+  "attention_heads_averaged": 20,
+  "attention_heads_note": "Encoder attention heads, averaged per layer (Abnar & Zuidema, 2020). Unrelated to v3's nine regression heads, which this quantity does not vary over.",
+  "attention_implementation": "eager",
+  "attention_implementation_note": "`attention_implementation` is the implementation that was actually in force while the probabilities were read, not the one the run asked for. The run switches the model to `eager` wherever it can be switched, because the fused kernels (`sdpa`, flash attention) never materialise the attention probability matrix: under transformers 5.x `output_attentions=True` on an sdpa model returns an empty tuple instead of raising, so a rollout run would have nothing to roll. On a model that cannot report its implementation this field reads `unknown` — older transformers fall back to eager by themselves, so the probabilities are real, but the run has not verified which path produced them.",
+  "stored": "final_rollout_only",
+  "per_layer_stored": false,
+  "per_layer_note": "The 24 per-layer matrices are ~9 MB and are deliberately not stored: no analysis reads them.",
+  "renormalised_after_cls_removal": false,
+  "cls_removal_note": "`<cls>` participates in the rollout and its row and column are dropped afterwards, so each stored row sums to 1 minus the share that reached `<cls>` (`cls_mass` records that share's distribution). The block is **not** renormalised: rescaling it would state a dependency between sequence tokens that the encoder routed through `<cls>`.",
+  "cls_mass": {
+    "min": 0.2734790927757897,
+    "median": 0.33121402210384465,
+    "max": 0.3853482734162663
+  },
+  "batch_size": 64,
+  "row_index_note": "int64, aligned to axis 0 and strictly ascending — the same ordering contract as `ism.npz` and `ig.npz`, so a join is one operation rather than a per-artifact convention.",
+  "code_ref": "a5b3393ca7a3983e2430caea4d9b4a1d33c5dd1d",
+  "split": {
+    "path": "/content/drive/MyDrive/SpCas9/test.csv",
+    "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+  },
+  "versions": {
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.8.1"
+  },
+  "nan_policy": "forbidden",
+  "checkpoint": {
+    "path": "/content/drive/MyDrive/SpCas9/spcas9_v3/nt_v3_seed42",
+    "files": {
+      "config.json": "62028537178f176962cc59530b31abe4947a82ed5053b9f6918c5e9e1a5caf4d",
+      "mu_sd.npy": "a7a5c3ccd2a584752b4dab451889ca2a8f55a2e6c221a3735b9c593ef6cbaf27",
+      "vocab.txt": "f1b544e27897936b50bbd925850fa8a08b421c33bb9c26e3711c140c061d0d4c"
+    }
+  },
+  "code_ref_verified_by": "module_sha256",
+  "module_sha256": {
+    "v3_rollout.py": "d3c967fa29ebcd81ef1b88ce38ec1481573ccda1f19e8434cd25d2d88de78a8b",
+    "v3_ig.py": "54acfcccc1606ee23345c5c65896e8bcbd3cd6c26b1e1c850edc21a42afa83d5",
+    "v3_predict.py": "29b326c634f333ae2437b5e9d5d92382c94add69400d9ecbbb05ccbc9fa6b08b",
+    "v3_selection.py": "772523529d732cbfc8dd8f727a653099624a7a3b2fe8f72cea5b74e9b07bfa2c",
+    "v3_strata.py": "b381e57162520e2af5ecad42e47d8eceedc5a6b550944b40e7ccfb6557a1a9e3"
+  },
+  "rollout_sha256": "b42b7b6dbb89db6b1a8a16b631ba62d196d86437799aa38dd0a95a784097c6b4"
+}

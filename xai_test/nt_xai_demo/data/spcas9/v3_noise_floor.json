@@ -1,0 +1,627 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "replicate_noise_floor",
+  "inputs": [
+    "labels"
+  ],
+  "spread_definition": "max - min of a repeated 30-mer's labels for one head, on the fraction scale. One spread per group per head; groups of three or more rows contribute one spread, not one per pair.",
+  "single_constant_note": "Use by_head, not pooled. The per-head floors span head_floor_ratio (see below), so the pooled median is several times evoCas9's own and would wave through evoCas9 gaps well outside that head's noise. The pooled figures are reported for continuity with the design doc, which quotes them as the single scale reversal was first tested against.",
+  "limit_note": "The floor rests on the repeated 30-mers of one split, and on the subset of them that survives the analysis intersection: groups and rows against intersection_rows, and against repeated_groups_in_split and repeated_rows_in_split, which are what the uncut split holds. The cut is the sharpest edge of the limit - most repeated 30-mers are not measured on all three analysed heads - so a report that uses the floor states both pairs of counts.",
+  "repeat_minimum": 2,
+  "groups": 79,
+  "rows": 379,
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "by_head": {
+    "SpCas9": {
+      "groups": 79,
+      "median": 0.06369654084787613,
+      "p90": 0.10713850189916466,
+      "mean": 0.06595415201673588,
+      "min": 0.00259292373699923,
+      "max": 0.23164003888634865
+    },
+    "SpCas9-NG": {
+      "groups": 79,
+      "median": 0.06968931063858598,
+      "p90": 0.11938900009916263,
+      "mean": 0.07617097414324923,
+      "min": 0.018060414735050257,
+      "max": 0.17177957212703063
+    },
+    "evoCas9": {
+      "groups": 79,
+      "median": 0.009872877232830207,
+      "p90": 0.058368360942509134,
+      "mean": 0.02117274313978188,
+      "min": 0.001366676359406804,
+      "max": 0.10951080985696784
+    }
+  },
+  "pooled": {
+    "measurements": 237,
+    "median": 0.05305466639679558,
+    "p90": 0.10510963846936333,
+    "mean": 0.05443262309992234,
+    "min": 0.001366676359406804,
+    "max": 0.23164003888634865
+  },
+  "head_floor_ratio": 7.058662737833772,
+  "label_scale": "fraction",
+  "label_divisor": 100.0,
+  "percentile": 90,
+  "intersection_rows": 3851,
+  "split_rows": 5186,
+  "repeated_groups_in_split": 779,
+  "repeated_rows_in_split": 2247,
+  "population_digest": "509ee68a7bce4bc3059007b2803bd2f6a81e935dc6b6c7f73e3b30674d13eadc",
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3"
+  },
+  "consumed": {
+    "split": "test.csv",
+    "digests": {
+      "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+    },
+    "split_checksum_pin_checked": true
+  },
+  "group_spreads": [
+    {
+      "sequence": "AAAGGGTCCTGGAGAAAAGTCCTGGGAAGC",
+      "rows": 5,
+      "spread_SpCas9": 0.047074326471523,
+      "spread_SpCas9-NG": 0.10950624719308,
+      "spread_evoCas9": 0.036026861532014
+    },
+    {
+      "sequence": "AACAGCAAGGGCTGAGCAGCAGTAGGTTGG",
+      "rows": 5,
+      "spread_SpCas9": 0.164097465108878,
+      "spread_SpCas9-NG": 0.066306239125031,
+      "spread_evoCas9": 0.005500655164883
+    },
+    {
+      "sequence": "AACGGCTCTCAGGCCCTGTCCGCACGTAAC",
+      "rows": 5,
+      "spread_SpCas9": 0.002592923736999,
+      "spread_SpCas9-NG": 0.089755303583033,
+      "spread_evoCas9": 0.009354345526564
+    },
+    {
+      "sequence": "AACTGCAGGAAGAACAGTTCAAGACGGTAG",
+      "rows": 5,
+      "spread_SpCas9": 0.231640038886349,
+      "spread_SpCas9-NG": 0.103930767238386,
+      "spread_evoCas9": 0.072525394984932
+    },
+    {
+      "sequence": "AACTGCTACGCTAGCAGTGAGCAAGGCTCT",
+      "rows": 5,
+      "spread_SpCas9": 0.067179475204974,
+      "spread_SpCas9-NG": 0.125826074790124,
+      "spread_evoCas9": 0.010633151201214
+    },
+    {
+      "sequence": "AACTGTAAACCTGGAATAACACGATGGAAC",
+      "rows": 5,
+      "spread_SpCas9": 0.093599366478446,
+      "spread_SpCas9-NG": 0.056562311126334,
+      "spread_evoCas9": 0.028091424071804
+    },
+    {
+      "sequence": "AAGAGCCCATCCCTGAGTCCAGCGAGCTGA",
+      "rows": 5,
+      "spread_SpCas9": 0.017679609437784,
+      "spread_SpCas9-NG": 0.06530015210375,
+      "spread_evoCas9": 0.017088302244881
+    },
+    {
+      "sequence": "AAGGGCGCTTCCCGCGGAGCACCTCGATGC",
+      "rows": 5,
+      "spread_SpCas9": 0.078424571947873,
+      "spread_SpCas9-NG": 0.060677434246285,
+      "spread_evoCas9": 0.002406357530032
+    },
+    {
+      "sequence": "AATGGCTTAAACCTGGGAGACAGAGGTTGC",
+      "rows": 4,
+      "spread_SpCas9": 0.027621324022504,
+      "spread_SpCas9-NG": 0.074423328153365,
+      "spread_evoCas9": 0.006392419005641
+    },
+    {
+      "sequence": "ACATGCAGGGATCCAAGCACACAAGGTCCT",
+      "rows": 5,
+      "spread_SpCas9": 0.060741204970955,
+      "spread_SpCas9-NG": 0.080836944421865,
+      "spread_evoCas9": 0.00278360701394
+    },
+    {
+      "sequence": "ACCCGCCCAGTTCGAACTTCCTGGAGGCCT",
+      "rows": 5,
+      "spread_SpCas9": 0.074554995333915,
+      "spread_SpCas9-NG": 0.071957062058355,
+      "spread_evoCas9": 0.025462155581261
+    },
+    {
+      "sequence": "ACCGGAGGACAAAGTACAAACGGCAGAAGC",
+      "rows": 5,
+      "spread_SpCas9": 0.067605692055031,
+      "spread_SpCas9-NG": 0.053054666396796,
+      "spread_evoCas9": 0.005325353453795
+    },
+    {
+      "sequence": "ACCTGTAATCCCAGCTACTCCGGAGGCTGA",
+      "rows": 5,
+      "spread_SpCas9": 0.056201139479091,
+      "spread_SpCas9-NG": 0.06129280559912,
+      "spread_evoCas9": 0.005843294211844
+    },
+    {
+      "sequence": "ACTAGCTCCTTTAACCTTGACGAACGTACA",
+      "rows": 5,
+      "spread_SpCas9": 0.020387223689366,
+      "spread_SpCas9-NG": 0.133088920865457,
+      "spread_evoCas9": 0.003863196970057
+    },
+    {
+      "sequence": "ACTTGCAGAGCTAGGGGTTCAGAGGGGTGA",
+      "rows": 5,
+      "spread_SpCas9": 0.075092732708349,
+      "spread_SpCas9-NG": 0.040193194954208,
+      "spread_evoCas9": 0.102956146695599
+    },
+    {
+      "sequence": "AGAAGGGCTCCCATCACATCAACCGGTGGC",
+      "rows": 5,
+      "spread_SpCas9": 0.011826778425404,
+      "spread_SpCas9-NG": 0.019809229719812,
+      "spread_evoCas9": 0.002028838941451
+    },
+    {
+      "sequence": "AGCGGCGGCTGCACAACCAGTGGAGGCAAG",
+      "rows": 5,
+      "spread_SpCas9": 0.095770195565747,
+      "spread_SpCas9-NG": 0.066296098885482,
+      "spread_evoCas9": 0.010540921473355
+    },
+    {
+      "sequence": "AGGAGGACTCTCTGATGAAGACCCAGGCGG",
+      "rows": 5,
+      "spread_SpCas9": 0.087723397988464,
+      "spread_SpCas9-NG": 0.074312168227442,
+      "spread_evoCas9": 0.096207668031788
+    },
+    {
+      "sequence": "AGTTGGCTAAGAGAGGTTTCCGAAGGGTTT",
+      "rows": 5,
+      "spread_SpCas9": 0.123676981354795,
+      "spread_SpCas9-NG": 0.124934218843942,
+      "spread_evoCas9": 0.024854317173694
+    },
+    {
+      "sequence": "ATAAGTTTGCAGTTGGCTAAGAGAGGTTTC",
+      "rows": 5,
+      "spread_SpCas9": 0.035249049348829,
+      "spread_SpCas9-NG": 0.089100614715026,
+      "spread_evoCas9": 0.006715811255219
+    },
+    {
+      "sequence": "ATGAGTAGACCAGGAGAATAAAGGAGAAAG",
+      "rows": 2,
+      "spread_SpCas9": 0.02476570817006,
+      "spread_SpCas9-NG": 0.090278156604324,
+      "spread_evoCas9": 0.034968284789644
+    },
+    {
+      "sequence": "ATGTGGAGGCTATCAACAAAGAATGGGCTT",
+      "rows": 5,
+      "spread_SpCas9": 0.081080725714305,
+      "spread_SpCas9-NG": 0.111375684826185,
+      "spread_evoCas9": 0.090103185802067
+    },
+    {
+      "sequence": "ATTAGTACTCATACCAAAAAAGAGTGAATA",
+      "rows": 3,
+      "spread_SpCas9": 0.055792274177955,
+      "spread_SpCas9-NG": 0.157860067556578,
+      "spread_evoCas9": 0.006812061024652
+    },
+    {
+      "sequence": "ATTGGCATTGCTGTCATCCTCGTGGGCACT",
+      "rows": 5,
+      "spread_SpCas9": 0.072559138026959,
+      "spread_SpCas9-NG": 0.078661306341066,
+      "spread_evoCas9": 0.011788968128235
+    },
+    {
+      "sequence": "CAAGGCAGATTTCTTGAGTCCAGGAGTTGA",
+      "rows": 5,
+      "spread_SpCas9": 0.010411576386085,
+      "spread_SpCas9-NG": 0.052538021569544,
+      "spread_evoCas9": 0.00662576158475
+    },
+    {
+      "sequence": "CACAGGGAAGCTGGGTGAATGGAGCGAGCA",
+      "rows": 5,
+      "spread_SpCas9": 0.139040183674394,
+      "spread_SpCas9-NG": 0.067509614335957,
+      "spread_evoCas9": 0.004057026788756
+    },
+    {
+      "sequence": "CACTGTGACGTCCTGCTCTCTCTGCGCCTG",
+      "rows": 5,
+      "spread_SpCas9": 0.04739661075398,
+      "spread_SpCas9-NG": 0.01806041473505,
+      "spread_evoCas9": 0.00165748994215
+    },
+    {
+      "sequence": "CAGAGATCAGGAAATAGAGCCACAGGCTTG",
+      "rows": 5,
+      "spread_SpCas9": 0.148512443298967,
+      "spread_SpCas9-NG": 0.041702325410191,
+      "spread_evoCas9": 0.002623557321061
+    },
+    {
+      "sequence": "CAGAGCAAATACCAGAGATAAGAGAGTAGG",
+      "rows": 5,
+      "spread_SpCas9": 0.02827763496144,
+      "spread_SpCas9-NG": 0.066828322845604,
+      "spread_evoCas9": 0.00892769354807
+    },
+    {
+      "sequence": "CAGGGCTCTGTCAGAAGATCTCCAGGTCCC",
+      "rows": 5,
+      "spread_SpCas9": 0.073481101931464,
+      "spread_SpCas9-NG": 0.041351703485842,
+      "spread_evoCas9": 0.012124112422656
+    },
+    {
+      "sequence": "CCGCGAGCCCTCCCCGACCCACCGCGGTCC",
+      "rows": 5,
+      "spread_SpCas9": 0.061562986968219,
+      "spread_SpCas9-NG": 0.052303851176403,
+      "spread_evoCas9": 0.0205308999768
+    },
+    {
+      "sequence": "CCGTGGTTGCCCCCAACAGCCCCAGGATAT",
+      "rows": 5,
+      "spread_SpCas9": 0.047721899777616,
+      "spread_SpCas9-NG": 0.064591823613589,
+      "spread_evoCas9": 0.011003221228546
+    },
+    {
+      "sequence": "CGATGTCACCTCCAATGACTAGGGTGGGCA",
+      "rows": 5,
+      "spread_SpCas9": 0.122923205438128,
+      "spread_SpCas9-NG": 0.066211733573665,
+      "spread_evoCas9": 0.029492154327338
+    },
+    {
+      "sequence": "CGGTGCAAGTCTAGAATATAGTAGGGGCTC",
+      "rows": 3,
+      "spread_SpCas9": 0.059267327276975,
+      "spread_SpCas9-NG": 0.105254470777457,
+      "spread_evoCas9": 0.00869036277992
+    },
+    {
+      "sequence": "CTCAGAAGACTTGGAGAAGCCAGAGGCTGT",
+      "rows": 5,
+      "spread_SpCas9": 0.105351422265351,
+      "spread_SpCas9-NG": 0.074482813504683,
+      "spread_evoCas9": 0.006731405664626
+    },
+    {
+      "sequence": "CTCAGCCTTCATAGAATTGAAGAGAGTTAG",
+      "rows": 5,
+      "spread_SpCas9": 0.025403790742552,
+      "spread_SpCas9-NG": 0.071743697478992,
+      "spread_evoCas9": 0.001366676359407
+    },
+    {
+      "sequence": "CTCAGTACCTATCTGAGCATACCGTGTGTT",
+      "rows": 5,
+      "spread_SpCas9": 0.02292257662769,
+      "spread_SpCas9-NG": 0.067484594644942,
+      "spread_evoCas9": 0.002019996329565
+    },
+    {
+      "sequence": "CTCGGCCACCACAGGGAAGCTGGGTGAATG",
+      "rows": 5,
+      "spread_SpCas9": 0.071425093542025,
+      "spread_SpCas9-NG": 0.042333123186596,
+      "spread_evoCas9": 0.037126404753879
+    },
+    {
+      "sequence": "CTCGGCCCGCTGCCGTATCCCGAGCGGCAG",
+      "rows": 5,
+      "spread_SpCas9": 0.088769308607865,
+      "spread_SpCas9-NG": 0.038439569929177,
+      "spread_evoCas9": 0.034808821514362
+    },
+    {
+      "sequence": "CTGTGCTTTACCCAGTTCTCTGGGAGCAGG",
+      "rows": 5,
+      "spread_SpCas9": 0.042966552879218,
+      "spread_SpCas9-NG": 0.119711494588472,
+      "spread_evoCas9": 0.003325188460514
+    },
+    {
+      "sequence": "CTGTGTCAGTGGAGAGCACCATAAGGTTTC",
+      "rows": 5,
+      "spread_SpCas9": 0.069604969275918,
+      "spread_SpCas9-NG": 0.064303471750667,
+      "spread_evoCas9": 0.003478914663092
+    },
+    {
+      "sequence": "CTTAGGACTGTTTGAAAGGTGCAGAGAAAT",
+      "rows": 4,
+      "spread_SpCas9": 0.045981432360743,
+      "spread_SpCas9-NG": 0.097643097643098,
+      "spread_evoCas9": 0.005878965089491
+    },
+    {
+      "sequence": "CTTTGATGTCTGCAGGCCAGATGAGGGCTC",
+      "rows": 5,
+      "spread_SpCas9": 0.091872068369911,
+      "spread_SpCas9-NG": 0.157388224853678,
+      "spread_evoCas9": 0.084953138864241
+    },
+    {
+      "sequence": "GACAGATGGCCCCTAGAAAAGCAAGGAAAT",
+      "rows": 5,
+      "spread_SpCas9": 0.072146493516646,
+      "spread_SpCas9-NG": 0.105013083597301,
+      "spread_evoCas9": 0.008695611881053
+    },
+    {
+      "sequence": "GACAGCATCTCTGTGTATACCAAACGATGC",
+      "rows": 5,
+      "spread_SpCas9": 0.088770221995806,
+      "spread_SpCas9-NG": 0.10029487097832,
+      "spread_evoCas9": 0.00437110285219
+    },
+    {
+      "sequence": "GATGGCTCCAGCCTAATTTCCCAACGCTGG",
+      "rows": 5,
+      "spread_SpCas9": 0.036761321930466,
+      "spread_SpCas9-NG": 0.079365071548601,
+      "spread_evoCas9": 0.005113316961214
+    },
+    {
+      "sequence": "GATTGCAGAGGTAGAATCAGCAGGTGCTGT",
+      "rows": 4,
+      "spread_SpCas9": 0.052681992337165,
+      "spread_SpCas9-NG": 0.069689310638586,
+      "spread_evoCas9": 0.005801075928295
+    },
+    {
+      "sequence": "GATTGCGTACTTCGAAAAGGTAGGCGACAC",
+      "rows": 5,
+      "spread_SpCas9": 0.069358492550368,
+      "spread_SpCas9-NG": 0.065760034736608,
+      "spread_evoCas9": 0.015064675105896
+    },
+    {
+      "sequence": "GCCTGTAGTCCCAGGTACTCACGAGGCTGA",
+      "rows": 5,
+      "spread_SpCas9": 0.043593824521711,
+      "spread_SpCas9-NG": 0.057470719085519,
+      "spread_evoCas9": 0.013504322708749
+    },
+    {
+      "sequence": "GCTGGATTCATGAGACATTCCAGAGGCCAA",
+      "rows": 5,
+      "spread_SpCas9": 0.051967853945496,
+      "spread_SpCas9-NG": 0.047075430585293,
+      "spread_evoCas9": 0.018597391717632
+    },
+    {
+      "sequence": "GGCCGCAGCCAGCGACGTGCCCCAGGACGG",
+      "rows": 5,
+      "spread_SpCas9": 0.104865756814037,
+      "spread_SpCas9-NG": 0.054196767921629,
+      "spread_evoCas9": 0.020915928763883
+    },
+    {
+      "sequence": "GGGGGCGCTCGGCCACCACAGGGAAGCTGG",
+      "rows": 5,
+      "spread_SpCas9": 0.010417983191127,
+      "spread_SpCas9-NG": 0.080794229589738,
+      "spread_evoCas9": 0.004291028281547
+    },
+    {
+      "sequence": "GGGGGCTGAGGTGCAGAATCCAGGGGGTCC",
+      "rows": 5,
+      "spread_SpCas9": 0.040699323679096,
+      "spread_SpCas9-NG": 0.061275491425643,
+      "spread_evoCas9": 0.083322388550773
+    },
+    {
+      "sequence": "GGTAGCAGTTGTAGGGAAATAGGGAGGTTG",
+      "rows": 5,
+      "spread_SpCas9": 0.080948812934587,
+      "spread_SpCas9-NG": 0.080505102861798,
+      "spread_evoCas9": 0.09405562641385
+    },
+    {
+      "sequence": "GTGCGCCTGCATATTACAACCAAGAGGCTT",
+      "rows": 5,
+      "spread_SpCas9": 0.108420087907435,
+      "spread_SpCas9-NG": 0.0548199892709,
+      "spread_evoCas9": 0.018476988771258
+    },
+    {
+      "sequence": "GTGGGCTGTAACAGGAGGGCCAGGAGATTT",
+      "rows": 3,
+      "spread_SpCas9": 0.026107659937772,
+      "spread_SpCas9-NG": 0.081042245434477,
+      "spread_evoCas9": 0.020068641643205
+    },
+    {
+      "sequence": "GTTTGTAAGCATAGAGGTGCTATGGGAATG",
+      "rows": 4,
+      "spread_SpCas9": 0.091016847874601,
+      "spread_SpCas9-NG": 0.095377227581474,
+      "spread_evoCas9": 0.014892681980234
+    },
+    {
+      "sequence": "TACAGTTGCCCTCATTATTCAGCACGGCTG",
+      "rows": 5,
+      "spread_SpCas9": 0.046317983670528,
+      "spread_SpCas9-NG": 0.065552696831123,
+      "spread_evoCas9": 0.028611115581941
+    },
+    {
+      "sequence": "TACCGTACCTAATGGACTTCAGGGGGATAC",
+      "rows": 5,
+      "spread_SpCas9": 0.080034399987273,
+      "spread_SpCas9-NG": 0.072428556153315,
+      "spread_evoCas9": 0.047982015248628
+    },
+    {
+      "sequence": "TAGAGAGAACCCAAATCTCCAGGAGGACTC",
+      "rows": 4,
+      "spread_SpCas9": 0.066936093780076,
+      "spread_SpCas9-NG": 0.062569333542897,
+      "spread_evoCas9": 0.008726433963238
+    },
+    {
+      "sequence": "TAGTGCAGCTTCTGCCGTTAACTAGGTTAA",
+      "rows": 5,
+      "spread_SpCas9": 0.088829979705339,
+      "spread_SpCas9-NG": 0.063950649772888,
+      "spread_evoCas9": 0.008723057119293
+    },
+    {
+      "sequence": "TCAAGACCAGCCTGACAAACACAGCGAAAC",
+      "rows": 5,
+      "spread_SpCas9": 0.07663370338109,
+      "spread_SpCas9-NG": 0.084254934966706,
+      "spread_evoCas9": 0.003344784008085
+    },
+    {
+      "sequence": "TCATGGAATCCCTTCTGCAGCACCTGGATC",
+      "rows": 5,
+      "spread_SpCas9": 0.042619811358249,
+      "spread_SpCas9-NG": 0.025365864358419,
+      "spread_evoCas9": 0.006855262404284
+    },
+    {
+      "sequence": "TCATGTCTGACCGGAAGATCCAGGGGGTGG",
+      "rows": 4,
+      "spread_SpCas9": 0.094472925070593,
+      "spread_SpCas9-NG": 0.037322707491659,
+      "spread_evoCas9": 0.109510809856968
+    },
+    {
+      "sequence": "TCGAGGACCATGAGATAGAAGGCGCGCACC",
+      "rows": 5,
+      "spread_SpCas9": 0.060305195068756,
+      "spread_SpCas9-NG": 0.085311340386137,
+      "spread_evoCas9": 0.010745390976778
+    },
+    {
+      "sequence": "TCGTGTACAGTTAGTACTCAGCAGTGGACT",
+      "rows": 5,
+      "spread_SpCas9": 0.074544264419744,
+      "spread_SpCas9-NG": 0.171779572127031,
+      "spread_evoCas9": 0.054829102431903
+    },
+    {
+      "sequence": "TCTCGGAACCTGTGAGCTGCACCAGGTAGA",
+      "rows": 5,
+      "spread_SpCas9": 0.063194776238254,
+      "spread_SpCas9-NG": 0.033295530924329,
+      "spread_evoCas9": 0.019366973236066
+    },
+    {
+      "sequence": "TCTGGCGGTCTCAAGCACTACCTACGTCAG",
+      "rows": 5,
+      "spread_SpCas9": 0.024969005409291,
+      "spread_SpCas9-NG": 0.026128166254281,
+      "spread_evoCas9": 0.006504813421976
+    },
+    {
+      "sequence": "TCTTGGTTCCGTGCCAGCTCCCAAGGTAGC",
+      "rows": 5,
+      "spread_SpCas9": 0.017896728633468,
+      "spread_SpCas9-NG": 0.064073614548712,
+      "spread_evoCas9": 0.00987287723283
+    },
+    {
+      "sequence": "TCTTGTATCCGGAGAGAATTTGCACGCTGG",
+      "rows": 5,
+      "spread_SpCas9": 0.045153271939587,
+      "spread_SpCas9-NG": 0.082521679104394,
+      "spread_evoCas9": 0.002331303455595
+    },
+    {
+      "sequence": "TGATGCACTTGTCCGGGTAAGTTGGGCTGC",
+      "rows": 5,
+      "spread_SpCas9": 0.041042567470834,
+      "spread_SpCas9-NG": 0.033120920856908,
+      "spread_evoCas9": 0.005638103619754
+    },
+    {
+      "sequence": "TGCAGAGCAAATACCAGAGATAAGAGAGTA",
+      "rows": 4,
+      "spread_SpCas9": 0.063696540847876,
+      "spread_SpCas9-NG": 0.085767486348437,
+      "spread_evoCas9": 0.022294164794927
+    },
+    {
+      "sequence": "TGCTGCGCTTCAATGGCTATAGAGAGAACC",
+      "rows": 5,
+      "spread_SpCas9": 0.068254142630329,
+      "spread_SpCas9-NG": 0.056757765280056,
+      "spread_evoCas9": 0.006643358262851
+    },
+    {
+      "sequence": "TGCTGCTTCGAAGTGCTTGAAAATGGTTTA",
+      "rows": 5,
+      "spread_SpCas9": 0.017556215818363,
+      "spread_SpCas9-NG": 0.16316601408567,
+      "spread_evoCas9": 0.007563426133812
+    },
+    {
+      "sequence": "TTCAGTACGGTGTTGAATACCAGTAGTAAA",
+      "rows": 5,
+      "spread_SpCas9": 0.045343137254902,
+      "spread_SpCas9-NG": 0.114285868558346,
+      "spread_evoCas9": 0.002700247533947
+    },
+    {
+      "sequence": "TTGAGGCCCCAGTGGCTGCTCTGGGGGCCT",
+      "rows": 5,
+      "spread_SpCas9": 0.106818105397097,
+      "spread_SpCas9-NG": 0.088779731466912,
+      "spread_evoCas9": 0.043948250603261
+    },
+    {
+      "sequence": "TTGTGTTCTGTCACCAACTGAAGTGGCTAA",
+      "rows": 5,
+      "spread_SpCas9": 0.025924165998046,
+      "spread_SpCas9-NG": 0.047083295339908,
+      "spread_evoCas9": 0.005649354493726
+    },
+    {
+      "sequence": "TTTAGGTAACTCAGCAGTTGAAGGCGCGAT",
+      "rows": 5,
+      "spread_SpCas9": 0.066613555357206,
+      "spread_SpCas9-NG": 0.119308376476835,
+      "spread_evoCas9": 0.015419582467955
+    },
+    {
+      "sequence": "TTTGGCTTTGCTACAACCCCAGCAGGTTAG",
+      "rows": 5,
+      "spread_SpCas9": 0.139636243305824,
+      "spread_SpCas9-NG": 0.08678191050719,
+      "spread_evoCas9": 0.014520986207381
+    }
+  ]
+}

@@ -1,0 +1,2198 @@
+{
+  "model": "9-Hydra v3",
+  "analysis": "cross_head_attribution_agreement",
+  "inputs": [
+    "ism"
+  ],
+  "rollout_excluded": "Attention rollout is not an input here. It is a function of the shared trunk's attention weights and carries no head axis (ADR 0008), so it cannot speak to whether two heads differ; nine identical matrices would read as agreement where the quantity has no head to vary over.",
+  "population": "analysis_intersection",
+  "population_digest": "e09ad05ee43943fbc1e8b25629d6f456b224bb120a9244e29f318bf3548379a6",
+  "rows": 3851,
+  "heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "evoCas9"
+  ],
+  "stored_heads": [
+    "SpCas9",
+    "SpCas9-NG",
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9",
+    "evoCas9"
+  ],
+  "stored_not_analysed": [
+    "VRQR variant",
+    "xCas",
+    "Sniper-Cas9",
+    "SpCas9-HF.1",
+    "eSpCas9(1.1)",
+    "HypaCas9"
+  ],
+  "stored_not_analysed_note": "The ISM archive stores all nine heads because one forward pass returns them all. Only `heads` are analysed here, and no agreement figure, pair or verdict covers the rest.",
+  "head_pairs": [
+    [
+      "SpCas9",
+      "SpCas9-NG"
+    ],
+    [
+      "SpCas9",
+      "evoCas9"
+    ],
+    [
+      "SpCas9-NG",
+      "evoCas9"
+    ]
+  ],
+  "head_coverage": {
+    "population": "own_measured_coverage",
+    "rows": {
+      "SpCas9": 5021,
+      "SpCas9-NG": 3982,
+      "evoCas9": 5161
+    },
+    "note": "A head's own measured coverage on the Testset, which is a different population from the analysis intersection and different for each head. It is named apart so an intersection figure is never read as a coverage figure; no coverage count equals the intersection's row count."
+  },
+  "position_ranges": {
+    "window": {
+      "start": 0,
+      "stop": 30
+    },
+    "pam": {
+      "start": 24,
+      "stop": 27
+    }
+  },
+  "statistic": "spearman_rank_correlation",
+  "agreement_definition": "Spearman rank correlation between two heads' position profiles, taken within the named position range. `per_row` correlates the two profiles of a single row and summarises the distribution over the stratum's rows; `mean_profile` correlates the stratum's two mean profiles, one number per pair. The two answer different questions and neither replaces the other: a stratum can hold rows that disagree pairwise while its means align.",
+  "profile_definition": "mean |ISM delta| over a position's three alternative bases, per row, position and head; the reference base's slot is a true zero and is excluded from the mean",
+  "single_head_profile": {
+    "population": "analysis_intersection",
+    "note": "ISM was swept over the analysis intersection, so a per-head profile here is an intersection figure even though a single head's absolute numbers may use its own coverage elsewhere. `head_coverage` carries those counts under their own population name."
+  },
+  "pooling": "forbidden",
+  "pooling_note": "One entry per stratum and no combined entry. The two strata answer different questions over differently-shaped populations: generalisation is sequence generalisation on unseen protospacers, pam_library is a PAM experiment on 5 targets. Adding their row counts would add a sample size to a replication factor.",
+  "delta_scale": "fraction",
+  "nan_policy": "forbidden",
+  "nan_policy_note": "A correlation is undefined, not zero, where a profile is constant over the range; such rows are counted as `undefined_rows` and left out of the distribution, and a single undefined number is written as null. No field holds NaN.",
+  "interpretation_limit": "Attribution describes the model's internal information use. No figure here is a claim about physical DNA/protein interaction, and a position the model is insensitive to may still matter biologically.",
+  "strata": {
+    "generalisation": {
+      "rows": 895,
+      "distinct_protospacers": 818,
+      "ngg_rows": 895,
+      "non_ngg_rows": 0,
+      "agreement": {
+        "window": {
+          "positions": {
+            "start": 0,
+            "stop": 30
+          },
+          "width": 30,
+          "per_row": {
+            "SpCas9_vs_SpCas9-NG": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 0.6057842046718577,
+              "mean": 0.5815198762125516,
+              "p10": 0.35884315906562847,
+              "q1": 0.47986651835372635,
+              "q3": 0.7041156840934372,
+              "p90": 0.7846496106785317,
+              "min": -0.18798665183537264,
+              "max": 0.9434927697441602,
+              "share_negative": 0.0033519553072625698
+            },
+            "SpCas9_vs_evoCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 0.22758620689655173,
+              "mean": 0.20711305547442535,
+              "p10": -0.07995550611790879,
+              "q1": 0.054282536151279204,
+              "q3": 0.3604004449388209,
+              "p90": 0.4746162402669633,
+              "min": -0.7699666295884315,
+              "max": 0.8304783092324806,
+              "share_negative": 0.17318435754189945
+            },
+            "SpCas9-NG_vs_evoCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 0.15773081201334815,
+              "mean": 0.1446565706153951,
+              "p10": -0.16129032258064516,
+              "q1": 0.0006674082313681868,
+              "q3": 0.29855394883203556,
+              "p90": 0.42629588431590654,
+              "min": -0.5804226918798665,
+              "max": 0.753503893214683,
+              "share_negative": 0.25027932960893856
+            }
+          },
+          "mean_profile": {
+            "SpCas9_vs_SpCas9-NG": 0.7824249165739711,
+            "SpCas9_vs_evoCas9": 0.3659621802002225,
+            "SpCas9-NG_vs_evoCas9": 0.08431590656284761
+          }
+        },
+        "pam": {
+          "positions": {
+            "start": 24,
+            "stop": 27
+          },
+          "width": 3,
+          "per_row": {
+            "SpCas9_vs_SpCas9-NG": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 0.5,
+              "mean": 0.4620111731843575,
+              "p10": -0.5,
+              "q1": 0.5,
+              "q3": 0.5,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.14748603351955308
+            },
+            "SpCas9_vs_evoCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 1.0,
+              "mean": 0.6162011173184357,
+              "p10": -0.5,
+              "q1": 0.5,
+              "q3": 1.0,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.14860335195530727
+            },
+            "SpCas9-NG_vs_evoCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 0.5,
+              "mean": 0.3804469273743017,
+              "p10": -0.5,
+              "q1": 0.5,
+              "q3": 1.0,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.24134078212290502
+            }
+          },
+          "mean_profile": {
+            "SpCas9_vs_SpCas9-NG": 0.5,
+            "SpCas9_vs_evoCas9": 1.0,
+            "SpCas9-NG_vs_evoCas9": 0.5
+          },
+          "width_note": "This range spans too few positions for a rank correlation to be informative — over three positions the statistic can only take ±1, ±0.5 or 0, and a tie decides it. It is reported for completeness. The PAM question is answered by `pam_separation`, which works at base resolution over every row instead of ranking three positions."
+        }
+      },
+      "pam_separation": {
+        "contrast": [
+          "SpCas9",
+          "SpCas9-NG"
+        ],
+        "positions": {
+          "start": 25,
+          "stop": 27
+        },
+        "rows": 895,
+        "ngg_rows": 895,
+        "statistic": "position_share_25_26, paired per row",
+        "position_share_25_26": {
+          "SpCas9": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 7.908675418977877,
+            "mean": 7.555711038831604,
+            "p10": 5.060020682920964,
+            "q1": 6.729467498790346,
+            "q3": 8.741340392659215,
+            "p90": 9.447796218706923,
+            "min": 0.7169611736672012,
+            "max": 10.936306880905214,
+            "share_negative": 0.0
+          },
+          "SpCas9-NG": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 2.45897974995731,
+            "mean": 2.6007402234322496,
+            "p10": 1.237772054597808,
+            "q1": 1.6918393380595913,
+            "q3": 3.346303629911465,
+            "p90": 4.165557154254165,
+            "min": 0.19029888659072836,
+            "max": 6.695855167205011,
+            "share_negative": 0.0
+          },
+          "evoCas9": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 1.983003185916921,
+            "mean": 2.0828816972978386,
+            "p10": 0.6225858298466516,
+            "q1": 1.188528133814751,
+            "q3": 2.750985058656603,
+            "p90": 3.582074244947449,
+            "min": 0.17223189483090243,
+            "max": 6.451181984806853,
+            "share_negative": 0.0
+          }
+        },
+        "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+        "paired_difference": {
+          "rows": 895,
+          "undefined_rows": 0,
+          "median": 5.057874367259181,
+          "mean": 4.9549708153993555,
+          "p10": 2.9465228597086752,
+          "q1": 3.9875388012554023,
+          "q3": 5.996256690736452,
+          "p90": 6.807221682723619,
+          "min": 0.31760551024739647,
+          "max": 9.264686830807756,
+          "share_negative": 0.0
+        },
+        "paired_relative_difference": {
+          "rows": 895,
+          "undefined_rows": 0,
+          "median": 0.9944343420355216,
+          "mean": 0.9995809999194465,
+          "p10": 0.64020773104064,
+          "q1": 0.796484768242552,
+          "q3": 1.2148226357437641,
+          "p90": 1.3685398505339563,
+          "min": 0.37127508941113646,
+          "max": 1.730388618928852,
+          "share_negative": 0.0
+        },
+        "direction_share": 1.0,
+        "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+        "relative_margin": 0.1,
+        "separated": true,
+        "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+        "direction_consistent_share": 0.9,
+        "direction_consistent": true,
+        "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+        "discriminating_position": {
+          "positions": {
+            "start": 26,
+            "stop": 27
+          },
+          "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+          "position_share": {
+            "SpCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 9.890246695600679,
+              "mean": 9.622813053785098,
+              "p10": 6.724840856685754,
+              "q1": 8.438722666125184,
+              "q3": 11.113618099565413,
+              "p90": 12.247938835824023,
+              "min": 0.7852966602289774,
+              "max": 15.756345525955236,
+              "share_negative": 0.0
+            },
+            "SpCas9-NG": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 1.781716508436484,
+              "mean": 1.9688927040686217,
+              "p10": 0.810870685206784,
+              "q1": 1.234000159131968,
+              "q3": 2.4601188261539284,
+              "p90": 3.40057487368092,
+              "min": 0.17319465422196662,
+              "max": 5.516964272965156,
+              "share_negative": 0.0
+            },
+            "evoCas9": {
+              "rows": 895,
+              "undefined_rows": 0,
+              "median": 2.172205263078186,
+              "mean": 2.2732563081693193,
+              "p10": 0.5767844267101,
+              "q1": 1.2318536700159903,
+              "q3": 3.1305203625526072,
+              "p90": 4.062152541433214,
+              "min": 0.1007555613506136,
+              "max": 8.095418750293474,
+              "share_negative": 0.0
+            }
+          },
+          "paired_difference": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 7.722374103002776,
+            "mean": 7.653920349716476,
+            "p10": 4.591821072299711,
+            "q1": 6.149799689274008,
+            "q3": 9.295764734405003,
+            "p90": 10.635468532945167,
+            "min": 0.3866920956347232,
+            "max": 13.948377405737043,
+            "share_negative": 0.0
+          },
+          "paired_relative_difference": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 1.3399525452709329,
+            "mean": 1.3225893525009162,
+            "p10": 0.9423798528484495,
+            "q1": 1.1340992373141754,
+            "q3": 1.5262268039305975,
+            "p90": 1.6821646245578048,
+            "min": 0.6028062697827402,
+            "max": 1.927720117455523,
+            "share_negative": 0.0
+          },
+          "direction_share": 1.0
+        },
+        "g_loss_share": {
+          "SpCas9": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 7.902906708569188,
+            "mean": 7.548861313214118,
+            "p10": 5.060020682920965,
+            "q1": 6.7175541349963,
+            "q3": 8.741340392659215,
+            "p90": 9.447796218706923,
+            "min": 0.7169611736672014,
+            "max": 10.936306880905214,
+            "share_negative": 0.0
+          },
+          "SpCas9-NG": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 2.294302612038481,
+            "mean": 2.3260640059917495,
+            "p10": 0.5662932475148424,
+            "q1": 1.3387055282973612,
+            "q3": 3.2678871693636795,
+            "p90": 4.134758821898102,
+            "min": -1.075255887783526,
+            "max": 6.695855167205011,
+            "share_negative": 0.03687150837988827
+          },
+          "evoCas9": {
+            "rows": 895,
+            "undefined_rows": 0,
+            "median": 1.9347146853868313,
+            "mean": 1.9213751592666268,
+            "p10": 0.15182485600836937,
+            "q1": 1.066642255783055,
+            "q3": 2.750985058656603,
+            "p90": 3.582074244947449,
+            "min": -2.290716265469622,
+            "max": 6.451181984806853,
+            "share_negative": 0.08156424581005586
+          }
+        },
+        "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+        "not_a_bug": true,
+        "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+      },
+      "pam_base_sensitivity": {
+        "positions": {
+          "start": 24,
+          "stop": 27
+        },
+        "definition": "mean |ISM delta| over the stratum's rows at each PAM position and base, per head, on the fraction scale. The base-resolution PAM table ADR 0007 assigns to ISM rather than IG, since a single-base substitution is indifferent to the 6-mer token boundary that merges the PAM with the right flank.",
+        "reference_slot_note": "A base's cell averages over the rows where it is the reference base too, and there its delta is a **true zero** - substituting a base for itself changes nothing. So a low or zero cell at a position whose reference is that base is an artifact of the layout, not a finding that the model ignores the base: in an all-NGG population G at 25 and 26 reads exactly 0 for that reason.",
+        "by_head": {
+          "SpCas9": {
+            "24": {
+              "A": 0.011835170226337578,
+              "C": 0.020231885290963595,
+              "G": 0.016350739590645348,
+              "T": 0.01279326255616014
+            },
+            "25": {
+              "A": 0.15790157615566136,
+              "C": 0.2773592023236167,
+              "G": 0.0,
+              "T": 0.24870525944279506
+            },
+            "26": {
+              "A": 0.3026796165208577,
+              "C": 0.40302476036731755,
+              "G": 0.0,
+              "T": 0.4488025777166782
+            }
+          },
+          "SpCas9-NG": {
+            "24": {
+              "A": 0.01383574593068535,
+              "C": 0.026710678722311414,
+              "G": 0.01887929723932391,
+              "T": 0.014896088992364187
+            },
+            "25": {
+              "A": 0.057411768553602444,
+              "C": 0.11540575476890748,
+              "G": 0.0,
+              "T": 0.09763768567526765
+            },
+            "26": {
+              "A": 0.04805975962030793,
+              "C": 0.08378103992990517,
+              "G": 0.0,
+              "T": 0.03481786920300941
+            }
+          },
+          "evoCas9": {
+            "24": {
+              "A": 0.011761191548479138,
+              "C": 0.01850556499955918,
+              "G": 0.019326788399725778,
+              "T": 0.01456909517594353
+            },
+            "25": {
+              "A": 0.05675225978854679,
+              "C": 0.08138609759879621,
+              "G": 0.0,
+              "T": 0.0790640863760004
+            },
+            "26": {
+              "A": 0.08727503486401038,
+              "C": 0.09094578199613418,
+              "G": 0.0,
+              "T": 0.09248703559209409
+            }
+          }
+        }
+      },
+      "single_head_profile": {
+        "population": "analysis_intersection",
+        "definition": "mean |ISM delta| over a position's three alternative bases, per row, position and head; the reference base's slot is a true zero and is excluded from the mean",
+        "mean_by_position": {
+          "SpCas9": [
+            0.01391086743471457,
+            0.014265848026692337,
+            0.015428151986189015,
+            0.015396719023389772,
+            0.01976170542867265,
+            0.01576554860556026,
+            0.02222430313600985,
+            0.024208933433175546,
+            0.022213691344662428,
+            0.02264885667445636,
+            0.02229799263117481,
+            0.01975155502336627,
+            0.022063996570399667,
+            0.024700276862610584,
+            0.025746231986643386,
+            0.025377407488676267,
+            0.02654394461950752,
+            0.02079290890660135,
+            0.027448551053489995,
+            0.030877710363011426,
+            0.03809468989888728,
+            0.0320853364804431,
+            0.031737473947030186,
+            0.03198903981037036,
+            0.02040368588803555,
+            0.22798867930735767,
+            0.3848356515349507,
+            0.020472288204350153,
+            0.02114926544838412,
+            0.01926558209392782
+          ],
+          "SpCas9-NG": [
+            0.015017330236837276,
+            0.015399245244012979,
+            0.017101436745177934,
+            0.017252744338231967,
+            0.026997724906268266,
+            0.017352191752744953,
+            0.023478820973142987,
+            0.02615648147933842,
+            0.021579047372269382,
+            0.022763503440526817,
+            0.02187326756824611,
+            0.020080529054808095,
+            0.021899437984937088,
+            0.024996146631207673,
+            0.02563652374268938,
+            0.02518210729820879,
+            0.02594301091093335,
+            0.021597465614026586,
+            0.028365026579401997,
+            0.033882234431745664,
+            0.04603630168533071,
+            0.03454681211402386,
+            0.03209627307078201,
+            0.0347567841153553,
+            0.024773936961561632,
+            0.0901517363325925,
+            0.055552889584407406,
+            0.03740030142127828,
+            0.028099743741264144,
+            0.02704361583165036
+          ],
+          "evoCas9": [
+            0.020016968204681365,
+            0.02028944725716463,
+            0.023089147538159657,
+            0.02646609284114597,
+            0.04721171959159894,
+            0.030657681158777816,
+            0.028659832420825898,
+            0.0436406356101798,
+            0.03162314032400816,
+            0.04185584410710265,
+            0.033807588332454334,
+            0.03622398300809248,
+            0.023386600384152068,
+            0.02764441589994832,
+            0.03210663751657816,
+            0.026020704340876822,
+            0.02906641382309949,
+            0.022338604794993194,
+            0.02205971156083445,
+            0.02630871298007258,
+            0.02537638210853124,
+            0.029512128107774427,
+            0.02505382708542695,
+            0.022298069869032384,
+            0.02138754670790253,
+            0.0724008145877811,
+            0.09023595081741302,
+            0.019918202943042085,
+            0.018064094169935332,
+            0.016769924299751868
+          ]
+        }
+      }
+    },
+    "pam_library": {
+      "rows": 1287,
+      "distinct_protospacers": 5,
+      "ngg_rows": 134,
+      "non_ngg_rows": 1153,
+      "agreement": {
+        "window": {
+          "positions": {
+            "start": 0,
+            "stop": 30
+          },
+          "width": 30,
+          "per_row": {
+            "SpCas9_vs_SpCas9-NG": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.49365962180200224,
+              "mean": 0.48456862628164077,
+              "p10": 0.25739710789766407,
+              "q1": 0.37219132369299224,
+              "q3": 0.6146829810901001,
+              "p90": 0.7045606229143493,
+              "min": -0.22580645161290322,
+              "max": 0.9252502780867631,
+              "share_negative": 0.012432012432012432
+            },
+            "SpCas9_vs_evoCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.3348164627363737,
+              "mean": 0.31430986514412546,
+              "p10": 0.04827586206896548,
+              "q1": 0.19221357063403782,
+              "q3": 0.45583982202447165,
+              "p90": 0.5612903225806452,
+              "min": -0.6209121245828698,
+              "max": 0.8949944382647386,
+              "share_negative": 0.0777000777000777
+            },
+            "SpCas9-NG_vs_evoCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.38598442714126807,
+              "mean": 0.35610507401386154,
+              "p10": 0.07070077864293658,
+              "q1": 0.2378197997775306,
+              "q3": 0.5150166852057843,
+              "p90": 0.6068520578420468,
+              "min": -0.6943270300333704,
+              "max": 0.8073414905450501,
+              "share_negative": 0.06060606060606061
+            }
+          },
+          "mean_profile": {
+            "SpCas9_vs_SpCas9-NG": 0.9461624026696329,
+            "SpCas9_vs_evoCas9": 0.307230255839822,
+            "SpCas9-NG_vs_evoCas9": 0.19510567296996664
+          }
+        },
+        "pam": {
+          "positions": {
+            "start": 24,
+            "stop": 27
+          },
+          "width": 3,
+          "per_row": {
+            "SpCas9_vs_SpCas9-NG": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.5,
+              "mean": 0.3014763014763015,
+              "p10": -0.5,
+              "q1": -0.5,
+              "q3": 0.5,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.2898212898212898
+            },
+            "SpCas9_vs_evoCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.5,
+              "mean": 0.5194250194250194,
+              "p10": -0.5,
+              "q1": 0.5,
+              "q3": 1.0,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.15306915306915306
+            },
+            "SpCas9-NG_vs_evoCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 0.5,
+              "mean": 0.5594405594405595,
+              "p10": -0.5,
+              "q1": 0.5,
+              "q3": 1.0,
+              "p90": 1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "share_negative": 0.13908313908313907
+            }
+          },
+          "mean_profile": {
+            "SpCas9_vs_SpCas9-NG": 0.5,
+            "SpCas9_vs_evoCas9": 0.5,
+            "SpCas9-NG_vs_evoCas9": 1.0
+          },
+          "width_note": "This range spans too few positions for a rank correlation to be informative — over three positions the statistic can only take ±1, ±0.5 or 0, and a tie decides it. It is reported for completeness. The PAM question is answered by `pam_separation`, which works at base resolution over every row instead of ranking three positions."
+        }
+      },
+      "pam_separation": {
+        "contrast": [
+          "SpCas9",
+          "SpCas9-NG"
+        ],
+        "positions": {
+          "start": 25,
+          "stop": 27
+        },
+        "rows": 1287,
+        "ngg_rows": 134,
+        "statistic": "position_share_25_26, paired per row",
+        "position_share_25_26": {
+          "SpCas9": {
+            "rows": 1287,
+            "undefined_rows": 0,
+            "median": 4.578997344752914,
+            "mean": 4.783235573841484,
+            "p10": 2.135284582171074,
+            "q1": 3.2522980739944667,
+            "q3": 5.848982136077952,
+            "p90": 8.178254673317875,
+            "min": 0.5585966263719355,
+            "max": 10.77306170099133,
+            "share_negative": 0.0
+          },
+          "SpCas9-NG": {
+            "rows": 1287,
+            "undefined_rows": 0,
+            "median": 3.432902358274187,
+            "mean": 3.5591026856729573,
+            "p10": 2.490363249564289,
+            "q1": 2.8685180542441895,
+            "q3": 4.171966061018136,
+            "p90": 4.8496393778027675,
+            "min": 1.3169307170987647,
+            "max": 6.84266719410492,
+            "share_negative": 0.0
+          },
+          "evoCas9": {
+            "rows": 1287,
+            "undefined_rows": 0,
+            "median": 2.935940484577557,
+            "mean": 3.1762489648138956,
+            "p10": 1.5271431088008864,
+            "q1": 2.1474331708908276,
+            "q3": 3.807553667213685,
+            "p90": 5.250769975809269,
+            "min": 0.06461224519573623,
+            "max": 8.648441087130891,
+            "share_negative": 0.0
+          }
+        },
+        "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+        "paired_difference": {
+          "rows": 1287,
+          "undefined_rows": 0,
+          "median": 1.1743123691834783,
+          "mean": 1.2241328881685272,
+          "p10": -1.732988001548048,
+          "q1": -0.13322258826981803,
+          "q3": 2.513049749263631,
+          "p90": 4.322368845389755,
+          "min": -4.764092714375615,
+          "max": 8.646732872547673,
+          "share_negative": 0.2680652680652681
+        },
+        "paired_relative_difference": {
+          "rows": 1287,
+          "undefined_rows": 0,
+          "median": 0.43360862656332316,
+          "mean": 0.4726823602035834,
+          "p10": 0.08296540342085208,
+          "q1": 0.22344151342171314,
+          "q3": 0.6791311428561997,
+          "p90": 0.8896445868585553,
+          "min": 0.00012250351229085786,
+          "max": 1.5671836229212985,
+          "share_negative": 0.0
+        },
+        "direction_share": 0.7319347319347319,
+        "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+        "relative_margin": 0.1,
+        "separated": true,
+        "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+        "direction_consistent_share": 0.9,
+        "direction_consistent": false,
+        "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+        "discriminating_position": {
+          "positions": {
+            "start": 26,
+            "stop": 27
+          },
+          "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+          "position_share": {
+            "SpCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 5.745148475534149,
+              "mean": 5.883428319656806,
+              "p10": 0.8564104279719214,
+              "q1": 2.4208281975456414,
+              "q3": 8.868515079479156,
+              "p90": 11.013616852545635,
+              "min": 0.04690803164960638,
+              "max": 18.162223482194968,
+              "share_negative": 0.0
+            },
+            "SpCas9-NG": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 1.4978723732335288,
+              "mean": 1.628354917207605,
+              "p10": 0.6150604175203858,
+              "q1": 1.0014109778680396,
+              "q3": 2.137818201115009,
+              "p90": 2.824479429258943,
+              "min": 0.12298789216445581,
+              "max": 5.892726245392734,
+              "share_negative": 0.0
+            },
+            "evoCas9": {
+              "rows": 1287,
+              "undefined_rows": 0,
+              "median": 1.7164575551687589,
+              "mean": 2.555396913035749,
+              "p10": 0.6257684153128461,
+              "q1": 1.0188941623932086,
+              "q3": 3.050502093317376,
+              "p90": 5.244281604762686,
+              "min": 0.08420539381532682,
+              "max": 15.858914369650966,
+              "share_negative": 0.0
+            }
+          },
+          "paired_difference": {
+            "rows": 1287,
+            "undefined_rows": 0,
+            "median": 3.9833315145214314,
+            "mean": 4.2550734024492005,
+            "p10": -0.21916753998831967,
+            "q1": 0.9301424992920247,
+            "q3": 6.940644749641471,
+            "p90": 8.993708259268802,
+            "min": -2.2163734203293357,
+            "max": 17.133186973179953,
+            "share_negative": 0.128982128982129
+          },
+          "paired_relative_difference": {
+            "rows": 1287,
+            "undefined_rows": 0,
+            "median": 1.1062811165580506,
+            "mean": 1.024075982045379,
+            "p10": 0.3096096031458121,
+            "q1": 0.6913532494160022,
+            "q3": 1.3780629609622723,
+            "p90": 1.5912716300175402,
+            "min": 0.000392072374552869,
+            "max": 1.9316836923804368,
+            "share_negative": 0.0
+          },
+          "direction_share": 0.871017871017871
+        },
+        "g_loss_share": {
+          "SpCas9": {
+            "rows": 134,
+            "undefined_rows": 0,
+            "median": 9.39417415229289,
+            "mean": 9.307165253084584,
+            "p10": 8.234583114019927,
+            "q1": 8.676385729378708,
+            "q3": 9.931489762690141,
+            "p90": 10.270424996174507,
+            "min": 7.236359310391747,
+            "max": 10.77306170099133,
+            "share_negative": 0.0
+          },
+          "SpCas9-NG": {
+            "rows": 134,
+            "undefined_rows": 0,
+            "median": 4.1913296510635565,
+            "mean": 4.1047689124514335,
+            "p10": 2.5903577845741688,
+            "q1": 3.297404322811231,
+            "q3": 4.937130083098445,
+            "p90": 5.495422608783332,
+            "min": 1.0212895051870832,
+            "max": 6.842667194104919,
+            "share_negative": 0.0
+          },
+          "evoCas9": {
+            "rows": 134,
+            "undefined_rows": 0,
+            "median": 2.593967053076156,
+            "mean": 2.2413788351704214,
+            "p10": 0.4178575448351165,
+            "q1": 0.9923991591482338,
+            "q3": 3.3747643162293413,
+            "p90": 3.93106979086945,
+            "min": -0.01226354604029012,
+            "max": 4.46204020402431,
+            "share_negative": 0.007462686567164179
+          }
+        },
+        "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+        "not_a_bug": true,
+        "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+      },
+      "pam_base_sensitivity": {
+        "positions": {
+          "start": 24,
+          "stop": 27
+        },
+        "definition": "mean |ISM delta| over the stratum's rows at each PAM position and base, per head, on the fraction scale. The base-resolution PAM table ADR 0007 assigns to ISM rather than IG, since a single-base substitution is indifferent to the 6-mer token boundary that merges the PAM with the right flank.",
+        "reference_slot_note": "A base's cell averages over the rows where it is the reference base too, and there its delta is a **true zero** - substituting a base for itself changes nothing. So a low or zero cell at a position whose reference is that base is an artifact of the layout, not a finding that the model ignores the base: in an all-NGG population G at 25 and 26 reads exactly 0 for that reason.",
+        "by_head": {
+          "SpCas9": {
+            "24": {
+              "A": 0.013347703864366966,
+              "C": 0.012718966078410075,
+              "G": 0.01744370912945665,
+              "T": 0.014342174893024166
+            },
+            "25": {
+              "A": 0.059519453550459483,
+              "C": 0.06822516570476062,
+              "G": 0.09909385314389717,
+              "T": 0.06465644078113945
+            },
+            "26": {
+              "A": 0.07663804362446335,
+              "C": 0.08142995362942874,
+              "G": 0.14747117326755718,
+              "T": 0.08617255791133191
+            }
+          },
+          "SpCas9-NG": {
+            "24": {
+              "A": 0.024467497047072004,
+              "C": 0.02544051787460659,
+              "G": 0.036937467889382805,
+              "T": 0.03197563900215029
+            },
+            "25": {
+              "A": 0.09314575982166272,
+              "C": 0.11342807508937998,
+              "G": 0.17069280671394302,
+              "T": 0.09556366031841143
+            },
+            "26": {
+              "A": 0.03095040688342644,
+              "C": 0.041473538819996325,
+              "G": 0.04833587645093768,
+              "T": 0.03086752936628964
+            }
+          },
+          "evoCas9": {
+            "24": {
+              "A": 0.0033915496995489377,
+              "C": 0.004427650390677981,
+              "G": 0.005635789577104059,
+              "T": 0.004716189977887512
+            },
+            "25": {
+              "A": 0.015884645549899896,
+              "C": 0.017289455905729844,
+              "G": 0.02883622143977498,
+              "T": 0.016585524194384926
+            },
+            "26": {
+              "A": 0.015326391730976913,
+              "C": 0.01463282940151003,
+              "G": 0.019632388098479916,
+              "T": 0.01489145928923766
+            }
+          }
+        }
+      },
+      "single_head_profile": {
+        "population": "analysis_intersection",
+        "definition": "mean |ISM delta| over a position's three alternative bases, per row, position and head; the reference base's slot is a true zero and is excluded from the mean",
+        "mean_by_position": {
+          "SpCas9": [
+            0.007584511076201016,
+            0.008629621942658103,
+            0.008642607266480294,
+            0.008639429218009557,
+            0.010264470476316895,
+            0.00883780764973393,
+            0.010193942964658802,
+            0.00867596620343079,
+            0.008886095691356108,
+            0.00997157075068555,
+            0.008198605457483403,
+            0.009013287939309823,
+            0.009690027130035918,
+            0.008676466448596817,
+            0.01215749861714537,
+            0.010035391658023977,
+            0.010435349358662359,
+            0.010897488348912824,
+            0.015126834466042629,
+            0.014173236831141914,
+            0.013005110615678809,
+            0.012342481208379304,
+            0.015574735797113293,
+            0.014238595507817918,
+            0.019284184655085926,
+            0.0971649710600854,
+            0.13057057614426046,
+            0.025027487013712484,
+            0.05688269901667207,
+            0.04927322338769421
+          ],
+          "SpCas9-NG": [
+            0.01252543570682965,
+            0.014772820471753167,
+            0.013358056427929008,
+            0.01236126115081788,
+            0.016110982863524203,
+            0.010783035990279405,
+            0.016108576161797544,
+            0.012405088022163358,
+            0.013057235394521902,
+            0.01546479821279631,
+            0.012591337532479343,
+            0.014309884701617238,
+            0.015806813160767118,
+            0.013931540556128823,
+            0.020811995327871265,
+            0.014614360943266444,
+            0.014812128043418986,
+            0.017977002723940858,
+            0.027072687734207748,
+            0.03247083357148691,
+            0.024810942435364632,
+            0.02639100668020923,
+            0.02689405105216474,
+            0.021091127825419664,
+            0.03960704060440389,
+            0.15761010064779943,
+            0.05054245050688329,
+            0.0592651565531,
+            0.08750954195832066,
+            0.08003802521291996
+          ],
+          "evoCas9": [
+            0.004884943095288737,
+            0.004857196908344374,
+            0.006345353344280815,
+            0.00664545457653869,
+            0.0063517298848726755,
+            0.007502373533929774,
+            0.006127289628432106,
+            0.005973558041943354,
+            0.00619192655943534,
+            0.009770054324272472,
+            0.0071705455185310145,
+            0.007951145093175455,
+            0.00476136705331549,
+            0.005509983492947193,
+            0.0064110486309179385,
+            0.007141143138457232,
+            0.006970497362845315,
+            0.004299040779136104,
+            0.005324396536511041,
+            0.005705838634611428,
+            0.00524795434026312,
+            0.005211282803236279,
+            0.006040058908227707,
+            0.0053916090680105,
+            0.0060570598817395,
+            0.02619861569659654,
+            0.021494356173401515,
+            0.008171966904552033,
+            0.010769886384990152,
+            0.010541167240448653
+          ]
+        }
+      },
+      "qualifier": "observed on 5 targets",
+      "qualifier_note": "This stratum's rows are PAM variants of 5 protospacers, so its n is 5 targets rather than its row count, and the row count is never added to the other stratum's. Every figure in this entry is pooled over those variants: `rows` is the variant count, and the quantiles in `agreement` and `pam_separation` are quantiles over variants of 5 targets, not over 5 independent observations. `per_target` repeats the window agreement and the PAM contrast target by target, which is the breakdown a library-stratum finding is reported with — a contrast that holds on the pool but on only two of the five targets is a different result from one that holds on all five.",
+      "per_target": [
+        {
+          "protospacer": "GTCGCTTCCTCTTCTCCTTC",
+          "rows": 268,
+          "ngg_rows": 31,
+          "window_agreement": {
+            "SpCas9_vs_SpCas9-NG": 0.546607341490545,
+            "SpCas9_vs_evoCas9": 0.3136818687430478,
+            "SpCas9-NG_vs_evoCas9": 0.38553948832035595
+          },
+          "pam_separation": {
+            "contrast": [
+              "SpCas9",
+              "SpCas9-NG"
+            ],
+            "positions": {
+              "start": 25,
+              "stop": 27
+            },
+            "rows": 268,
+            "ngg_rows": 31,
+            "statistic": "position_share_25_26, paired per row",
+            "position_share_25_26": {
+              "SpCas9": {
+                "rows": 268,
+                "undefined_rows": 0,
+                "median": 4.519618317370586,
+                "mean": 4.753149768156393,
+                "p10": 2.128350157009563,
+                "q1": 3.018600417915357,
+                "q3": 6.027284362269656,
+                "p90": 8.461893282090927,
+                "min": 0.8068229848961587,
+                "max": 9.578912909834743,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 268,
+                "undefined_rows": 0,
+                "median": 3.07928570625863,
+                "mean": 3.159002209569356,
+                "p10": 2.152619630545027,
+                "q1": 2.5997537910491233,
+                "q3": 3.660892517168592,
+                "p90": 4.221172677296507,
+                "min": 1.4840507919605141,
+                "max": 5.995870350590118,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 268,
+                "undefined_rows": 0,
+                "median": 2.524879630085971,
+                "mean": 2.5877367557655977,
+                "p10": 1.0041828770946433,
+                "q1": 1.8005866787432119,
+                "q3": 3.378726121460431,
+                "p90": 4.158502867946543,
+                "min": 0.06461224519573623,
+                "max": 5.194675600922826,
+                "share_negative": 0.0
+              }
+            },
+            "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+            "paired_difference": {
+              "rows": 268,
+              "undefined_rows": 0,
+              "median": 1.3900102095535636,
+              "mean": 1.5941475585870368,
+              "p10": -1.2655437757514452,
+              "q1": -0.08246094201266152,
+              "q3": 3.1419246160024352,
+              "p90": 4.751956631651311,
+              "min": -3.7838249692603774,
+              "max": 6.708275636606053,
+              "share_negative": 0.2574626865671642
+            },
+            "paired_relative_difference": {
+              "rows": 268,
+              "undefined_rows": 0,
+              "median": 0.5076973457017617,
+              "mean": 0.5319505472528914,
+              "p10": 0.14900482255168115,
+              "q1": 0.2793978193549627,
+              "q3": 0.7807030591706837,
+              "p90": 0.9371679172802807,
+              "min": 0.0012185284115620546,
+              "max": 1.347452818956772,
+              "share_negative": 0.0
+            },
+            "direction_share": 0.7425373134328358,
+            "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+            "relative_margin": 0.1,
+            "separated": true,
+            "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+            "direction_consistent_share": 0.9,
+            "direction_consistent": false,
+            "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+            "discriminating_position": {
+              "positions": {
+                "start": 26,
+                "stop": 27
+              },
+              "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+              "position_share": {
+                "SpCas9": {
+                  "rows": 268,
+                  "undefined_rows": 0,
+                  "median": 5.356483362783914,
+                  "mean": 5.882893941702108,
+                  "p10": 0.8899068432928159,
+                  "q1": 2.2047365243787347,
+                  "q3": 9.228343795544356,
+                  "p90": 11.500280831636298,
+                  "min": 0.1362974918922998,
+                  "max": 18.162223482194968,
+                  "share_negative": 0.0
+                },
+                "SpCas9-NG": {
+                  "rows": 268,
+                  "undefined_rows": 0,
+                  "median": 1.3403774593927962,
+                  "mean": 1.4800209121168448,
+                  "p10": 0.595376616988409,
+                  "q1": 0.8505695966092037,
+                  "q3": 1.9924657364338736,
+                  "p90": 2.5635035884192683,
+                  "min": 0.12855522276358064,
+                  "max": 4.402528415256251,
+                  "share_negative": 0.0
+                },
+                "evoCas9": {
+                  "rows": 268,
+                  "undefined_rows": 0,
+                  "median": 1.515047197735955,
+                  "mean": 1.8385269997245337,
+                  "p10": 0.5403099855955683,
+                  "q1": 0.9383825416537526,
+                  "q3": 2.3754868833597467,
+                  "p90": 3.380149267931172,
+                  "min": 0.08420539381532682,
+                  "max": 8.557141431752918,
+                  "share_negative": 0.0
+                }
+              },
+              "paired_difference": {
+                "rows": 268,
+                "undefined_rows": 0,
+                "median": 3.9554598185875287,
+                "mean": 4.402873029585264,
+                "p10": -0.11292241496521538,
+                "q1": 0.8081944827657347,
+                "q3": 7.310209441664336,
+                "p90": 9.659463963231113,
+                "min": -0.9823994970917712,
+                "max": 17.133186973179953,
+                "share_negative": 0.11940298507462686
+              },
+              "paired_relative_difference": {
+                "rows": 268,
+                "undefined_rows": 0,
+                "median": 1.1472169722721293,
+                "mean": 1.0313099579584306,
+                "p10": 0.23559940989567055,
+                "q1": 0.6907678923164741,
+                "q3": 1.420313409859877,
+                "p90": 1.6098156339124297,
+                "min": 0.003658112027611609,
+                "max": 1.9316836923804368,
+                "share_negative": 0.0
+              },
+              "direction_share": 0.8805970149253731
+            },
+            "g_loss_share": {
+              "SpCas9": {
+                "rows": 31,
+                "undefined_rows": 0,
+                "median": 8.56248601303925,
+                "mean": 8.674997675686877,
+                "p10": 7.999105045566361,
+                "q1": 8.420064718986481,
+                "q3": 9.083772974349838,
+                "p90": 9.362302676972938,
+                "min": 7.236359310391747,
+                "max": 9.578912909834743,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 31,
+                "undefined_rows": 0,
+                "median": 3.7269387780508327,
+                "mean": 3.5432409168414742,
+                "p10": 2.5550500836727417,
+                "q1": 3.1057238458546954,
+                "q3": 4.197029947492952,
+                "p90": 4.559916040957623,
+                "min": 1.4840507919605141,
+                "max": 5.210718050816534,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 31,
+                "undefined_rows": 0,
+                "median": 0.4849019742930874,
+                "mean": 0.5569983102792959,
+                "p10": 0.1829364906672705,
+                "q1": 0.2903479477888301,
+                "q3": 0.7507049933357507,
+                "p90": 1.0651390744783882,
+                "min": -0.01226354604029012,
+                "max": 1.2492768618054637,
+                "share_negative": 0.03225806451612903
+              }
+            },
+            "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+            "not_a_bug": true,
+            "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+          }
+        },
+        {
+          "protospacer": "GTTCACGACGTCATGCTCAC",
+          "rows": 264,
+          "ngg_rows": 27,
+          "window_agreement": {
+            "SpCas9_vs_SpCas9-NG": 0.47163515016685204,
+            "SpCas9_vs_evoCas9": 0.3971078976640712,
+            "SpCas9-NG_vs_evoCas9": 0.41846496106785314
+          },
+          "pam_separation": {
+            "contrast": [
+              "SpCas9",
+              "SpCas9-NG"
+            ],
+            "positions": {
+              "start": 25,
+              "stop": 27
+            },
+            "rows": 264,
+            "ngg_rows": 27,
+            "statistic": "position_share_25_26, paired per row",
+            "position_share_25_26": {
+              "SpCas9": {
+                "rows": 264,
+                "undefined_rows": 0,
+                "median": 4.6803406725647925,
+                "mean": 4.91253589311963,
+                "p10": 2.3167430730235585,
+                "q1": 3.474791276055936,
+                "q3": 5.981184424849653,
+                "p90": 8.229755368883566,
+                "min": 0.9080255986701761,
+                "max": 10.598931625647962,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 264,
+                "undefined_rows": 0,
+                "median": 3.2107550934002793,
+                "mean": 3.47902433109914,
+                "p10": 2.489803148925342,
+                "q1": 2.8457757116640674,
+                "q3": 4.013488256708628,
+                "p90": 4.819566825018367,
+                "min": 1.9033100427580976,
+                "max": 5.979911632942946,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 264,
+                "undefined_rows": 0,
+                "median": 2.5273194606310527,
+                "mean": 2.589205804603894,
+                "p10": 1.4846441947998803,
+                "q1": 2.031615821244754,
+                "q3": 3.152950843118996,
+                "p90": 3.7478111014390922,
+                "min": 0.8904311262239963,
+                "max": 4.912957451630575,
+                "share_negative": 0.0
+              }
+            },
+            "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+            "paired_difference": {
+              "rows": 264,
+              "undefined_rows": 0,
+              "median": 1.243846526278931,
+              "mean": 1.4335115620204906,
+              "p10": -1.3253246082408323,
+              "q1": 0.16227895275616655,
+              "q3": 2.619346565097745,
+              "p90": 4.629498018675469,
+              "min": -4.555887674401758,
+              "max": 8.218527440558761,
+              "share_negative": 0.22348484848484848
+            },
+            "paired_relative_difference": {
+              "rows": 264,
+              "undefined_rows": 0,
+              "median": 0.43483490383427037,
+              "mean": 0.4674283278687397,
+              "p10": 0.0815402096856564,
+              "q1": 0.2163539842997914,
+              "q3": 0.6869361540731749,
+              "p90": 0.8654056884707785,
+              "min": 0.00526856430091433,
+              "max": 1.3468614321362304,
+              "share_negative": 0.0
+            },
+            "direction_share": 0.7765151515151515,
+            "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+            "relative_margin": 0.1,
+            "separated": true,
+            "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+            "direction_consistent_share": 0.9,
+            "direction_consistent": false,
+            "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+            "discriminating_position": {
+              "positions": {
+                "start": 26,
+                "stop": 27
+              },
+              "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+              "position_share": {
+                "SpCas9": {
+                  "rows": 264,
+                  "undefined_rows": 0,
+                  "median": 5.592181673626683,
+                  "mean": 5.966996988844649,
+                  "p10": 0.954450339080877,
+                  "q1": 2.5487766349079424,
+                  "q3": 8.953565342385497,
+                  "p90": 11.192882324331089,
+                  "min": 0.17154770176375733,
+                  "max": 16.060889863857042,
+                  "share_negative": 0.0
+                },
+                "SpCas9-NG": {
+                  "rows": 264,
+                  "undefined_rows": 0,
+                  "median": 1.4619120290470824,
+                  "mean": 1.5631401058001875,
+                  "p10": 0.557052090144245,
+                  "q1": 1.0124831790689448,
+                  "q3": 1.9807414569799846,
+                  "p90": 2.648148103091003,
+                  "min": 0.12298789216445581,
+                  "max": 5.02837812751227,
+                  "share_negative": 0.0
+                },
+                "evoCas9": {
+                  "rows": 264,
+                  "undefined_rows": 0,
+                  "median": 1.497051213634237,
+                  "mean": 1.796728994468865,
+                  "p10": 0.6980097799645103,
+                  "q1": 1.0359300291612392,
+                  "q3": 2.2273817532399165,
+                  "p90": 3.307733353065951,
+                  "min": 0.18599314884165694,
+                  "max": 6.834666701282585,
+                  "share_negative": 0.0
+                }
+              },
+              "paired_difference": {
+                "rows": 264,
+                "undefined_rows": 0,
+                "median": 3.7620670586132636,
+                "mean": 4.403856883044462,
+                "p10": 0.042334940577716695,
+                "q1": 1.1441148390005653,
+                "q3": 7.402710987491114,
+                "p90": 9.098276888923296,
+                "min": -1.4591160835183645,
+                "max": 15.155803320941523,
+                "share_negative": 0.09848484848484848
+              },
+              "paired_relative_difference": {
+                "rows": 264,
+                "undefined_rows": 0,
+                "median": 1.140042614937776,
+                "mean": 1.0438266719878335,
+                "p10": 0.38893085659012855,
+                "q1": 0.681024716541732,
+                "q3": 1.369686800729917,
+                "p90": 1.5773876783436238,
+                "min": 0.03142329243188557,
+                "max": 1.883189319679202,
+                "share_negative": 0.0
+              },
+              "direction_share": 0.9015151515151515
+            },
+            "g_loss_share": {
+              "SpCas9": {
+                "rows": 27,
+                "undefined_rows": 0,
+                "median": 9.678959732142333,
+                "mean": 9.62293581661025,
+                "p10": 8.744329461441717,
+                "q1": 9.261178363454796,
+                "q3": 10.23181830237257,
+                "p90": 10.361426961849594,
+                "min": 8.02028211561033,
+                "max": 10.598931625647964,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 27,
+                "undefined_rows": 0,
+                "median": 4.009011141468148,
+                "mean": 3.9786455835610717,
+                "p10": 2.632751300102916,
+                "q1": 3.1051274942909384,
+                "q3": 5.0011052772141085,
+                "p90": 5.340594566472642,
+                "min": 1.9402566996926105,
+                "max": 5.857792814432835,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 27,
+                "undefined_rows": 0,
+                "median": 1.2231136805594678,
+                "mean": 1.202657408467033,
+                "p10": 0.8239115431795734,
+                "q1": 0.9758234115520312,
+                "q3": 1.485866791881178,
+                "p90": 1.5449519212697267,
+                "min": 0.5346513691438224,
+                "max": 1.6135302358102481,
+                "share_negative": 0.0
+              }
+            },
+            "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+            "not_a_bug": true,
+            "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+          }
+        },
+        {
+          "protospacer": "GACCCAAGCCACGAACGAGC",
+          "rows": 258,
+          "ngg_rows": 26,
+          "window_agreement": {
+            "SpCas9_vs_SpCas9-NG": 0.511234705228031,
+            "SpCas9_vs_evoCas9": 0.2972191323692992,
+            "SpCas9-NG_vs_evoCas9": 0.289210233592881
+          },
+          "pam_separation": {
+            "contrast": [
+              "SpCas9",
+              "SpCas9-NG"
+            ],
+            "positions": {
+              "start": 25,
+              "stop": 27
+            },
+            "rows": 258,
+            "ngg_rows": 26,
+            "statistic": "position_share_25_26, paired per row",
+            "position_share_25_26": {
+              "SpCas9": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 4.682090026395529,
+                "mean": 4.936704951144057,
+                "p10": 2.679765200907182,
+                "q1": 3.481489648499913,
+                "q3": 5.9142157918152005,
+                "p90": 7.7545337511759405,
+                "min": 1.1461723512266593,
+                "max": 10.344940280860214,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 3.4368566777825094,
+                "mean": 3.6108247644363196,
+                "p10": 2.581278026358563,
+                "q1": 2.900529860115735,
+                "q3": 4.189990053393771,
+                "p90": 4.926877943777805,
+                "min": 1.8195793455940874,
+                "max": 6.2611523201502255,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 2.9415435623364012,
+                "mean": 3.432747529193851,
+                "p10": 1.7863279669436758,
+                "q1": 2.196656024653389,
+                "q3": 3.9327175817591846,
+                "p90": 6.436245282739025,
+                "min": 0.6559991043241167,
+                "max": 8.177696131822993,
+                "share_negative": 0.0
+              }
+            },
+            "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+            "paired_difference": {
+              "rows": 258,
+              "undefined_rows": 0,
+              "median": 1.2503112103808964,
+              "mean": 1.325880186707738,
+              "p10": -1.0676878715695164,
+              "q1": 0.15758676140569938,
+              "q3": 2.365322858241105,
+              "p90": 3.9222830291761226,
+              "min": -3.574091643690526,
+              "max": 8.307949900460006,
+              "share_negative": 0.22868217054263565
+            },
+            "paired_relative_difference": {
+              "rows": 258,
+              "undefined_rows": 0,
+              "median": 0.3793522584045804,
+              "mean": 0.42077687364219135,
+              "p10": 0.07512366088753024,
+              "q1": 0.18813482829055952,
+              "q3": 0.5955877089118362,
+              "p90": 0.8149008484122972,
+              "min": 0.010650298341581672,
+              "max": 1.3419474115540388,
+              "share_negative": 0.0
+            },
+            "direction_share": 0.7713178294573644,
+            "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+            "relative_margin": 0.1,
+            "separated": true,
+            "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+            "direction_consistent_share": 0.9,
+            "direction_consistent": false,
+            "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+            "discriminating_position": {
+              "positions": {
+                "start": 26,
+                "stop": 27
+              },
+              "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+              "position_share": {
+                "SpCas9": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 6.137137198274853,
+                  "mean": 5.9412501751167,
+                  "p10": 1.0858687099388997,
+                  "q1": 2.968855333831271,
+                  "q3": 8.294303012237883,
+                  "p90": 10.709666563814936,
+                  "min": 0.04690803164960638,
+                  "max": 15.369558140254782,
+                  "share_negative": 0.0
+                },
+                "SpCas9-NG": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 1.5872392060999352,
+                  "mean": 1.6690314096774213,
+                  "p10": 0.5792158852303745,
+                  "q1": 1.0256971525687062,
+                  "q3": 2.1904312175984435,
+                  "p90": 2.8503597040114466,
+                  "min": 0.170693744636024,
+                  "max": 4.706497207704374,
+                  "share_negative": 0.0
+                },
+                "evoCas9": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 2.0661758896226177,
+                  "mean": 3.2052112581867207,
+                  "p10": 0.5650126108211294,
+                  "q1": 1.0602253706701745,
+                  "q3": 3.6065990569931525,
+                  "p90": 7.658247029269956,
+                  "min": 0.09836442657192769,
+                  "max": 15.858914369650966,
+                  "share_negative": 0.0
+                }
+              },
+              "paired_difference": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 4.173944849521348,
+                "mean": 4.272218765439279,
+                "p10": -0.020390692597264302,
+                "q1": 1.3375668641181815,
+                "q3": 6.671005098198137,
+                "p90": 8.612245582018284,
+                "min": -1.4655528673065796,
+                "max": 13.866888726969934,
+                "share_negative": 0.10465116279069768
+              },
+              "paired_relative_difference": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 1.1074651677554432,
+                "mean": 1.0206629073246278,
+                "p10": 0.29122626880767005,
+                "q1": 0.6983484090487876,
+                "q3": 1.3753446300144145,
+                "p90": 1.5863470466112946,
+                "min": 0.009438469738744107,
+                "max": 1.7864873277559978,
+                "share_negative": 0.0
+              },
+              "direction_share": 0.8953488372093024
+            },
+            "g_loss_share": {
+              "SpCas9": {
+                "rows": 26,
+                "undefined_rows": 0,
+                "median": 9.625613026213738,
+                "mean": 9.406005217190993,
+                "p10": 8.135632914581869,
+                "q1": 9.132360918927182,
+                "q3": 9.994317858790973,
+                "p90": 10.134505971262183,
+                "min": 7.327682859842317,
+                "max": 10.344940280860214,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 26,
+                "undefined_rows": 0,
+                "median": 3.846065476568854,
+                "mean": 3.7956045488135697,
+                "p10": 2.396267717006791,
+                "q1": 2.910255500974827,
+                "q3": 4.795659274832568,
+                "p90": 5.031183125217527,
+                "min": 1.6252550045558911,
+                "max": 5.7392672751917155,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 26,
+                "undefined_rows": 0,
+                "median": 3.327013682086465,
+                "mean": 3.290542482032111,
+                "p10": 2.7600587459367993,
+                "q1": 3.041587808305461,
+                "q3": 3.526256918223568,
+                "p90": 3.818254010793333,
+                "min": 2.473473973535222,
+                "max": 3.9806110588600117,
+                "share_negative": 0.0
+              }
+            },
+            "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+            "not_a_bug": true,
+            "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+          }
+        },
+        {
+          "protospacer": "GGTCAGGCTCCATGTGCCGC",
+          "rows": 258,
+          "ngg_rows": 28,
+          "window_agreement": {
+            "SpCas9_vs_SpCas9-NG": 0.4696329254727475,
+            "SpCas9_vs_evoCas9": 0.30011123470522805,
+            "SpCas9-NG_vs_evoCas9": 0.3568409343715239
+          },
+          "pam_separation": {
+            "contrast": [
+              "SpCas9",
+              "SpCas9-NG"
+            ],
+            "positions": {
+              "start": 25,
+              "stop": 27
+            },
+            "rows": 258,
+            "ngg_rows": 28,
+            "statistic": "position_share_25_26, paired per row",
+            "position_share_25_26": {
+              "SpCas9": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 4.400521206575165,
+                "mean": 4.712996658298497,
+                "p10": 2.0931261268041377,
+                "q1": 3.222241532786288,
+                "q3": 5.745991208677829,
+                "p90": 8.47625129368331,
+                "min": 0.5585966263719355,
+                "max": 10.77306170099133,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 3.51916220172549,
+                "mean": 3.6650259363759234,
+                "p10": 2.504570341208144,
+                "q1": 2.9403775867986317,
+                "q3": 4.297338759253909,
+                "p90": 4.956651358732962,
+                "min": 1.406603820730237,
+                "max": 6.84266719410492,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 3.5442460727653007,
+                "mean": 3.781409468838998,
+                "p10": 1.6636697284855546,
+                "q1": 2.542039865135461,
+                "q3": 4.438758010659804,
+                "p90": 6.6936798144074885,
+                "min": 1.0414314681270465,
+                "max": 8.648441087130891,
+                "share_negative": 0.0
+              }
+            },
+            "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+            "paired_difference": {
+              "rows": 258,
+              "undefined_rows": 0,
+              "median": 0.9440969997310114,
+              "mean": 1.0479707219225736,
+              "p10": -1.7567652465161527,
+              "q1": -0.1218118267058983,
+              "q3": 2.330691216775847,
+              "p90": 3.7724541036419947,
+              "min": -4.326794009478128,
+              "max": 6.8522373544225985,
+              "share_negative": 0.2751937984496124
+            },
+            "paired_relative_difference": {
+              "rows": 258,
+              "undefined_rows": 0,
+              "median": 0.40292068843890627,
+              "mean": 0.43995870454411523,
+              "p10": 0.06379156188817603,
+              "q1": 0.20077796437333656,
+              "q3": 0.6245946750480151,
+              "p90": 0.8760171506960549,
+              "min": 0.004759918220225744,
+              "max": 1.5250724159992315,
+              "share_negative": 0.0
+            },
+            "direction_share": 0.7248062015503876,
+            "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+            "relative_margin": 0.1,
+            "separated": true,
+            "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+            "direction_consistent_share": 0.9,
+            "direction_consistent": false,
+            "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+            "discriminating_position": {
+              "positions": {
+                "start": 26,
+                "stop": 27
+              },
+              "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+              "position_share": {
+                "SpCas9": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 5.841806773179325,
+                  "mean": 5.958356690548406,
+                  "p10": 0.8690702267113569,
+                  "q1": 2.7752027749625645,
+                  "q3": 8.704233788767079,
+                  "p90": 11.32489079906994,
+                  "min": 0.06789634068307862,
+                  "max": 14.678524875880495,
+                  "share_negative": 0.0
+                },
+                "SpCas9-NG": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 1.4637953062442954,
+                  "mean": 1.7034507090215794,
+                  "p10": 0.7208370083844802,
+                  "q1": 1.0114985642616876,
+                  "q3": 2.1633808257987113,
+                  "p90": 3.0166795390508385,
+                  "min": 0.1761163214100152,
+                  "max": 5.892726245392734,
+                  "share_negative": 0.0
+                },
+                "evoCas9": {
+                  "rows": 258,
+                  "undefined_rows": 0,
+                  "median": 2.250988578631298,
+                  "mean": 3.4149039077544807,
+                  "p10": 0.7034325713701556,
+                  "q1": 1.1390236163029295,
+                  "q3": 4.167859364984016,
+                  "p90": 8.751354885985277,
+                  "min": 0.23640330168512738,
+                  "max": 15.393153797095975,
+                  "share_negative": 0.0
+                }
+              },
+              "paired_difference": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 4.2573843566676555,
+                "mean": 4.254905981526827,
+                "p10": -0.02456768213099484,
+                "q1": 1.2698347578608993,
+                "q3": 6.619242077618145,
+                "p90": 8.807519366665987,
+                "min": -1.618477268989467,
+                "max": 13.599472692126206,
+                "share_negative": 0.10852713178294573
+              },
+              "paired_relative_difference": {
+                "rows": 258,
+                "undefined_rows": 0,
+                "median": 1.083559249196512,
+                "mean": 1.0147626622300792,
+                "p10": 0.35871915535593535,
+                "q1": 0.7323618081986534,
+                "q3": 1.347883561592797,
+                "p90": 1.5820522240095019,
+                "min": 0.000392072374552869,
+                "max": 1.8393893593422808,
+                "share_negative": 0.0
+              },
+              "direction_share": 0.8914728682170543
+            },
+            "g_loss_share": {
+              "SpCas9": {
+                "rows": 28,
+                "undefined_rows": 0,
+                "median": 10.005842573717608,
+                "mean": 9.829280019683042,
+                "p10": 8.802205819676002,
+                "q1": 9.589937279249451,
+                "q3": 10.260024776795092,
+                "p90": 10.540594887146575,
+                "min": 8.242055255589435,
+                "max": 10.77306170099133,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 28,
+                "undefined_rows": 0,
+                "median": 5.175866776619527,
+                "mean": 5.059516268361539,
+                "p10": 3.6760966600768787,
+                "q1": 4.470137583098255,
+                "q3": 5.6933691944584695,
+                "p90": 6.166744630510978,
+                "min": 3.1882838267056157,
+                "max": 6.842667194104919,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 28,
+                "undefined_rows": 0,
+                "median": 3.783072760261165,
+                "mean": 3.73048823198979,
+                "p10": 2.981792415059732,
+                "q1": 3.5205640372552676,
+                "q3": 4.171101332637244,
+                "p90": 4.328496693715695,
+                "min": 2.2317423393150397,
+                "max": 4.46204020402431,
+                "share_negative": 0.0
+              }
+            },
+            "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+            "not_a_bug": true,
+            "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+          }
+        },
+        {
+          "protospacer": "GGCGCCCACACTCGTGCAGC",
+          "rows": 239,
+          "ngg_rows": 22,
+          "window_agreement": {
+            "SpCas9_vs_SpCas9-NG": 0.4634037819799778,
+            "SpCas9_vs_evoCas9": 0.36551724137931035,
+            "SpCas9-NG_vs_evoCas9": 0.4789766407119021
+          },
+          "pam_separation": {
+            "contrast": [
+              "SpCas9",
+              "SpCas9-NG"
+            ],
+            "positions": {
+              "start": 25,
+              "stop": 27
+            },
+            "rows": 239,
+            "ngg_rows": 22,
+            "statistic": "position_share_25_26, paired per row",
+            "position_share_25_26": {
+              "SpCas9": {
+                "rows": 239,
+                "undefined_rows": 0,
+                "median": 4.720016824750023,
+                "mean": 4.584299391833957,
+                "p10": 1.649209781609925,
+                "q1": 2.803121092746589,
+                "q3": 5.653637400204717,
+                "p90": 7.736666143522069,
+                "min": 0.657860801550323,
+                "max": 9.994014115350176,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 239,
+                "undefined_rows": 0,
+                "median": 3.8974101255218985,
+                "mean": 3.9260278664300308,
+                "p10": 2.830724102784434,
+                "q1": 3.336272229520879,
+                "q3": 4.501969766062572,
+                "p90": 5.163104766979928,
+                "min": 1.3169307170987647,
+                "max": 6.422954100500385,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 239,
+                "undefined_rows": 0,
+                "median": 3.321266192975694,
+                "mean": 3.5544607918928874,
+                "p10": 1.7009965605350092,
+                "q1": 2.4456076516983636,
+                "q3": 4.533768880010623,
+                "p90": 5.788068651339107,
+                "min": 0.5733157334791136,
+                "max": 7.666950530721675,
+                "share_negative": 0.0
+              }
+            },
+            "position_share_definition": "a head's mean sensitivity at positions 25-26 divided by its mean over the whole 30bp window, per row. A **profile shape**, defined on every row whatever its own PAM, and scale-free so the heads' sixfold different dynamic ranges do not decide the comparison. It is not an NGG-only quantity; `g_loss_share` is.",
+            "paired_difference": {
+              "rows": 239,
+              "undefined_rows": 0,
+              "median": 0.7980903875310537,
+              "mean": 0.6582715254039264,
+              "p10": -2.5155879576329814,
+              "q1": -1.2311953421330948,
+              "q3": 2.2982446459566663,
+              "p90": 3.4314531621334603,
+              "min": -4.764092714375615,
+              "max": 8.646732872547673,
+              "share_negative": 0.36401673640167365
+            },
+            "paired_relative_difference": {
+              "rows": 239,
+              "undefined_rows": 0,
+              "median": 0.442141114700954,
+              "mean": 0.5033832350996762,
+              "p10": 0.08175591511370849,
+              "q1": 0.2389866565859066,
+              "q3": 0.6995291062904394,
+              "p90": 0.9666015927099502,
+              "min": 0.00012250351229085786,
+              "max": 1.5671836229212985,
+              "share_negative": 0.0
+            },
+            "direction_share": 0.6359832635983264,
+            "direction_share_definition": "share of rows where SpCas9's sensitivity share strictly exceeds SpCas9-NG's. 1.0 is full separation in the direction the PAM requirement predicts; 0.0 means it never exceeds it, which includes the heads reading the positions identically. `paired_difference.share_negative` is the share running the other way.",
+            "relative_margin": 0.1,
+            "separated": true,
+            "separated_definition": "the median paired symmetric relative difference of the two heads' 25-26 sensitivity shares reaches `relative_margin`. A reporting convention, not a significance test; the summaries are in this artifact so another margin can be applied to them. It is a claim about **magnitude only** — see `direction_consistent`.",
+            "direction_consistent_share": 0.9,
+            "direction_consistent": false,
+            "direction_consistent_definition": "the contrast runs in the predicted direction on at least `direction_consistent_share` of rows. Separate from `separated`, and the stricter claim: a stratum can separate on the median while a sizeable minority of its rows order the other way, and one boolean covering both would hide that.",
+            "discriminating_position": {
+              "positions": {
+                "start": 26,
+                "stop": 27
+              },
+              "why": "SpCas9 requires NGG and SpCas9-NG accepts NGA, so the two recognition rules differ at position 26 alone — both require G at 25. This is the only position where the heads' rules disagree, so the contrast is reported here as well as over 25-26.",
+              "position_share": {
+                "SpCas9": {
+                  "rows": 239,
+                  "undefined_rows": 0,
+                  "median": 5.526141783730339,
+                  "mean": 5.648413785044179,
+                  "p10": 0.4769151197601727,
+                  "q1": 1.7901429424445436,
+                  "q3": 8.769250849364543,
+                  "p90": 10.657036518088901,
+                  "min": 0.0486955499377488,
+                  "max": 16.710108254070594,
+                  "share_negative": 0.0
+                },
+                "SpCas9-NG": {
+                  "rows": 239,
+                  "undefined_rows": 0,
+                  "median": 1.6165784477676757,
+                  "mean": 1.7417481148254472,
+                  "p10": 0.667419942912026,
+                  "q1": 1.0693468685208245,
+                  "q3": 2.299356431097678,
+                  "p90": 3.027167570346399,
+                  "min": 0.18193635292945917,
+                  "max": 4.501905597289278,
+                  "share_negative": 0.0
+                },
+                "evoCas9": {
+                  "rows": 239,
+                  "undefined_rows": 0,
+                  "median": 1.6641100953993833,
+                  "mean": 2.5679683004109766,
+                  "p10": 0.7189876279978099,
+                  "q1": 1.0198406932503024,
+                  "q3": 3.024668646080106,
+                  "p90": 5.553322808332347,
+                  "min": 0.09457363732481,
+                  "max": 14.610371062695954,
+                  "share_negative": 0.0
+                }
+              },
+              "paired_difference": {
+                "rows": 239,
+                "undefined_rows": 0,
+                "median": 3.8884000431339327,
+                "mean": 3.9066656702187323,
+                "p10": -0.6190204000843227,
+                "q1": 0.3243970675309294,
+                "q3": 6.559175760150872,
+                "p90": 8.878388693418632,
+                "min": -2.2163734203293357,
+                "max": 15.262745127127037,
+                "share_negative": 0.2217573221757322
+              },
+              "paired_relative_difference": {
+                "rows": 239,
+                "undefined_rows": 0,
+                "median": 1.0631230189052696,
+                "mean": 1.0078856979482873,
+                "p10": 0.32841575499391196,
+                "q1": 0.6858230972674583,
+                "q3": 1.3661497613143674,
+                "p90": 1.5999283223718108,
+                "min": 0.008076435476296372,
+                "max": 1.82793830551293,
+                "share_negative": 0.0
+              },
+              "direction_share": 0.7782426778242678
+            },
+            "g_loss_share": {
+              "SpCas9": {
+                "rows": 22,
+                "undefined_rows": 0,
+                "median": 9.214970989583044,
+                "mean": 9.029089669112432,
+                "p10": 8.123742571579779,
+                "q1": 8.583632265925864,
+                "q3": 9.564369659419098,
+                "p90": 9.868366867733522,
+                "min": 7.242699050835061,
+                "max": 9.994014115350174,
+                "share_negative": 0.0
+              },
+              "SpCas9-NG": {
+                "rows": 22,
+                "undefined_rows": 0,
+                "median": 4.439670203976453,
+                "mean": 4.201043695771887,
+                "p10": 3.2417384290250495,
+                "q1": 3.9239674996509644,
+                "q3": 4.710750453706643,
+                "p90": 5.275479473352735,
+                "min": 1.0212895051870832,
+                "max": 6.422954100500386,
+                "share_negative": 0.0
+              },
+              "evoCas9": {
+                "rows": 22,
+                "undefined_rows": 0,
+                "median": 2.7889078733604182,
+                "mean": 2.754467783500878,
+                "p10": 2.3001720523585614,
+                "q1": 2.5614819715057062,
+                "q3": 3.0029845358924483,
+                "p90": 3.171230489948773,
+                "min": 1.974124462924737,
+                "max": 3.415842350855634,
+                "share_negative": 0.0
+              }
+            },
+            "g_loss_definition": "-(mean delta over the non-G substitutions at positions 25-26) divided by the row's mean window sensitivity, on NGG rows only. Positive means losing the GG lowers the prediction.",
+            "not_a_bug": true,
+            "reading": "Separation would show the shared trunk specialising its PAM reading per head. No separation is equally a result: it says the shared trunk reads the PAM positions alike for both heads, and it is reported as a finding rather than treated as a bug or resolved by lowering the margin."
+          }
+        }
+      ]
+    }
+  },
+  "versions": {
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.8.1"
+  },
+  "consumed": {
+    "ism": {
+      "name": "ism.npz",
+      "sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b",
+      "sidecar": {
+        "code_ref": "8a02f86c8dfba8fc218b8820124b2e6963f7dc96",
+        "population": "analysis_intersection",
+        "population_digest": "e09ad05ee43943fbc1e8b25629d6f456b224bb120a9244e29f318bf3548379a6",
+        "delta_sha256": "9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b",
+        "delta_scale": "fraction",
+        "versions": {
+          "numpy": "2.4.6",
+          "pandas": "2.2.3",
+          "torch": "2.11.0+cu130",
+          "transformers": "5.8.1"
+        }
+      }
+    },
+    "split": {
+      "name": "test.csv",
+      "sha256": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b",
+      "split_checksum_pin_checked": true
+    }
+  }
+}

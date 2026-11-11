@@ -80,3 +80,13 @@ xai_test/SpCas9_NT_analysis/result/model.safetensors
 # `predictions_checksum.json` beside it. Same for the bulk `.npz` arrays the
 # ISM, IG and rollout runs will write; their sidecars carry the digests.
 xai_test/SpCas9_NT_analysis/artifacts/**/*.npz
+
+# NT XAI 데모 자료 (#156). `prepare`가 위 v3 artifact와 Cas12a Test1500 결과 ZIP
+# (`xai_test/cas12a_NT_analysis/result/`)에서 모은 사본이다. 위와 같은 사유로
+# bulk `.npz`와 per-row CSV(Cas12a·SpCas9 `predictions.csv`,
+# `published_split/*.csv`)는 맨 위의 `*.csv` 규칙과 아래 규칙으로 무시한다: 원본에서
+# 그대로 다시 모을 수 있고, sha256은 추적되는 `data/manifest.json`에 있다. 15행짜리
+# Cas12a `cases.csv`만 bulk가 아니라 예외로 추적한다. 복원 조건은
+# `xai_test/nt_xai_demo/DATA.md`.
+xai_test/nt_xai_demo/data/**/*.npz
+!xai_test/nt_xai_demo/data/cas12a/cases.csv

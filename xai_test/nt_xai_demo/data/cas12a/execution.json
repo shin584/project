@@ -1,0 +1,1 @@
+{"autocast":false,"backend":"eager","batch_size":32,"device_type":"cuda","integration_batch_size":16,"packages":{"numpy":"1.26.4","safetensors":"0.7.0","scipy":"1.16.1","torch":"2.14.1+cu130","transformers":"5.8.1"},"precision":"float32","python":"3.13.16","tf32":false}

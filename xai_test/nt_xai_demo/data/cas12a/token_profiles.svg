@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300">
+<rect width="100%" height="100%" fill="white"/>
+<text x="25" y="25" font-size="16">IG mean absolute signed DNA token mass</text>
+<path d="M50 50V245H735" fill="none" stroke="black"/>
+<polyline points="50.00,201.93 135.00,159.07 220.00,213.50 305.00,218.10 390.00,200.08 475.00,230.87 560.00,231.18 645.00,235.04 730.00,234.13" fill="none" stroke="#0969da" stroke-width="2"/>
+<text x="60" y="285" fill="#0969da" font-size="12">all</text>
+<polyline points="50.00,199.79 135.00,190.93 220.00,212.53 305.00,216.76 390.00,198.40 475.00,231.22 560.00,230.87 645.00,234.76 730.00,233.77" fill="none" stroke="#cf222e" stroke-width="2"/>
+<text x="225" y="285" fill="#cf222e" font-size="12">TTTV</text>
+<polyline points="50.00,208.56 135.00,60.00 220.00,216.51 305.00,222.27 390.00,205.31 475.00,229.79 560.00,232.13 645.00,235.91 730.00,235.27" fill="none" stroke="#1a7f37" stroke-width="2"/>
+<text x="390" y="285" fill="#1a7f37" font-size="12">TTTT</text>
+<text x="45.0" y="265" font-size="11">1</text>
+<text x="130.0" y="265" font-size="11">2</text>
+<text x="215.0" y="265" font-size="11">3</text>
+<text x="300.0" y="265" font-size="11">4</text>
+<text x="385.0" y="265" font-size="11">5</text>
+<text x="470.0" y="265" font-size="11">6</text>
+<text x="555.0" y="265" font-size="11">7</text>
+<text x="640.0" y="265" font-size="11">8</text>
+<text x="725.0" y="265" font-size="11">9</text>
+<text x="5" y="55" font-size="10">0.594</text></svg>
