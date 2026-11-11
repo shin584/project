@@ -1,0 +1,7 @@
+# `data/manifest.json` pins the SHA-256 of every byte under `data/`, and
+# `core.autocrlf` is true in this repo: without this line a fresh Windows
+# checkout would materialise CRLF and `verify` would fail on a clean clone.
+# `-text` (not `eol=lf`) because the files are copies whose bytes must match
+# their sources exactly, whatever line endings those carry. It lives beside
+# `data/`, not in it, because `prepare` rebuilds `data/` from scratch.
+data/** -text
