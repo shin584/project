@@ -232,6 +232,7 @@ def test_cas12a_profile_divides_by_the_valid_alternatives_only(cas12a, data_dir)
 def test_the_reader_loads_no_model_and_imports_no_analysis_package():
     """Read the import statements themselves, not the prose that explains them."""
     import ast
+    import subprocess
     import sys
     from pathlib import Path
 
@@ -249,7 +250,26 @@ def test_the_reader_loads_no_model_and_imports_no_analysis_package():
         name.endswith("_NT_analysis") or name == "SpCas9" for name in imported
     )
     assert "xai_test" not in imported  # no sibling analysis module reaches in
-    assert not {"torch", "transformers"} & set(sys.modules)
+
+    # Transitively too, in a process of its own. Asserting on *this* process's
+    # `sys.modules` only held while this subtree ran alone: inside the wider
+    # suite another test has already imported torch, and the assertion failed
+    # for a reason that had nothing to do with this reader.
+    probe = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import sys; import xai_test.nt_xai_demo.reader; "
+                "print(sorted({'torch', 'transformers'} & set(sys.modules)))"
+            ),
+        ],
+        cwd=Path(rd.__file__).parents[2],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert probe.stdout.strip() == "[]", probe.stdout
 
 
 def test_token_aggregation_uses_the_artifacts_own_boundaries(spcas9):
