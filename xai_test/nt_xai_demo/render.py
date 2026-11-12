@@ -34,6 +34,21 @@ class RenderRefused(ValueError):
     """A figure or view is missing something that must not be left off."""
 
 
+def quoted(note: str, gloss: str) -> tuple[str, str]:
+    """An artifact's own note, verbatim, with the demo's Korean gloss beneath it.
+
+    These notes are recorded in English while the demo speaks Korean.
+    Restating one *in place of* the quote would make the demo the author of a
+    limit the analysis stated, so the recorded text is printed verbatim and the
+    Korean reading is added beside it, each labelled for what it is. A speaker
+    reads the gloss; anyone checking the claim reads the line above it.
+
+    Defined here, like `CROSS_POINTER`, because both nucleases' views have to
+    print an artifact's own words in the identical shape.
+    """
+    return (f"원문(artifact 기록): {note}", f"  └ 우리말 (데모가 붙인 설명): {gloss}")
+
+
 @dataclass(frozen=True)
 class Stratum:
     """Which stratum (층) a figure belongs to, and whether it pools.
@@ -102,6 +117,16 @@ class Denominator:
             parts.append(f"{self.targets:,}{self.target_unit}")
         text = "·".join(parts)
         return f"{text} ({self.note})" if self.note else text
+
+
+def single_row(note: str = "이 행") -> Denominator:
+    """The denominator of a figure read off one row: that one row, said out loud.
+
+    A per-case figure is one row's value, and both nucleases' `explain` views
+    need to say so the same way - a figure whose denominator is left implicit
+    is the one that gets quoted as a population result.
+    """
+    return Denominator(rows=1, unit="행", note=note)
 
 
 @dataclass(frozen=True)

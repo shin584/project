@@ -117,22 +117,39 @@ def test_a_one_shot_view_without_a_nuclease_says_to_select_one(data_dir):
 def test_a_view_this_ticket_has_not_built_yet_names_its_ticket(repl):
     repl.execute("cas12a")
 
-    for view, ticket in (("cases", "#160"), ("agreement", "#161"), ("cross", "#162")):
+    for view, ticket in (("agreement", "#161"), ("cross", "#162")):
         text = repl.execute(view).text
         assert ticket in text, view
 
-    repl.execute("cas12a")
-    assert "#160" in repl.execute("explain GEN-HEADGAP-02").text
 
-
-def test_both_nucleases_have_a_built_report(repl):
-    """The two reports are the one view both nucleases carry in this ticket."""
-    for nuclease in ("cas12a", "spcas9"):
+def test_both_nucleases_have_report_cases_and_explain(repl):
+    """`report`, `cases` and `explain` are the views both nucleases now carry."""
+    for nuclease, case_id in (("cas12a", "4:out_of_range"), ("spcas9", "GEN-ERRHI-01")):
         repl.execute(nuclease)
-        outcome = repl.execute("report")
 
-        assert outcome.ok, nuclease
-        assert "이 분석이 답한 질문" in outcome.text, nuclease
+        for command in ("report", "cases", f"explain {case_id}"):
+            outcome = repl.execute(command)
+
+            assert outcome.ok, (nuclease, command)
+            assert "이 분석이 답한 질문" in outcome.text, (nuclease, command)
+
+
+def test_explain_without_an_id_says_what_it_takes(repl):
+    repl.execute("spcas9")
+
+    outcome = repl.execute("explain")
+
+    assert not outcome.ok
+    assert "<ID>" in outcome.text
+
+
+def test_explain_with_an_unknown_id_names_the_ids_that_exist(repl):
+    repl.execute("spcas9")
+
+    outcome = repl.execute("explain GEN-NOPE-01")
+
+    assert not outcome.ok
+    assert "GEN-ERRHI-01" in outcome.text
 
 
 def test_a_command_that_could_not_deliver_is_marked_not_ok(repl):

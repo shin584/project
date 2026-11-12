@@ -11,8 +11,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from xai_test.nt_xai_demo import cas12a_views, spcas9_views
 from xai_test.nt_xai_demo import reader as rd
-from xai_test.nt_xai_demo import spcas9_views
 
 
 def _reader(cls, *needed: str):
@@ -146,3 +146,77 @@ def test_the_real_spcas9_report_quotes_the_per_head_floor_not_the_pooled_one():
         own = float(spcas9.noise_floor_by_head(head)["median"])
         assert f"{own:.4g}" in report, head
     assert f"{pooled:.4g}" not in report
+
+
+def test_the_real_case_tables_keep_their_own_identifiers():
+    """18 SpCas9 cases by `case_id`, 15 Cas12a cases by `source_row` + `role`."""
+    spcas9 = _reader(rd.SpCas9Reader)
+    cas12a = _reader(rd.Cas12aReader)
+
+    assert len(spcas9.case_ids()) == 18
+    assert spcas9.case("GEN-HEADGAP-02")["row_index"] == 17068
+    assert len(cas12a.case_ids()) == 15
+    assert all(":" in identifier for identifier in cas12a.case_ids())
+
+
+def test_gen_headgap_02_is_the_only_real_case_carrying_ig():
+    """The demonstration path, measured: 1 of 18 falls inside the 400-row list.
+
+    The other 17 are the "이 행은 IG 고정 명단 400행에 없음" path, and the
+    annotation's own `ig_coverage` has to agree with what the IG row axis says.
+    """
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ig/ig.npz")
+
+    with_ig = [
+        case_id
+        for case_id in spcas9.case_ids()
+        if spcas9.case_annotation(case_id).get("ig") is not None
+    ]
+
+    assert with_ig == ["GEN-HEADGAP-02"]
+    assert spcas9.has_ig(17068)
+    coverage = spcas9.cases_annotated["ig_coverage"]
+    assert coverage["cases"] == 18 and coverage["cases_with_ig"] == 1
+
+
+def test_every_real_spcas9_case_row_is_a_test_row():
+    """The split-role safeguard over the rows a speaker will actually open."""
+    spcas9 = _reader(rd.SpCas9Reader)
+
+    roles = {
+        spcas9.split_role(int(spcas9.case(case_id)["row_index"]))
+        for case_id in spcas9.case_ids()
+    }
+
+    assert roles == {"test"}
+
+
+def test_the_real_explain_shows_ig_for_the_one_case_and_its_absence_for_another():
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ig/ig.npz")
+
+    carried = spcas9_views.explain(spcas9, "GEN-HEADGAP-02")
+    absent = spcas9_views.explain(spcas9, "GEN-ERRHI-01")
+
+    assert "IG: 있음" in carried
+    assert "IG: 없음" in absent
+    assert f"IG 고정 명단 {spcas9.ig_rows.rows:,}행에 없음" in absent
+    # Both state the row's split role either way.
+    for text in (carried, absent):
+        assert "split 역할: test" in text
+
+
+def test_the_real_cases_views_name_every_case_and_no_other_id():
+    import re
+
+    spcas9 = _reader(rd.SpCas9Reader)
+    cas12a = _reader(rd.Cas12aReader)
+
+    spcas9_text = spcas9_views.cases(spcas9)
+    known = set(spcas9.case_ids())
+    found = set(re.findall(r"\b(?:GEN|LIB)-[A-Z]+-\d+\b", spcas9_text))
+    assert found == known
+
+    cas12a_text = cas12a_views.cases(cas12a)
+    for identifier in cas12a.case_ids():
+        row, role = identifier.split(":")
+        assert row in cas12a_text and role in cas12a_text

@@ -84,18 +84,6 @@ QUALIFIER_GLOSS = (
 )
 
 
-def _quoted(note: str, gloss: str) -> tuple[str, str]:
-    """An artifact's own note, verbatim, with the demo's Korean gloss beneath it.
-
-    These notes are recorded in English while the demo speaks Korean. Restating
-    one *in place of* the quote would make the demo the author of a limit the
-    analysis stated, so the recorded text is printed verbatim and the Korean
-    reading is added beside it, each labelled for what it is. A speaker reads
-    the gloss; anyone checking the claim reads the line above it.
-    """
-    return (f"원문(artifact 기록): {note}", f"  └ 우리말 (데모가 붙인 설명): {gloss}")
-
-
 def _heads_label(reader: SpCas9Reader) -> str:
     return "분석된 3개 head (" + "·".join(reader.analysed_heads) + ")"
 
@@ -192,7 +180,7 @@ def _agreement(reader: SpCas9Reader) -> render.Section:
                 "측정된 값으로 제시한다. 합격·불합격 판정을 붙이지 않는다 — 두 기법은 "
                 "서로의 정답이 아니다."
             ),
-            *_quoted(reader.validation["mismatch_note"], MISMATCH_GLOSS),
+            *render.quoted(reader.validation["mismatch_note"], MISMATCH_GLOSS),
             (
                 "행별 분포의 median만 적는다. 층 평균 프로파일끼리의 상관과 위치 "
                 "프로파일은 `agreement` 뷰의 것이다 (#161)."
@@ -376,18 +364,303 @@ def _reversal(reader: SpCas9Reader) -> render.Section:
             "분석된 3개 head를 유지하는 이유가 이 절이다: 한 행 안에서 head 사이 순서가 "
             "역전되는 행이 실제로 있어서, head 하나만 보여주면 이 결과가 사라진다."
         ),
-        *_quoted(reversal["reversal_definition"], REVERSAL_DEFINITION_GLOSS),
-        *_quoted(reversal["selection_pool_note"], SELECTION_POOL_GLOSS),
-        *_quoted(floor["pair_floor_rule"], CLEARING_FLOOR_GLOSS),
+        *render.quoted(reversal["reversal_definition"], REVERSAL_DEFINITION_GLOSS),
+        *render.quoted(reversal["selection_pool_note"], SELECTION_POOL_GLOSS),
+        *render.quoted(floor["pair_floor_rule"], CLEARING_FLOOR_GLOSS),
         *_floor_notes(reader),
         *(
             line
             for note in (reader.reversal_stratum("pam_library").get("qualifier_note"),)
             if note
-            for line in _quoted(note, QUALIFIER_GLOSS)
+            for line in render.quoted(note, QUALIFIER_GLOSS)
         ),
     )
     return render.Section(title="head 순서 역전", notes=notes, figures=tuple(figures))
+
+
+# --------------------------------------------------------------------------- #
+# cases and explain
+# --------------------------------------------------------------------------- #
+
+CASES_TITLE = "9-Hydra v3 (SpCas9) 기술 사례 (원 자료의 case_id 그대로)"
+CASES_QUESTIONS = (
+    "어떤 행을 사례로 골랐고 무엇을 기준으로 골랐는가 — 층·기준별로",
+    "그 사례 중 어느 행이 IG 고정 명단 안에 있는가",
+)
+CASES_NOTES = (
+    "ID는 원 자료(cases.json)의 `case_id`다. 데모가 ID를 새로 만들지 않는다.",
+    (
+        "선정은 예측과 라벨만 읽고 attribution을 읽지 않는다. 설명할 attribution으로 "
+        "사례를 고르면 순환이 된다."
+    ),
+    (
+        "한 행은 한 사례다. 기준은 ERRLO → ERRHI → HEADGAP 순서로 적용되므로 HEADGAP은 "
+        "오차 cell이 가져가지 않은 행을 받는다."
+    ),
+    "행별 값은 `explain <ID>`로 본다.",
+)
+
+EXPLAIN_QUESTIONS = (
+    "이 행에 어떤 방법이 있고 어떤 방법이 없는가 — 없는 것은 사유와 함께",
+    "있는 방법이 이 행에서 무엇을 가리키는가 — head별로",
+)
+SPLIT_SAFEGUARD_NOTE = (
+    "split 역할을 항상 적는다. 실측으로 ISM 모집단과 IG 고정 명단은 전부 `test`이고 "
+    "미매칭 ID가 없으므로 이 표시는 경고가 아니라 저가 안전장치다 — train·val 행의 "
+    "오차를 설명하는 사고를 막고, 전제가 깨지면 바로 드러난다."
+)
+LIBRARY_QUALIFIER_GLOSS = (
+    "이 사례는 타깃 5개 중 하나에서 관측된 것이다. 같은 cell의 사례 3건을 독립 관측 "
+    "3건으로 읽지 않는다."
+)
+IG_COVERAGE_GLOSS = (
+    "IG는 사례 선정 **전에** 자기 seed로 고정된 400행 명단에서 돌았다. 그래서 사례가 "
+    "IG를 갖는 것은 두 명단이 우연히 겹친 경우뿐이고, IG가 없는 사례는 실패가 아니라 "
+    "명단 밖이라는 뜻이다. 사례를 명단에 맞춰 고르거나 버리지 않았다."
+)
+
+
+def _selection_pool(reader: SpCas9Reader, stratum: str) -> render.Denominator:
+    entry = reader.case_strata[stratum]
+    return render.Denominator(
+        rows=int(entry["rows"]),
+        unit="행",
+        targets=int(entry["distinct_protospacers"]),
+        note="이 층의 선정 모집단",
+    )
+
+
+#: Which head a criterion ranked on. `ERRLO`/`ERRHI` rank the `SpCas9`
+#: absolute error inside that head's own quartiles; `HEADGAP` is the spread of
+#: *all three* analysed heads' absolute errors, so naming one head there would
+#: misstate the criterion for a third of the cases.
+HEADGAP = "HEADGAP"
+
+
+def _criterion_head(reader: SpCas9Reader, criterion: str) -> str:
+    if criterion == HEADGAP:
+        return f"{_heads_label(reader)} — 세 head 절대오차의 max − min"
+    return f"{reader.primary_head} (이 기준이 순위를 매긴 head)"
+
+
+def _case_line(reader: SpCas9Reader, case: dict) -> render.Figure:
+    """One listed case: its row, its split role, and which methods it carries."""
+    case_id = str(case["case_id"])
+    row_id = int(case["row_index"])
+    methods = reader.case_methods(case_id)
+    # Short here, with reasons once in the section's notes: the IG reason and
+    # the rollout limit are the same sentence for every case, and repeating
+    # either eighteen times buries the per-case facts a speaker is reading.
+    # `explain <ID>` states them against the single row.
+    carried = ", ".join(entry.method for entry in methods if entry.present)
+    missing = ", ".join(entry.method for entry in methods if not entry.present)
+    note = (
+        f"row_index={row_id} / split={reader.split_role(row_id) or '미매칭'} / "
+        f"보유: {carried}"
+    )
+    note += f" / 없음: {missing}" if missing else " / 없는 방법 없음"
+    qualifier = str(case.get("reporting_qualifier") or "").strip()
+    if qualifier:
+        note += f" / 기록된 한정(원문): {qualifier}"
+    return render.Figure(
+        name=f"{case_id} ({case['criterion']})",
+        value=f"row_index {row_id}",
+        stratum=str(case["stratum"]),
+        head=_criterion_head(reader, str(case["criterion"])),
+        statistic=(
+            f"사례 선정 ({case['criterion']}, 이 cell의 선정 순위 "
+            f"{case['selection_rank']})"
+        ),
+        denominator=_selection_pool(reader, str(case["stratum"])),
+        note=note,
+    )
+
+
+def cases(reader: SpCas9Reader) -> str:
+    """The SpCas9 `cases` view: every case under the case table's own `case_id`."""
+    records = [reader.case(case_id) for case_id in reader.case_ids()]
+    with_ig = [
+        str(case["case_id"])
+        for case in records
+        if reader.case_annotation(str(case["case_id"])).get("ig") is not None
+    ]
+    coverage = reader.cases_annotated.get("ig_coverage") or {}
+    ig_note = (
+        f"사례 {len(records):,}개 중 IG를 가진 사례 {len(with_ig):,}개"
+        + (f": {', '.join(with_ig)}" if with_ig else "")
+        + f". 나머지는 IG 고정 명단 {reader.ig_rows.rows:,}행에 없다."
+    )
+    rollout_limit = next(
+        entry.limit
+        for entry in reader.case_methods(records[0]["case_id"])
+        if entry.method == "rollout"
+    )
+    notes = [
+        *CASES_NOTES,
+        ig_note,
+        f"rollout은 모든 사례 행을 덮지만 {rollout_limit}",
+    ]
+    if coverage.get("note"):
+        notes.extend(render.quoted(str(coverage["note"]), IG_COVERAGE_GLOSS))
+    section = render.Section(
+        title="사례 목록",
+        notes=tuple(notes),
+        figures=tuple(_case_line(reader, case) for case in records),
+    )
+    return render.render(
+        [section],
+        claim_limit=reader.claim_limit,
+        title=CASES_TITLE,
+        questions=CASES_QUESTIONS,
+    )
+
+
+def _explain_row(reader: SpCas9Reader, case: dict) -> render.Section:
+    """The row itself: split role first, then this row's labels and predictions."""
+    row_id = int(case["row_index"])
+    stratum = str(case["stratum"])
+    figures = [
+        render.Figure(
+            name="split 역할",
+            value=reader.split_role(row_id) or "미매칭 (split 파일에 이 행이 없다)",
+            stratum=stratum,
+            head="해당 없음 (행의 성질)",
+            statistic="published_split의 split 열",
+            denominator=render.Denominator(
+                rows=reader.split_rows, unit="행", note="split 파일 3개 합계"
+            ),
+        )
+    ]
+    for head in reader.analysed_heads:
+        label = case.get(f"label_{head}")
+        prediction = case.get(f"pred_{head}")
+        figures.append(
+            render.Figure(
+                name=f"{head} 실측 / 예측",
+                value=(
+                    (render.format_value(label) if label is not None else "미측정")
+                    + " / "
+                    + (
+                        render.format_value(prediction)
+                        if prediction is not None
+                        else "예측 없음"
+                    )
+                ),
+                stratum=stratum,
+                head=head,
+                statistic="사례 표의 실측 라벨과 예측",
+                denominator=render.single_row(),
+                scale="fraction",
+            )
+        )
+    notes = [SPLIT_SAFEGUARD_NOTE]
+    qualifier = str(case.get("reporting_qualifier") or "").strip()
+    if qualifier:
+        notes.extend(render.quoted(qualifier, LIBRARY_QUALIFIER_GLOSS))
+    return render.Section(
+        title=f"{case['case_id']} — 행과 선정",
+        notes=tuple(notes),
+        figures=tuple(figures),
+    )
+
+
+def _explain_methods(reader: SpCas9Reader, case: dict) -> render.Section:
+    """Which methods this row carries, and for each absence the recorded reason."""
+    notes = [entry.text() for entry in reader.case_methods(str(case["case_id"]))]
+    return render.Section(title="이 행의 방법별 유무", notes=tuple(notes))
+
+
+def _explain_values(reader: SpCas9Reader, case: dict) -> render.Section:
+    """The recorded per-head figures for the methods this row does carry."""
+    annotation = reader.case_annotation(str(case["case_id"]))
+    stratum = str(case["stratum"])
+    ism = annotation["ism"]
+    figures: list[render.Figure] = []
+    for head in reader.analysed_heads:
+        figures.append(
+            render.Figure(
+                name=f"{head} ISM 토큰 프로파일",
+                value=ism["token_profile"][head],
+                stratum=stratum,
+                head=head,
+                statistic="위치별 평균 |ISM delta|의 토큰 평균 (WT 슬롯 제외)",
+                denominator=render.single_row(),
+                scale="fraction",
+                note=f"토큰 순서: {', '.join(reader.token_names)}",
+            )
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} 최대 민감 위치 / 토큰",
+                value=f"{ism['top_position'][head]} / {ism['top_token'][head]}",
+                stratum=stratum,
+                head=head,
+                statistic="이 행 ISM 프로파일의 최대 위치와 그 토큰",
+                denominator=render.single_row(),
+            )
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} PAM 구간이 차지하는 민감도 몫",
+                value=ism["pam_share"][head],
+                stratum=stratum,
+                head=head,
+                statistic="PAM(24-26) 평균 ÷ 30bp 창 평균",
+                denominator=render.single_row(),
+                scale="무차원 비율 (창의 몫이며 염기별 PAM attribution이 아니다)",
+                note=(
+                    "이 층 안에서의 백분위 "
+                    f"{float(ism['pam_share_percentile_in_stratum'][head]):.4g}, "
+                    "attribution outlier 여부 "
+                    f"{render.format_value(annotation['attribution_outlier'][head])} "
+                    "(기술용이며 선정 기준이 아니다)"
+                ),
+            )
+        )
+    notes = [
+        (
+            "ISM은 염기 치환, IG는 토큰 attribution이다. 해상도가 달라 둘은 서로의 "
+            "정답이 아니다 (ADR 0007)."
+        )
+    ]
+    ig = annotation.get("ig")
+    if ig is None:
+        notes.append(
+            f"IG 값이 이 절에 없는 이유: 이 행은 IG 고정 명단 "
+            f"{reader.ig_rows.rows:,}행에 없다."
+        )
+    else:
+        for head in reader.analysed_heads:
+            figures.append(
+                render.Figure(
+                    name=f"{head} IG 토큰 attribution",
+                    value=ig["token_attribution"][head],
+                    stratum=stratum,
+                    head=head,
+                    statistic="토큰 5개의 IG attribution",
+                    denominator=render.single_row(),
+                    scale=reader.ig_scale,
+                    note=f"최대 토큰: {ig['top_token'][head]}",
+                )
+            )
+    return render.Section(
+        title="방법별 값 (head별)", notes=tuple(notes), figures=tuple(figures)
+    )
+
+
+def explain(reader: SpCas9Reader, identifier: str) -> str:
+    """The SpCas9 `explain <ID>` view: one row, method by method."""
+    case = reader.case(identifier)
+    return render.render(
+        [
+            _explain_row(reader, case),
+            _explain_methods(reader, case),
+            _explain_values(reader, case),
+        ],
+        claim_limit=reader.claim_limit,
+        title=f"{case['case_id']} (row_index {case['row_index']}) — 방법별 유무와 값",
+        questions=EXPLAIN_QUESTIONS,
+    )
 
 
 def report(reader: SpCas9Reader) -> str:

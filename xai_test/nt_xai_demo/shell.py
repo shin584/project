@@ -61,13 +61,13 @@ VIEWS: tuple[View, ...] = (
     View(
         "cases",
         "기술 사례 목록 (원 자료 ID 그대로)",
-        builders={"cas12a": "#160", "spcas9": "#160"},
+        builders={"cas12a": cas12a_views.cases, "spcas9": spcas9_views.cases},
     ),
     View(
         "explain",
         "한 행의 방법별 유무와 값",
         argument="<ID>",
-        builders={"cas12a": "#160", "spcas9": "#160"},
+        builders={"cas12a": cas12a_views.explain, "spcas9": spcas9_views.explain},
     ),
     View(
         "agreement",

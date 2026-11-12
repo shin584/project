@@ -257,6 +257,130 @@ def head_order_reversal() -> dict:
     }
 
 
+#: The case table, keyed as the real one is: `<STRATUM>-<CRITERION>-<NN>`.
+#: GEN-HEADGAP-02 is the one case inside the IG list (as on the real data);
+#: GEN-ERRHI-01 is outside it. LIB-ERRLO-01 sits on a `val` row with no
+#: prediction and one unmeasured head - impossible on the real data, and here
+#: so the split-role safeguard and the missing-prediction path have a case.
+SPCAS9_CASES = (
+    ("GEN-ERRHI-01", "generalisation", "ERRHI", 5),
+    ("GEN-HEADGAP-02", "generalisation", "HEADGAP", 11),
+    ("LIB-ERRLO-01", "pam_library", "ERRLO", 30),
+)
+CASE_STRATA = {
+    "generalisation": {"rows": 895, "distinct_protospacers": 818},
+    "pam_library": {"rows": 1287, "distinct_protospacers": 5},
+}
+LIB_QUALIFIER = "observed in one of 5 targets"
+
+
+def label_fraction(row: int, head: str) -> float | None:
+    """What the reader must return: the split file's percent, divided by 100."""
+    if (row, head) == UNMEASURED:
+        return None
+    return (LABEL_PERCENT[row] + ISM_HEADS.index(head)) / 100.0
+
+
+def prediction_fraction(row: int, head: str) -> float | None:
+    if SPLIT_ROLE[row] != "test":
+        return None
+    return 0.1 + ISM_HEADS.index(head) * 0.01
+
+
+def spcas9_cases() -> dict:
+    cases = []
+    for case_id, stratum, criterion, row in SPCAS9_CASES:
+        case: dict = {
+            "case_id": case_id,
+            "stratum": stratum,
+            "criterion": criterion,
+            "selection_rank": int(case_id[-1]),
+            "row_index": row,
+            "reporting_qualifier": LIB_QUALIFIER if stratum == "pam_library" else "",
+        }
+        for head in ANALYSED_HEADS:
+            case[f"label_{head}"] = label_fraction(row, head)
+            case[f"pred_{head}"] = prediction_fraction(row, head)
+        cases.append(case)
+    return {
+        "primary_head": "SpCas9",
+        "heads": list(ANALYSED_HEADS),
+        "criteria": ["ERRLO", "ERRHI", "HEADGAP"],
+        "label_scale": "fraction",
+        "prediction_scale": "fraction",
+        "strata": CASE_STRATA,
+        "cases": cases,
+    }
+
+
+#: Per-head ISM token profiles recorded for a case. Distinct per head so a
+#: view that shows another head's numbers is caught by value.
+CASE_ISM_TOKENS = {
+    "SpCas9": [0.019, 0.022, 0.026, 0.036, 0.152],
+    "SpCas9-NG": [0.031, 0.020, 0.025, 0.037, 0.083],
+    "evoCas9": [0.003, 0.0046, 0.0051, 0.0027, 0.0036],
+}
+CASE_IG_TOKENS = {
+    "SpCas9": [-0.0409, -0.129, 0.154, 0.124, 2.088],
+    "SpCas9-NG": [0.376, -0.195, 0.694, 0.110, 0.061],
+    "evoCas9": [0.668, -0.319, 0.572, -0.0924, 0.0296],
+}
+CASE_PAM_SHARE = {"SpCas9": 5.34, "SpCas9-NG": 2.81, "evoCas9": 1.31}
+CASE_PAM_PERCENTILE = {"SpCas9": 46.6, "SpCas9-NG": 83.6, "evoCas9": 38.2}
+
+
+def spcas9_annotation(case: tuple[str, str, str, int]) -> dict:
+    case_id, stratum, criterion, row = case
+    in_ig = row in IG_ROWS
+    return {
+        "case_id": case_id,
+        "row_index": row,
+        "stratum": stratum,
+        "criterion": criterion,
+        "reporting_qualifier": LIB_QUALIFIER if stratum == "pam_library" else "",
+        "ism": {
+            "token_profile": {h: list(v) for h, v in CASE_ISM_TOKENS.items()},
+            "top_position": {"SpCas9": 26, "SpCas9-NG": 25, "evoCas9": 15},
+            "top_token": {
+                "SpCas9": "pam_plus_right_flank",
+                "SpCas9-NG": "pam_plus_right_flank",
+                "evoCas9": "protospacer_12_17",
+            },
+            "pam_share": dict(CASE_PAM_SHARE),
+            "pam_share_percentile_in_stratum": dict(CASE_PAM_PERCENTILE),
+        },
+        "ig": (
+            {
+                "token_attribution": {h: list(v) for h, v in CASE_IG_TOKENS.items()},
+                "top_token": {
+                    "SpCas9": "pam_plus_right_flank",
+                    "SpCas9-NG": "protospacer_12_17",
+                    "evoCas9": "left_flank_plus_protospacer_5prime",
+                },
+            }
+            if in_ig
+            else None
+        ),
+        "head_order": {
+            "tau": -1 / 3,
+            "reversal": True,
+            "tied_pair": False,
+            "clears_noise_floor": False,
+            "clears_noise_floor_rule": "every inverted pair's measured label gap "
+            "exceeds that pair's floor",
+            "inverted_pairs": [
+                {
+                    "pair": "SpCas9_vs_SpCas9-NG",
+                    "label_gap": 0.00885,
+                    "floor": PAIR_FLOORS["SpCas9_vs_SpCas9-NG"],
+                    "clears_floor": False,
+                }
+            ],
+        },
+        "attribution_outlier": {head: False for head in ANALYSED_HEADS},
+    }
+
+
 def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
     spcas9 = root / "spcas9"
     (spcas9 / "published_split").mkdir(parents=True, exist_ok=True)
@@ -418,29 +542,15 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
         },
     )
     write_json("v3_noise_floor.json", noise_floor())
+    write_json("v3_cases/cases.json", spcas9_cases())
     write_json(
-        "v3_cases/cases.json",
+        "v3_cases/cases_annotated.json",
         {
-            "primary_head": "SpCas9",
+            "claim_limit": CLAIM_LIMIT,
             "heads": list(ANALYSED_HEADS),
-            "label_scale": "fraction",
-            "prediction_scale": "fraction",
-            "cases": [
-                {
-                    "case_id": "GEN-ERRHI-01",
-                    "stratum": "generalisation",
-                    "row_index": 11,
-                },
-                {
-                    "case_id": "GEN-HEADGAP-02",
-                    "stratum": "generalisation",
-                    "row_index": 30,
-                },
-            ],
+            "token_names": list(TOKEN_NAMES),
+            "cases": [spcas9_annotation(case) for case in SPCAS9_CASES],
         },
-    )
-    write_json(
-        "v3_cases/cases_annotated.json", {"claim_limit": CLAIM_LIMIT, "cases": []}
     )
 
     heads_header = list(ISM_HEADS)
@@ -513,6 +623,116 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
         },
     )
     return spcas9
+
+
+#: The described cases, identified as the source data does: source_row + role.
+#: Row 9's IG failed, so the demo has an absence path with the artifact's own
+#: recorded reason rather than a gap on screen.
+CAS12A_CASES = (
+    (4, "out_of_range", 1, "raw < 0 or raw > 1"),
+    (9, "low_error", 1, "|error| ascending"),
+)
+#: Each role's pool, as the real `cases.json` records it: `eligible` rows meet
+#: the criterion, `available` is what was left after the earlier categories
+#: took their rows (`exclude_previous`). They differ for `low_error` on the
+#: real data (375 eligible, 372 available), and they differ here too - the
+#: denominator a case was actually drawn from is `available`, and a fixture
+#: that made the two equal could not tell a reader picking the wrong one.
+CAS12A_CATEGORY_POOLS = {
+    # role: available (drawn from), eligible (met the criterion)
+    "out_of_range": (16, 16),
+    "high_error": (375, 375),
+    "low_error": (372, 375),
+}
+CAS12A_IG_FAILED_ROW = 9
+CAS12A_IG_FAILURE = "completeness residual above limit"
+#: Per-token mean |signed mass| for a case: 9 DNA blocks, as the real one has.
+CAS12A_CASE_TOKEN_SENSITIVITY = (
+    0.035,
+    0.011,
+    0.023,
+    0.010,
+    0.029,
+    0.003,
+    0.011,
+    0.004,
+    0.003,
+)
+CAS12A_CASE_PAM_SHARE = 0.1558
+CAS12A_CASE_TOP_POSITION = 5
+CAS12A_ROLLOUT_INTERPRETATION = (
+    "attention flow; not output attribution or selective token-pair interaction"
+)
+
+
+def cas12a_annotation(row: int, role: str, reason: str) -> dict:
+    """One annotated case, with each method's own `status` and `failure`."""
+    label, raw, clipped, stratum = (
+        0.0 if row == 4 else 0.3,
+        -0.05 if row == 4 else 0.35,
+        0.0 if row == 4 else 0.35,
+        "TTTT" if row == 4 else "TTTV",
+    )
+    ig_failed = row == CAS12A_IG_FAILED_ROW
+    return {
+        "source_row": row,
+        "role": role,
+        "roles": ["full_population", role],
+        "pam_stratum": stratum,
+        "rank_in_category": 1,
+        "selection_reason": reason,
+        "label": label,
+        "raw_prediction": raw,
+        "clipping_distance": abs(raw - clipped),
+        "raw_absolute_error": abs(raw - label),
+        "methods": {
+            "ism": {
+                "status": "available",
+                "failure": None,
+                "summary": {
+                    "source_row": row,
+                    "pam_share": CAS12A_CASE_PAM_SHARE,
+                    "pam_share_undefined_reason": None,
+                    "top_position": CAS12A_CASE_TOP_POSITION,
+                    "token_mean_sensitivity": list(CAS12A_CASE_TOKEN_SENSITIVITY),
+                },
+            },
+            "ig": (
+                {
+                    "status": "failed",
+                    "failure": CAS12A_IG_FAILURE,
+                    "summary": None,
+                }
+                if ig_failed
+                else {
+                    "status": "available",
+                    "failure": None,
+                    "summary": {
+                        "dna_signed_mass": [0.1 * (i + 1) for i in range(9)],
+                        "total_signed_mass": -0.7883,
+                        "quality": {
+                            "completeness_pass": True,
+                            "convergence_pass": True,
+                            "absolute_residual": 2.5e-06,
+                            "completeness_limit": 0.0395,
+                        },
+                        "steps": 400,
+                    },
+                }
+            ),
+            "rollout": {
+                "status": "available",
+                "failure": None,
+                "summary": {
+                    "interpretation": CAS12A_ROLLOUT_INTERPRETATION,
+                    "sequence_query_diagnostic": {
+                        "status": "near_identical_queries",
+                        "near_identical_fraction": 1.0,
+                    },
+                },
+            },
+        },
+    }
 
 
 def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
@@ -618,12 +838,21 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
                 "selection_reason",
             ]
         )
-        writer.writerow(
-            [4, -0.05, 0.0, 0.05, 0.05, "TTTT", "out_of_range", 1, "raw < 0 or raw > 1"]
-        )
-        writer.writerow(
-            [9, 0.35, 0.3, 0.05, 0.0, "TTTV", "low_error", 1, "|error| ascending"]
-        )
+        for row, role, rank, reason in CAS12A_CASES:
+            annotation = cas12a_annotation(row, role, reason)
+            writer.writerow(
+                [
+                    row,
+                    annotation["raw_prediction"],
+                    annotation["label"],
+                    annotation["raw_absolute_error"],
+                    annotation["clipping_distance"],
+                    annotation["pam_stratum"],
+                    role,
+                    rank,
+                    reason,
+                ]
+            )
 
     for name, payload in {
         "metrics.json": {
@@ -691,7 +920,34 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
                 for method in ("prediction", "ism", "ig", "rollout")
             },
         },
-        "cases_annotated.json": {"cases": [], "selection": {}},
+        "cases.json": {
+            "cases": [
+                cas12a_annotation(row, role, reason)
+                for row, role, _, reason in CAS12A_CASES
+            ],
+            "categories": {
+                role: {
+                    "available": available,
+                    "eligible": eligible,
+                    "selected": sum(
+                        1 for _, case_role, *_ in CAS12A_CASES if case_role == role
+                    ),
+                    "unfilled": 0,
+                }
+                for role, (available, eligible) in CAS12A_CATEGORY_POOLS.items()
+            },
+            "protocol": {
+                "category_order": list(CAS12A_CATEGORY_POOLS),
+                "quantile_population": "all Test raw absolute errors before exclusions",
+            },
+        },
+        "cases_annotated.json": {
+            "cases": [
+                cas12a_annotation(row, role, reason)
+                for row, role, _, reason in CAS12A_CASES
+            ],
+            "selection": {},
+        },
     }.items():
         write_json(name, payload)
 

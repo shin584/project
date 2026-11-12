@@ -325,12 +325,10 @@ def test_cas12a_rollout_degeneracy_is_read_as_stored(cas12a):
 
 def test_cases_keep_their_own_identifiers(spcas9, cas12a):
     assert [case["case_id"] for case in spcas9.cases] == [
-        "GEN-ERRHI-01",
-        "GEN-HEADGAP-02",
+        case_id for case_id, *_ in fx.SPCAS9_CASES
     ]
     assert [(case["source_row"], case["role"]) for case in cas12a.cases] == [
-        (4, "out_of_range"),
-        (9, "low_error"),
+        (row, role) for row, role, *_ in fx.CAS12A_CASES
     ]
 
 

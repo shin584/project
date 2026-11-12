@@ -247,6 +247,266 @@ def _rollout(reader: Cas12aReader) -> render.Section:
     )
 
 
+# --------------------------------------------------------------------------- #
+# cases and explain
+# --------------------------------------------------------------------------- #
+
+CASES_TITLE = "NT-Cas12a 기술 사례 (원 자료의 source_row + role 그대로)"
+CASES_QUESTIONS = (
+    "어떤 행을 기술 사례로 골랐고 어떤 역할로 골랐는가 — 역할별 모집단과 함께",
+    "그 사례에서 네 방법이 각각 성공했는가",
+)
+CASES_NOTES = (
+    (
+        "식별자는 원 자료 그대로 `source_row`와 `role`이다. 데모가 ID를 새로 "
+        "만들지 않는다 — `explain <source_row>:<role>`로 조회한다."
+    ),
+    (
+        "기술 사례는 무작위 상세 부분집합이 아니다. 오차로 골라낸 행이므로 기술적 "
+        "해석에만 쓰고 모집단 요약으로 읽지 않는다."
+    ),
+    (
+        "역할마다 자기 후보 모집단이 있다. 선정 개수를 후보 수와 함께 적는다 — "
+        "out_of_range 5건과 high_error 5건은 같은 크기의 주장이 아니다."
+    ),
+)
+EXPLAIN_QUESTIONS = (
+    "이 행에 어떤 방법이 있고 어떤 방법이 없는가 — 없는 것은 기록된 사유와 함께",
+    "있는 방법이 이 행에서 무엇을 가리키는가",
+)
+ROLLOUT_ROW_LIMIT = (
+    "이 행의 rollout은 저장돼 있으나 행의 성질로 읽을 수 없다: DNA query가 거의 "
+    "동일해 행 사이 차이가 생기지 않는다. 저장·수치 실패가 아니라 해석 제한이다."
+)
+
+
+def _case_line(reader: Cas12aReader, case: dict) -> render.Figure:
+    """One listed case: its row, role, PAM group, and which methods succeeded.
+
+    No label, prediction or error here, although the case record holds them.
+    They are this row's own statistics with their own kind and scale, and on
+    this line they would ride under the selection figure's stratum ("this
+    role's pool") and statistic ("case selection"), which are not theirs.
+    `explain` gives each of them its own four fields.
+    """
+    identifier = f"{case['source_row']}:{case['role']}"
+    pool = reader.case_pool(str(case["role"]))
+    note = f"PAM 집단={case['pam_stratum']} / " + " / ".join(
+        entry.text() for entry in reader.case_methods(identifier)
+    )
+    return render.Figure(
+        name=f"{identifier} (이 역할의 순위 {case['rank_in_category']})",
+        value=f"source_row {case['source_row']}",
+        # A case's role is its own population, never pooled with another
+        # role's or with the Test population.
+        stratum=f"{case['role']} 후보 모집단",
+        head=reader.head,
+        statistic=f"사례 선정 ({case['selection_reason']})",
+        denominator=render.Denominator(
+            rows=pool["available"],
+            unit="행",
+            note=(
+                f"이 역할이 실제로 뽑은 후보 행 (선정 {pool['selected']:,}건, "
+                f"기준을 만족한 행 {pool['eligible']:,}행 중 앞 범주가 이미 가져간 "
+                "행을 제외한 수)"
+            ),
+        ),
+        note=note,
+    )
+
+
+def cases(reader: Cas12aReader) -> str:
+    """The Cas12a `cases` view: every described case under its row and role."""
+    records = [reader.case(identifier) for identifier in reader.case_ids()]
+    section = render.Section(
+        title="사례 목록",
+        notes=(
+            *CASES_NOTES,
+            f"사례 {len(records):,}건. 행별 값은 `explain <source_row>:<role>`로 본다.",
+        ),
+        figures=tuple(_case_line(reader, case) for case in records),
+    )
+    return render.render(
+        [section],
+        claim_limit=reader.claim_limit,
+        title=CASES_TITLE,
+        questions=CASES_QUESTIONS,
+    )
+
+
+def _explain_row(reader: Cas12aReader, case: dict) -> render.Section:
+    row_id = int(case["source_row"])
+    stored = reader.prediction(row_id)
+    group = str(case["pam_stratum"])
+    figures = [
+        render.Figure(
+            name="라벨 / raw 예측 / clipped 예측",
+            value=(
+                f"{stored['label']:.4g} / {stored['raw_prediction']:.4g} / "
+                f"{stored['clipped_prediction']:.4g}"
+            ),
+            stratum=group,
+            head=reader.head,
+            statistic="저장된 라벨과 예측 (raw 기본, clipped 병기)",
+            denominator=render.single_row(),
+            scale="fraction (native raw output)",
+        ),
+        render.Figure(
+            name="raw 절대 오차",
+            value=case["raw_absolute_error"],
+            stratum=group,
+            head=reader.head,
+            statistic="raw absolute error (선정에 쓴 값)",
+            denominator=render.single_row(),
+            scale="fraction",
+            note=f"선정 사유: {case['selection_reason']}",
+        ),
+    ]
+    return render.Section(
+        title=f"source_row {row_id} ({case['role']}) — 행과 선정",
+        notes=(
+            (
+                "이 행이 속한 PAM 집단만 적는다. 집단을 합친 수치는 이 뷰에 없다 — "
+                "합치면 군 사이 평균 효율 차이가 섞인다."
+            ),
+        ),
+        figures=tuple(figures),
+    )
+
+
+def _explain_methods(reader: Cas12aReader, case: dict) -> render.Section:
+    """Each method's recorded status for this row, a failure quoted as a failure.
+
+    The statuses are the annotation's own, so a method that ran and failed
+    shows its recorded `failure` text instead of leaving a blank that would
+    read as the demo having lost the number.
+    """
+    identifier = f"{case['source_row']}:{case['role']}"
+    notes = [entry.text() for entry in reader.case_methods(identifier)]
+    return render.Section(title="이 행의 방법별 유무", notes=tuple(notes))
+
+
+def _explain_values(reader: Cas12aReader, case: dict) -> render.Section:
+    """The recorded per-row figures, each from the method that actually ran."""
+    identifier = f"{case['source_row']}:{case['role']}"
+    annotation = reader.case_annotation(identifier)
+    methods = annotation.get("methods") or {}
+    group = str(case["pam_stratum"])
+    figures: list[render.Figure] = []
+    notes: list[str] = []
+
+    ism = methods.get("ism") or {}
+    if ism.get("status") == "available":
+        summary = ism["summary"]
+        figures.append(
+            render.Figure(
+                name="최대 민감 위치",
+                value=summary["top_position"],
+                stratum=group,
+                head=reader.head,
+                statistic="ISM 위치 프로파일의 최대 위치 (WT 슬롯 제외)",
+                denominator=render.single_row(),
+                note="PAM은 5′ 쪽 4-7이다",
+            )
+        )
+        figures.append(
+            render.Figure(
+                name="토큰별 평균 민감도",
+                value=summary["token_mean_sensitivity"],
+                stratum=group,
+                head=reader.head,
+                statistic="DNA 블록별 평균 |raw delta|",
+                denominator=render.single_row(),
+                scale="fraction",
+            )
+        )
+        if summary.get("pam_share") is not None:
+            figures.append(
+                render.Figure(
+                    name="PAM 구간이 차지하는 민감도 몫",
+                    value=summary["pam_share"],
+                    stratum=group,
+                    head=reader.head,
+                    statistic="PAM(4-7) 평균 ÷ 창 전체 평균",
+                    denominator=render.single_row(),
+                    scale="무차원 비율 (창의 몫이며 염기별 PAM attribution이 아니다)",
+                )
+            )
+    else:
+        notes.append(f"ISM 값 없음 — {ism.get('failure') or '사유 기록 없음'}")
+
+    ig = methods.get("ig") or {}
+    if ig.get("status") == "available":
+        summary = ig["summary"]
+        figures.append(
+            render.Figure(
+                name="DNA 블록별 signed mass",
+                value=summary["dna_signed_mass"],
+                stratum=group,
+                head=reader.head,
+                statistic="IG signed mass (DNA 블록)",
+                denominator=render.single_row(),
+                scale="모델 출력 단위 (fraction 척도의 출력 차이에 대한 분해)",
+                note=(
+                    "completeness 통과="
+                    f"{render.format_value(summary['quality']['completeness_pass'])}, "
+                    f"잔차={summary['quality']['absolute_residual']:.3g} "
+                    f"(한계 {summary['quality']['completeness_limit']:.3g}), "
+                    f"steps={summary['steps']}"
+                ),
+            )
+        )
+    else:
+        notes.append(
+            f"IG 값 없음 — status={ig.get('status', '기록 없음')}: "
+            f"{ig.get('failure') or '사유 기록 없음'}"
+        )
+
+    rollout = methods.get("rollout") or {}
+    if rollout.get("status") == "available":
+        summary = rollout["summary"]
+        diagnostic = summary.get("sequence_query_diagnostic") or {}
+        figures.append(
+            render.Figure(
+                name="rollout query 진단",
+                value=str(diagnostic.get("status", "기록 없음")),
+                stratum=group,
+                head=reader.head,
+                statistic="sequence_query_diagnostic (rollout 해석 가능성)",
+                denominator=render.single_row(),
+                note=(
+                    "거의 동일한 query 비율 "
+                    f"{render.format_value(diagnostic.get('near_identical_fraction'))}"
+                ),
+            )
+        )
+        notes.extend(
+            render.quoted(str(summary.get("interpretation")), ROLLOUT_ROW_LIMIT)
+        )
+    else:
+        notes.append(
+            f"rollout 값 없음 — status={rollout.get('status', '기록 없음')}: "
+            f"{rollout.get('failure') or '사유 기록 없음'}"
+        )
+
+    return render.Section(title="방법별 값", notes=tuple(notes), figures=tuple(figures))
+
+
+def explain(reader: Cas12aReader, identifier: str) -> str:
+    """The Cas12a `explain <source_row>[:<role>]` view."""
+    case = reader.case(identifier)
+    return render.render(
+        [
+            _explain_row(reader, case),
+            _explain_methods(reader, case),
+            _explain_values(reader, case),
+        ],
+        claim_limit=reader.claim_limit,
+        title=(f"source_row {case['source_row']} ({case['role']}) — 방법별 유무와 값"),
+        questions=EXPLAIN_QUESTIONS,
+    )
+
+
 def report(reader: Cas12aReader) -> str:
     """The Cas12a `report` view."""
     return render.render(

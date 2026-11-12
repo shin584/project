@@ -225,6 +225,47 @@ def aggregate_to_tokens(
 
 
 @dataclass(frozen=True)
+class MethodPresence:
+    """Whether one method covers a row, and - when it does not - why.
+
+    `explain` prints an absence as an absence with its reason, so the reasons
+    these artifacts actually record stay distinguishable: a row outside a
+    frozen population (SpCas9 IG's 400-row list) and a method that ran and
+    failed (Cas12a records `status: failed` with its own `failure` text).
+    Rendered as one blank, both would read as the demo having lost a number.
+
+    `population` names what decides the answer, with its size, because "no IG"
+    means a different thing for each.
+
+    `limit` is the third case, and it is not an absence: the method ran and its
+    values are stored, but they cannot be read the way this view reads the
+    others. Attention rollout is the real instance - it covers the row, and has
+    no head axis at all (ADR 0008), so it can give no per-head reading. Calling
+    that "없음" would understate real coverage; saying only "있음" would invite
+    the per-head reading the artifact cannot support.
+    """
+
+    method: str
+    present: bool
+    population: str
+    reason: str | None = None
+    limit: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.present and not (self.reason or "").strip():
+            raise ArtifactMismatch(
+                f"{self.method}이(가) 없다고만 적혀 있다: 사유를 함께 적어야 한다"
+            )
+
+    def text(self) -> str:
+        """One line for a view: present or not, with the population or the reason."""
+        if not self.present:
+            return f"{self.method}: 없음 — {self.reason}"
+        line = f"{self.method}: 있음 — {self.population}"
+        return f"{line} / 다만 {self.limit}" if self.limit else line
+
+
+@dataclass(frozen=True)
 class IgAbsence:
     """Why a row carries no IG result. `explain` states this instead of a gap."""
 
@@ -337,6 +378,116 @@ class SpCas9Reader:
     @cached_property
     def cases_annotated(self) -> dict[str, Any]:
         return load_json(self.root / "v3_cases/cases_annotated.json")
+
+    # -- cases, by the case table's own identifiers -------------------------- #
+
+    def case_ids(self) -> tuple[str, ...]:
+        """The case IDs the case table holds, in its order. No ID is minted here."""
+        return tuple(str(case["case_id"]) for case in self.cases)
+
+    @cached_property
+    def case_strata(self) -> dict[str, dict[str, Any]]:
+        """Each stratum's own selection pool, as the case table records it.
+
+        The pool is per stratum and never summed: the two strata's quartile and
+        decile bounds are their own (the gap scales differ about twofold), so a
+        case's denominator is the stratum it was drawn from.
+        """
+        table = load_json(self.root / "v3_cases/cases.json")
+        return {
+            name: dict(entry) for name, entry in (table.get("strata") or {}).items()
+        }
+
+    def case(self, identifier: str) -> dict[str, Any]:
+        """One selection record, by `case_id` or by its `row_index`.
+
+        A row number resolves too, because `row_index` is the axis the
+        artifacts share and a speaker reading one off another view should not
+        have to translate it. Nothing else is accepted: the demo has no
+        identifier of its own to look up.
+        """
+        wanted = str(identifier).strip()
+        for case in self.cases:
+            if wanted == str(case["case_id"]) or wanted == str(case["row_index"]):
+                return dict(case)
+        raise KeyError(
+            f"SpCas9 사례 {identifier!r}이(가) 없다 "
+            f"(있는 사례: {', '.join(self.case_ids())})"
+        )
+
+    def case_annotation(self, identifier: str) -> dict[str, Any]:
+        """The attribution annotation for a case, addressed by `case_id`.
+
+        `cases_annotated.json` points back at `cases.json` by `case_id` and
+        holds no selection score, so this is the only direction the join runs:
+        the selection is looked up first and its ID used here.
+        """
+        case_id = str(self.case(identifier)["case_id"])
+        for annotation in self.cases_annotated["cases"]:
+            if str(annotation["case_id"]) == case_id:
+                return dict(annotation)
+        raise ArtifactMismatch(f"주석 표에 사례 {case_id}이(가) 없다")
+
+    @staticmethod
+    def _in_population(
+        method: str, row_id: int, axis_name: str, rows: int, present: bool
+    ):
+        """One method's presence, with the absence worded from its own population."""
+        return MethodPresence(
+            method=method,
+            present=present,
+            population=f"{axis_name} {rows:,}행",
+            reason=None if present else f"이 행은 {axis_name} {rows:,}행에 없음",
+        )
+
+    def case_methods(self, identifier: str) -> tuple[MethodPresence, ...]:
+        """Which methods cover this case's row, each absence with its reason."""
+        row_id = int(self.case(identifier)["row_index"])
+        annotation = self.case_annotation(identifier)
+
+        # The annotation and the IG row axis are two records of the same fact.
+        # If they disagree, neither reason on screen would be true, so this is
+        # a mismatch to raise rather than a sentence to print.
+        annotated = annotation.get("ig") is not None
+        on_axis = self.has_ig(row_id)
+        if annotated != on_axis:
+            raise ArtifactMismatch(
+                f"row_index {row_id}: 사례 주석의 IG 유무({annotated})와 "
+                f"IG 고정 명단 수록 여부({on_axis})가 다르다"
+            )
+
+        return (
+            self._in_population(
+                "예측",
+                row_id,
+                "예측 표",
+                len(self._predictions),
+                row_id in self._predictions,
+            ),
+            self._in_population(
+                "ISM", row_id, "ISM sweep", self.ism_rows.rows, row_id in self.ism_rows
+            ),
+            MethodPresence(
+                method="IG",
+                present=on_axis,
+                population=f"IG 고정 명단 {self.ig_rows.rows:,}행",
+                reason=None if on_axis else self.ig_absence(row_id).reason,
+            ),
+            MethodPresence(
+                method="rollout",
+                present=row_id in self.rollout_rows,
+                population=f"rollout 모집단 {self.rollout_rows.rows:,}행",
+                reason=(
+                    None
+                    if row_id in self.rollout_rows
+                    else f"이 행은 rollout 모집단 {self.rollout_rows.rows:,}행에 없음"
+                ),
+                limit=(
+                    "head 축이 없어 head별 읽기를 줄 수 없다 (ADR 0008). 그래서 "
+                    "사례 주석의 입력이 아니고, 이 뷰에 head별 값이 없다."
+                ),
+            ),
+        )
 
     # -- axes --------------------------------------------------------------- #
 
@@ -512,6 +663,11 @@ class SpCas9Reader:
         )
         return predictions
 
+    @property
+    def split_rows(self) -> int:
+        """How many rows the three split files hold together: the role's denominator."""
+        return len(self._split)
+
     def split_role(self, row_id: int) -> str | None:
         """`train` / `val` / `test`, or None for a row the split files do not hold.
 
@@ -584,7 +740,11 @@ class SpCas9Reader:
         return IgAbsence(
             row_id=int(row_id),
             rows=self.ig_rows.rows,
-            reason=f"이 행은 IG 고정 명단 {self.ig_rows.rows}행에 없음",
+            reason=(
+                f"이 행은 IG 고정 명단 {self.ig_rows.rows:,}행에 없음 "
+                "(명단은 사례 선정 전에 자기 seed로 고정됐고, 사례를 명단에 맞춰 "
+                "고르거나 버리지 않았다)"
+            ),
         )
 
     def ig_tokens(self, row_id: int, head: str) -> np.ndarray:
@@ -833,6 +993,146 @@ class Cas12aReader:
                 }
                 for record in csv.DictReader(handle)
             ]
+
+    # -- cases, identified as the source data identifies them ---------------- #
+
+    def case_ids(self) -> tuple[str, ...]:
+        """`<source_row>:<role>` for each described case, in the table's order.
+
+        The source data identifies a case by its row and the role it was
+        selected for, and a row can hold more than one role, so both are needed
+        to address one. The demo joins them with a colon and mints nothing.
+        """
+        return tuple(f"{case['source_row']}:{case['role']}" for case in self.cases)
+
+    def case(self, identifier: str) -> dict[str, Any]:
+        """One case, by `<source_row>:<role>` or by the row alone where unique."""
+        wanted = str(identifier).strip()
+        matches = [
+            case
+            for case in self.cases
+            if wanted == f"{case['source_row']}:{case['role']}"
+            or wanted == str(case["source_row"])
+        ]
+        if not matches:
+            raise KeyError(
+                f"Cas12a 사례 {identifier!r}이(가) 없다 "
+                f"(있는 사례: {', '.join(self.case_ids())})"
+            )
+        if len(matches) > 1:
+            raise KeyError(
+                f"source_row {identifier}은(는) 역할이 여럿이다: "
+                + ", ".join(f"{case['source_row']}:{case['role']}" for case in matches)
+            )
+        return dict(matches[0])
+
+    @cached_property
+    def _annotations(self) -> dict[tuple[int, str], dict[str, Any]]:
+        return {
+            (int(case["source_row"]), str(case["role"])): case
+            for case in self.cases_annotated["cases"]
+        }
+
+    def case_annotation(self, identifier: str) -> dict[str, Any]:
+        """The method-by-method annotation for one case, keyed by row *and* role.
+
+        Both parts of the key are needed: a row can be described under more
+        than one role, and the annotation records the methods per described
+        case rather than per row.
+        """
+        case = self.case(identifier)
+        key = (int(case["source_row"]), str(case["role"]))
+        if key not in self._annotations:
+            raise ArtifactMismatch(f"주석 표에 사례 {key[0]}:{key[1]}이(가) 없다")
+        return dict(self._annotations[key])
+
+    @cached_property
+    def case_categories(self) -> dict[str, dict[str, Any]]:
+        """Each role's pool and how many of it were selected.
+
+        A case list without its pool invites reading 5 cases as 5 findings:
+        5 of 16 out-of-range rows and 5 of 375 high-error rows are different
+        claims, and the pool sizes are the artifact's own.
+        """
+        return dict(load_json(self.root / "cases.json").get("categories") or {})
+
+    def case_pool(self, role: str) -> dict[str, int]:
+        """The count a role's cases were actually drawn from, and what bounded it.
+
+        `available` is the denominator, not `eligible`: the protocol sets
+        `exclude_previous`, so a later category picks from the rows an earlier
+        one did not already take - low_error's 375 eligible rows are 372 by the
+        time it draws. `eligible` is kept beside it, because the gap between
+        the two *is* the exclusion and hiding it would make the pool look
+        untouched. A role with no recorded pool is refused: inventing one, or
+        quietly falling back to the Test population, would put a denominator on
+        screen that nothing measured.
+        """
+        category = self.case_categories.get(role)
+        if not category:
+            raise ArtifactMismatch(
+                f"cases.json에 역할 {role!r}의 후보 모집단 기록이 없다"
+            )
+        if "available" not in category:
+            raise ArtifactMismatch(
+                f"역할 {role!r}의 기록에 available이 없다: 실제 분모를 적을 수 없다"
+            )
+        return {
+            "available": int(category["available"]),
+            "eligible": int(category.get("eligible", category["available"])),
+            "selected": int(category.get("selected", 0)),
+        }
+
+    def case_methods(self, identifier: str) -> tuple[MethodPresence, ...]:
+        """Each method's recorded `status` for this case, failures quoted.
+
+        The statuses are the annotation's, not re-derived: a method that ran
+        and failed records its own `failure` text, and that text is what
+        `explain` shows instead of a blank.
+        """
+        annotation = self.case_annotation(identifier)
+        methods = annotation.get("methods") or {}
+        population = f"Test 전수 {self.prediction_rows.rows:,}행"
+        entries = [
+            MethodPresence(
+                method="예측",
+                present=int(annotation["source_row"]) in self._predictions,
+                population=population,
+                reason=(
+                    None
+                    if int(annotation["source_row"]) in self._predictions
+                    else f"이 행은 {population}에 없음"
+                ),
+            )
+        ]
+        for key, label in (("ism", "ISM"), ("ig", "IG"), ("rollout", "rollout")):
+            entry = methods.get(key)
+            if entry is None:
+                entries.append(
+                    MethodPresence(
+                        method=label,
+                        present=False,
+                        population=population,
+                        reason=f"주석 표에 {key} 항목이 없음",
+                    )
+                )
+                continue
+            status = str(entry.get("status"))
+            failure = entry.get("failure")
+            entries.append(
+                MethodPresence(
+                    method=label,
+                    present=status == "available",
+                    population=population,
+                    reason=(
+                        None
+                        if status == "available"
+                        else f"status={status}"
+                        + (f": {failure}" if failure else " (사유 기록 없음)")
+                    ),
+                )
+            )
+        return tuple(entries)
 
     # -- arrays ------------------------------------------------------------- #
 
