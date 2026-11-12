@@ -69,7 +69,13 @@ def _download_file(ref: str, dest: str) -> None:
     # id만 준 경우에도 받아지도록 fuzzy=True로 둔다.
     url = ref if ref.startswith("http") else f"https://drive.google.com/uc?id={ref}"
     print(f"[model_source] 구글 드라이브에서 내려받는 중 → {dest}")
-    gdown.download(url, dest, quiet=False, fuzzy=True)
+    # gdown 6부터 fuzzy 인자가 없어졌다(공유 링크 해석이 기본 동작이 됨).
+    # 5.x 이하에서는 fuzzy=True를 줘야 .../file/d/<id>/view 형태를 받는다.
+    import inspect
+    kwargs = {"quiet": False}
+    if "fuzzy" in inspect.signature(gdown.download).parameters:
+        kwargs["fuzzy"] = True
+    gdown.download(url, dest, **kwargs)
     if not os.path.exists(dest):
         raise RuntimeError(
             f"다운로드가 끝났는데 파일이 없습니다: {dest}\n"
