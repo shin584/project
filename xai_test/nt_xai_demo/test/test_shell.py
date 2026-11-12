@@ -114,12 +114,33 @@ def test_a_one_shot_view_without_a_nuclease_says_to_select_one(data_dir):
     assert "선택" in outcome.text
 
 
-def test_a_view_this_ticket_has_not_built_yet_names_its_ticket(repl):
+def test_no_offered_view_is_left_as_a_ticket():
+    """Every view the shell offers has a builder, for every nuclease it names."""
+    tickets = [
+        (view.name, nuclease)
+        for view in sh.VIEWS
+        for nuclease, builder in view.builders.items()
+        if isinstance(builder, str)
+    ]
+
+    assert tickets == []
+
+
+def test_a_view_a_ticket_has_not_built_yet_names_its_ticket(repl, monkeypatch):
+    """The pending-view path stays: the next view lands as a ticket first.
+
+    No view is pending now, so the mechanism is driven through a view entry
+    carrying a ticket rather than a built one.
+    """
+    pending = sh.View("rollout", "다음 티켓", builders={"cas12a": "#999"})
+    monkeypatch.setitem(sh.VIEW_BY_NAME, pending.name, pending)
     repl.execute("cas12a")
 
-    for view, ticket in (("cross", "#162"),):
-        text = repl.execute(view).text
-        assert ticket in text, view
+    outcome = repl.execute("rollout")
+
+    assert not outcome.ok
+    assert "#999" in outcome.text and "아직" in outcome.text
+    assert "주장 범위" not in outcome.text  # no claim-limit frame around nothing
 
 
 def test_agreement_takes_an_optional_head_only_where_there_are_heads(repl):
@@ -170,7 +191,7 @@ def test_a_command_that_could_not_deliver_is_marked_not_ok(repl):
     assert not repl.execute("predict").ok  # unknown command
     assert not repl.execute("report").ok  # no nuclease selected
     repl.execute("cas12a")
-    assert not repl.execute("cross").ok  # pending view
+    assert not repl.execute("cross SpCas9").ok  # `cross` takes no argument
     assert repl.execute("report").ok
     assert repl.execute("help").ok
 
@@ -192,7 +213,7 @@ def test_cross_does_not_ask_for_a_nuclease(repl):
     text = repl.execute("cross").text
 
     assert "먼저 선택" not in text
-    assert "#162" in text
+    assert "주장 범위" in text  # a rendered view, not a prompt to select
 
 
 def test_the_loop_greets_once_and_stops_on_quit(data_dir):
@@ -215,11 +236,3 @@ def test_the_loop_ends_quietly_on_end_of_input(data_dir):
         raise EOFError
 
     assert sh.repl(data_dir=data_dir, read=read, write=lambda text: None) == 0
-
-
-def test_a_pending_view_says_pending_rather_than_printing_an_empty_frame(repl):
-    repl.execute("cas12a")
-    text = repl.execute("cross").text
-
-    assert "아직" in text
-    assert "주장 범위" not in text  # no claim-limit frame around nothing

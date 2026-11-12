@@ -687,3 +687,121 @@ def agreement(reader: Cas12aReader, *arguments: str) -> str:
         title=AGREEMENT_TITLE,
         questions=(*AGREEMENT_QUESTIONS, AGREEMENT_NOT_ASKED),
     )
+
+
+# --------------------------------------------------------------------------- #
+# cross
+# --------------------------------------------------------------------------- #
+
+#: The population the cross finding is stated on: Test in full.
+CROSS_STRATUM = "all"
+
+
+def _top_two(profile: list[float]) -> tuple[int, int]:
+    """The largest and second-largest positions, by `render.profile_peak`'s rule."""
+    first = render.profile_peak(profile)
+    rest = [float("nan") if i == first else v for i, v in enumerate(profile)]
+    return first, render.profile_peak(rest)
+
+
+def _in_pam(position: int) -> bool:
+    return PAM[0] <= position <= PAM[1]
+
+
+def _cross_ranked(
+    reader: Cas12aReader,
+) -> tuple[dict, list[float], tuple[int, int]]:
+    """The profile entry, its values and its top two positions, read once.
+
+    Refused if the most sensitive position is outside the PAM: the finding
+    would not hold for these artifacts, and stating it anyway is the kind of
+    claim this view exists to keep honest. The clause and the evidence section
+    both come through here, so neither can be built from a profile the other
+    would have refused.
+    """
+    entry = reader.position_profile(CROSS_STRATUM)
+    profile = [float(value) for value in entry["mean_abs_raw_delta"]]
+    ranked = _top_two(profile)
+    if not _in_pam(ranked[0]):
+        raise render.RenderRefused(
+            f"NT-Cas12a {CROSS_STRATUM}의 최대 민감 위치 {ranked[0]}이 PAM "
+            f"{PAM[0]}-{PAM[1]} 밖이다: 교차 소견이 이 자료에서 성립하지 않는다"
+        )
+    return entry, profile, ranked
+
+
+def cross_sections(reader: Cas12aReader) -> tuple[render.Section, ...]:
+    """Cas12a's half of the `cross` finding: its own section, never a shared table."""
+    entry, profile, ranked = _cross_ranked(reader)
+    stratum = _stratum(
+        reader,
+        CROSS_STRATUM,
+        per_group=lambda group: str(
+            render.profile_peak(reader.position_profile(group)["mean_abs_raw_delta"])
+        ),
+        effect="TTTV·TTTT 두 군의 행을 합친 평균 프로파일이다 (군별 최대 위치)",
+    )
+    denominator = render.Denominator(
+        rows=entry["n_available"],
+        unit="행",
+        note=f"Test 전수 요구 {entry['requested']:,}행 중 ISM 성공 행",
+    )
+    figures = tuple(
+        render.Figure(
+            name=f"민감 위치 {rank}위",
+            value=(
+                f"{position} ({'PAM 안' if _in_pam(position) else 'PAM 밖'}, "
+                f"값 {render.format_value(profile[position])})"
+            ),
+            stratum=stratum,
+            head=reader.head,
+            statistic=(
+                "ISM 위치 프로파일 (위치별 평균 |raw delta|, WT 슬롯 제외 유효 대체 "
+                "염기 평균, 집단 평균)"
+            ),
+            denominator=denominator,
+            scale="fraction (native raw output)",
+        )
+        for rank, position in enumerate(ranked, start=1)
+    )
+    return (
+        render.Section(
+            title=f"근거: NT-Cas12a — {CROSS_STRATUM}",
+            notes=(f"PAM {PAM[0]}-{PAM[1]} (TTTV)은 protospacer의 5′ 쪽이다.",),
+            figures=figures,
+        ),
+    )
+
+
+def cross_finding(reader: Cas12aReader) -> str:
+    """The Cas12a clause of the finding, worded from the positions it found.
+
+    Where the second position is outside the PAM, the clause says so for that
+    position rather than naming only the one inside: a sentence that lists the
+    inside positions and leaves the other out would read as if both were in
+    the PAM while the evidence below it prints `PAM 밖`.
+    """
+    _, _, ranked = _cross_ranked(reader)
+    if sorted(ranked) == [PAM[1] - 1, PAM[1]]:
+        where = f"PAM {PAM[0]}-{PAM[1]}의 마지막 두 염기"
+    else:
+        where = f"PAM {PAM[0]}-{PAM[1]} 기준 " + ", ".join(
+            f"{position}은 {'안' if _in_pam(position) else '밖'}" for position in ranked
+        )
+    return f"NT-Cas12a: 가장 민감한 두 위치 {ranked[0]}·{ranked[1]} ({where}). PAM은 5′ 쪽."
+
+
+def cross_agreement_mention(reader: Cas12aReader) -> str:
+    """Cas12a's IG-ISM agreement, named only to say what population it is over.
+
+    Like SpCas9's, it carries its own provenance in prose - population, head,
+    statistic kind and denominator - because this one is deliberately not a
+    `render.Figure`.
+    """
+    entry = reader.agreement_primary(CROSS_STRATUM)
+    return (
+        f"NT-Cas12a {render.format_value(entry['median'])}는 Test 전수"
+        f"({entry['n_valid']:,}행, TTTV·TTTT 풀링)의 t1-t5 토큰 기준"
+        f"({entry['primary']}), head={reader.head}, IG-ISM "
+        "spearman_rank_correlation의 행별 분포 median이다"
+    )

@@ -18,7 +18,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import cas12a_views, render, spcas9_views
+from . import cas12a_views, cross_views, render, spcas9_views
 from .reader import DEFAULT_DATA_DIR, Cas12aReader, SpCas9Reader
 
 UNSELECTED_PROMPT = "(선택 안 됨)"
@@ -84,7 +84,10 @@ VIEWS: tuple[View, ...] = (
         "cross",
         "두 모델의 교차 소견 (뉴클레아제 선택과 무관)",
         needs_nuclease=False,
-        builders={"cas12a": "#162", "spcas9": "#162", "": "#162"},
+        # One builder under "" for every selection: `cross` stands outside a
+        # single analysis, so it is handed both readers and prints the same
+        # text whichever nuclease is selected, or none.
+        builders={"": cross_views.cross},
     ),
 )
 
@@ -195,16 +198,28 @@ class Shell:
                 f"({view.name} 뷰는 한 분석 안에서만 뜻이 있다.)",
                 ok=False,
             )
-        builder = view.builders.get(self.selected or "")
+        # A view that needs no nuclease is keyed under "" and is handed one
+        # reader per nuclease, not the selected one, so its text is identical
+        # whichever nuclease is selected or none is - the point of such a view
+        # being that neither analysis is the frame for it.
+        builder = view.builders.get("" if not view.needs_nuclease else self.selected)
         if builder is None:
             return Outcome(f"{view.name} 뷰는 {self.selected}에 없다.", ok=False)
         if isinstance(builder, str):  # a ticket, not a builder
             return Outcome(
                 f"{view.name} 뷰는 아직 만들지 않았다 ({builder}).", ok=False
             )
+        if not view.needs_nuclease and arguments:
+            return Outcome(
+                f"{view.name}은 인자를 받지 않는다 (뉴클레아제 선택과 무관하다): "
+                f"{' '.join(arguments)}",
+                ok=False,
+            )
         if view.argument_required and not arguments:
             return Outcome(f"{view.name}은 인자를 받는다: {view.usage}", ok=False)
         try:
+            if not view.needs_nuclease:
+                return Outcome(builder(**{name: self.reader(name) for name in READERS}))
             return Outcome(builder(self.reader(self.selected or ""), *arguments))
         except (render.RenderRefused, FileNotFoundError, KeyError) as error:
             return Outcome(f"{view.name} 뷰를 낼 수 없다: {error}", ok=False)

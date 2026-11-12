@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from xai_test.nt_xai_demo import cas12a_views, spcas9_views
+from xai_test.nt_xai_demo import cas12a_views, cross_views, spcas9_views
 from xai_test.nt_xai_demo import reader as rd
 
 
@@ -262,3 +262,39 @@ def test_the_real_cas12a_profile_peaks_at_position_7_in_every_population():
     assert len(peaks) == 3
     assert all(line.strip().startswith("최대 민감 위치: 7 (PAM 안") for line in peaks)
     assert cas12a.agreement_primary("all")["median"] == pytest.approx(0.4)
+
+
+def test_the_real_cross_view_states_the_four_spcas9_figures_and_their_ranges():
+    """#162's four SpCas9 numbers, their denominator, and the library counterparts.
+
+    The four (ISM 0.115 against 0.016-0.033, token IG 2.024 against 0.14-0.27)
+    are generalisation-stratum means over the IG fixed list for the SpCas9
+    head. The denominator of that stratum is printed with every one of them,
+    and the PAM library stratum's own values (ISM 0.0996 / IG 1.090) are shown
+    apart rather than averaged in.
+    """
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
+    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
+    text = cross_views.cross(spcas9=spcas9, cas12a=cas12a)
+
+    for number in ("0.1154", "0.01629", "0.03339", "2.024", "0.1401", "0.2741"):
+        assert number in text, number
+    library = [line for line in text.splitlines() if "층=pam_library" in line]
+    assert len(library) == 2  # the ISM and token IG counterparts, apart
+    assert "토큰(24-29): 0.09962" in text and "토큰(24-29): 1.09" in text
+    provenance = [line for line in text.splitlines() if "분모=" in line]
+    generalisation = [line for line in provenance if "층=generalisation" in line]
+    assert len(generalisation) == 2  # ISM and token IG, nothing else
+    for line in generalisation:
+        assert "분모=200행·193타깃" in line and "head=SpCas9 /" in line, line
+        assert "3,851행" in line and "400행" in line, line  # what it is not
+
+
+def test_the_real_cross_view_states_cas12as_two_pam_positions():
+    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
+    text = cross_views.cross(spcas9=spcas9, cas12a=cas12a)
+
+    assert "위치 7·6 (PAM 4-7의 마지막 두 염기)" in text
+    assert "민감 위치 1위: 7 (PAM 안, 값 0.2405)" in text
+    assert "민감 위치 2위: 6 (PAM 안, 값 0.1341)" in text

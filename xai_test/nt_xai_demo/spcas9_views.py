@@ -933,3 +933,160 @@ def agreement(reader: SpCas9Reader, head: str | None = None) -> str:
         title=AGREEMENT_TITLE,
         questions=(*AGREEMENT_QUESTIONS, AGREEMENT_NOT_ASKED),
     )
+
+
+# --------------------------------------------------------------------------- #
+# cross
+# --------------------------------------------------------------------------- #
+
+#: The stratum the cross finding is stated on. The PAM library stratum's
+#: counterparts are shown apart: its 200 rows are variants of 5 targets.
+CROSS_STRATUM = "generalisation"
+
+
+def _pam_token(reader: SpCas9Reader) -> tuple[int, str]:
+    """The PAM-bearing token's index and its span, as the IG sidecar declares it."""
+    _pam(reader)  # the PAM has to sit inside the token before the token stands for it
+    index = reader.token_names.index(PAM_TOKEN)
+    start, end = reader.token_boundaries[index]
+    return index, f"{start}-{end}"
+
+
+#: The two methods the PAM token is read under, with how each is stated.
+_CROSS_METHODS = (
+    (
+        "ISM",
+        "ism_token_profile",
+        "위치별 평균 |ISM delta|(WT 슬롯 제외)의 토큰 평균, 층 평균",
+    ),
+    ("IG", "ig_token_profile", "토큰 5개의 |IG attribution|, 층 평균"),
+)
+
+
+def _pam_token_peaks(reader: SpCas9Reader, stratum: str) -> bool:
+    """Whether the PAM token is the largest of the five under *both* methods.
+
+    This is the finding's precondition, read on its own so the clause in the
+    finding section and the evidence section under it are checked against the
+    same fact - a sentence printed on one call order and a refusal raised on
+    another is exactly the drift that would make the screen lie.
+    """
+    index, _ = _pam_token(reader)
+    entry = reader.validation_figures(stratum, reader.primary_head)
+    return all(
+        entry[key][index] > max(entry[key][:index] + entry[key][index + 1 :])
+        for _, key, _ in _CROSS_METHODS
+    )
+
+
+def _require_pam_token_peak(reader: SpCas9Reader, stratum: str) -> None:
+    """Refuse the finding on a stratum where it does not hold."""
+    if not _pam_token_peaks(reader, stratum):
+        raise render.RenderRefused(
+            f"SpCas9 {stratum} 층에서 {PAM_TOKEN} 토큰이 ISM·IG 모두의 최대가 "
+            "아니다: 교차 소견이 이 자료에서 성립하지 않는다"
+        )
+
+
+def _cross_figures(
+    reader: SpCas9Reader, stratum: str, *, note: str
+) -> tuple[render.Figure, ...]:
+    """The PAM token's mean ISM and IG beside the range of the other four.
+
+    Whether it is the largest of the five is printed with each value, so the
+    reader of the PAM library section - shown as a counterpart, not as
+    evidence - sees that fact measured rather than assumed from the section
+    above it.
+    """
+    head = reader.primary_head
+    entry = reader.validation_figures(stratum, head)
+    index, span = _pam_token(reader)
+    denominator = _stratum_denominator(entry, note=note)
+    scales = {"ISM": "fraction", "IG": reader.ig_scale}
+    figures: list[render.Figure] = []
+    for method, key, statistic in _CROSS_METHODS:
+        profile = [float(value) for value in entry[key]]
+        others = profile[:index] + profile[index + 1 :]
+        largest = profile[index] > max(others)
+        figures.append(
+            render.Figure(
+                name=f"{method}: {PAM_TOKEN} 토큰({span})",
+                value=profile[index],
+                stratum=stratum,
+                head=head,
+                statistic=statistic,
+                denominator=denominator,
+                scale=scales[method],
+                note=(
+                    f"나머지 토큰 {len(others)}개: "
+                    f"{render.format_value(min(others))}-{render.format_value(max(others))}"
+                    f" — 다섯 토큰 중 최대: {render.format_value(largest)}"
+                ),
+            )
+        )
+    return tuple(figures)
+
+
+def cross_sections(reader: SpCas9Reader) -> tuple[render.Section, ...]:
+    """SpCas9's half of the `cross` finding: its own sections, never a shared table.
+
+    The finding is stated on the generalisation stratum and refused if the
+    PAM token is not the most sensitive one there under both ISM and IG. The
+    PAM library stratum's values are a separate section, so its 5-target
+    population is never read as part of the finding's denominator.
+    """
+    _, span = _pam_token(reader)
+    _require_pam_token_peak(reader, CROSS_STRATUM)
+    sweep = (
+        f"IG 고정 명단의 {CROSS_STRATUM} 층 평균 — ISM sweep {reader.ism_rows.rows:,}행이나 "
+        f"IG {reader.ig_rows.rows:,}행 전체의 값이 아니다"
+    )
+    finding = _cross_figures(reader, CROSS_STRATUM, note=sweep)
+    library = _cross_figures(
+        reader,
+        "pam_library",
+        note="PAM 실험 층 — 위 generalisation 값과 합치지 않는다 (pooling: forbidden)",
+    )
+    return (
+        render.Section(
+            title=f"근거: 9-Hydra v3 SpCas9 — {CROSS_STRATUM} 층",
+            notes=(
+                (
+                    f"PAM {PAM[0]}-{PAM[1]}은 {PAM_TOKEN} 토큰({span})의 앞 세 "
+                    "염기이고 protospacer의 3′ 쪽이다."
+                ),
+            ),
+            figures=finding,
+        ),
+        render.Section(
+            title="근거: 9-Hydra v3 SpCas9 — pam_library 층 (대응값, 따로 표시)",
+            figures=library,
+        ),
+    )
+
+
+def cross_agreement_mention(reader: SpCas9Reader) -> str:
+    """SpCas9's IG-ISM agreement, named only to say what population it is over.
+
+    It carries its own provenance in prose - stratum, head, statistic kind and
+    denominator - because it is deliberately not a `render.Figure`: a figure
+    would put it in the shape of a displayed result, which the section it
+    belongs to exists to refuse.
+    """
+    entry = reader.validation_figures(CROSS_STRATUM, reader.primary_head)
+    return (
+        f"SpCas9 {render.format_value(entry['per_row']['median'])}은 {CROSS_STRATUM} 층"
+        f"({entry['rows']:,}행·{entry['distinct_protospacers']:,}타깃)의 "
+        f"{reader.primary_head} head magnitude 기준, 5개 토큰 IG-ISM "
+        f"{entry['statistic']}의 행별 분포 median이다"
+    )
+
+
+def cross_finding(reader: SpCas9Reader) -> str:
+    """The SpCas9 clause of the finding. Refused where it does not hold."""
+    _, span = _pam_token(reader)
+    _require_pam_token_peak(reader, CROSS_STRATUM)
+    return (
+        f"9-Hydra v3 SpCas9: 다섯 토큰 중 {PAM_TOKEN}({span})가 ISM·IG 모두에서 "
+        f"가장 크다 ({CROSS_STRATUM} 층, {reader.primary_head} head). PAM은 3′ 쪽."
+    )
