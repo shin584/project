@@ -415,7 +415,9 @@ def test_the_per_row_reads_views_need_are_each_keyed_by_id(spcas9, cas12a):
     assert len(spcas9.reference_sequence(row)) == fx.POSITIONS
     assert set(spcas9.reference_sequence(row)) <= set(rd.BASES)
     assert spcas9.rollout(row).shape == (5, 5)
-    assert spcas9.noise_floor_by_head("SpCas9")["median"] == pytest.approx(0.06)
+    assert spcas9.noise_floor_by_head("SpCas9")["median"] == pytest.approx(
+        fx.NOISE_FLOOR_MEDIAN["SpCas9"]
+    )
     with pytest.raises(rd.UnknownHead):
         spcas9.noise_floor_by_head("xCas")
 

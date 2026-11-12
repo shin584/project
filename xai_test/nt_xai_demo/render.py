@@ -25,6 +25,10 @@ from typing import Any
 
 CLAIM_LIMIT_HEADING = "주장 범위"
 
+#: Each `report` ends with this one line and no other view pointer. Defined
+#: here because both nucleases' reports must print the identical pointer.
+CROSS_POINTER = "교차 소견은 `cross`"
+
 
 class RenderRefused(ValueError):
     """A figure or view is missing something that must not be left off."""

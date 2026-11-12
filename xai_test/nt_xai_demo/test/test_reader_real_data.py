@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from xai_test.nt_xai_demo import reader as rd
+from xai_test.nt_xai_demo import spcas9_views
 
 
 def _reader(cls, *needed: str):
@@ -117,3 +118,31 @@ def test_spcas9_claim_limit_is_one_statement_across_its_artifacts():
     assert "physical DNA/protein" in spcas9.claim_limit
     assert spcas9.analysed_heads == ("SpCas9", "SpCas9-NG", "evoCas9")
     assert spcas9.ism_heads.width == 9 and spcas9.ig_heads.width == 3
+
+
+def test_the_real_spcas9_report_shows_only_the_three_analysed_heads():
+    """The six stored-but-unanalysed heads must not reach the screen (#155).
+
+    The synthetic fixture pins this too, but the real ISM archive is where the
+    nine actually live, and the head names come from it.
+    """
+    spcas9 = _reader(rd.SpCas9Reader)
+    report = spcas9_views.report(spcas9)
+
+    unanalysed = set(spcas9.ism_heads.names) - set(spcas9.analysed_heads)
+    assert len(unanalysed) == 6
+    for head in unanalysed:
+        assert head not in report, head
+    for head in spcas9.analysed_heads:
+        assert head in report, head
+
+
+def test_the_real_spcas9_report_quotes_the_per_head_floor_not_the_pooled_one():
+    spcas9 = _reader(rd.SpCas9Reader)
+    report = spcas9_views.report(spcas9)
+    pooled = float(spcas9.noise_floor["pooled"]["median"])
+
+    for head in spcas9.analysed_heads:
+        own = float(spcas9.noise_floor_by_head(head)["median"])
+        assert f"{own:.4g}" in report, head
+    assert f"{pooled:.4g}" not in report

@@ -124,8 +124,15 @@ def test_a_view_this_ticket_has_not_built_yet_names_its_ticket(repl):
     repl.execute("cas12a")
     assert "#160" in repl.execute("explain GEN-HEADGAP-02").text
 
-    repl.execute("spcas9")
-    assert "#159" in repl.execute("report").text
+
+def test_both_nucleases_have_a_built_report(repl):
+    """The two reports are the one view both nucleases carry in this ticket."""
+    for nuclease in ("cas12a", "spcas9"):
+        repl.execute(nuclease)
+        outcome = repl.execute("report")
+
+        assert outcome.ok, nuclease
+        assert "이 분석이 답한 질문" in outcome.text, nuclease
 
 
 def test_a_command_that_could_not_deliver_is_marked_not_ok(repl):

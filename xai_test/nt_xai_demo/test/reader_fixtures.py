@@ -106,6 +106,157 @@ def expected_profile(row: int, position: int, head_index: int) -> float:
     return (head_index + 1) * 0.01 + 0.2 + row * 0.001 + position * 0.0001
 
 
+#: Per-head replicate noise floors (median spread, fraction). Distinct on
+#: purpose, and the pooled median below is none of them: a report that shows
+#: the pooled value instead of the per-head ones is caught by value.
+NOISE_FLOOR_MEDIAN = {"SpCas9": 0.0637, "SpCas9-NG": 0.0697, "evoCas9": 0.0099}
+NOISE_FLOOR_POOLED_MEDIAN = 0.0531
+#: A pair's floor is the larger of its two heads' own floors.
+PAIR_FLOORS = {
+    "SpCas9_vs_SpCas9-NG": 0.0697,
+    "SpCas9_vs_evoCas9": 0.0637,
+    "SpCas9-NG_vs_evoCas9": 0.0697,
+}
+#: The pam_library stratum's rows are PAM variants of 5 targets, so its
+#: reversal rows are repeated target by target. Deliberately uneven: one target
+#: carries far more of the pool's reversals than the others.
+REVERSAL_PER_TARGET = (
+    {
+        "protospacer": "GTCGCTTCCTCTTCTCCTTC",
+        "rows": 268,
+        "reversal_rows": 18,
+        "rows_clearing_floor": 0,
+    },
+    {
+        "protospacer": "GTTCACGACGTCATGCTCAC",
+        "rows": 264,
+        "reversal_rows": 7,
+        "rows_clearing_floor": 0,
+    },
+    {
+        "protospacer": "GACCCAAGCCACGAACGAGC",
+        "rows": 258,
+        "reversal_rows": 45,
+        "rows_clearing_floor": 0,
+    },
+    {
+        "protospacer": "GGTCAGGCTCCATGTGCCGC",
+        "rows": 258,
+        "reversal_rows": 54,
+        "rows_clearing_floor": 0,
+    },
+    {
+        "protospacer": "GGCGCCCACACTCGTGCAGC",
+        "rows": 239,
+        "reversal_rows": 45,
+        "rows_clearing_floor": 0,
+    },
+)
+REVERSAL_STRATA = {
+    # stratum: rows, targets, reversal rows, rows clearing the floor
+    "generalisation": (895, 818, 13, 1),
+    "pam_library": (1287, 5, 169, 0),
+}
+
+
+def noise_floor() -> dict:
+    return {
+        "spread_definition": "max - min of a repeated 30-mer's labels for one head, "
+        "on the fraction scale.",
+        "single_constant_note": "Use by_head, not pooled.",
+        "limit_note": "The floor rests on the repeated 30-mers of one split.",
+        "label_scale": "fraction",
+        "groups": 79,
+        "rows": 379,
+        "heads": list(ANALYSED_HEADS),
+        "by_head": {
+            head: {"groups": 79, "median": median, "p90": median * 2}
+            for head, median in NOISE_FLOOR_MEDIAN.items()
+        },
+        "pooled": {"measurements": 237, "median": NOISE_FLOOR_POOLED_MEDIAN},
+        "head_floor_ratio": 7.06,
+        "intersection_rows": 3851,
+        "split_rows": 5186,
+        "repeated_groups_in_split": 779,
+        "repeated_rows_in_split": 2247,
+    }
+
+
+def _reversal_stratum(rows: int, targets: int, reversals: int, clearing: int) -> dict:
+    return {
+        "rows": rows,
+        "distinct_protospacers": targets,
+        "tau": {"rows": rows, "undefined_rows": 0, "median": 1.0},
+        "tau_negative_rows": reversals + 1,
+        "tied_rows": 2,
+        "tied_rows_with_negative_tau": 1,
+        "reversal_rows": reversals,
+        "reversal_rate": reversals / rows,
+        "inverted_pairs": {
+            pair: {
+                "rows": reversals - index,
+                "floor": floor,
+                "label_gap": {"rows": reversals - index, "median": 0.01 + index / 1000},
+                "prediction_gap": {"rows": reversals - index, "median": 0.02},
+                "rows_clearing_floor": min(clearing, 1),
+            }
+            for index, (pair, floor) in enumerate(PAIR_FLOORS.items())
+        },
+        # How far the inverted pairs sit from their own floor, in units of that
+        # floor: under 1.0 the ordering was decided inside measurement noise.
+        "gap_over_floor": {
+            "rows": reversals * 2,
+            "undefined_rows": 0,
+            "median": 0.42 if clearing else 0.15,
+        },
+        "clearing_floor": {
+            "rows": clearing,
+            "rule": "every inverted pair's measured label gap exceeds that pair's floor",
+            "pooled_rule_rows": clearing,
+        },
+    }
+
+
+def head_order_reversal() -> dict:
+    strata = {
+        name: _reversal_stratum(*shape) for name, shape in REVERSAL_STRATA.items()
+    }
+    strata["pam_library"]["qualifier"] = "observed on 5 targets"
+    strata["pam_library"]["qualifier_note"] = (
+        "This stratum's rows are PAM variants of 5 targets, so its n is 5 targets "
+        "rather than its row count, and that count is never added to the other "
+        "stratum's."
+    )
+    strata["pam_library"]["per_target"] = list(REVERSAL_PER_TARGET)
+    return {
+        "model": "9-Hydra v3",
+        "analysis": "head_order_reversal",
+        "statistic": "kendall_tau_a",
+        "heads": list(ANALYSED_HEADS),
+        "reversal_definition": "A row whose predicted ordering of the analysed "
+        "heads disagrees with their measured ordering.",
+        "selection_pool": "forbidden",
+        "selection_pool_note": "Head-order reversal is a reported result and not "
+        "a case-selection pool.",
+        "floor": {
+            "source": "v3_noise_floor.json",
+            "statistic": "median",
+            "by_head": dict(NOISE_FLOOR_MEDIAN),
+            "pair_floors": dict(PAIR_FLOORS),
+            "pair_floor_rule": "the larger of its two heads' own floors",
+            "pooled_median": NOISE_FLOOR_POOLED_MEDIAN,
+            "pooled_applied": False,
+            "gap_source": "measured_labels",
+        },
+        "label_scale": "fraction",
+        "prediction_scale": "fraction",
+        "population": {"name": "analysis_intersection", "rows": 3851},
+        "pooling": "forbidden",
+        "claim_limit": CLAIM_LIMIT,
+        "strata": strata,
+    }
+
+
 def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
     spcas9 = root / "spcas9"
     (spcas9 / "published_split").mkdir(parents=True, exist_ok=True)
@@ -257,10 +408,7 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
             },
         },
     )
-    write_json(
-        "v3_report/head_order_reversal.json",
-        {"statistic": "head_order_reversal", "claim_limit": CLAIM_LIMIT, "strata": {}},
-    )
+    write_json("v3_report/head_order_reversal.json", head_order_reversal())
     write_json(
         "v3_head_agreement/head_agreement.json",
         {
@@ -269,16 +417,7 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
             "pooling": "forbidden",
         },
     )
-    write_json(
-        "v3_noise_floor.json",
-        {
-            "spread_definition": "max - min of a repeated 30-mer's labels",
-            "label_scale": "fraction",
-            "by_head": {head: {"median": 0.06, "groups": 3} for head in ANALYSED_HEADS},
-            "pooled": {"median": 0.05},
-            "single_constant_note": "head별 값을 쓴다",
-        },
-    )
+    write_json("v3_noise_floor.json", noise_floor())
     write_json(
         "v3_cases/cases.json",
         {

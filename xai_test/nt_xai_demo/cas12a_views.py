@@ -42,8 +42,6 @@ NOT_ASKED = (
     "출력이 하나뿐이어서 두 질문이 성립하지 않는다 (SpCas9 report에만 있는 절이다)."
 )
 
-CROSS_POINTER = "교차 소견은 `cross`"
-
 # raw is the view; clipped is the second line of the same table.
 CLIPPINGS = (("raw", "기본"), ("clipped", "둘째 줄"))
 
@@ -256,5 +254,5 @@ def report(reader: Cas12aReader) -> str:
         claim_limit=reader.claim_limit,
         title=TITLE,
         questions=(*QUESTIONS, NOT_ASKED),
-        pointers=(CROSS_POINTER,),
+        pointers=(render.CROSS_POINTER,),
     )

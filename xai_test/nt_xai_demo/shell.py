@@ -18,8 +18,8 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import cas12a_views, render
-from .reader import DEFAULT_DATA_DIR, Cas12aReader
+from . import cas12a_views, render, spcas9_views
+from .reader import DEFAULT_DATA_DIR, Cas12aReader, SpCas9Reader
 
 UNSELECTED_PROMPT = "(선택 안 됨)"
 
@@ -56,7 +56,7 @@ VIEWS: tuple[View, ...] = (
     View(
         "report",
         "그 뉴클레아제의 분석 요지",
-        builders={"cas12a": cas12a_views.report, "spcas9": "#159"},
+        builders={"cas12a": cas12a_views.report, "spcas9": spcas9_views.report},
     ),
     View(
         "cases",
@@ -86,6 +86,12 @@ VIEW_BY_NAME: dict[str, View] = {view.name: view for view in VIEWS}
 
 QUIT_WORDS = ("quit", "exit", "q", "종료")
 
+#: One reader class per nuclease; the artifacts share no axis.
+READERS: dict[str, type[Cas12aReader | SpCas9Reader]] = {
+    "cas12a": Cas12aReader,
+    "spcas9": SpCas9Reader,
+}
+
 
 @dataclass(frozen=True)
 class Outcome:
@@ -108,7 +114,9 @@ class Shell:
 
     data_dir: Path = DEFAULT_DATA_DIR
     selected: str | None = None
-    _readers: dict[str, Cas12aReader] = field(default_factory=dict, repr=False)
+    _readers: dict[str, Cas12aReader | SpCas9Reader] = field(
+        default_factory=dict, repr=False
+    )
 
     # -- prompt and help ---------------------------------------------------- #
 
@@ -135,17 +143,18 @@ class Shell:
 
     # -- readers ------------------------------------------------------------ #
 
-    def reader(self, nuclease: str) -> Cas12aReader:
+    def reader(self, nuclease: str) -> Cas12aReader | SpCas9Reader:
         """The reader for one nuclease, built once per shell.
 
-        Only Cas12a has a built view in this ticket; the SpCas9 reader joins
-        when its views do (#159), so asking for it now is a programming error,
-        not a user-facing one.
+        Each nuclease has its own reader class over the same `data/`: the two
+        analyses' artifacts share no axis, and only SpCas9 has a head axis at
+        all. A name with no reader is a programming error, not a user-facing
+        one - the shell only ever asks for a nuclease it offers.
         """
-        if nuclease != "cas12a":
+        if nuclease not in READERS:
             raise KeyError(f"리더가 아직 없다: {nuclease}")
         if nuclease not in self._readers:
-            self._readers[nuclease] = Cas12aReader(self.data_dir)
+            self._readers[nuclease] = READERS[nuclease](self.data_dir)
         return self._readers[nuclease]
 
     # -- dispatch ----------------------------------------------------------- #

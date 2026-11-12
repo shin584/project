@@ -311,7 +311,15 @@ class SpCas9Reader:
 
     @cached_property
     def head_order_reversal(self) -> dict[str, Any]:
-        return load_json(self.root / "v3_report/head_order_reversal.json")
+        path = self.root / "v3_report/head_order_reversal.json"
+        report = load_json(path)
+        expect(report["pooling"], "forbidden", what="pooling", source=path)
+        # The artifact holds counts and distributions and no row list: a view
+        # may quote it as a result, never mine it for cases to show.
+        expect(
+            report["selection_pool"], "forbidden", what="selection_pool", source=path
+        )
+        return report
 
     @cached_property
     def head_agreement(self) -> dict[str, Any]:
@@ -629,6 +637,12 @@ class SpCas9Reader:
         """
         self.ig_heads.index(head)
         declared = self.validation["strata"][self.require_stratum(stratum)]
+        listed = len(self.ig_subset_rows(stratum))
+        if int(declared["rows"]) != listed:
+            raise ArtifactMismatch(
+                f"{stratum} 층: ig_ism_validation이 적은 행 수({declared['rows']})와 "
+                f"IG 고정 명단의 행 수({listed})가 다르다"
+            )
         entry = declared["by_head"][head][variant]
         return {
             "stratum": stratum,
@@ -649,6 +663,58 @@ class SpCas9Reader:
         """Replicate noise floor for one head. `single_constant_note` forbids pooling."""
         self.ism_heads.index(head)
         return dict(self.noise_floor["by_head"][head])
+
+    def reversal_stratum(self, stratum: str) -> dict[str, Any]:
+        """The recorded head-ordering reversal for one stratum. Never a combined entry.
+
+        `head_order_reversal.json` declares `"pooling": "forbidden"` like the
+        validation report does: the PAM library stratum's rows are variants of
+        5 targets, so its row count is never added to the other stratum's.
+        """
+        declared = self.head_order_reversal["strata"]
+        if self.require_stratum(stratum) not in declared:
+            raise ArtifactMismatch(
+                f"head 순서 역전에 층 {stratum!r}의 항목이 없다 "
+                f"(있는 항목: {', '.join(declared)})"
+            )
+        return dict(declared[stratum])
+
+    def reversal_floor(self) -> dict[str, Any]:
+        """The noise floor the reversal applied, checked against the floor artifact.
+
+        The reversal quotes the floor it tested label gaps against. It has to
+        be the per-head median of `v3_noise_floor.json` - `single_constant_note`
+        forbids the pooled constant, which is several times evoCas9's own - and
+        the gap it tests has to be the measured one. A quoted floor that is not
+        the artifact's per-head value is refused, not shown.
+        """
+        source = self.root / "v3_report/head_order_reversal.json"
+        floor = self.head_order_reversal["floor"]
+        expect(floor["statistic"], "median", what="floor.statistic", source=source)
+        expect(
+            floor["pooled_applied"], False, what="floor.pooled_applied", source=source
+        )
+        expect(
+            floor["gap_source"],
+            "measured_labels",
+            what="floor.gap_source",
+            source=source,
+        )
+        expect(
+            self.noise_floor["label_scale"],
+            "fraction",
+            what="label_scale",
+            source=self.root / "v3_noise_floor.json",
+        )
+        for head in self.analysed_heads:
+            quoted = float(floor["by_head"][head])
+            own = float(self.noise_floor_by_head(head)["median"])
+            if quoted != own:
+                raise ArtifactMismatch(
+                    f"head 순서 역전이 적용한 {head} 노이즈 바닥({quoted})이 "
+                    f"v3_noise_floor.json의 head별 median({own})과 다르다"
+                )
+        return dict(floor)
 
     @cached_property
     def claim_limit(self) -> str:
