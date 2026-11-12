@@ -47,6 +47,19 @@ manifest의 `derived`에 기록된다.
 Cas12a만 준비하고, manifest의 `nucleases.spcas9`에 `"status": "absent"`와 없는 파일
 목록을 쓰며, 콘솔에 SpCas9 부재를 출력한다.
 
+`absent`는 "이번 실행이 SpCas9 원본을 대조하지 않았다"는 뜻이지 "`data/spcas9/`가 비었다"는
+뜻이 아니다. 이전 manifest가 나열하고 디스크에 남아 있는 `data/spcas9/` 파일(새 clone에서는
+Git이 추적하는 경량 JSON)은 그대로 이어받는다: 파일은 stage로 옮기고, manifest 항목
+(`sha256`/`bytes`/`git`/`source`)은 이전 manifest에서 **재계산 없이** 가져온다. 원본이 없어
+고정 해시를 다시 대조할 수 없으므로, 새 해시를 찍으면 깨진 파일을 인증하게 되기 때문이다.
+이어받는 파일은 이전 manifest의 sha256과만 대조하며, 다르면 `PinMismatch`로 거부한다.
+이어받은 사실은 `nucleases.spcas9.carried_over`(`from`, `previous_status`, `files`)에
+기록되고, 콘솔에는 "기존 SpCas9 자료 N개를 유지함"으로 출력된다.
+
+`SpCas9WouldBeLost`는 복구할 수 없는 손실에만 남는다: 원본 묶음이 없는데 `data/spcas9/`에
+어느 manifest에도 없는 bulk(`.npz`/bulk csv)가 있는 경우. manifest에 있는 bulk는 위처럼
+이어받고, 경량 JSON은 Git에서 복원되므로 거부할 이유가 없다.
+
 | 배치할 로컬 경로 | 바이트 | sha256 | 사본 위치 |
 |---|---:|---|---|
 | `xai_test/SpCas9_NT_analysis/artifacts/v3_ism/ism.npz` | 16,922,326 | `9cc7b78c9c280a427a560e37ef3096f171cd38ee322550f37902d74ce11abe5b` | Drive `MyDrive/SpCas9/spcas9_v3/artifacts/v3_ism/ism.npz` |

@@ -7,7 +7,10 @@ Two sources, one destination (`xai_test/nt_xai_demo/data/`), one manifest:
   never extracted. `agreement.json` is sliced by key selection only.
 * SpCas9 (9-Hydra v3) — copied from the in-place artifacts and the published
   split. The bulk part of it is not in Git; when it is absent, only Cas12a is
-  prepared and the absence is reported, not hidden.
+  prepared and the absence is reported, not hidden. Whatever `spcas9/` files an
+  earlier manifest certified and are still on disk (on a clone, the Git-tracked
+  light JSON) are carried over with that manifest's entries, not re-hashed:
+  without the bundle there is no source pin to certify a new hash against.
 
 Order matters: every hash the sources already pin (archive audit, sidecar
 digests, checksum files, `consumed` digests) is compared against the source
@@ -176,7 +179,11 @@ class MissingSource(PrepareRefused):
 
 
 class SpCas9WouldBeLost(PrepareRefused):
-    pass
+    """Bulk under `spcas9/` that no manifest lists, with no bundle to rebuild it.
+
+    Listed files are carried over instead, and Git-tracked light files can be
+    restored from Git; only unlisted bulk would be lost for good.
+    """
 
 
 class PinMismatch(PrepareRefused):
@@ -200,14 +207,20 @@ class PrepareReport:
     cas12a_pins: int
     spcas9_pins: int
     spcas9_missing: list[str] = field(default_factory=list)
+    spcas9_carried: list[str] = field(default_factory=list)
 
     def render(self) -> str:
         lines = [f"Cas12a: 준비됨 (원본 고정 해시 {self.cas12a_pins}개 대조 통과)"]
         if self.spcas9_missing:
             lines.append(
-                "SpCas9: 부재 — 원본 묶음이 없어 준비하지 않았습니다. 없는 원본:"
+                "SpCas9: 원본 묶음 부재 — 새로 준비하지 않았습니다. 없는 원본:"
             )
             lines += [f"  - {name}" for name in self.spcas9_missing]
+            if self.spcas9_carried:
+                lines.append(
+                    f"  기존 SpCas9 자료 {len(self.spcas9_carried)}개를 유지함 "
+                    "(해시는 이전 manifest의 기록 그대로; 원본 고정 해시 대조는 하지 않음)"
+                )
             lines.append(
                 "  복원 조건: Cas12a ZIP + SpCas9 원본 묶음 (xai_test/nt_xai_demo/DATA.md)"
             )
@@ -471,6 +484,83 @@ def _spcas9(sources: Sources) -> tuple[list[Pin], dict[str, Path], dict[str, str
     return pins, copies, checked
 
 
+def _previous_manifest(data_dir: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads((data_dir / MANIFEST).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _carry_over(
+    data_dir: Path, previous: dict[str, Any]
+) -> tuple[list[Pin], dict[str, dict[str, Any]]]:
+    """The `spcas9/` files to keep when the bundle is absent, and their pins.
+
+    A file is kept, with its previous manifest entry, when that entry lists it
+    and it is on disk; a listed file that is not on disk (bulk on a clone) is not
+    there to keep. Each kept file is compared with its recorded sha256 — the only
+    pin left — so a broken file is refused, never re-certified. Bulk on disk that
+    no entry lists can be neither kept nor rebuilt, so `prepare` refuses.
+    """
+    listed = {
+        name: entry
+        for name, entry in previous.get("files", {}).items()
+        if name.startswith("spcas9/")
+    }
+    kept = {name: e for name, e in listed.items() if (data_dir / name).is_file()}
+    root = data_dir / "spcas9"
+    on_disk = (
+        path.relative_to(data_dir).as_posix()
+        for path in (root.rglob("*") if root.is_dir() else ())
+        if path.is_file()
+    )
+    unlisted = sorted(n for n in on_disk if is_bulk(n) and n not in listed)
+    if unlisted:
+        raise SpCas9WouldBeLost(
+            "SpCas9 원본 묶음이 없고, data/spcas9/에 manifest에 없는 bulk 자료가 있어 "
+            "덮어쓰지 않았습니다 (유지할 근거 해시도, 다시 만들 원본도 없음). "
+            "묶음을 복원하거나 이 파일을 옮긴 뒤 다시 실행하십시오 "
+            "(xai_test/nt_xai_demo/DATA.md):\n"
+            + "\n".join(f"  - {name}" for name in unlisted)
+        )
+    pins = [
+        Pin(
+            f"{name} sha256 (이전 manifest)",
+            entry.get("sha256"),
+            sha256_file(data_dir / name),
+        )
+        for name, entry in sorted(kept.items())
+    ]
+    return pins, kept
+
+
+def _absent_spcas9(
+    missing: list[str], previous: dict[str, Any], carried: dict[str, Any]
+) -> dict[str, Any]:
+    """`nucleases.spcas9` without the bundle; `carried_over` only when files were kept.
+
+    `verify` reads only `files` and the reader never reads `nucleases`, so
+    `status` stays `"absent"` (the bundle was not checked this run) and the kept
+    files are named beside it instead of under a third status value.
+    """
+    record: dict[str, Any] = {"status": "absent", "missing": missing}
+    if carried:
+        record["carried_over"] = {
+            "from": "이전 manifest (이 실행 전의 data/manifest.json)",
+            "previous_status": previous.get("nucleases", {})
+            .get("spcas9", {})
+            .get("status"),
+            "note": (
+                "원본 묶음이 없어 새로 준비하지 않았다. 아래 파일은 이전 manifest의 "
+                "항목(sha256/bytes/git/source)을 그대로 이어받았고, 그 sha256과의 "
+                "일치만 확인했다 (원본 고정 해시 대조는 이번 실행에서 하지 않음)."
+            ),
+            "files": sorted(carried),
+        }
+    return record
+
+
 def _write_tree(
     stage: Path,
     written: dict[str, bytes],
@@ -501,10 +591,13 @@ def prepare(
 ) -> PrepareReport:
     """Check every source pin, then (only then) write the data and its manifest.
 
+    Without the SpCas9 bundle, the `spcas9/` files an earlier manifest lists and
+    that are on disk are carried over with their recorded entries.
+
     Raises a `PrepareRefused` without touching `data_dir` when a Cas12a source
-    is missing, when any pin disagrees, or when an absent SpCas9 bundle would
-    replace SpCas9 data an earlier run prepared (on a clone, the committed
-    `data/spcas9/` copies).
+    is missing, when any pin disagrees (a carried-over file against its previous
+    entry included), or when an absent SpCas9 bundle would delete `spcas9/`
+    bulk that no manifest lists.
     """
     sources = sources or Sources()
     data_dir = Path(data_dir)
@@ -523,15 +616,11 @@ def prepare(
     spcas9_pins, spcas9_files, spcas9_checked = (
         ([], {}, {}) if missing else _spcas9(sources)
     )
-    failed = [p for p in [*cas12a_pins, *spcas9_pins] if not p.ok]
+    previous = _previous_manifest(data_dir) if missing else {}
+    carry_pins, carried = _carry_over(data_dir, previous) if missing else ([], {})
+    failed = [p for p in [*cas12a_pins, *spcas9_pins, *carry_pins] if not p.ok]
     if failed:
         raise PinMismatch(failed)
-    if missing and _previous_spcas9_status(data_dir) == "prepared":
-        raise SpCas9WouldBeLost(
-            "SpCas9 원본 묶음이 없는데 기존 data/에 SpCas9 자료가 있어 덮어쓰지 않았습니다. "
-            "묶음을 복원한 뒤 다시 실행하십시오 (xai_test/nt_xai_demo/DATA.md). 없는 원본:\n"
-            + "\n".join(f"  - {name}" for name in missing)
-        )
 
     prefix = sources.cas12a_report_prefix
 
@@ -547,11 +636,24 @@ def prepare(
     stage = Path(tempfile.mkdtemp(prefix=".prepare-", dir=data_dir.parent))
     try:
         files = _write_tree(stage, cas12a_files, spcas9_files, origin)
+        for name, entry in carried.items():
+            target = stage / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(data_dir / name, target)
+            files[name] = entry
+        files = dict(sorted(files.items()))
         # The copies are hashed again; a source that changed after its pins
         # were checked must not be certified by the new manifest.
         changed = [
             Pin(f"{name} 복사본 sha256 (대조 시점)", value, files[name]["sha256"])
             for name, value in spcas9_checked.items()
+        ] + [
+            Pin(
+                f"{name} 복사본 sha256 (이전 manifest)",
+                entry["sha256"],
+                sha256_file(stage / name),
+            )
+            for name, entry in carried.items()
         ]
         if any(not pin.ok for pin in changed):
             raise PinMismatch([pin for pin in changed if not pin.ok])
@@ -567,7 +669,7 @@ def prepare(
                     "pins_checked": [p.name for p in cas12a_pins],
                 },
                 "spcas9": (
-                    {"status": "absent", "missing": missing}
+                    _absent_spcas9(missing, previous, carried)
                     if missing
                     else {
                         "status": "prepared",
@@ -596,15 +698,8 @@ def prepare(
         cas12a_pins=len(cas12a_pins),
         spcas9_pins=len(spcas9_pins),
         spcas9_missing=missing,
+        spcas9_carried=sorted(carried),
     )
-
-
-def _previous_spcas9_status(data_dir: Path) -> str | None:
-    try:
-        payload = json.loads((data_dir / MANIFEST).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    return payload.get("nucleases", {}).get("spcas9", {}).get("status")
 
 
 def verify(data_dir: Path = DEFAULT_DATA_DIR) -> list[str]:

@@ -88,22 +88,119 @@ def test_missing_spcas9_bundle_prepares_cas12a_only_and_reports_absence(tmp_path
     assert payload["nucleases"]["spcas9"]["status"] == "absent"
     assert "v3_ism/ism.npz" in " ".join(payload["nucleases"]["spcas9"]["missing"])
     assert not any(name.startswith("spcas9/") for name in payload["files"])
+    assert "carried_over" not in payload["nucleases"]["spcas9"]  # nothing to carry
     assert payload["nucleases"]["cas12a"]["status"] == "prepared"
     assert report.spcas9_missing
     text = report.render()
     assert "SpCas9" in text and "부재" in text
 
 
-def test_absent_spcas9_bundle_never_replaces_previously_prepared_spcas9_data(tmp_path):
+def _spcas9_entries(payload):
+    return {k: v for k, v in payload["files"].items() if k.startswith("spcas9/")}
+
+
+def _as_fresh_clone(data):
+    """What a clone has: every Git-tracked file, no bulk (`.npz`, bulk csv)."""
+    for name in manifest(data)["files"]:
+        if demo.is_bulk(name):
+            (data / name).unlink()
+
+
+def test_fresh_clone_without_spcas9_bundle_prepares_cas12a_and_keeps_spcas9_light_files(
+    tmp_path,
+):
     data = tmp_path / "data"
     demo.prepare(build_sources(tmp_path / "full"), data)
+    _as_fresh_clone(data)
+    before = manifest(data)
+    assert before["nucleases"]["spcas9"]["status"] == "prepared"
+    light = {
+        name: entry
+        for name, entry in _spcas9_entries(before).items()
+        if not demo.is_bulk(name)
+    }
+    light_bytes = {name: (data / name).read_bytes() for name in light}
+
+    report = demo.prepare(build_sources(tmp_path / "partial", spcas9=False), data)
+
+    after = manifest(data)
+    # Cas12a was written anew, bulk included.
+    assert (data / "cas12a/ism.npz").is_file()
+    assert after["nucleases"]["cas12a"]["status"] == "prepared"
+    # The SpCas9 light files survive byte for byte, their entries carried over
+    # from the previous manifest (not re-hashed), and nothing else is listed.
+    assert {n: (data / n).read_bytes() for n in light} == light_bytes
+    assert _spcas9_entries(after) == light
+    spcas9 = after["nucleases"]["spcas9"]
+    assert spcas9["status"] == "absent"
+    assert "v3_ism/ism.npz" in " ".join(spcas9["missing"])
+    carried = spcas9["carried_over"]
+    assert carried["files"] == sorted(light)
+    assert carried["previous_status"] == "prepared"
+    assert "manifest" in carried["from"]
+    assert demo.verify(data) == []
+    text = report.render()
+    assert "부재" in text and "유지" in text
+    assert report.spcas9_carried == sorted(light)
+
+
+def test_carried_over_hashes_come_from_the_previous_manifest_not_a_new_hash(
+    tmp_path, monkeypatch
+):
+    data = tmp_path / "data"
+    demo.prepare(build_sources(tmp_path / "full"), data)
+    _as_fresh_clone(data)
+    previous = _spcas9_entries(manifest(data))
+    name = "spcas9/v3_ism/ism.sidecar.json"
+    sentinel = dict(previous[name], source="이전 manifest의 원래 source")
+    payload = manifest(data)
+    payload["files"][name] = sentinel
+    (data / "manifest.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    demo.prepare(build_sources(tmp_path / "partial", spcas9=False), data)
+
+    assert manifest(data)["files"][name] == sentinel
+
+
+def test_carried_over_file_that_disagrees_with_previous_manifest_is_refused(tmp_path):
+    data = tmp_path / "data"
+    demo.prepare(build_sources(tmp_path / "full"), data)
+    _as_fresh_clone(data)
+    (data / "spcas9/v3_ism/ism.sidecar.json").write_text("{}", encoding="utf-8")
     before = (data / "manifest.json").read_bytes()
 
-    with pytest.raises(demo.SpCas9WouldBeLost, match="SpCas9"):
+    with pytest.raises(demo.PinMismatch, match="ism.sidecar.json"):
         demo.prepare(build_sources(tmp_path / "partial", spcas9=False), data)
 
     assert (data / "manifest.json").read_bytes() == before
-    assert (data / "spcas9/v3_ism/ism.sidecar.json").exists()
+
+
+def test_absent_spcas9_bundle_preserves_previously_prepared_spcas9_bulk(tmp_path):
+    data = tmp_path / "data"
+    demo.prepare(build_sources(tmp_path / "full"), data)
+    previous = _spcas9_entries(manifest(data))
+    bulk = (data / "spcas9/v3_ism/ism.npz").read_bytes()
+
+    demo.prepare(build_sources(tmp_path / "partial", spcas9=False), data)
+
+    assert _spcas9_entries(manifest(data)) == previous
+    assert (data / "spcas9/v3_ism/ism.npz").read_bytes() == bulk
+    assert demo.verify(data) == []
+
+
+def test_unlisted_spcas9_bulk_without_its_bundle_is_never_deleted(tmp_path):
+    data = tmp_path / "data"
+    demo.prepare(build_sources(tmp_path / "full"), data)
+    payload = manifest(data)
+    del payload["files"]["spcas9/v3_ism/ism.npz"]
+    (data / "manifest.json").write_text(json.dumps(payload), encoding="utf-8")
+    before = (data / "manifest.json").read_bytes()
+
+    with pytest.raises(demo.SpCas9WouldBeLost, match="v3_ism/ism.npz"):
+        demo.prepare(build_sources(tmp_path / "partial", spcas9=False), data)
+
+    assert (data / "manifest.json").read_bytes() == before
+    assert (data / "spcas9/v3_ism/ism.npz").exists()
 
 
 def test_missing_cas12a_source_is_reported_not_a_traceback(tmp_path):
