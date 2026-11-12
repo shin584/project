@@ -232,8 +232,12 @@ def test_the_ig_ism_agreement_has_no_verdict_and_carries_the_mismatch_note(repor
     assert "낮은 상관은 토큰 수준 attribution의 한계" in agreement
     # The only mention of a verdict is the sentence refusing to make one.
     assert "합격·불합격 판정을 붙이지 않는다" in agreement
+
+    # The ban is on the displayed values: a verdict beside a number is what
+    # would read as the model passing or failing. The notes may well say the
+    # word, since what they say about it is that no verdict is attached.
     for line in agreement.splitlines():
-        if "판정을 붙이지 않는다" in line:
+        if not ("층=" in line or "IG-ISM 순위 상관" in line):
             continue
         for word in ("합격", "불합격", "통과", "실패", "충분", "기준"):
             assert word not in line, line
@@ -317,3 +321,20 @@ def test_an_artifact_that_offers_a_case_pool_is_refused(tmp_path):
 
     with pytest.raises(rd.ArtifactMismatch):
         spcas9_views.report(rd.SpCas9Reader(data_dir))
+
+
+def test_every_quoted_artifact_note_carries_a_korean_gloss(report):
+    """The quote is the authority; the gloss is what the speaker reads aloud."""
+    lines = report.splitlines()
+    quotes = [i for i, line in enumerate(lines) if "원문(artifact 기록)" in line]
+
+    assert quotes
+    for index in quotes:
+        assert "우리말 (데모가 붙인 설명)" in lines[index + 1], lines[index]
+
+
+def test_the_gloss_is_labelled_as_the_demos_words_not_the_artifacts(report):
+    for line in report.splitlines():
+        if "우리말" in line:
+            assert "데모가 붙인 설명" in line, line
+            assert "원문" not in line, line

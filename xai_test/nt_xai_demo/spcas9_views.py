@@ -51,14 +51,49 @@ NOT_ASKED = (
 INTERSECTION = "analysis_intersection"
 
 
-def _quoted(note: str) -> str:
-    """An artifact's own note, marked as quoted.
+#: A Korean gloss for each artifact note the report quotes. The gloss is the
+#: demo's own summary and is labelled as such: the quote above it stays the
+#: authority, so a speaker can read either without the audience losing track of
+#: which words the analysis recorded and which the demo added.
+MISMATCH_GLOSS = (
+    "상관이 낮은 것은 버그가 아니라 토큰 수준 attribution의 한계다. 마지막 토큰이 "
+    "PAM(24-26)과 오른쪽 flank(27-29)를 함께 묶으므로, 염기 단위 ISM과 토큰 단위 IG가 "
+    "거기서 일치할 이유가 없다 (ADR 0007). 불일치는 측정된 그대로 적고, 수치를 올리려고 "
+    "다시 돌리거나 임계값을 바꾸거나 버리지 않는다."
+)
+REVERSAL_DEFINITION_GLOSS = (
+    "한 행에서 예측한 head 순서가 실측 순서와 어긋난 행을 말한다. 세 head 쌍에 대한 "
+    "Kendall tau가 음수이고, 어느 쪽에도 동률 쌍이 없는 행이다. 이 tau는 한 행 안에서 "
+    "head들끼리를 비교한 값이다."
+)
+SELECTION_POOL_GLOSS = (
+    "head 순서 역전은 보고된 결과이며 사례를 골라내는 후보 명단이 아니다. 역전된 쌍 "
+    "전부가 노이즈 바닥을 넘어야 한다고 요구하면 단 1행만 남으므로, 명단을 채우려고 "
+    "기준을 낮추면 측정 노이즈를 모델의 실패로 보고하게 된다. 그래서 이 절은 개수와 "
+    "분포만 담고 고를 수 있는 행 목록은 담지 않는다."
+)
+CLEARING_FLOOR_GLOSS = (
+    "역전된 쌍마다 그 쌍의 바닥을 각각 넘어야 한 행으로 센다. 쌍의 바닥은 그 쌍을 "
+    "이루는 두 head의 바닥 중 더 큰 쪽이다."
+)
+QUALIFIER_GLOSS = (
+    "이 층의 행은 타깃 5개의 PAM 변이체다. 그래서 n은 행 수가 아니라 타깃 5개이며, 이 "
+    "행 수를 다른 층에 더하지 않는다. 이 층의 모든 풀링된 수치는 그 5개 타깃의 변이체 "
+    "위에서 센 값이라서 타깃별로 한 번 더 적는다 — 한 타깃이 떠받쳐서 성립하는 비율과 "
+    "다섯 타깃 모두에서 성립하는 비율은 다른 결과다."
+)
+
+
+def _quoted(note: str, gloss: str) -> tuple[str, str]:
+    """An artifact's own note, verbatim, with the demo's Korean gloss beneath it.
 
     These notes are recorded in English while the demo speaks Korean. Restating
-    one in the demo's words would make the demo the author of a limit the
-    analysis stated, so the text is printed verbatim and labelled as a quote.
+    one *in place of* the quote would make the demo the author of a limit the
+    analysis stated, so the recorded text is printed verbatim and the Korean
+    reading is added beside it, each labelled for what it is. A speaker reads
+    the gloss; anyone checking the claim reads the line above it.
     """
-    return f"원문(artifact 기록): {note}"
+    return (f"원문(artifact 기록): {note}", f"  └ 우리말 (데모가 붙인 설명): {gloss}")
 
 
 def _heads_label(reader: SpCas9Reader) -> str:
@@ -157,7 +192,7 @@ def _agreement(reader: SpCas9Reader) -> render.Section:
                 "측정된 값으로 제시한다. 합격·불합격 판정을 붙이지 않는다 — 두 기법은 "
                 "서로의 정답이 아니다."
             ),
-            _quoted(reader.validation["mismatch_note"]),
+            *_quoted(reader.validation["mismatch_note"], MISMATCH_GLOSS),
             (
                 "행별 분포의 median만 적는다. 층 평균 프로파일끼리의 상관과 위치 "
                 "프로파일은 `agreement` 뷰의 것이다 (#161)."
@@ -194,8 +229,9 @@ def _floor_notes(reader: SpCas9Reader) -> tuple[str, ...]:
             "자기 노이즈 밖 차이까지 통과시킨다."
         ),
         (
-            "한 쌍의 바닥은 두 head 바닥 중 **더 큰** 쪽이다: 쌍의 실측 차이가 두 head "
-            "모두를 넘지 못하면 그 순서는 노이즈 안에서 정해진 것이다."
+            "더 큰 쪽을 쓰는 이유: 쌍의 실측 차이가 두 head 모두의 노이즈를 넘지 못하면 "
+            "그 순서는 측정 노이즈 안에서 정해진 것이고, 모델이 틀렸다고 말할 근거가 "
+            "되지 못한다."
         ),
         (
             "이 바닥은 **실측 효율의 변동 폭**이라 IG-ISM 일치도(무차원 순위 상관)와는 "
@@ -276,7 +312,7 @@ def _reversal(reader: SpCas9Reader) -> render.Section:
                 denominator=render.Denominator(
                     rows=reversals, unit="행", note="역전 행"
                 ),
-                note=_quoted(entry["clearing_floor"]["rule"]),
+                note=CLEARING_FLOOR_GLOSS,
             )
         )
         gap = entry["gap_over_floor"]
@@ -340,17 +376,15 @@ def _reversal(reader: SpCas9Reader) -> render.Section:
             "분석된 3개 head를 유지하는 이유가 이 절이다: 한 행 안에서 head 사이 순서가 "
             "역전되는 행이 실제로 있어서, head 하나만 보여주면 이 결과가 사라진다."
         ),
-        _quoted(reversal["reversal_definition"]),
-        (
-            "이 tau는 한 행 안에서 head들을 비교한다. head가 행들을 어떻게 순위 매기는지에 "
-            "대해서는 아무 말도 하지 않는다."
-        ),
-        _quoted(reversal["selection_pool_note"]),
+        *_quoted(reversal["reversal_definition"], REVERSAL_DEFINITION_GLOSS),
+        *_quoted(reversal["selection_pool_note"], SELECTION_POOL_GLOSS),
+        *_quoted(floor["pair_floor_rule"], CLEARING_FLOOR_GLOSS),
         *_floor_notes(reader),
         *(
-            _quoted(note)
+            line
             for note in (reader.reversal_stratum("pam_library").get("qualifier_note"),)
             if note
+            for line in _quoted(note, QUALIFIER_GLOSS)
         ),
     )
     return render.Section(title="head 순서 역전", notes=notes, figures=tuple(figures))
