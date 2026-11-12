@@ -19,6 +19,7 @@ to render without one.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -175,11 +176,24 @@ class Figure:
 
 @dataclass
 class Section:
-    """A titled group of figures. Prose goes in `notes`, never in a value."""
+    """A titled group of figures. Prose goes in `notes`, never in a value.
+
+    `chart` is drawn after the figures: it is the picture of a figure above it
+    (a position profile), so the figure carrying its four fields comes first
+    and a chart never appears without one.
+    """
 
     title: str
     figures: Sequence[Figure] = field(default_factory=tuple)
     notes: Sequence[str] = field(default_factory=tuple)
+    chart: Sequence[str] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        if self.chart and not self.figures:
+            raise RenderRefused(
+                f"[{self.title}] 그림만 있고 그 그림의 표시값이 없다: "
+                "층·head·통계·분모를 적을 곳이 없다"
+            )
 
     def lines(self) -> list[str]:
         lines = [f"[{self.title}]"]
@@ -187,7 +201,86 @@ class Section:
             lines.append(f"  {note}")
         for figure in self.figures:
             lines.extend(f"  {line}" for line in figure.lines())
+        lines.extend(f"  {line}" for line in self.chart)
         return lines
+
+
+#: The PAM bracket drawn beside a profile: opens, continues, closes.
+PAM_OPEN, PAM_INSIDE, PAM_CLOSE, PAM_OUTSIDE = "[", "|", "]", " "
+BAR = "#"
+PEAK_MARK = "<- 최대"
+
+
+#: The agreement views carry no verdict; both nucleases say so in these words.
+NO_VERDICT = (
+    "측정된 값으로 제시한다. 합격·불합격 판정을 붙이지 않는다 — 두 기법은 서로의 "
+    "정답이 아니다."
+)
+
+
+def profile_peak(values: Sequence[float]) -> int:
+    """The position of a profile's largest value, NaN skipped.
+
+    The one definition both the peak figure and the bars' peak mark use, so
+    the number a view states and the bar it marks cannot disagree.
+    """
+    finite = [(float(v), i) for i, v in enumerate(values) if not math.isnan(v)]
+    if not finite:
+        raise RenderRefused("그릴 값이 하나도 없다")
+    return max(finite, key=lambda pair: pair[0])[1]
+
+
+def profile_bars(
+    values: Sequence[float],
+    *,
+    pam: tuple[int, int],
+    width: int = 40,
+) -> list[str]:
+    """A per-position profile as console ASCII bars, the PAM bracketed.
+
+    One line per position: the PAM bracket, the position, a bar scaled to the
+    profile's own peak, and the value. The bracket is what makes the point of
+    the picture readable at a glance - whether the most sensitive position
+    sits inside the PAM - so it is drawn on every PAM line, not only at its
+    ends. The peak is marked once.
+
+    A missing value (NaN) is written as missing, never as an empty bar: an
+    empty bar reads as "no effect", which nothing measured.
+    """
+    start, end = pam
+    if not 0 <= start <= end < len(values):
+        raise RenderRefused(
+            f"PAM 구간 {start}-{end}이 프로파일 {len(values)}개 위치 밖이다"
+        )
+    peak = profile_peak(values)
+    peak_value = float(values[peak])
+
+    lines = [
+        (
+            f"{PAM_OPEN} {PAM_CLOSE} = PAM (위치 {start}-{end}). "
+            "막대 길이는 이 프로파일의 최대값 기준이다"
+        )
+    ]
+    for position, value in enumerate(values):
+        if position == start:
+            marker = PAM_OPEN
+        elif position == end:
+            marker = PAM_CLOSE
+        elif start < position < end:
+            marker = PAM_INSIDE
+        else:
+            marker = PAM_OUTSIDE
+        if math.isnan(value):
+            lines.append(f"{marker} {position:>3}  {'':<{width}}  값 없음")
+            continue
+        length = round(value / peak_value * width) if peak_value > 0 else 0
+        if value > 0:
+            length = max(length, 1)
+        line = f"{marker} {position:>3}  {BAR * length:<{width}}  {value:.4g}"
+        if position == peak:
+            line += f"  {PEAK_MARK}"
+        lines.append(line)
+    return lines
 
 
 def format_value(value: Any) -> str:

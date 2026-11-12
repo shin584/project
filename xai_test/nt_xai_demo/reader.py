@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from functools import cached_property
@@ -50,6 +51,8 @@ BASES = ("A", "C", "G", "T")
 CAS12A_HEAD = "단일 출력"
 CAS12A_STRATA = ("all", "TTTV", "TTTT")
 CAS12A_LIMIT_SECTIONS = ("rollout 해석", "범위와 한계")
+CAS12A_AGREEMENT_SECTION = "설명과 IG–ISM 일치도"
+_MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
 
 
 class ArtifactMismatch(RuntimeError):
@@ -819,6 +822,33 @@ class SpCas9Reader:
             "mismatch_note": self.validation["mismatch_note"],
         }
 
+    def stratum_ism_profile(self, stratum: str, head: str) -> dict[str, Any]:
+        """One stratum's mean ISM position profile for one head, WT slot excluded.
+
+        The validation report records this profile only at token resolution,
+        so the per-position one is built here from the stratum's IG-subset rows
+        - the same rows the recorded agreement is over, so the denominator is
+        the stratum's and never the 3,851-row sweep. Built, it is checked
+        against the recorded token profile before anything is shown: a profile
+        whose token means are not the analysis' own is a misread (a wrong head,
+        a wrong row, the WT slot averaged in), and is refused rather than drawn.
+        """
+        recorded = self.validation_figures(stratum, head)
+        profile = self.ism_profiles(self.ig_subset_rows(stratum), head).mean(axis=0)
+        tokens = aggregate_to_tokens(profile, self.token_boundaries)
+        if not np.allclose(tokens, recorded["ism_token_profile"], rtol=1e-5, atol=0):
+            raise ArtifactMismatch(
+                f"{stratum} 층 {head}: 위치 프로파일의 토큰 평균 {tokens.tolist()}이 "
+                f"기록된 ISM 토큰 프로파일 {recorded['ism_token_profile']}과 다르다"
+            )
+        return {
+            "stratum": stratum,
+            "head": head,
+            "profile": [float(value) for value in profile],
+            "rows": recorded["rows"],
+            "distinct_protospacers": recorded["distinct_protospacers"],
+        }
+
     def noise_floor_by_head(self, head: str) -> dict[str, Any]:
         """Replicate noise floor for one head. `single_constant_note` forbids pooling."""
         self.ism_heads.index(head)
@@ -1247,6 +1277,77 @@ class Cas12aReader:
             "n_available": int(entry["n_available"]),
             "requested": int(entry["requested"]),
         }
+
+    def agreement_primary(self, stratum: str) -> dict[str, Any]:
+        """The protocol's primary IG-ISM statistic for one PAM population.
+
+        `agreement.json` records eight variants per population (token set x
+        support x mass/density); `protocol.primary` names the one the analysis
+        reports, as `<tokens>/<support>/<kind>`, while `versions` nests them
+        support -> tokens -> kind. The variant is looked up by those names and
+        the population's own `primary` entry has to be that variant, so a
+        reader that picked another variant, or the wrong nesting, fails here
+        instead of showing a neighbouring number.
+        """
+        protocol = self.agreement["protocol"]
+        primary = str(protocol["primary"])
+        tokens, support, kind = primary.split("/")
+        entry = self.agreement["populations"][self.require_stratum(stratum)]
+        variant = entry["versions"][support][tokens][kind]
+        sequences = variant["sequences"]
+        for key in ("median", "n_valid", "n_total"):
+            if entry["primary"][key] != sequences[key]:
+                raise ArtifactMismatch(
+                    f"agreement {stratum}: primary의 {key}({entry['primary'][key]})가 "
+                    f"protocol이 지정한 {primary}의 값({sequences[key]})과 다르다"
+                )
+        correlation = variant["mean_profile"]["correlation"]
+        return {
+            "primary": primary,
+            "median": sequences["median"],
+            "n_valid": int(sequences["n_valid"]),
+            "n_total": int(sequences["n_total"]),
+            "reason": sequences.get("reason"),
+            "mean_profile_rho": correlation.get("rho"),
+            "mean_profile_tokens": int(correlation["n_valid"]),
+            "mean_profile_reason": correlation.get("reason"),
+            # The mean profile's own row count: the fewest rows any token was
+            # paired on, not the per-row statistic's `n_valid`.
+            "mean_profile_rows": min(
+                int(token["n_paired"]) for token in variant["mean_profile"]["profile"]
+            ),
+        }
+
+    @cached_property
+    def agreement_section(self) -> dict[str, Any]:
+        """The report's own IG-ISM section: its prose, and the figures it links.
+
+        Cas12a records no `mismatch_note` key; the analysis states what a low
+        agreement means in this section of `report.ko.md`, so that prose is
+        what a view quotes beside the number, verbatim. The SVGs are the ones
+        this section links, resolved under `data/cas12a/` - named by path,
+        never opened.
+        """
+        sections = _markdown_sections(
+            (self.root / "report.ko.md").read_text(encoding="utf-8")
+        )
+        if CAS12A_AGREEMENT_SECTION not in sections:
+            raise ArtifactMismatch(
+                f"report.ko.md에 {CAS12A_AGREEMENT_SECTION} 절이 없다"
+            )
+        prose: list[str] = []
+        images: list[tuple[str, Path]] = []
+        for line in sections[CAS12A_AGREEMENT_SECTION].splitlines():
+            image = _MARKDOWN_IMAGE.fullmatch(line.strip())
+            if image:
+                images.append((image.group(1), self.root / image.group(2)))
+            elif line.strip():
+                prose.append(line.strip())
+        if not prose:
+            raise ArtifactMismatch(
+                f"report.ko.md의 {CAS12A_AGREEMENT_SECTION} 절이 비어 있다"
+            )
+        return {"title": CAS12A_AGREEMENT_SECTION, "prose": prose, "images": images}
 
     def rollout_degeneracy(self, stratum: str) -> dict[str, Any]:
         """The near-identical-query count, read as stored: a limit, not a failure."""

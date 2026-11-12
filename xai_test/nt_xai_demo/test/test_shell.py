@@ -117,9 +117,22 @@ def test_a_one_shot_view_without_a_nuclease_says_to_select_one(data_dir):
 def test_a_view_this_ticket_has_not_built_yet_names_its_ticket(repl):
     repl.execute("cas12a")
 
-    for view, ticket in (("agreement", "#161"), ("cross", "#162")):
+    for view, ticket in (("cross", "#162"),):
         text = repl.execute(view).text
         assert ticket in text, view
+
+
+def test_agreement_takes_an_optional_head_only_where_there_are_heads(repl):
+    """`agreement [head]`: optional, and refused for Cas12a's single output."""
+    repl.execute("spcas9")
+    assert repl.execute("agreement").ok
+    assert repl.execute("agreement evoCas9").ok
+    assert not repl.execute("agreement xCas").ok  # stored, not analysed
+
+    repl.execute("cas12a")
+    assert repl.execute("agreement").ok
+    refused = repl.execute("agreement SpCas9")
+    assert not refused.ok and "head" in refused.text
 
 
 def test_both_nucleases_have_report_cases_and_explain(repl):
@@ -157,7 +170,7 @@ def test_a_command_that_could_not_deliver_is_marked_not_ok(repl):
     assert not repl.execute("predict").ok  # unknown command
     assert not repl.execute("report").ok  # no nuclease selected
     repl.execute("cas12a")
-    assert not repl.execute("agreement").ok  # pending view
+    assert not repl.execute("cross").ok  # pending view
     assert repl.execute("report").ok
     assert repl.execute("help").ok
 
@@ -206,7 +219,7 @@ def test_the_loop_ends_quietly_on_end_of_input(data_dir):
 
 def test_a_pending_view_says_pending_rather_than_printing_an_empty_frame(repl):
     repl.execute("cas12a")
-    text = repl.execute("agreement").text
+    text = repl.execute("cross").text
 
     assert "아직" in text
     assert "주장 범위" not in text  # no claim-limit frame around nothing

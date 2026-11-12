@@ -237,3 +237,28 @@ def test_the_real_cases_views_name_every_case_and_no_other_id():
     for identifier in cas12a.case_ids():
         row, role = identifier.split(":")
         assert row in cas12a_text and role in cas12a_text
+
+
+def test_the_real_spcas9_profile_peaks_inside_the_pam_in_both_strata():
+    """The point the bars exist to show, on the real data: PAM 24-26 holds the peak."""
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
+    text = spcas9_views.agreement(spcas9)
+
+    peaks = [line for line in text.splitlines() if "최대 민감 위치" in line]
+    assert len(peaks) == len(spcas9.strata)
+    assert all("PAM 안" in line for line in peaks), peaks
+    # Each stratum's own denominator; never the 400-row list or the sweep.
+    for line in text.splitlines():
+        if line.strip().startswith("층="):
+            assert "분모=400행" not in line and "분모=3,851행" not in line, line
+    assert "분모=200행·193타깃" in text and "분모=200행·5타깃" in text
+
+
+def test_the_real_cas12a_profile_peaks_at_position_7_in_every_population():
+    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
+    text = cas12a_views.agreement(cas12a)
+
+    peaks = [line for line in text.splitlines() if "최대 민감 위치" in line]
+    assert len(peaks) == 3
+    assert all(line.strip().startswith("최대 민감 위치: 7 (PAM 안") for line in peaks)
+    assert cas12a.agreement_primary("all")["median"] == pytest.approx(0.4)

@@ -207,10 +207,10 @@ def test_the_floor_belongs_to_the_analysis_intersection_not_a_third_stratum(repo
 
 
 def test_the_report_leaves_the_profile_views_figures_to_the_agreement_view(report):
-    """#161 owns the position profile and the mean-profile correlation."""
+    """`agreement` owns the position profile and the mean-profile correlation."""
     agreement = _section(report, "IG-ISM 일치도")
 
-    assert "#161" in agreement
+    assert "`agreement`" in agreement
     # Named in the pointer, but no figure here is one.
     for line in report.splitlines():
         if "층=" in line:

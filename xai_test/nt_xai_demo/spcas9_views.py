@@ -183,7 +183,7 @@ def _agreement(reader: SpCas9Reader) -> render.Section:
             *render.quoted(reader.validation["mismatch_note"], MISMATCH_GLOSS),
             (
                 "행별 분포의 median만 적는다. 층 평균 프로파일끼리의 상관과 위치 "
-                "프로파일은 `agreement` 뷰의 것이다 (#161)."
+                "프로파일은 `agreement` 뷰의 것이다."
             ),
             (
                 "두 층을 합친 값은 없다 (pooling: forbidden). generalisation은 처음 보는 "
@@ -730,4 +730,206 @@ def report(reader: SpCas9Reader) -> str:
         title=TITLE,
         questions=(*QUESTIONS, NOT_ASKED),
         pointers=(render.CROSS_POINTER,),
+    )
+
+
+# --------------------------------------------------------------------------- #
+# agreement
+# --------------------------------------------------------------------------- #
+
+AGREEMENT_TITLE = (
+    "9-Hydra v3 (SpCas9) IG-ISM 일치도와 ISM 위치 프로파일 (층별, 판정 없음)"
+)
+AGREEMENT_QUESTIONS = (
+    "IG와 ISM이 다섯 토큰의 순위를 비슷하게 매기는가 — 층·head별 측정값으로",
+    "층 평균 프로파일끼리는 순위가 얼마나 비슷한가",
+    "ISM 위치 프로파일에서 가장 민감한 위치가 PAM 안에 있는가 — 층별로",
+)
+AGREEMENT_NOT_ASKED = (
+    "묻지 않은 것: 두 층을 합친 일치도. pooling: forbidden이라 그런 수치는 없다. "
+    "signed 변형도 이 뷰에 없다 — 일치가 음의 상관으로 정의돼(agreement_sign=-1) "
+    "magnitude와 한 표에 두면 부호를 오독한다."
+)
+NO_VERDICT = render.NO_VERDICT
+NO_SVG = (
+    "SVG: SpCas9 번들에는 위치 프로파일 SVG가 없다. 이 ASCII 막대가 유일한 표시다 "
+    "(Cas12a는 ZIP의 SVG를 경로만 출력하고 렌더하지 않는다 — 두 뷰의 표시를 맞추기 위해서다)."
+)
+
+#: The SpCas9 PAM, as `mismatch_note` states it ("the PAM (24-26)"). It is the
+#: first three positions of the `pam_plus_right_flank` token; `_pam` checks
+#: that against the IG sidecar's own token boundaries before using it.
+PAM = (24, 26)
+PAM_TOKEN = "pam_plus_right_flank"
+
+
+def _pam(reader: SpCas9Reader) -> tuple[int, int]:
+    start, end = reader.token_boundaries[reader.token_names.index(PAM_TOKEN)]
+    if not start <= PAM[0] <= PAM[1] <= end:
+        raise render.RenderRefused(
+            f"PAM {PAM[0]}-{PAM[1]}이 {PAM_TOKEN} 토큰({start}-{end}) 안에 있지 않다"
+        )
+    return PAM
+
+
+def _stratum_denominator(entry: dict, *, note: str | None = None) -> render.Denominator:
+    return render.Denominator(
+        rows=int(entry["rows"]),
+        unit="행",
+        targets=int(entry["distinct_protospacers"]),
+        note=note,
+    )
+
+
+def _agreement_stratum(reader: SpCas9Reader, stratum: str) -> render.Section:
+    """One stratum's recorded agreement, every analysed head, nothing pooled."""
+    statistic = reader.validation["statistic"]
+    figures: list[render.Figure] = []
+    for head in reader.analysed_heads:
+        entry = reader.validation_figures(stratum, head, "magnitude")
+        per_row = entry["per_row"]
+        spread = (
+            f"q1 {render.format_value(per_row['q1'])} / "
+            f"q3 {render.format_value(per_row['q3'])}, "
+            if "q1" in per_row and "q3" in per_row
+            else ""
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} IG-ISM 순위 상관 (magnitude, 행별 median)",
+                value=per_row["median"],
+                stratum=stratum,
+                head=head,
+                statistic=f"{statistic} (magnitude, 행별 분포의 median)",
+                denominator=render.Denominator(
+                    rows=int(per_row["rows"]),
+                    unit="행",
+                    targets=entry["distinct_protospacers"],
+                ),
+                scale="무차원 순위 상관",
+                note=(
+                    f"{spread}정의되지 않는 행 "
+                    f"{int(per_row.get('undefined_rows', 0)):,}행"
+                ),
+            )
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} 층 평균 프로파일끼리의 순위 상관 (magnitude)",
+                value=entry["mean_profile"],
+                stratum=stratum,
+                head=head,
+                statistic=f"{statistic} (층 평균 ISM·IG 토큰 프로파일 사이)",
+                denominator=render.Denominator(
+                    rows=len(entry["ism_token_profile"]),
+                    unit="토큰",
+                    note=(
+                        f"{entry['rows']:,}행·{entry['distinct_protospacers']:,}타깃의 "
+                        "평균 프로파일 사이 — 행 수가 아니라 토큰 5개가 분모다"
+                    ),
+                ),
+                scale="무차원 순위 상관",
+            )
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} 층 평균 ISM 토큰 프로파일",
+                value=entry["ism_token_profile"],
+                stratum=stratum,
+                head=head,
+                statistic="위치별 평균 |ISM delta|(WT 슬롯 제외)의 토큰 평균, 층 평균",
+                denominator=_stratum_denominator(entry),
+                scale="fraction",
+                note=f"토큰 순서: {', '.join(reader.token_names)}",
+            )
+        )
+        figures.append(
+            render.Figure(
+                name=f"{head} 층 평균 IG 토큰 프로파일",
+                value=entry["ig_token_profile"],
+                stratum=stratum,
+                head=head,
+                statistic="토큰 5개의 |IG attribution|, 층 평균",
+                denominator=_stratum_denominator(entry),
+                scale=reader.ig_scale,
+            )
+        )
+    return render.Section(
+        title=f"IG-ISM 일치도 — {stratum} 층 (판정 없음)",
+        figures=tuple(figures),
+    )
+
+
+def _profile_stratum(reader: SpCas9Reader, stratum: str, head: str) -> render.Section:
+    """One stratum's ISM position profile for one head, drawn as bars."""
+    pam = _pam(reader)
+    built = reader.stratum_ism_profile(stratum, head)
+    profile = built["profile"]
+    peak = render.profile_peak(profile)
+    inside = pam[0] <= peak <= pam[1]
+    figure = render.Figure(
+        name=f"최대 민감 위치 ({head})",
+        value=f"{peak} ({'PAM 안' if inside else 'PAM 밖'}, PAM {pam[0]}-{pam[1]}, 3′)",
+        stratum=stratum,
+        head=head,
+        statistic=(
+            "ISM 위치 프로파일의 최댓값 위치 (위치별 평균 |delta|, WT 슬롯 제외 "
+            "대체 염기 3개, 층 평균)"
+        ),
+        denominator=_stratum_denominator(
+            built, note="IG 고정 명단의 이 층 행 — ISM sweep 전체가 아니다"
+        ),
+        scale="fraction",
+        note=(
+            "아래 막대의 토큰 평균이 기록된 층 평균 ISM 토큰 프로파일과 같음을 "
+            "확인한 뒤에 그렸다"
+        ),
+    )
+    return render.Section(
+        title=f"ISM 위치 프로파일 — {stratum} 층, {head}",
+        figures=(figure,),
+        chart=tuple(render.profile_bars(profile, pam=pam)),
+    )
+
+
+def agreement(reader: SpCas9Reader, head: str | None = None) -> str:
+    """The SpCas9 `agreement [head]` view. The profile's head defaults to primary.
+
+    The agreement figures show all three analysed heads; the bars show one
+    head at a time, picked by name, because six profiles of thirty bars would
+    bury the point the bars exist to make.
+    """
+    head = head or reader.primary_head
+    reader.ism_heads.index(head)  # analysed heads only, by name
+    notes = (
+        NO_VERDICT,
+        *render.quoted(reader.validation["mismatch_note"], MISMATCH_GLOSS),
+        (
+            "두 층을 합친 값은 없다 (pooling: forbidden). generalisation은 처음 보는 "
+            "protospacer의 일반화, pam_library는 타깃 5개의 PAM 실험이다."
+        ),
+        (
+            f"모든 수치는 IG 고정 명단({reader.ig_rows.rows:,}행)의 한 층에서 센 것이다. "
+            f"ISM sweep {reader.ism_rows.rows:,}행은 이 뷰의 분모가 아니다."
+        ),
+    )
+    sections = [
+        render.Section(title="읽는 법", notes=notes),
+        *(_agreement_stratum(reader, stratum) for stratum in reader.strata),
+        *(_profile_stratum(reader, stratum, head) for stratum in reader.strata),
+        render.Section(
+            title="저장된 그림",
+            notes=(
+                NO_SVG,
+                "다른 head의 프로파일: `agreement <head>` (분석된 head: "
+                + ", ".join(reader.analysed_heads)
+                + ")",
+            ),
+        ),
+    ]
+    return render.render(
+        sections,
+        claim_limit=reader.claim_limit,
+        title=AGREEMENT_TITLE,
+        questions=(*AGREEMENT_QUESTIONS, AGREEMENT_NOT_ASKED),
     )

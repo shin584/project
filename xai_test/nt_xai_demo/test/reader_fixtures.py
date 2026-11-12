@@ -381,6 +381,31 @@ def spcas9_annotation(case: tuple[str, str, str, int]) -> dict:
     }
 
 
+#: Recorded IG-ISM agreement per stratum. Distinct on purpose, so a figure
+#: that pooled the two strata, or read one under the other's name, is caught.
+VALIDATION_MEDIAN = {"generalisation": 0.7, "pam_library": 0.45}
+VALIDATION_MEAN_PROFILE = {"generalisation": 1.0, "pam_library": 0.9}
+#: The IG subset row each stratum holds (see `ig_subset.json` below).
+STRATUM_ROW = {"generalisation": 11, "pam_library": 30}
+
+
+def spcas9_stratum_profile(stratum: str, head: str) -> list[float]:
+    """The stratum's mean ISM position profile, WT slot excluded, in closed form."""
+    row = ISM_ROWS.index(STRATUM_ROW[stratum])
+    head_index = ISM_HEADS.index(head)
+    return [
+        expected_profile(row, position, head_index) for position in range(POSITIONS)
+    ]
+
+
+def spcas9_recorded_ism_tokens(stratum: str, head: str) -> list[float]:
+    profile = spcas9_stratum_profile(stratum, head)
+    return [
+        sum(profile[start : end + 1]) / (end - start + 1)
+        for start, end in TOKEN_BOUNDARIES
+    ]
+
+
 def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
     spcas9 = root / "spcas9"
     (spcas9 / "published_split").mkdir(parents=True, exist_ok=True)
@@ -516,11 +541,16 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
                                 "per_row": {
                                     "rows": 1,
                                     "undefined_rows": 0,
-                                    "median": 0.7,
+                                    "median": VALIDATION_MEDIAN[stratum],
+                                    "q1": VALIDATION_MEDIAN[stratum] - 0.3,
+                                    "q3": VALIDATION_MEDIAN[stratum] + 0.2,
                                 },
-                                "mean_profile": 1.0,
+                                "mean_profile": VALIDATION_MEAN_PROFILE[stratum],
                                 "mean_token_profile": {
-                                    "ism": [0.01, 0.02, 0.03, 0.04, 0.11],
+                                    # The recorded ISM token profile is the
+                                    # closed-form one, so the view's own
+                                    # position profile can be checked against it.
+                                    "ism": spcas9_recorded_ism_tokens(stratum, head),
                                     "ig": [0.14, 0.15, 0.17, 0.27, 2.02],
                                 },
                             }
@@ -735,6 +765,110 @@ def cas12a_annotation(row: int, role: str, reason: str) -> dict:
     }
 
 
+CAS12A_AGREEMENT_SECTION = "설명과 IG–ISM 일치도"
+CAS12A_AGREEMENT_TEXT = (
+    "주 통계는 같은 길이 t1–t5의 6-mer, PAM-breaking 포함, density Spearman입니다.\n"
+    "낮은 상관은 설명 정확도 실패가 아닙니다."
+)
+CAS12A_SVGS = (
+    ("ISM 위치별 평균", "position_profiles.svg"),
+    ("IG 토큰별 평균", "token_profiles.svg"),
+    ("IG–ISM 분포", "agreement_distribution.svg"),
+)
+#: Each PAM population's per-row agreement median and its mean-profile rho.
+#: Distinct per population, so a pooled figure read under a group's name shows.
+CAS12A_AGREEMENT = {
+    # population: (rows, median, mean-profile rho)
+    "all": (3, 0.4, 0.5),
+    "TTTV": (2, 0.3, 0.6),
+    "TTTT": (1, 0.6, 0.9),
+}
+CAS12A_PRIMARY = "five_6mer/all_nonWT/density"
+#: Where each population's ISM position profile peaks: inside the PAM (4-7).
+CAS12A_PROFILE_PEAK = {"all": 7, "TTTV": 7, "TTTT": 6}
+
+
+def cas12a_position_profile(stratum: str) -> list[float]:
+    profile = [0.01 * (index % 5 + 1) for index in range(CAS12A_POSITIONS)]
+    profile[CAS12A_PROFILE_PEAK[stratum]] = 0.24
+    return profile
+
+
+def cas12a_agreement() -> dict:
+    """The sliced agreement: populations / group_diagnostics / protocol, as real.
+
+    The non-primary variants carry different medians on purpose: a reader that
+    took the first variant it found instead of the protocol's `primary` path
+    shows the wrong number.
+    """
+
+    def variant(rows: int, median: float, rho: float) -> dict:
+        return {
+            "mean_profile": {
+                "correlation": {
+                    "n_total": 5,
+                    "n_valid": 5,
+                    "reason": None,
+                    "rho": rho,
+                    "token_ids": [1, 2, 3, 4, 5],
+                },
+                "profile": [
+                    {
+                        "mean_ig": 0.02 * token,
+                        "mean_ism": 0.05 * token,
+                        "n_paired": rows,
+                        "n_total": rows,
+                        "token_id": token,
+                    }
+                    for token in range(1, 6)
+                ],
+            },
+            "sequences": {
+                "distribution": [median] * rows,
+                "excluded_reasons": {},
+                "median": median,
+                "n_total": rows,
+                "n_valid": rows,
+                "reason": None,
+            },
+        }
+
+    tokens_p, support_p, kind_p = CAS12A_PRIMARY.split("/")
+    populations = {}
+    for name, (rows, median, rho) in CAS12A_AGREEMENT.items():
+        versions = {
+            support: {
+                tokens: {
+                    kind: (
+                        variant(rows, median, rho)
+                        if (tokens, support, kind) == (tokens_p, support_p, kind_p)
+                        else variant(rows, -0.05, -0.2)
+                    )
+                    for kind in ("density", "mass")
+                }
+                for tokens in ("five_6mer", "nine_token")
+            }
+            for support in ("all_nonWT", "exclude_pam_breaking")
+        }
+        populations[name] = {
+            "n_available": rows,
+            "n_total": rows,
+            "primary": dict(variant(rows, median, rho)["sequences"]),
+            "source_ids": list(CAS12A_ROWS[:rows]),
+            "versions": versions,
+        }
+    return {
+        "populations": populations,
+        "group_diagnostics": {},
+        "protocol": {
+            "primary": CAS12A_PRIMARY,
+            "ism": "mean eligible alternative absolute raw delta, then mean valid bases",
+            "output_unit": "native raw fraction",
+            "version": "cas12a-ig-ism-agreement-v1",
+        },
+    }
+
+
 def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
     cas12a = root / "cas12a"
     cas12a.mkdir(parents=True, exist_ok=True)
@@ -873,9 +1007,7 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
         },
         "position_profiles.json": {
             stratum: {
-                "mean_abs_raw_delta": [
-                    0.01 * (index + 1) for index in range(CAS12A_POSITIONS)
-                ],
+                "mean_abs_raw_delta": cas12a_position_profile(stratum),
                 "n_available": count,
                 "requested": count,
             }
@@ -898,11 +1030,7 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
             }
             for stratum, count in (("all", 3), ("TTTV", 2), ("TTTT", 1))
         },
-        "agreement.sliced.json": {
-            "populations": {"all": {"n_available": 3, "n_total": 3}},
-            "group_diagnostics": {},
-            "protocol": {"statistic": "spearman"},
-        },
+        "agreement.sliced.json": cas12a_agreement(),
         "summary.json": {
             "complete": True,
             "population_count": 3,
@@ -954,10 +1082,14 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
     (cas12a / "report.ko.md").write_text(
         "# Cas12a Test 결과\n\n"
         "## 성능\n\n본문.\n\n"
-        f"## rollout 해석\n\n{CAS12A_ROLLOUT_TEXT}\n\n"
+        f"## {CAS12A_AGREEMENT_SECTION}\n\n{CAS12A_AGREEMENT_TEXT}\n\n"
+        + "".join(f"![{label}]({name})\n\n" for label, name in CAS12A_SVGS)
+        + f"## rollout 해석\n\n{CAS12A_ROLLOUT_TEXT}\n\n"
         f"## 범위와 한계\n\n{CAS12A_LIMIT_TEXT}\n",
         encoding="utf-8",
     )
+    for _, name in CAS12A_SVGS:
+        (cas12a / name).write_text("<svg/>", encoding="utf-8")
     return cas12a
 
 

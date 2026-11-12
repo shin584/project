@@ -48,6 +48,11 @@ class View:
     builders: dict[str, Callable[..., str] | str] = field(default_factory=dict)
 
     @property
+    def argument_required(self) -> bool:
+        """`<ID>` must be given; `[head]` may be left off (written in brackets)."""
+        return bool(self.argument) and not str(self.argument).startswith("[")
+
+    @property
     def usage(self) -> str:
         return f"{self.name} {self.argument}" if self.argument else self.name
 
@@ -71,8 +76,9 @@ VIEWS: tuple[View, ...] = (
     ),
     View(
         "agreement",
-        "IG-ISM 일치도와 위치 프로파일",
-        builders={"cas12a": "#161", "spcas9": "#161"},
+        "IG-ISM 일치도와 위치 프로파일 (head 선택은 spcas9만)",
+        argument="[head]",
+        builders={"cas12a": cas12a_views.agreement, "spcas9": spcas9_views.agreement},
     ),
     View(
         "cross",
@@ -196,7 +202,7 @@ class Shell:
             return Outcome(
                 f"{view.name} 뷰는 아직 만들지 않았다 ({builder}).", ok=False
             )
-        if view.argument and not arguments:
+        if view.argument_required and not arguments:
             return Outcome(f"{view.name}은 인자를 받는다: {view.usage}", ok=False)
         try:
             return Outcome(builder(self.reader(self.selected or ""), *arguments))

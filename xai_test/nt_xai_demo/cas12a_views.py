@@ -516,3 +516,174 @@ def report(reader: Cas12aReader) -> str:
         questions=(*QUESTIONS, NOT_ASKED),
         pointers=(render.CROSS_POINTER,),
     )
+
+
+# --------------------------------------------------------------------------- #
+# agreement
+# --------------------------------------------------------------------------- #
+
+AGREEMENT_TITLE = "NT-Cas12a IG-ISM 일치도와 ISM 위치 프로파일 (PAM 집단별, 판정 없음)"
+AGREEMENT_QUESTIONS = (
+    "IG와 ISM이 t1–t5 토큰의 순위를 비슷하게 매기는가 — PAM 집단별 측정값으로",
+    "집단 평균 프로파일끼리는 순위가 얼마나 비슷한가",
+    "ISM 위치 프로파일에서 가장 민감한 위치가 PAM 안에 있는가 — 집단별로",
+)
+AGREEMENT_NOT_ASKED = (
+    "묻지 않은 것: head별 일치도. 이 모델은 출력이 하나뿐이다. protocol의 primary "
+    "외의 변형(9-token, PAM-breaking 제외, mass)은 agreement.json에 기록돼 있으나 "
+    "이 뷰에 없다."
+)
+NO_VERDICT = render.NO_VERDICT
+
+#: The TTTV PAM's four bases, 5′ of the protospacer. The analysis' own PAM
+#: share is computed over this span (`nt_main_report`: `sensitivity[4:8]`).
+PAM = (4, 7)
+
+
+def _agreement_figures(reader: Cas12aReader) -> render.Section:
+    figures: list[render.Figure] = []
+    for stratum in reader.strata:
+        entry = reader.agreement_primary(stratum)
+        median = entry["median"]
+        figures.append(
+            render.Figure(
+                name=f"{stratum} IG-ISM 순위 상관 (행별 median)",
+                value=median
+                if median is not None
+                else f"정의되지 않음 — {entry['reason']}",
+                stratum=_stratum(
+                    reader,
+                    stratum,
+                    per_group=lambda group: render.format_value(
+                        reader.agreement_primary(group)["median"]
+                    ),
+                    effect="TTTV·TTTT 두 군의 행을 합친 행별 분포의 median이다",
+                ),
+                head=reader.head,
+                statistic=f"spearman_rank_correlation ({entry['primary']}, 행별 분포의 median)",
+                denominator=render.Denominator(
+                    rows=entry["n_valid"],
+                    unit="행",
+                    note=f"유효 {entry['n_valid']:,}행 / 전체 {entry['n_total']:,}행",
+                ),
+                scale="무차원 순위 상관",
+            )
+        )
+        rho = entry["mean_profile_rho"]
+        figures.append(
+            render.Figure(
+                name=f"{stratum} 집단 평균 프로파일끼리의 순위 상관",
+                value=rho
+                if rho is not None
+                else f"정의되지 않음 — {entry['mean_profile_reason']}",
+                stratum=_stratum(
+                    reader,
+                    stratum,
+                    per_group=lambda group: render.format_value(
+                        reader.agreement_primary(group)["mean_profile_rho"]
+                    ),
+                    effect="TTTV·TTTT 두 군의 행을 합친 평균 프로파일이다",
+                ),
+                head=reader.head,
+                statistic=f"spearman_rank_correlation ({entry['primary']}, 집단 평균 ISM·IG 토큰 프로파일 사이)",
+                denominator=render.Denominator(
+                    rows=entry["mean_profile_tokens"],
+                    unit="토큰",
+                    note=(
+                        f"{entry['mean_profile_rows']:,}행의 평균 프로파일 사이 — 행 수가 아니라 "
+                        "토큰 수가 분모다"
+                    ),
+                ),
+                scale="무차원 순위 상관",
+            )
+        )
+    section = reader.agreement_section
+    return render.Section(
+        title="IG-ISM 일치도 (PAM 집단 3개, 판정 없음)",
+        notes=(
+            NO_VERDICT,
+            *(
+                f"원문(report.ko.md '{section['title']}' 절): {line}"
+                for line in section["prose"]
+            ),
+            (
+                "Cas12a 산출물에는 `mismatch_note` 키가 없다. 낮은 일치도의 뜻은 위 "
+                "절이 그 자리를 대신해 적고 있어 그대로 인용한다."
+            ),
+        ),
+        figures=tuple(figures),
+    )
+
+
+def _profile(reader: Cas12aReader, stratum: str) -> render.Section:
+    entry = reader.position_profile(stratum)
+    profile = [float(value) for value in entry["mean_abs_raw_delta"]]
+
+    peak = render.profile_peak(profile)
+    inside = PAM[0] <= peak <= PAM[1]
+    figure = render.Figure(
+        name="최대 민감 위치",
+        value=f"{peak} ({'PAM 안' if inside else 'PAM 밖'}, PAM {PAM[0]}-{PAM[1]}, 5′)",
+        stratum=_stratum(
+            reader,
+            stratum,
+            per_group=lambda group: str(
+                render.profile_peak(
+                    reader.position_profile(group)["mean_abs_raw_delta"]
+                )
+            ),
+            effect="TTTV·TTTT 두 군의 행을 합친 평균 프로파일이다",
+        ),
+        head=reader.head,
+        statistic=(
+            "ISM 위치 프로파일의 최댓값 위치 (위치별 평균 |raw delta|, WT 슬롯 제외 "
+            "유효 대체 염기 평균, 집단 평균)"
+        ),
+        denominator=render.Denominator(
+            rows=entry["n_available"],
+            unit="행",
+            note=f"요구 {entry['requested']:,}행 중 ISM 성공 행",
+        ),
+        scale="fraction (native raw output)",
+    )
+    return render.Section(
+        title=f"ISM 위치 프로파일 — {stratum}",
+        figures=(figure,),
+        chart=tuple(render.profile_bars(profile, pam=PAM)),
+    )
+
+
+def _svgs(reader: Cas12aReader) -> render.Section:
+    """The bundle's SVGs, by path. Not opened, not rendered."""
+    lines = [
+        f"{label}: {path}" + ("" if path.exists() else " (파일 없음)")
+        for label, path in reader.agreement_section["images"]
+    ]
+    return render.Section(
+        title="저장된 그림 (경로만, 렌더하지 않는다)",
+        notes=(
+            *lines,
+            (
+                "SpCas9에는 대응하는 SVG가 없어, 렌더하면 두 뉴클레아제의 표시가 "
+                "비대칭이 된다. 그래서 두 뷰 모두 위 ASCII 막대로 보여준다."
+            ),
+        ),
+    )
+
+
+def agreement(reader: Cas12aReader, *arguments: str) -> str:
+    """The Cas12a `agreement` view. There is no head to choose."""
+    if arguments:
+        raise KeyError(
+            f"Cas12a는 출력이 하나뿐이라 head를 고를 수 없다: {' '.join(arguments)}"
+        )
+    return render.render(
+        [
+            _agreement_figures(reader),
+            *(_profile(reader, stratum) for stratum in reader.strata),
+            _svgs(reader),
+        ],
+        claim_limit=reader.claim_limit,
+        title=AGREEMENT_TITLE,
+        questions=(*AGREEMENT_QUESTIONS, AGREEMENT_NOT_ASKED),
+    )
