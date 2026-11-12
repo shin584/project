@@ -648,6 +648,64 @@ def _explain_values(reader: SpCas9Reader, case: dict) -> render.Section:
     )
 
 
+def _explain_head_order(reader: SpCas9Reader, case: dict) -> render.Section:
+    """This row's own head ordering: a description of a row, never a selection.
+
+    The `report`'s reversal section counts rows per stratum; this one reads the
+    single row's recorded tau and its inverted pairs, so a reader looking at one
+    case can see whether its heads disagree and whether that disagreement is
+    larger than the replicate noise of the pair it belongs to. The section's own
+    note points back at `report` for the population figures, because one row's
+    ordering says nothing about how common that ordering is.
+    """
+    order = reader.case_annotation(str(case["case_id"]))["head_order"]
+    stratum = str(case["stratum"])
+    figures = [
+        render.Figure(
+            name="이 행의 head 순서 역전",
+            value=bool(order["reversal"]),
+            stratum=stratum,
+            head=_heads_label(reader),
+            statistic=f"{reader.head_order_reversal['statistic']} (이 행의 head 3쌍)",
+            denominator=render.single_row(),
+            note=(
+                f"tau={float(order['tau']):.4g}, 동률 쌍="
+                f"{render.format_value(order['tied_pair'])}"
+            ),
+        )
+    ]
+    for pair in order.get("inverted_pairs", ()):
+        gap = float(pair["label_gap"])
+        pair_floor = float(pair["floor"])
+        heads = str(pair["pair"]).replace("_vs_", " vs ")
+        figures.append(
+            render.Figure(
+                name=f"{heads} 역전 쌍의 실측 차이",
+                value=gap,
+                stratum=stratum,
+                head=heads,
+                statistic="역전된 쌍의 measured label gap",
+                denominator=render.Denominator(rows=1, unit="쌍", note="이 행의 이 쌍"),
+                scale=(
+                    f"fraction ({_percent_points(gap)}) — 이 쌍의 바닥 "
+                    f"{pair_floor:.4g} ({_percent_points(pair_floor)})"
+                ),
+                note=f"바닥을 넘는가: {render.format_value(pair['clears_floor'])}",
+            )
+        )
+    return render.Section(
+        title="head 순서 (이 행)",
+        notes=(
+            (
+                "행별 head 순서는 기술이며 선정 기준이 아니다. 모집단 수치는 "
+                "`report`의 head 순서 역전 절에 있다."
+            ),
+            *render.quoted(str(order["clears_noise_floor_rule"]), CLEARING_FLOOR_GLOSS),
+        ),
+        figures=tuple(figures),
+    )
+
+
 def explain(reader: SpCas9Reader, identifier: str) -> str:
     """The SpCas9 `explain <ID>` view: one row, method by method."""
     case = reader.case(identifier)
@@ -656,6 +714,7 @@ def explain(reader: SpCas9Reader, identifier: str) -> str:
             _explain_row(reader, case),
             _explain_methods(reader, case),
             _explain_values(reader, case),
+            _explain_head_order(reader, case),
         ],
         claim_limit=reader.claim_limit,
         title=f"{case['case_id']} (row_index {case['row_index']}) — 방법별 유무와 값",

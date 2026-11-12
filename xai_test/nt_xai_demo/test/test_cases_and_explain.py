@@ -297,6 +297,40 @@ def test_explain_carries_the_four_fields_and_the_claim_limit(spcas9):
     assert fx.CLAIM_LIMIT in text
 
 
+def test_explain_describes_this_rows_own_head_order(spcas9):
+    text = spcas9_views.explain(spcas9, CASE_WITH_IG)
+    entry = next(c for c in fx.SPCAS9_CASES if c[0] == CASE_WITH_IG)
+    order = fx.spcas9_annotation(entry)["head_order"]
+
+    assert "head 순서 (이 행)" in text
+    # The row's own tau, not the stratum's count of reversed rows.
+    assert f"tau={float(order['tau']):.4g}" in text
+    # Each inverted pair is named with its measured gap against its own floor.
+    for pair in order["inverted_pairs"]:
+        assert pair["pair"].replace("_vs_", " vs ") in text
+        assert f"{float(pair['floor']):.4g}" in text
+
+
+def test_the_row_head_order_section_does_not_read_as_a_selection(spcas9):
+    text = spcas9_views.explain(spcas9, CASE_WITH_IG)
+
+    # #155 puts the population figures in `report`; this section says so rather
+    # than letting one row stand in for the stratum.
+    assert "선정 기준이 아니다" in text
+    assert "`report`" in text
+
+
+def test_the_row_head_order_figures_carry_the_four_fields(spcas9):
+    text = spcas9_views.explain(spcas9, CASE_WITH_IG)
+    section = text.split("head 순서 (이 행)", 1)[1]
+
+    lines = provenance_lines(section)
+    assert lines
+    for line in lines:
+        for field in ("층=", "head=", "통계=", "분모="):
+            assert field in line, line
+
+
 def test_cas12a_explain_shows_its_methods_and_quotes_a_failure(cas12a):
     text = cas12a_views.explain(cas12a, f"{fx.CAS12A_IG_FAILED_ROW}:low_error")
 

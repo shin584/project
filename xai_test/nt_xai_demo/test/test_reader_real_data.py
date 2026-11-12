@@ -205,6 +205,23 @@ def test_the_real_explain_shows_ig_for_the_one_case_and_its_absence_for_another(
         assert "split 역할: test" in text
 
 
+def test_the_real_explain_reads_each_cases_own_head_order():
+    spcas9 = _reader(rd.SpCas9Reader)
+
+    for case_id in spcas9.case_ids():
+        order = spcas9.case_annotation(case_id)["head_order"]
+        text = spcas9_views.explain(spcas9, case_id)
+
+        assert "head 순서 (이 행)" in text
+        assert f"tau={float(order['tau']):.4g}" in text
+        # Every inverted pair the artifact recorded for this row is named, with
+        # that pair's own floor beside the measured gap.
+        for pair in order["inverted_pairs"]:
+            heads = str(pair["pair"]).replace("_vs_", " vs ")
+            assert heads in text
+            assert f"{float(pair['floor']):.4g}" in text
+
+
 def test_the_real_cases_views_name_every_case_and_no_other_id():
     import re
 
