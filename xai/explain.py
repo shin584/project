@@ -65,7 +65,20 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     """염기 위치를 특징으로 하는 KernelSHAP.
 
     '꺼진' 위치는 무작위 배경 서열의 염기로 바꿔 모델에 넣고, 배경 n개의 평균을 쓴다.
+
+    계산 전에 사전계산 저장소(xai/shap_cache.py)를 먼저 조회한다. 적중하면 추론 없이
+    바로 돌려준다. 키 재료(model_key, head)는 handle에 실려 온다. 사전계산은 seed=0으로
+    만들므로 다른 seed는 조회하지 않는다.
     """
+    model_key = getattr(handle, "model_key", None)
+    head = getattr(handle, "head", None)
+    if model_key is not None and head is not None and seed == 0:
+        from xai import shap_cache
+        hit = shap_cache.load(shap_cache.shap_cache_key(
+            model_key, head, window_seq, nsamples, n_background))
+        if hit is not None:
+            return hit
+
     import shap
 
     onehot = _onehot(window_seq)

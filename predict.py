@@ -21,6 +21,7 @@ predict.py
     pip install torch transformers safetensors
 """
 
+import logging
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -31,6 +32,7 @@ import streamlit as st
 
 import model_source
 from pam_scanner import (
+    CAS_CONFIGS,
     SPCAS9_VARIANTS, CandidateSite, ScanResult, VariantResult,
     gaussian_penalty, variant_compatible,
 )
@@ -72,6 +74,8 @@ NT_DTYPE = "float32"
 #:   "zscore"  — 표준화된 값. 0이 학습 데이터의 평균 효율이다.
 #:               target_mean·target_std를 알면 실제 효율로 되돌리고,
 #:               모르면 정규분포 백분위로 바꿔 보여준다.
+logger = logging.getLogger(__name__)
+
 OUTPUT_MODES = ("raw", "sigmoid", "percent", "zscore")
 
 
@@ -225,6 +229,10 @@ class ExplainHandle:
     #: 서열 → (층별 attention [H,T,T] 목록, 토큰별 서열구간, 서열 길이).
     #: attention이 없는 모델(CNN 등)은 None으로 둔다.
     attention_fn: Callable | None = None
+    #: SHAP 사전계산 캐시 키 재료. app.py가 compute_shap에 넘기는 값과 같아야 한다
+    #: (model_key = "A/Cas12a" 형식, head = 출력 이름). None이면 캐시를 조회하지 않는다.
+    model_key: str | None = None
+    head:      str | None = None
 
 
 class BasePredictor(ABC):
@@ -404,6 +412,17 @@ class NTClassifierPredictor(BasePredictor):
     def _encode(self, seqs: list[str]):
         return self.tokenizer(list(seqs), return_tensors="pt", padding=True)
 
+    def warmup(self) -> None:
+        """가중치 로드 + 첫 forward를 미리 끝낸다. 실패해도 예측 경로를 막지 않는다.
+
+        더미 서열 길이는 실제 요청과 같은 model_input_len이어야 토큰 모양이 같아진다.
+        """
+        try:
+            cfg = next(c for c in CAS_CONFIGS if c.name == self.spec.cas)
+            self._logits(["A" * cfg.model_input_len])
+        except Exception:
+            logger.warning("%s 워밍업 실패 — 첫 요청이 느려집니다", self.spec.cas, exc_info=True)
+
     def _logits(self, seqs: list[str]) -> np.ndarray:
         """서열 목록 → [N, num_labels] 출력 (설정에 따라 sigmoid 적용)"""
         import torch
@@ -513,8 +532,12 @@ class NTClassifierPredictor(BasePredictor):
             layers = [a[0].detach().float().numpy() for a in out.attentions]  # [H,T,T]
             return layers, self._token_spans(seq), len(seq)
 
-        return ExplainHandle(raw_fn, ig_inputs, ig_grad_fn, project, attention_fn)
+        return ExplainHandle(raw_fn, ig_inputs, ig_grad_fn, project, attention_fn,
+                             model_key=f"{self.spec.model}/{self.spec.cas}", head=head)
 
+
+# 앱 시작 때 미리 데울 모델 (시연용). 여기 없는 모델은 계속 지연 로딩된다.
+WARMUP_KEYS: tuple[tuple[str, str], ...] = (("A", "Cas12a"),)
 
 # 연동된 (모델, Cas) 조합 → 예측기 클래스
 PREDICTOR_CLASSES: dict[tuple[str, str], type[BasePredictor]] = {
@@ -524,11 +547,18 @@ PREDICTOR_CLASSES: dict[tuple[str, str], type[BasePredictor]] = {
 
 
 @st.cache_resource(show_spinner="모델 불러오는 중... (처음 한 번은 오래 걸립니다)")
-def load_predictors() -> dict[tuple[str, str], BasePredictor]:
+def load_predictors(warmup: bool = True) -> dict[tuple[str, str], BasePredictor]:
     predictors = {}
     for key, spec in MODEL_REGISTRY.items():
         cls = PREDICTOR_CLASSES.get(key)
         predictors[key] = cls(spec) if (cls and spec.paths) else UnconnectedPredictor(spec)
+    # 워밍업은 WARMUP_KEYS만. 전부 데우면 지연 로딩이 깨져 모든 가중치가 상주한다.
+    # 이 함수는 @st.cache_resource라 세션당 한 번만 돈다 (#151에서 캐시를 바꿀 때 유지할 것).
+    if warmup:
+        for key in WARMUP_KEYS:
+            p = predictors.get(key)
+            if p is not None and p.connected and hasattr(p, "warmup"):
+                p.warmup()
     return predictors
 
 
