@@ -277,4 +277,8 @@ Over 9-Hydra v1's 2,931 test rows the split is 2,191 / 699 / 41. The categories 
 These categories exist because v1's row-level split ignored the `Use` column. Any model trained on the **9-Hydra split** — v2 and **9-Hydra v3** — has a protospacer-disjoint Testset (measured on `SpCas9/published_split/`: 0 of 5,186 test rows carry a protospacer seen in train or val, and 0 test 30-mers appear there), so for those models all three categories collapse into `Unseen target` and the trichotomy carries no information.
 _Avoid_: binary "seen / unseen"; "known target, new PAM" as the name for the middle category (the 3' flank varies too); applying these categories to v2 or v3 at all (a v3 population described as "restricted to unseen targets" is a vacuous truth that reads as if a leakage control had been applied — use the **PAM library stratum / non-library stratum** cut instead)
 
+## Language — NT XAI 데모
 
+**NT XAI 데모**:
+The entry point (`xai_test/nt_xai_demo/`) over the **stored** XAI artifacts of the two NT fine-tunes — 9-Hydra v3 (SpCas9, its 3 analysed heads) and NT-Cas12a. A presentation surface for two finished analyses: not a comparison between them, and not an inference path (ADR 0012).
+_Avoid_: "the demo" (that is the SaCas9 Model A / B demo CLI of ADR 0003, which is comparative by design), "통합 데모" (integration is at the entry point only — this demo does not compare), calling it a live-inference or model-serving demo
