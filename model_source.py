@@ -33,9 +33,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # · 공유 설정은 "링크가 있는 모든 사용자"로 바꿔 둬야 받아진다.
 #
 DRIVE_FILES: dict[str, str] = {
-    # 예시 (실제 링크로 바꿔 주세요)
-    # "models/drive/SpCas9.keras": "https://drive.google.com/file/d/.../view?usp=sharing",
-    # "models/drive/Cas12a.keras": "https://drive.google.com/file/d/.../view?usp=sharing",
+    "models/SpCas9.safetensors": "https://drive.google.com/file/d/1lJngweSQI9jcieD6-w6bpq8wyRHqLgIV/view?usp=sharing",
+    "models/Cas12a.safetensors": "https://drive.google.com/file/d/1od8MWspPGmWGj8lEaOc_tP_ABY0if5C8/view?usp=sharing",
 }
 
 # 폴더 하나에 모델이 모여 있다면 폴더 링크를 여기에 적어도 된다.
