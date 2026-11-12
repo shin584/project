@@ -196,6 +196,44 @@ def test_a_command_that_could_not_deliver_is_marked_not_ok(repl):
     assert repl.execute("help").ok
 
 
+@pytest.mark.parametrize(
+    "nuclease, line",
+    [
+        ("cas12a", "report junk"),
+        ("cas12a", "cases x"),
+        ("cas12a", "agreement x"),
+        ("cas12a", "explain a b"),
+        ("spcas9", "report junk"),
+        ("spcas9", "cases x"),
+        ("spcas9", "agreement SpCas9 x"),
+        ("spcas9", "explain a b"),
+        ("cas12a", "cross x"),
+        ("spcas9", "cross x"),
+    ],
+)
+def test_one_argument_too_many_is_refused_and_the_shell_stays_open(
+    repl, nuclease, line
+):
+    """A typo in a meeting must not end the demo: the usage comes back instead."""
+    repl.execute(nuclease)
+
+    outcome = repl.execute(line)
+
+    assert not outcome.ok
+    assert not outcome.stop
+    # Cas12a's `agreement` has no head, so its usage is the bare view name.
+    assert "사용법 `" in outcome.text and line.split()[0] in outcome.text
+    assert repl.execute("report").ok  # still running
+
+
+def test_each_view_derives_its_argument_cap_from_its_record():
+    assert sh.VIEW_BY_NAME["report"].max_arguments == 0
+    assert sh.VIEW_BY_NAME["cases"].max_arguments == 0
+    assert sh.VIEW_BY_NAME["explain"].max_arguments == 1
+    assert sh.VIEW_BY_NAME["agreement"].max_arguments == 1
+    assert sh.VIEW_BY_NAME["cross"].max_arguments == 0
+
+
 def test_one_shot_help_is_the_shells_help_not_argparses(data_dir):
     text = sh.run_once(["help"], data_dir=data_dir).text
 

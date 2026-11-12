@@ -672,10 +672,16 @@ def _svgs(reader: Cas12aReader) -> render.Section:
 
 
 def agreement(reader: Cas12aReader, *arguments: str) -> str:
-    """The Cas12a `agreement` view. There is no head to choose."""
+    """The Cas12a `agreement` view. There is no head to choose.
+
+    Still reachable from the shell: `agreement [head]` is one view record for
+    both nucleases, so the shell lets one argument through and only this
+    builder knows Cas12a has no head axis. More than one never gets here.
+    """
     if arguments:
         raise KeyError(
-            f"Cas12a는 출력이 하나뿐이라 head를 고를 수 없다: {' '.join(arguments)}"
+            f"Cas12a는 출력이 하나뿐이라 head를 고를 수 없다: 사용법 `agreement`, "
+            f"받은 것 `{' '.join(arguments)}`"
         )
     return render.render(
         [

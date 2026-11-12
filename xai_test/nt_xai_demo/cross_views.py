@@ -61,17 +61,21 @@ NOT_COMPARED_AGREEMENT_TAIL = (
     "없다. 각 뉴클레아제의 `agreement` 뷰에서 그 분석 안에서만 본다."
 )
 
-#: Printed in the claim-limit frame above SpCas9's own recorded statement. The
-#: finding names both models, so the limit is stated for both; Cas12a records
-#: its limits as prose sections with no equivalent sentence, so this line is
-#: labelled as the demo's own and the quote below it as the artifact's.
+#: Printed first in the claim-limit frame, above both artifacts' own records.
+#: The finding names both models, so the limit is stated for both; Cas12a
+#: records its limits as prose sections with no equivalent single sentence, so
+#: this line is labelled as the demo's own and each quote below it as an
+#: artifact's.
 CLAIM_LIMIT_BOTH = (
     "이 화면의 수치는 두 모델 모두에 대해, 그 모델이 예측에 쓰는 내부 정보 사용"
     "(어느 위치·토큰에 예측이 의존하는가)을 기술한다. 물리적 DNA/단백질 결합에 "
-    "대한 주장이 아니다. NT-Cas12a의 산출물에는 이에 대응하는 한 문장이 없어 "
-    "(한계를 절 단위 산문으로 적는다), 이 범위는 데모가 두 분석에 공통으로 적는 "
-    "것이며 그 근거로 SpCas9 artifact의 기록된 문장을 아래에 그대로 인용한다."
+    "대한 주장이 아니다. 이 한 문장은 데모가 두 분석에 공통으로 적는 것이다 "
+    "(NT-Cas12a의 산출물은 한계를 한 문장이 아니라 절 단위 산문으로 적는다). "
+    "아래에 각 artifact가 기록한 한계를 그대로 인용한다: SpCas9의 문장, 그리고 "
+    "이 화면에 Cas12a ISM 수치가 뜨므로 NT-Cas12a의 한계 절."
 )
+
+CAS12A_QUOTE_LABEL = "원문(NT-Cas12a artifact 기록, report.ko.md의 한계 절):"
 
 CLAIM_LIMIT_GLOSS = (
     "여기 실린 모든 수치는 모델이 예측에 어느 위치·토큰을 쓰는지, 그리고 한 행의 "
@@ -80,17 +84,22 @@ CLAIM_LIMIT_GLOSS = (
 )
 
 
-def claim_limit(spcas9: SpCas9Reader) -> str:
-    """The limit, stated for both models, over SpCas9's own recorded sentence.
+def claim_limit(spcas9: SpCas9Reader, cas12a: Cas12aReader) -> str:
+    """The demo's common sentence, then SpCas9's record, then Cas12a's sections.
 
-    SpCas9's artifacts record this limit verbatim and Cas12a's do not, so the
-    recorded text is quoted as the artifact's and the sentence covering both
-    models is labelled as the demo's own. Restating the recorded limit *in
-    place of* the quote would make the demo the author of a limit the analysis
-    stated; the Korean reading beside it is labelled as the demo's gloss.
+    `cross` prints both analyses' figures, so both analyses' recorded limits
+    are on screen. Each record is quoted as the artifact's and the sentence
+    covering both models is labelled as the demo's own: restating a recorded
+    limit *in place of* the quote would make the demo the author of a limit
+    the analysis stated. SpCas9's record is English, so the demo's Korean
+    reading is set beside it and labelled as a gloss; Cas12a's is already
+    Korean and is quoted as it stands.
     """
     quote, gloss = render.quoted(spcas9.claim_limit, CLAIM_LIMIT_GLOSS)
-    return f"{CLAIM_LIMIT_BOTH}\n\n{quote}\n{gloss}"
+    return (
+        f"{CLAIM_LIMIT_BOTH}\n\n{quote}\n{gloss}\n\n"
+        f"{CAS12A_QUOTE_LABEL}\n{cas12a.claim_limit}"
+    )
 
 
 def _finding(spcas9: SpCas9Reader, cas12a: Cas12aReader) -> render.Section:
@@ -141,7 +150,7 @@ def cross(*, spcas9: SpCas9Reader, cas12a: Cas12aReader) -> str:
     ]
     return render.render(
         sections,
-        claim_limit=claim_limit(spcas9),
+        claim_limit=claim_limit(spcas9, cas12a),
         title=TITLE,
         questions=(*QUESTIONS, NOT_ASKED),
     )

@@ -53,6 +53,16 @@ class View:
         return bool(self.argument) and not str(self.argument).startswith("[")
 
     @property
+    def max_arguments(self) -> int:
+        """How many arguments the view takes at most: one if it names one, else none.
+
+        Derived from `argument` so the cap cannot drift from the usage line the
+        shell prints; the shell checks it once for every view, so a stray
+        token is a usage message, not an exception that ends the REPL.
+        """
+        return 1 if self.argument else 0
+
+    @property
     def usage(self) -> str:
         return f"{self.name} {self.argument}" if self.argument else self.name
 
@@ -209,14 +219,20 @@ class Shell:
             return Outcome(
                 f"{view.name} 뷰는 아직 만들지 않았다 ({builder}).", ok=False
             )
-        if not view.needs_nuclease and arguments:
-            return Outcome(
-                f"{view.name}은 인자를 받지 않는다 (뉴클레아제 선택과 무관하다): "
-                f"{' '.join(arguments)}",
-                ok=False,
-            )
         if view.argument_required and not arguments:
             return Outcome(f"{view.name}은 인자를 받는다: {view.usage}", ok=False)
+        if len(arguments) > view.max_arguments:
+            takes = (
+                "인자를 받지 않는다"
+                if view.max_arguments == 0
+                else f"인자를 {view.max_arguments}개까지 받는다"
+            )
+            unrelated = "" if view.needs_nuclease else " (뉴클레아제 선택과 무관하다)"
+            return Outcome(
+                f"{view.name}은 {takes}{unrelated}: 사용법 `{view.usage}`, "
+                f"받은 것 `{' '.join(arguments)}`",
+                ok=False,
+            )
         try:
             if not view.needs_nuclease:
                 return Outcome(builder(**{name: self.reader(name) for name in READERS}))

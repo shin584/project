@@ -297,3 +297,26 @@ def test_the_claim_limit_says_internal_use_not_physical_binding(text, spcas9):
     assert "내부 정보 사용" in claim
     assert "물리적" in claim
     assert "NT-Cas12a" in claim  # stated for both, not only the one that wrote it
+
+
+def test_the_claim_limit_quotes_cas12as_recorded_limit_sections_too(
+    text, spcas9, cas12a
+):
+    """`cross` prints Cas12a's ISM figures, so Cas12a's own limits are on screen.
+
+    Stacked as: the demo's common sentence, SpCas9's recorded sentence, then
+    Cas12a's recorded sections - each artifact quote labelled as a quote.
+    """
+    claim = text.split(f"-- {render.CLAIM_LIMIT_HEADING}")[1]
+
+    for name in rd.CAS12A_LIMIT_SECTIONS:
+        assert f"[{name}]" in claim
+    for line in cas12a.claim_limit.splitlines():
+        if line.strip():
+            assert line.strip() in claim  # Cas12a's own words, verbatim
+
+    common = claim.index("내부 정보 사용")
+    spcas9_quote = claim.index(spcas9.claim_limit)
+    cas12a_quote = claim.index(f"[{rd.CAS12A_LIMIT_SECTIONS[0]}]")
+    assert common < spcas9_quote < cas12a_quote
+    assert claim.count("원문(") == 2  # both artifact quotes labelled as quotes
