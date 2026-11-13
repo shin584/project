@@ -22,11 +22,51 @@ def compute_ig(_predictor, model_key: str, head: str, window_seq: str, steps: in
     return explain.integrated_gradients(_predictor.explain_handle(head), window_seq, steps)
 
 
-@st.cache_data(show_spinner="SHAP 계산 중... (몇 초 걸릴 수 있어요)")
+# 진행률 바가 스피너 역할을 대신하므로 show_spinner는 끈다 (둘이 겹쳐 보인다).
+@st.cache_data(show_spinner=False)
+def _compute_shap_cached(_predictor, model_key: str, head: str, window_seq: str,
+                         nsamples: int, n_background: int, _on_batch=None):
+    """실제 계산 + 캐시.
+
+    언더스코어로 시작하는 인자(_predictor, _on_batch)는 캐시 키에서 빠진다.
+    콜백에 접두사가 없으면 호출마다 다른 함수 객체라 캐시가 매번 빗나간다.
+    """
+    return explain.kernel_shap(_predictor.explain_handle(head), window_seq,
+                               nsamples, n_background, on_batch=_on_batch)
+
+
 def compute_shap(_predictor, model_key: str, head: str, window_seq: str,
                  nsamples: int, n_background: int):
-    return explain.kernel_shap(_predictor.explain_handle(head), window_seq,
-                               nsamples, n_background)
+    """SHAP 계산 + 진행률 바. app.py의 호출 방식은 바뀌지 않는다.
+
+    이 래퍼는 캐시하지 않는다. 진행률 바를 캐시된 함수가 돌아가는 동안에만
+    띄우고, 끝나면 반드시 치우기 위해서다.
+
+    바를 만드는 위치가 까다롭다.
+      · 래퍼에서 만든 st.empty()에 그리면 → CacheReplayClosureError.
+        @st.cache_data는 캐시 함수 안의 화면 출력을 기록했다가 적중 시 재생하는데,
+        함수 **바깥**에서 만든 블록에는 재생할 수 없다.
+      · 그래서 바는 콜백 안에서(= 캐시 함수가 도는 중에) 처음 한 번 만든다.
+      · 다만 그러면 캐시 적중 시 재생된 바가 화면에 남는다. 그래서 캐시 함수의
+        출력 전체를 컨테이너로 감싸고 finally에서 통째로 비운다.
+    """
+    outer = st.empty()
+    bar = {"slot": None}
+
+    def _on_batch(done: int, total: int) -> None:
+        if bar["slot"] is None:
+            bar["slot"] = st.empty()
+        pct = min(max(done / total, 0.0), 1.0) if total > 0 else 0.0
+        bar["slot"].progress(pct, text=f"SHAP 계산 중... {int(pct * 100)}%")
+
+    try:
+        with outer.container():
+            return _compute_shap_cached(_predictor, model_key, head, window_seq,
+                                        nsamples, n_background, _on_batch=_on_batch)
+    finally:
+        # 캐시가 적중하면 콜백이 한 번도 불리지 않지만 재생된 바가 남는다.
+        # 미적중이면 100% 바가 남는다. 어느 쪽이든 여기서 치운다.
+        outer.empty()
 
 
 @st.cache_data(show_spinner="Attention Rollout 계산 중...")

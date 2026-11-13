@@ -213,7 +213,8 @@ def _result(spec: ModelSpec, site: CandidateSite, cas_name: str, raw: float) -> 
 class ExplainHandle:
     """XAI(IG·SHAP) 계산에 필요한 모델 접근 함수 묶음. 모델 종류별로 predictor가 만든다.
 
-    raw_fn      : [N, L, 4] 원핫 → [N] 모델 원출력
+    raw_fn      : [N, L, 4] 원핫 → [N] 모델 원출력.
+                  옵셔널 키워드 on_batch(done, total)로 배치 진행률을 받을 수 있다.
     ig_inputs   : 윈도우 서열 → IG 입력 배열 목록 (배치 차원 없음)
     ig_grad_fn  : 입력 배열 목록(각각 [N, ...]) → (출력 [N], 입력별 기울기 목록)
     project     : 입력별 기여도 목록 → 위치별 기여도 [L]
@@ -404,16 +405,24 @@ class NTClassifierPredictor(BasePredictor):
     def _encode(self, seqs: list[str]):
         return self.tokenizer(list(seqs), return_tensors="pt", padding=True)
 
-    def _logits(self, seqs: list[str]) -> np.ndarray:
-        """서열 목록 → [N, num_labels] 출력 (설정에 따라 sigmoid 적용)"""
+    def _logits(self, seqs: list[str], on_batch: Callable | None = None) -> np.ndarray:
+        """서열 목록 → [N, num_labels] 출력 (설정에 따라 sigmoid 적용)
+
+        on_batch(done, total) : 배치 하나를 끝낼 때마다 부르는 옵셔널 콜백 (ADR 0001).
+            done·total은 '모델에 넣은 서열 수'다. 코어는 숫자만 넘기고,
+            표시 문구와 진행률 바는 화면이 정한다. 넘기지 않으면 동작이 전과 같다.
+        """
         import torch
+        total = len(seqs)
         out = []
-        for i in range(0, len(seqs), NT_BATCH_SIZE):
+        for i in range(0, total, NT_BATCH_SIZE):
             enc = self._encode(seqs[i:i + NT_BATCH_SIZE])
             with torch.no_grad():
                 logits = _apply_output_mode(self.model(**enc).logits, torch,
                                             self.spec.output_mode)
             out.append(logits.detach().float().numpy())   # bfloat16은 numpy가 못 받는다
+            if on_batch is not None:
+                on_batch(min(i + NT_BATCH_SIZE, total), total)
         return np.concatenate(out, axis=0)
 
     def predict_batch(self, sites):
@@ -467,10 +476,13 @@ class NTClassifierPredictor(BasePredictor):
         model = self.model
         idx = self._head_index(head)
 
-        def raw_fn(X):
-            """[N, L, 4] 원핫 → [N]. SHAP이 섞어 만든 원핫을 서열로 되돌려 넣는다."""
+        def raw_fn(X, on_batch: Callable | None = None):
+            """[N, L, 4] 원핫 → [N]. SHAP이 섞어 만든 원핫을 서열로 되돌려 넣는다.
+
+            on_batch는 _logits의 배치 루프로 그대로 흘려보낸다 (진행률용).
+            """
             seqs = [onehot_to_seq(row) for row in np.asarray(X)]
-            return self._logits(seqs)[:, idx]
+            return self._logits(seqs, on_batch=on_batch)[:, idx]
 
         def ig_inputs(seq: str):
             """IG 입력 = 토큰 임베딩 [T, H]. 기준 입력은 explain.py가 0으로 만든다."""

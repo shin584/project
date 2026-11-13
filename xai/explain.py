@@ -25,13 +25,32 @@ class SHAPResult:
     additivity_error: float    # |base + Σ SHAP − f(x)|
 
 
-def integrated_gradients(handle, window_seq: str, steps: int = 64) -> IGResult:
-    """Integrated Gradients. 기준 입력은 전부 0(빈 서열), 구간 적분은 중점법."""
+#: IG 적분 단계를 한 번에 몇 개씩 역전파할지. 메모리가 부족하면 줄인다.
+#: 값에는 영향이 없고 (아래 설명 참고) 최대 메모리 사용량만 달라진다.
+IG_CHUNK_SIZE = 8
+
+
+def integrated_gradients(handle, window_seq: str, steps: int = 64,
+                         chunk_size: int = IG_CHUNK_SIZE) -> IGResult:
+    """Integrated Gradients. 기준 입력은 전부 0(빈 서열), 구간 적분은 중점법.
+
+    적분 단계를 한 배치에 모두 올리면 역전파 그래프가 steps배로 커져 메모리를 많이 쓴다.
+    청크로 나눠 기울기 '합'을 누적하고 마지막에 steps로 나누면
+    평균을 한 번에 구한 것과 수학적으로 같은 값이 나온다 (mean = sum / steps).
+    """
     inputs = handle.ig_inputs(window_seq)
     alphas = (np.arange(steps) + 0.5) / steps
-    batch = [alphas.reshape((-1,) + (1,) * x.ndim) * x[None] for x in inputs]
-    _, grads = handle.ig_grad_fn(batch)
-    attrs = [x * g.mean(axis=0) for x, g in zip(inputs, grads)]
+
+    chunk = max(1, int(chunk_size))
+    sums = [np.zeros(np.shape(x), dtype=np.float64) for x in inputs]
+    for i in range(0, steps, chunk):
+        a = alphas[i:i + chunk]
+        batch = [a.reshape((-1,) + (1,) * x.ndim) * x[None] for x in inputs]
+        _, grads = handle.ig_grad_fn(batch)
+        for s, g in zip(sums, grads):
+            s += np.asarray(g, dtype=np.float64).sum(axis=0)
+
+    attrs = [x * (s / steps) for x, s in zip(inputs, sums)]
 
     f_x = float(handle.ig_grad_fn([x[None] for x in inputs])[0][0])
     f_0 = float(handle.ig_grad_fn([np.zeros_like(x)[None] for x in inputs])[0][0])
@@ -61,10 +80,16 @@ def _random_backgrounds(length: int, n: int, seed: int) -> np.ndarray:
 
 
 def kernel_shap(handle, window_seq: str, nsamples: int = 512,
-                n_background: int = 16, seed: int = 0) -> SHAPResult:
+                n_background: int = 16, seed: int = 0,
+                on_batch=None) -> SHAPResult:
     """염기 위치를 특징으로 하는 KernelSHAP.
 
     '꺼진' 위치는 무작위 배경 서열의 염기로 바꿔 모델에 넣고, 배경 n개의 평균을 쓴다.
+
+    on_batch(done, total) : 진행률 콜백 (ADR 0001). done·total은 모델에 넣은 서열 수다.
+        훅은 f(masks) 안이 아니라 handle.raw_fn 안쪽 배치 루프에 걸린다.
+        f는 몇 번밖에 불리지 않아 여기에 걸면 진행률이 몇 단계로 끝난다.
+        코어는 숫자만 넘기고 표시 문구는 화면이 정한다.
     """
     import shap
 
@@ -72,11 +97,26 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     length = onehot.shape[0]
     backgrounds = _random_backgrounds(length, n_background, seed)
 
+    # shap은 f를 여러 번 부른다(배경 기준값 1회 + 샘플 1회). 호출마다 0부터 다시 세면
+    # 진행률이 뒤로 돌아가므로, 누적 서열 수를 전체 예상치에 대고 보고한다.
+    expected = max(1, n_background * (nsamples + 1))
+    seen = 0
+
     def f(masks):
+        nonlocal seen
         masks = np.asarray(masks)
         n = masks.shape[0]
         mixed = np.where(masks[:, None, :, None] > 0.5, onehot[None, None], backgrounds[None])
-        y = handle.raw_fn(mixed.reshape(n * n_background, length, 4))
+        X = mixed.reshape(n * n_background, length, 4)
+        if on_batch is None:
+            y = handle.raw_fn(X)
+        else:
+            base = seen
+            y = handle.raw_fn(
+                X,
+                on_batch=lambda done, _total: on_batch(min(base + done, expected), expected),
+            )
+            seen = base + X.shape[0]
         return np.asarray(y).reshape(n, n_background).mean(axis=1)
 
     explainer = shap.KernelExplainer(f, np.zeros((1, length)))
