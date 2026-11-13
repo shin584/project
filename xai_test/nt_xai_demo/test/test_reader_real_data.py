@@ -8,6 +8,8 @@ these skip and the fixture tests carry the defence.
 
 from __future__ import annotations
 
+from collections import Counter
+
 import numpy as np
 import pytest
 
@@ -423,3 +425,94 @@ def test_the_real_spcas9_report_states_both_populations_with_denominators():
     assert "분모 200행 / 193 타깃" in text  # the agreement subset's own
     assert "다른 모집단이다" in text
     assert len(text.splitlines()) < 25
+
+
+def test_the_real_spcas9_lookup_is_the_generalisation_stratum_cases_json_counts():
+    """#174: the 30bp lookup is generalisation ∩ ISM, and that is cases.json's pool.
+
+    Generalisation is `v3_strata`'s cut - non-library **and** NGG, on the rows
+    where all three analysed heads are measured. On this data that is exactly
+    the 895 rows / 818 targets `cases.json` records, so the lookup and the
+    case screen stand on one population. Non-library without the NGG cut
+    would be 2,564 rows, 1,669 of them in neither stratum.
+    """
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(
+        rd.SpCas9Reader,
+        "spcas9/v3_ism/ism.npz",
+        "spcas9/v3_ig/ig.npz",
+        "spcas9/v3_rollout/rollout.npz",
+    )
+    pool = spcas9.case_strata["generalisation"]
+    index = spcas9.sequence_index
+    rows = spcas9.generalisation_rows
+
+    assert index.stored_rows == len(rows) == int(pool["rows"]) == 895
+    sequences = [spcas9.reference_sequence(row) for row in rows]
+    assert len({sequence[4:24] for sequence in sequences}) == 818
+    assert int(pool["distinct_protospacers"]) == 818
+    assert all(row in spcas9.ism_rows for row in rows)
+    assert all(sequence[25:27] == "GG" for sequence in sequences)
+    assert all(
+        spcas9.label(row, head) is not None
+        for row in rows
+        for head in spcas9.analysed_heads
+    )
+    # Replicates: widening 20bp to 30bp does not separate a single one.
+    counts = Counter(sequences)
+    assert index.distinct == 818
+    assert sum(1 for n in counts.values() if n > 1) == 20
+    assert max(counts.values()) == 5
+
+    # A replicated window shows its smallest row with the duplicate line.
+    sequence, _ = counts.most_common(1)[0]
+    shared = sorted(row for row in rows if spcas9.reference_sequence(row) == sequence)
+    lines = spcas9_screen.screen_for(spcas9, sequence).splitlines()
+    assert lines[0].startswith(f"서열 입력  row_index {shared[0]}  generalisation")
+    assert lines[1].startswith(f"이 타깃은 {len(shared)}행 중복(세포주 반복)")
+
+
+def test_the_real_spcas9_case_sequences_open_a_screen_on_the_smallest_row():
+    """A case's own window opens its number's body - unless it is replicated.
+
+    Eight of the nine case rows are the only row holding their window, and
+    their window opens exactly the number's screen. `C3`'s row (20544) is one
+    of the 20 replicated keys, so its window resolves to the smallest row
+    sharing it (9343) and shows that row's values with the duplicate line -
+    the rule #172 set, applied here rather than excepted for a case.
+    """
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(
+        rd.SpCas9Reader,
+        "spcas9/v3_ism/ism.npz",
+        "spcas9/v3_ig/ig.npz",
+        "spcas9/v3_rollout/rollout.npz",
+    )
+
+    def body(text):
+        lines = text.splitlines()
+        start = next(i for i, line in enumerate(lines) if line.startswith("  SpCas9 "))
+        return lines[start:-1]
+
+    replicated = []
+    for number, case in spcas9_screen.numbered_cases(spcas9).items():
+        row = int(case["row_index"])
+        sequence = spcas9.reference_sequence(row)
+        text = spcas9_screen.screen_for(spcas9, sequence)
+        shown = spcas9.sequence_index.find(sequence)
+        assert text.splitlines()[0].startswith(
+            f"서열 입력  row_index {shown.row}  generalisation"
+        )
+        assert len(text.splitlines()) <= 27
+        if shown.row == row:
+            assert number in text.splitlines()[0]
+            assert body(text) == body(spcas9_screen.case_screen(spcas9, number))
+        else:
+            # The shown row is not the case's, so the screen does not claim it.
+            replicated.append((number, row, shown.row))
+            assert number not in text.splitlines()[0]
+            assert text.splitlines()[1].startswith("이 타깃은 ")
+
+    assert replicated == [("C3", 20544, 9343)]

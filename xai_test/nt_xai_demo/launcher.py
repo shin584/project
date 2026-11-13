@@ -1,4 +1,4 @@
-"""데모 런처: 뉴클레아제를 첫 인자로 받고, 그 한 분석만 띄운다 (#169, #171, #173).
+"""데모 런처: 뉴클레아제를 첫 인자로 받고, 그 한 분석만 띄운다 (#169, #171, #173, #174).
 
 `python -m xai_test.nt_xai_demo cas12a` opens the `cas12a>` REPL;
 `python -m xai_test.nt_xai_demo cas12a A1` prints the same screen once. Both go
@@ -67,9 +67,10 @@ NUCLEASES: dict[str, Nuclease] = {
     "spcas9": Nuclease(
         key="spcas9",
         label="9-Hydra v3 (SpCas9, 분석 head 3개)",
-        # The raw 30bp input lands in #174; until then the prompt offers the
-        # numbers it can actually open rather than an input that would refuse.
-        takes="번호",
+        # The unit, with where the protospacer sits: a 20bp protospacer is the
+        # likeliest wrong paste, and the prompt is the cheapest place to say
+        # so - before it is typed rather than after (#174).
+        takes="번호 | 30bp 서열 (protospacer는 그 안)",
         reader_factory=SpCas9Reader,
         screen=spcas9_screen,
     ),

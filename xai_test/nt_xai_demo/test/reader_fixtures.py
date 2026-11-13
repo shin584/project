@@ -53,6 +53,11 @@ BASES = ("A", "C", "G", "T")
 ISM_ROWS = (5, 11, 30, 44)
 IG_ROWS = (11, 30)  # misaligned with ISM_ROWS on purpose
 SPLIT_ROLE = {5: "test", 11: "test", 30: "val", 44: "test"}
+#: Rows in the PAM library; the rest are non-library. With an NGG PAM (below)
+#: the non-library rows are the generalisation stratum, as `v3_strata` cuts it.
+PAM_LIBRARY_ROWS = frozenset({30})
+#: The generalisation stratum's PAM: G at 25 and 26 (position 24 is the free N).
+NGG_POSITIONS = (25, 26)
 #: Percent, as the split files store it. 12.5 percent is 0.125 as a fraction.
 #: Row 44 sits at the prediction, so its primary head's error is 0 - an
 #: `ERRLO` case, and a value a percent/fraction slip cannot hide.
@@ -80,7 +85,9 @@ def reference_bases(rows: int, positions: int) -> np.ndarray:
     )
 
 
-def ism_delta(rows: int, positions: int, heads: int) -> tuple[np.ndarray, np.ndarray]:
+def ism_delta(
+    rows: int, positions: int, heads: int, reference: np.ndarray | None = None
+) -> tuple[np.ndarray, np.ndarray]:
     """Deltas whose per-head, per-row profile has a closed form.
 
     The reference slot stays exactly 0 and the three alternatives carry
@@ -88,7 +95,8 @@ def ism_delta(rows: int, positions: int, heads: int) -> tuple[np.ndarray, np.nda
     alternatives is `expected_profile`. Signs alternate, so a profile that
     forgot the absolute value is visibly wrong.
     """
-    reference = reference_bases(rows, positions)
+    if reference is None:
+        reference = reference_bases(rows, positions)
     delta = np.zeros((rows, positions, len(BASES), heads), dtype=np.float32)
     for row in range(rows):
         for position in range(positions):
@@ -452,6 +460,25 @@ def spcas9_recorded_ism_tokens(stratum: str, head: str) -> list[float]:
     ]
 
 
+def spcas9_reference() -> np.ndarray:
+    """The ISM reference bases, with every non-library row given an NGG PAM.
+
+    Only the bases at 25-26 change; `ism_delta` keys its values to the
+    alternatives' order, not to which base is WT, so no profile moves.
+    """
+    reference = reference_bases(len(ISM_ROWS), POSITIONS)
+    for at, row in enumerate(ISM_ROWS):
+        if row not in PAM_LIBRARY_ROWS:
+            reference[at, list(NGG_POSITIONS)] = BASES.index("G")
+    return reference
+
+
+def spcas9_sequence(row: int) -> str:
+    """The 30bp window a row's split record spells, the same as its ISM reference."""
+    bases = spcas9_reference()[ISM_ROWS.index(row)]
+    return "".join(BASES[int(base)] for base in bases)
+
+
 def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
     spcas9 = root / "spcas9"
     (spcas9 / "published_split").mkdir(parents=True, exist_ok=True)
@@ -472,7 +499,9 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
             json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8"
         )
 
-    delta, reference = ism_delta(len(ISM_ROWS), POSITIONS, len(ISM_HEADS))
+    delta, reference = ism_delta(
+        len(ISM_ROWS), POSITIONS, len(ISM_HEADS), spcas9_reference()
+    )
     wt_prediction = np.array(
         [
             [0.5 + head * 0.01 + row * 0.1 for head in range(len(ISM_HEADS))]
@@ -658,9 +687,9 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
                 writer.writerow(
                     [
                         row,
-                        "A" * POSITIONS,
-                        "A" * 20,
-                        "True",
+                        spcas9_sequence(row),
+                        spcas9_sequence(row)[4:24],
+                        str(row in PAM_LIBRARY_ROWS),
                         0,
                         split.capitalize(),
                         split,
@@ -1261,6 +1290,41 @@ def copy_sequence(cas12a: Path, source: int, target: int) -> None:
         if int(record[0]) == target:
             record[column] = spelled
     with open(predictions, "w", newline="", encoding="utf-8") as handle:
+        csv.writer(handle).writerows(records)
+
+
+def copy_spcas9_sequence(spcas9: Path, source: int, target: int) -> None:
+    """Give `target` the same 30bp window as `source`, as a replicate row has.
+
+    Both places the sequence is spelled change together - the split file and
+    the ISM `reference_base`. Where the WT base moves, its slot's delta swaps
+    with the new WT slot's, so the WT slot keeps its true zero and the three
+    alternatives keep the same values: the row's profiles do not move.
+    """
+    path = spcas9 / "v3_ism/ism.npz"
+    with np.load(path) as archive:
+        arrays = {key: archive[key] for key in archive.files}
+    rows = arrays["row_index"]
+    at, of = (int(np.flatnonzero(rows == row)[0]) for row in (target, source))
+    old = arrays["reference_base"][at].copy()
+    new = arrays["reference_base"][of].copy()
+    for position in np.flatnonzero(old != new):
+        was, now = int(old[position]), int(new[position])
+        slots = arrays["delta"][at, position]
+        slots[[was, now]] = slots[[now, was]]
+    arrays["reference_base"][at] = new
+    np.savez(path, **arrays)
+
+    split = spcas9 / f"published_split/{SPLIT_ROLE[target]}.csv"
+    with open(split, newline="", encoding="utf-8") as handle:
+        records = list(csv.reader(handle))
+    columns = records[0]
+    spelled = "".join(BASES[int(base)] for base in new)
+    for record in records[1:]:
+        if int(record[0]) == target:
+            record[columns.index("sequence")] = spelled
+            record[columns.index("protospacer")] = spelled[4:24]
+    with open(split, "w", newline="", encoding="utf-8") as handle:
         csv.writer(handle).writerows(records)
 
 

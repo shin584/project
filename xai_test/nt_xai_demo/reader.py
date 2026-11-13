@@ -59,6 +59,27 @@ CAS12A_AGREEMENT_SECTION = "설명과 IG–ISM 일치도"
 # fixes `special_mask` to [True] + [False] * 9 + [True, True] and its own
 # summary takes `mass[1:10]` as `dna_signed_mass` (`cas12a_NT_analysis/nt_ig`).
 CAS12A_SEQUENCE_UNIT = SequenceUnit(length=34, name="34bp 타깃 서열")
+#: SpCas9's raw input is the 30bp window ISM covers. A 20bp protospacer is the
+#: likeliest wrong paste, so that length gets a sentence saying where it sits.
+SPCAS9_SEQUENCE_UNIT = SequenceUnit(
+    length=30,
+    name="30bp 서열",
+    hints=(
+        (
+            20,
+            (
+                "20bp protospacer만 넣은 것 같다: protospacer는 30bp 창의 4-23에 든다 "
+                "(앞 flank 4 + protospacer 20 + PAM 3 + 뒤 flank 3)"
+            ),
+        ),
+    ),
+)
+#: The generalisation stratum as `SpCas9_NT_analysis/v3_strata.stratify` cuts
+#: it: non-library rows with an NGG PAM (G at 25 and 26), on the rows where all
+#: three analysed heads are measured. Without the NGG cut, non-library rows
+#: would include rows that belong to neither stratum.
+SPCAS9_NGG = slice(25, 27)
+SPCAS9_LOOKUP_SCOPE = "generalisation 층 (PAM library 밖 · NGG PAM · ISM 보유)"
 CAS12A_IG_TOKENS = 12
 CAS12A_IG_DNA = slice(1, 10)
 _MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
@@ -795,6 +816,66 @@ class SpCas9Reader:
     def reference_sequence(self, row_id: int) -> str:
         bases = self._ism["reference_base"][self.ism_rows.position(row_id)]
         return "".join(BASES[int(base)] for base in bases)
+
+    @cached_property
+    def _split_sequences(self) -> dict[int, tuple[str, bool]]:
+        """row_index -> (30bp sequence, in_pam_library), as the split files hold them."""
+        flags = {"True": True, "False": False}
+        rows: dict[int, tuple[str, bool]] = {}
+        for split in SPLITS:
+            path = self.root / f"published_split/{split}.csv"
+            with open(path, newline="", encoding="utf-8") as handle:
+                for record in csv.DictReader(handle):
+                    flag = record["in_pam_library"].strip()
+                    if flag not in flags:
+                        raise ArtifactMismatch(
+                            f"{path}: row_index {record['row_index']}의 "
+                            f"in_pam_library가 {flag!r}다 (True/False여야 한다)"
+                        )
+                    rows[int(record["row_index"])] = (
+                        record["sequence"].strip().upper(),
+                        flags[flag],
+                    )
+        return rows
+
+    @cached_property
+    def generalisation_rows(self) -> tuple[int, ...]:
+        """The generalisation stratum's ISM rows, ascending (see `SPCAS9_NGG`).
+
+        Every one has ISM, rollout and all three analysed heads' labels, so a
+        lookup over them always opens a full screen. The stratum is cut on the
+        split's spelling and the screen prints ISM's reference, so the two must
+        agree on every ISM row; a disagreement is refused here.
+        """
+        rows = []
+        for row in (int(row) for row in self.ism_rows.ids):
+            found = self._split_sequences.get(row)
+            if found is None:
+                raise ArtifactMismatch(f"split 파일에 ISM의 row_index {row}이(가) 없다")
+            spelled, in_library = found
+            if spelled != self.reference_sequence(row):
+                raise ArtifactMismatch(
+                    f"row_index {row}: split 파일의 서열이 ISM reference_base와 다르다"
+                )
+            if in_library or spelled[SPCAS9_NGG] != "GG":
+                continue
+            if any(self.label(row, head) is None for head in self.analysed_heads):
+                continue
+            rows.append(row)
+        return tuple(sorted(rows))
+
+    @cached_property
+    def sequence_index(self) -> SequenceIndex:
+        """The generalisation rows' 30bp windows, for the raw-sequence input (#174)."""
+        rows = self.generalisation_rows
+        if not rows:
+            raise ArtifactMismatch("generalisation 층에 ISM 행이 하나도 없다")
+        return SequenceIndex(
+            {row: self.reference_sequence(row) for row in rows},
+            SPCAS9_SEQUENCE_UNIT,
+            id_name="row_index",
+            scope=SPCAS9_LOOKUP_SCOPE,
+        )
 
     def has_ig(self, row_id: int) -> bool:
         return int(row_id) in self.ig_rows

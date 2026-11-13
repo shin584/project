@@ -70,7 +70,7 @@ GOLDEN_A1 = """\
 A1  GEN-ERRLO-01  ERRLO  row_index 44  generalisation
   SpCas9     실측 0.1   예측 0.1   오차 0
 
-서열  CATGCATGCATGCATGCATGCATGCATGCA
+서열  CATGCATGCATGCATGCATGCATGCGGGCA
 ISM   ▃▃▃█▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃  SpCas9
                               [----]  pam_plus_right_flank 24-29
       막대 = 위치별 대체염기 3개 중 최대 |Δ| (WT 칸 제외) · 각 막대는 자기 최대에 맞춰 그린다 (fraction)
@@ -91,7 +91,7 @@ C2  GEN-HEADGAP-02  HEADGAP  row_index 11  generalisation  (head 2개: evoCas9�
   SpCas9     실측 0.4   예측 0.1   오차 0.3
   evoCas9    실측 0.56   예측 0.18   오차 0.38
 
-서열  TGCATGCATGCATGCATGCATGCATGCATG
+서열  TGCATGCATGCATGCATGCATGCATGGATG
 ISM   ▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃█▃▃▃  SpCas9
 ISM   ▆▆▆▆▆▆▆█▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆  evoCas9
                               [----]  pam_plus_right_flank 24-29
@@ -234,10 +234,117 @@ def test_a_number_is_case_insensitive(reader):
     assert screen.case_screen(reader, "c2") == screen.case_screen(reader, "C2")
 
 
-def test_a_raw_sequence_is_refused_while_its_input_is_unbuilt(reader):
-    with pytest.raises(screen.UnknownCaseNumber) as refusal:
-        screen.screen_for(reader, "A" * 30)
-    assert "30bp" in str(refusal.value)
+# --- the 30bp sequence input (#174) ---------------------------------------- #
+
+
+def _body(text: str) -> list[str]:
+    """The shared row body: from the first figures line to before provenance."""
+    lines = text.splitlines()
+    start = next(i for i, line in enumerate(lines) if line.startswith("  SpCas9 "))
+    return lines[start:-1]
+
+
+def test_the_lookup_holds_the_generalisation_rows_and_no_library_row(reader):
+    index = reader.sequence_index
+    assert index.stored_rows == 3  # rows 5, 11, 44; row 30 is in the PAM library
+    assert sorted(reader.generalisation_rows) == [5, 11, 44]
+
+
+def test_a_stored_sequence_opens_its_numbers_body_with_its_own_header(reader):
+    text = screen.screen_for(reader, fx.spcas9_sequence(5))
+    lines = text.splitlines()
+    assert lines[0] == "서열 입력  row_index 5  generalisation  (= 사례 B1)"
+    assert _body(text) == _body(screen.case_screen(reader, "B1"))
+    assert lines[-1] == (
+        "출처: 층=generalisation · head=SpCas9 · 통계=ISM 최대 |Δ|(fraction), "
+        "IG signed token attribution, rollout 토큰 열 평균 · 분모=이 행 1행 · "
+        "입력=30bp 서열, generalisation 3행에서 조회"
+    )
+
+
+def test_a_headgap_cases_sequence_shows_the_same_two_heads_as_its_number(reader):
+    text = screen.screen_for(reader, fx.spcas9_sequence(11))
+    assert text.splitlines()[0].startswith(
+        "서열 입력  row_index 11  generalisation  (= 사례 C2)"
+    )
+    assert _body(text) == _body(screen.case_screen(reader, "C2"))
+    assert "head=SpCas9, evoCas9" in text.splitlines()[-1]
+
+
+def test_a_sequence_is_read_in_lower_case_too(reader):
+    sequence = fx.spcas9_sequence(44)
+    assert screen.screen_for(reader, sequence.lower()) == screen.screen_for(
+        reader, sequence
+    )
+
+
+def test_a_replicated_sequence_shows_the_smallest_row_and_a_duplicate_line(tmp_path):
+    data = fx.build_data_dir(tmp_path / "data")
+    fx.copy_spcas9_sequence(data / "spcas9", source=44, target=5)
+    replicated = rd.SpCas9Reader(data)
+    sequence = fx.spcas9_sequence(44)
+
+    lines = screen.screen_for(replicated, sequence).splitlines()
+
+    assert lines[0] == "서열 입력  row_index 5  generalisation  (= 사례 B1)"
+    assert lines[1] == (
+        "이 타깃은 2행 중복(세포주 반복): row_index 5, 44 — "
+        "가장 작은 row_index 5를 보여준다"
+    )
+    assert replicated.reference_sequence(5) == sequence
+    assert replicated.sequence_index.distinct == 2
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        fx.spcas9_sequence(30),  # stored, but in the PAM library stratum
+        "A" * 30,  # well-formed, stored nowhere
+    ],
+)
+def test_a_sequence_outside_the_stratum_is_a_miss_with_its_count_and_examples(
+    reader, typed
+):
+    with pytest.raises(screen.SequenceNotStored) as refusal:
+        screen.screen_for(reader, typed)
+    message = str(refusal.value)
+    assert message.startswith(
+        f"저장된 3행에 없음 — 조회 범위: {rd.SPCAS9_LOOKUP_SCOPE}: "
+    )
+    examples = message.split(". 예: ")[1].split(", ")
+    assert examples == [fx.spcas9_sequence(row) for row in (5, 11, 44)]
+
+
+def test_a_20bp_protospacer_is_refused_naming_the_30bp_window(reader):
+    with pytest.raises(screen.NotASequence) as refusal:
+        screen.screen_for(reader, fx.spcas9_sequence(5)[4:24])
+    message = str(refusal.value)
+    assert message.startswith("30bp 서열이 아니다: 길이 20 (30이어야 한다) — ")
+    assert "protospacer" in message and "4-23" in message
+
+
+@pytest.mark.parametrize(
+    ("typed", "reason"),
+    [
+        ("A" * 34, "길이 34 (30이어야 한다)"),
+        ("A" * 29 + "N", "ACGT 외 문자 'N' (위치 29)"),
+    ],
+)
+def test_other_wrong_units_are_refused_naming_the_unit(reader, typed, reason):
+    with pytest.raises(screen.NotASequence) as refusal:
+        screen.screen_for(reader, typed)
+    assert str(refusal.value) == f"30bp 서열이 아니다: {reason}"
+
+
+def test_a_split_sequence_that_disagrees_with_the_ism_reference_is_refused(tmp_path):
+    data = fx.build_data_dir(tmp_path / "data")
+    split = data / "spcas9/published_split/test.csv"
+    text = split.read_text(encoding="utf-8")
+    split.write_text(
+        text.replace(fx.spcas9_sequence(44), "C" * 30, 1), encoding="utf-8"
+    )
+    with pytest.raises(rd.ArtifactMismatch, match="row_index 44"):
+        assert rd.SpCas9Reader(data).sequence_index
 
 
 # --- the guards the golden text rests on ------------------------------------ #

@@ -1,14 +1,19 @@
-"""9-Hydra v3 화면 한 장: 사례 번호 하나 → 그 서열의 XAI 결과 (#169, #173).
+"""9-Hydra v3 화면 한 장: 사례 번호나 30bp 서열 → 그 서열의 XAI 결과 (#169, #173, #174).
 
 A case number (`A1`-`A3` ERRLO, `B1`-`B3` ERRHI, `C1`-`C3` HEADGAP) is a
 typing convenience over the audited selection in `cases.json`: `B2` is the
-ERRHI case recorded at `selection_rank` 2. Nothing is re-ranked here.
+ERRHI case recorded at `selection_rank` 2. Nothing is re-ranked here. The
+other input is the 30bp window itself, looked up over the stratum the cases
+were drawn from, printing the same body (#174).
 
-Only the **generalisation** stratum is offered. The nine `pam_library` cases
-are variants of 5 targets and their selection bounds are their own (the two
-strata's gap scales differ about twofold), so with one stratum on screen there
-is no path left that could mix them - ADR 0012's prohibition made structural
-rather than restated in a caption.
+Only the **generalisation** stratum is offered, by either input. The nine
+`pam_library` cases are variants of 5 targets and their selection bounds are
+their own (the two strata's gap scales differ about twofold), so with one
+stratum on screen there is no path left that could mix them - ADR 0012's
+prohibition made structural rather than restated in a caption. That is also
+why the lookup is the stratum and not every row with ISM: the 1,669 non-library
+non-NGG rows are in **neither** stratum, so a screen opened from one could not
+say which population its `층=` line names.
 
 Three things this nuclease's artifacts force, which Cas12a's do not:
 
@@ -39,8 +44,13 @@ from typing import Any
 from . import render, screen_parts
 from .reader import ArtifactMismatch, SpCas9Reader
 from .screen_parts import ROLLOUT_LIMIT, UnknownCaseNumber
+from .sequence_lookup import NotASequence, SequenceNotStored
 
+#: The refusal types are re-exported because the launcher catches a screen
+#: module's refusals through the module it was handed.
 __all__ = [
+    "NotASequence",
+    "SequenceNotStored",
     "UnknownCaseNumber",
     "case_screen",
     "help_lines",
@@ -48,6 +58,7 @@ __all__ = [
     "numbered_cases",
     "report",
     "screen_for",
+    "sequence_screen",
 ]
 
 #: Letter -> criterion, in the order the screen lists them. A and B mean the
@@ -62,6 +73,10 @@ CASE_LETTERS: tuple[tuple[str, str], ...] = (
 #: docstring); its cases remain in the artifact and keep their own `case_id`.
 STRATUM = "generalisation"
 HEADGAP = "HEADGAP"
+
+#: The header note for a screen showing two heads, written once so the number
+#: and the sequence cannot word the same fact differently.
+_TWO_HEAD_NOTE = "  (head 2개: {second}가 {primary} 대비 오차 차이 최대)"
 
 #: The sample line the eight cases outside the frozen IG subset print.
 IG_SAMPLE_NOTE = "IG는 층당 200행 표본 — 이 행은 비대상"
@@ -111,17 +126,17 @@ def number_range(reader: SpCas9Reader) -> str:
 
 
 def help_lines(reader: SpCas9Reader) -> list[str]:
-    """The input lines of the launcher's help, in this nuclease's own units.
-
-    The 30bp sequence input lands in #174, so it is not offered here: a help
-    text that listed an input the session refuses would be the meeting's
-    first wrong turn.
-    """
+    """The input lines of the launcher's help, in this nuclease's own units."""
+    index = reader.sequence_index
     return [
         f"  <번호>   사례 한 장: {number_range(reader)}",
         (
+            f"  <서열>   {index.unit.name} → 같은 화면 "
+            f"({STRATUM} {index.stored_rows:,}행에서 찾는다)"
+        ),
+        (
             f"           {STRATUM} 층만 — 서열은 ISM이 덮는 30bp 창 "
-            "(20bp protospacer가 그 안에 든다)"
+            "(20bp protospacer는 그 안 4-23)"
         ),
     ]
 
@@ -341,10 +356,22 @@ def row_body(reader: SpCas9Reader, row: int, heads: Sequence[str]) -> list[str]:
     return lines
 
 
-def _provenance(
-    reader: SpCas9Reader, case: dict[str, Any], heads: Sequence[str]
-) -> str:
-    """The one line carrying the four fields every figure above shares."""
+def _provenance(heads: Sequence[str], how: str) -> str:
+    """The one line carrying the four fields every figure above shares.
+
+    `how` is how this row was reached - the selection for a case number, the
+    lookup for a typed sequence - because that is the one field the two inputs
+    do not share.
+    """
+    return (
+        f"출처: 층={STRATUM} · head={', '.join(heads)} · "
+        "통계=ISM 최대 |Δ|(fraction), IG signed token attribution, "
+        f"rollout 토큰 열 평균 · 분모=이 행 1행 · {how}"
+    )
+
+
+def _selection(reader: SpCas9Reader, case: dict[str, Any]) -> str:
+    """How a case number reached its row: the selection, in its own pool."""
     pool = reader.case_strata[STRATUM]
     gap = case.get("head_gap")
     selection = (
@@ -358,11 +385,7 @@ def _provenance(
             f" (기록된 head_gap {float(gap):.4g} = 분석 head 3개 절대오차의 "
             f"max − min, 그 두 head는 {widest}−{narrowest})"
         )
-    return (
-        f"출처: 층={STRATUM} · head={', '.join(heads)} · "
-        "통계=ISM 최대 |Δ|(fraction), IG signed token attribution, "
-        f"rollout 토큰 열 평균 · 분모=이 행 1행 · {selection}"
-    )
+    return selection
 
 
 def case_screen(reader: SpCas9Reader, number: str) -> str:
@@ -374,25 +397,70 @@ def case_screen(reader: SpCas9Reader, number: str) -> str:
         f"{key}  {case['case_id']}  {case['criterion']}  row_index {row}  {STRATUM}"
     )
     if len(heads) > 1:
-        header += f"  (head 2개: {heads[1]}가 {heads[0]} 대비 오차 차이 최대)"
-    lines = [header, *row_body(reader, row, heads), _provenance(reader, case, heads)]
+        header += _TWO_HEAD_NOTE.format(second=heads[1], primary=heads[0])
+    lines = [
+        header,
+        *row_body(reader, row, heads),
+        _provenance(heads, _selection(reader, case)),
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def case_at(reader: SpCas9Reader, row: int) -> tuple[str, dict[str, Any]] | None:
+    """The number and case on one row, when a case was selected from it."""
+    for number, case in numbered_cases(reader).items():
+        if int(case["row_index"]) == int(row):
+            return number, case
+    return None
+
+
+def sequence_screen(reader: SpCas9Reader, typed: str) -> str:
+    """The same screen, opened by the 30bp window instead of a case number.
+
+    The lookup is the generalisation stratum - the population the cases were
+    drawn from - so every hit has ISM, rollout and all three analysed heads'
+    labels, and the screen's `층=generalisation` is true for a typed sequence
+    exactly as it is for a number. A window on several rows (cell-line
+    replicates) shows the smallest `row_index` with one line saying so;
+    nothing is averaged.
+
+    A second head appears only where a case on this row was selected for head
+    disagreement, since that selection is the reason to show one. A row no
+    case was drawn from has no such reason and shows the primary head.
+    """
+    index = reader.sequence_index
+    hit = index.find(typed)
+    row = hit.row
+    found = case_at(reader, row)
+    heads = (reader.primary_head,) if found is None else heads_shown(reader, found[1])
+    header = f"서열 입력  row_index {row}  {STRATUM}"
+    if found is not None:
+        header += f"  (= 사례 {found[0]})"
+    if len(heads) > 1:
+        header += _TWO_HEAD_NOTE.format(second=heads[1], primary=heads[0])
+    lines = [header]
+    duplicate = hit.duplicate_line()
+    if duplicate:
+        lines.append(duplicate)
+    lines += [
+        *row_body(reader, row, heads),
+        _provenance(
+            heads, f"입력={index.unit.name}, {STRATUM} {index.stored_rows:,}행에서 조회"
+        ),
+    ]
     return "\n".join(lines) + "\n"
 
 
 def screen_for(reader: SpCas9Reader, typed: str) -> str:
-    """Route one input. The raw 30bp sequence input lands in #174.
+    """Route one input: a short input with a digit is a case number, else a sequence.
 
-    Until it does, anything that is not a case number is refused by the same
-    refusal a wrong number gets, naming the numbers that do work: the screen
-    these artifacts can open today is the numbered one.
+    The same split Cas12a's screen makes (#172), so a mistyped number still
+    gets the number range in its refusal and a mistyped sequence - a stray
+    digit included - gets the 30bp unit in its own.
     """
     if screen_parts.looks_like_case_number(typed):
         return case_screen(reader, typed)
-    raise UnknownCaseNumber(
-        f"사례 번호가 아니다: {typed.strip()[:40]!r}. "
-        f"유효 번호: {number_range(reader)} "
-        "(30bp 생서열로 여는 입력은 아직 없다)"
-    )
+    return sequence_screen(reader, typed)
 
 
 # --------------------------------------------------------------------------- #

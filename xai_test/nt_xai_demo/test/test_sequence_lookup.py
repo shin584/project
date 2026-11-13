@@ -102,3 +102,33 @@ def test_a_stored_sequence_of_the_wrong_unit_is_refused_at_build():
 def test_an_empty_population_is_refused_at_build():
     with pytest.raises(ValueError):
         sl.SequenceIndex({}, UNIT)
+
+
+# --- what a caller can add to its unit and its miss (#174) ------------------ #
+
+HINTED = sl.SequenceUnit(
+    length=8, name="8bp 서열", hints=((4, "4bp 코어만 넣은 것 같다"),)
+)
+
+
+def test_a_length_with_a_hint_appends_it_to_the_refusal():
+    with pytest.raises(sl.NotASequence) as refusal:
+        sl.SequenceIndex(ROWS, HINTED).find("ACGT")
+    assert str(refusal.value) == (
+        "8bp 서열이 아니다: 길이 4 (8이어야 한다) — 4bp 코어만 넣은 것 같다"
+    )
+
+
+def test_a_length_without_a_hint_is_refused_as_before():
+    with pytest.raises(sl.NotASequence) as refusal:
+        sl.SequenceIndex(ROWS, HINTED).find("ACGTA")
+    assert str(refusal.value) == "8bp 서열이 아니다: 길이 5 (8이어야 한다)"
+
+
+def test_a_miss_names_the_lookups_scope_when_the_caller_gives_one():
+    index = sl.SequenceIndex(ROWS, UNIT, scope="한 층만")
+    with pytest.raises(sl.SequenceNotStored) as refusal:
+        index.find("TTTTTTTT")
+    assert str(refusal.value).startswith(
+        "저장된 5행에 없음 (서로 다른 서열 3개) — 조회 범위: 한 층만: TTTTTTTT. 예: "
+    )

@@ -114,7 +114,7 @@ def test_spcas9_opens_a_repl_that_names_its_own_input(data_dir):
     written: list[str] = []
 
     def read(prompt: str) -> str:
-        assert prompt == "spcas9 [번호]> "
+        assert prompt == "spcas9 [번호 | 30bp 서열 (protospacer는 그 안)]> "
         return pending.pop(0)
 
     assert ln.run("spcas9", (), data_dir=data_dir, read=read, write=written.append) == 0
@@ -198,6 +198,42 @@ def test_a_wrong_unit_names_both_inputs_and_keeps_the_repl_running(data_dir):
         "사례 번호라면: A1 low_error · C1 out_of_range"
     )
     assert written[2].startswith("A1  low_error")
+
+
+def _spcas9_once(data_dir, typed: str) -> tuple[int, list[str], list[str]]:
+    written: list[str] = []
+    errors: list[str] = []
+    code = ln.run(
+        "spcas9",
+        (typed,),
+        data_dir=data_dir,
+        write=written.append,
+        write_error=errors.append,
+    )
+    return code, written, errors
+
+
+def test_a_30bp_sequence_one_shot_prints_the_spcas9_sequence_screen(data_dir):
+    sequence = fx.spcas9_sequence(5)
+    code, written, errors = _spcas9_once(data_dir, sequence)
+    expected = spcas9_screen.screen_for(rd.SpCas9Reader(data_dir), sequence)
+    assert code == 0 and not errors
+    assert written == [expected.rstrip("\n")]
+    assert written[0].startswith("서열 입력  row_index 5")
+
+
+def test_a_20bp_protospacer_at_spcas9_names_the_unit_and_the_numbers(data_dir):
+    code, written, errors = _spcas9_once(data_dir, fx.spcas9_sequence(5)[4:24])
+    assert code == 1 and not written
+    assert errors[0].startswith("30bp 서열이 아니다: 길이 20 (30이어야 한다) — ")
+    assert errors[0].endswith("사례 번호라면: A1 ERRLO · B1 ERRHI · C2 HEADGAP")
+
+
+def test_the_spcas9_help_names_the_sequence_input_and_its_population(data_dir):
+    session = ln.Session(nuclease=ln.NUCLEASES["spcas9"], data_dir=data_dir)
+    help_text = session.help_text()
+    assert "30bp 서열" in help_text
+    assert "generalisation 3행" in help_text
 
 
 def test_the_help_names_the_sequence_input_and_its_population(data_dir):

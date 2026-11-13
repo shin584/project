@@ -2,8 +2,8 @@
 
 The demo's second input is the sequence itself. This module knows only row
 IDs and their sequences: the unit (length, name on screen) and the population
-are the caller's, so Cas12a's 34bp target window and SpCas9's own unit
-(#173) share the same lookup, duplicate handling and miss message.
+are the caller's, so Cas12a's 34bp target window and SpCas9's 30bp window
+(#174) share the same lookup, duplicate handling and miss message.
 
 The same sequence can sit on several rows - cell-line replicates measured
 separately. The screen shows the smallest row ID and says how many rows share
@@ -37,14 +37,21 @@ class SequenceUnit:
 
     length: int
     name: str
+    #: (length, sentence) pairs: a wrong length the caller recognises - another
+    #: unit of its own a user is likely to paste - gets that sentence appended.
+    hints: tuple[tuple[int, str], ...] = ()
 
     def check(self, typed: str) -> str:
         """The sequence normalised to upper case, or a refusal naming the unit."""
         sequence = typed.strip().upper()
         if len(sequence) != self.length:
-            raise NotASequence(
+            refusal = (
                 f"{self.name}이 아니다: 길이 {len(sequence)} ({self.length}이어야 한다)"
             )
+            hint = dict(self.hints).get(len(sequence))
+            if hint:
+                refusal += f" — {hint}"
+            raise NotASequence(refusal)
         for position, letter in enumerate(sequence):
             if letter not in ALPHABET:
                 raise NotASequence(
@@ -86,11 +93,15 @@ class SequenceIndex:
         unit: SequenceUnit,
         *,
         id_name: str = "row",
+        scope: str | None = None,
     ) -> None:
         if not sequences:
             raise ValueError("조회할 저장 서열이 하나도 없다")
         self.unit = unit
         self.id_name = id_name
+        #: What the stored rows are, when they are not every row the nuclease
+        #: has - named in a miss, so "not stored" is not read as "not measured".
+        self.scope = scope
         self.stored_rows = len(sequences)
         by_sequence: dict[str, list[int]] = {}
         for row in sorted(int(row) for row in sequences):
@@ -117,6 +128,8 @@ class SequenceIndex:
             counted = f"저장된 {self.stored_rows:,}행에 없음"
             if self.distinct != self.stored_rows:
                 counted += f" (서로 다른 서열 {self.distinct:,}개)"
+            if self.scope:
+                counted += f" — 조회 범위: {self.scope}"
             raise SequenceNotStored(
                 f"{counted}: {sequence}. 예: {', '.join(self.examples())}"
             )
