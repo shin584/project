@@ -26,7 +26,7 @@ def _repl(data_dir, inputs):
     written: list[str] = []
 
     def read(prompt: str) -> str:
-        assert prompt == "cas12a> "
+        assert prompt == "cas12a [번호 | 34bp 타깃 서열]> "
         if not pending:
             raise EOFError
         return pending.pop(0)
@@ -135,3 +135,46 @@ def test_main_no_longer_enters_the_old_menu_shell():
         for alias in node.names
     }
     assert "shell" not in imported and "launcher" in imported
+
+
+#: Case A1's 34bp window in the fixture (source_row 9).
+A1_SEQUENCE = "TGCATGCATGCATGCATGCATGCATGCATGCATG"
+
+
+def test_the_prompt_states_the_sequence_unit():
+    assert "34bp 타깃 서열" in ln.Session.prompt
+
+
+def test_a_sequence_one_shot_prints_the_sequence_screen(data_dir):
+    code, written, errors = _once(data_dir, A1_SEQUENCE)
+    expected = cas12a_screen.sequence_screen(rd.Cas12aReader(data_dir), A1_SEQUENCE)
+    assert code == 0 and not errors
+    assert written == [expected.rstrip("\n")]
+
+
+def test_a_sequence_in_the_repl_prints_what_the_one_shot_prints(data_dir):
+    _, written, _ = _once(data_dir, A1_SEQUENCE)
+    code, repl_written = _repl(data_dir, [A1_SEQUENCE, "quit"])
+    assert code == 0 and repl_written[1:] == written
+
+
+def test_a_sequence_not_stored_fails_the_one_shot_with_examples(data_dir):
+    code, written, errors = _once(data_dir, "A" * 34)
+    assert code == 1 and not written
+    assert errors[0].startswith(f"저장된 3행에 없음: {'A' * 34}. 예: ")
+
+
+def test_a_wrong_unit_names_both_inputs_and_keeps_the_repl_running(data_dir):
+    code, written = _repl(data_dir, ["ACGT", "A1", "q"])
+    assert code == 0
+    assert written[1] == (
+        "34bp 타깃 서열이 아니다: 길이 4 (34이어야 한다). "
+        "사례 번호라면: A1 low_error · C1 out_of_range"
+    )
+    assert written[2].startswith("A1  low_error")
+
+
+def test_the_help_names_the_sequence_input_and_its_population(data_dir):
+    _, written = _repl(data_dir, [])
+    assert "34bp 타깃 서열" in written[0]
+    assert "저장된 3행" in written[0]

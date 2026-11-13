@@ -974,6 +974,7 @@ def build_cas12a(
                 case = cas12a_annotation(row, "", case_rows[row])
                 label, raw = case["label"], case["raw_prediction"]
                 clipped, stratum = min(max(raw, 0.0), 1.0), case["pam_stratum"]
+                error = case["raw_absolute_error"]
             else:
                 label, raw, clipped = (
                     0.2 + index * 0.1,
@@ -981,6 +982,7 @@ def build_cas12a(
                     0.25 + index * 0.1,
                 )
                 stratum = "TTTV" if index else "TTTT"
+                error = 0.05
             writer.writerow(
                 [
                     row,
@@ -992,7 +994,7 @@ def build_cas12a(
                     clipped,
                     stratum,
                     0.05,
-                    0.05,
+                    error,
                     0.0025,
                     0.05,
                     0.05,
@@ -1179,6 +1181,40 @@ def drop_alternatives(cas12a: Path, row: int, position: int) -> None:
     arrays["base_valid_mask"][at, position] = arrays["wt_mask"][at, position]
     arrays["denominator"][at, position] = 0
     np.savez(path, **arrays)
+
+
+def copy_sequence(cas12a: Path, source: int, target: int) -> None:
+    """Give `target` the same 34bp window as `source`, as a replicate row has.
+
+    Both places the sequence is spelled change together - `predictions.csv`
+    and the ISM `reference_base` (with its WT mask, a zero WT delta and the
+    denominator that follows) - so the reader's row-join check still holds for
+    the target row.
+    """
+    path = cas12a / "ism.npz"
+    with np.load(path) as archive:
+        arrays = {key: archive[key] for key in archive.files}
+    rows = arrays["source_row"]
+    at, of = (int(np.flatnonzero(rows == row)[0]) for row in (target, source))
+    reference = arrays["reference_base"][of].copy()
+    wt_mask = np.eye(len(BASES), dtype=bool)[reference]
+    arrays["reference_base"][at] = reference
+    arrays["wt_mask"][at] = wt_mask
+    arrays["non_wt_mask"][at] = ~wt_mask
+    arrays["raw_delta"][at] = np.where(wt_mask, 0.0, arrays["raw_delta"][at])
+    arrays["denominator"][at] = (~wt_mask & arrays["base_valid_mask"][at]).sum(axis=-1)
+    np.savez(path, **arrays)
+
+    predictions = cas12a / "predictions.csv"
+    with open(predictions, newline="", encoding="utf-8") as handle:
+        records = list(csv.reader(handle))
+    column = records[0].index("sequence")
+    spelled = "".join(BASES[int(base)] for base in reference)
+    for record in records[1:]:
+        if int(record[0]) == target:
+            record[column] = spelled
+    with open(predictions, "w", newline="", encoding="utf-8") as handle:
+        csv.writer(handle).writerows(records)
 
 
 def build_data_dir(root: Path, **kwargs) -> Path:

@@ -335,3 +335,27 @@ def test_the_real_case_screens_open_for_all_fifteen_numbers_in_one_screen():
             rtol=1e-6,
         )
     assert len(cas12a_screen.report(cas12a).splitlines()) < 20
+
+
+def test_the_real_sequences_open_the_number_screens_body_over_all_1500_rows():
+    """Every case's 34bp window opens its number's body; the index holds 1,500."""
+    from xai_test.nt_xai_demo import cas12a_screen
+
+    cas12a = _reader(
+        rd.Cas12aReader, "cas12a/ism.npz", "cas12a/ig.npz", "cas12a/rollout.npz"
+    )
+    index = cas12a.sequence_index
+    assert index.stored_rows == 1500
+
+    def body(text):
+        lines = text.splitlines()
+        start = next(i for i, line in enumerate(lines) if line.startswith("실측 "))
+        return lines[start:-1]
+
+    for number, case in cas12a_screen.numbered_cases(cas12a).items():
+        sequence = cas12a.sequence(int(case["source_row"]))
+        by_sequence = cas12a_screen.sequence_screen(cas12a, sequence)
+        assert by_sequence.startswith(f"서열 입력  source_row {case['source_row']}")
+        assert number in by_sequence.splitlines()[0]
+        assert body(by_sequence) == body(cas12a_screen.case_screen(cas12a, number))
+        assert len(by_sequence.splitlines()) <= 26

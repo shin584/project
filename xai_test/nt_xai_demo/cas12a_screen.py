@@ -24,6 +24,17 @@ from collections.abc import Sequence
 
 from . import render
 from .reader import ArtifactMismatch, Cas12aReader
+from .sequence_lookup import NotASequence, SequenceNotStored
+
+__all__ = [
+    "NotASequence",
+    "SequenceNotStored",
+    "UnknownCaseNumber",
+    "case_screen",
+    "report",
+    "screen_for",
+    "sequence_screen",
+]
 
 #: Letter -> role, in the order the screen lists them. A and B mean the same
 #: thing for both nucleases (A = predicted well, B = badly).
@@ -33,6 +44,9 @@ CASE_LETTERS: tuple[tuple[str, str], ...] = (
     ("C", "out_of_range"),
 )
 _NUMBER = re.compile(r"([A-Za-z])(\d+)")
+#: Longer than this is read as a sequence even with a digit in it: no case
+#: number comes near it, and a pasted window with a typo must hear its unit.
+NUMBER_MAX_LENGTH = 4
 
 #: Eight heights for the ISM bar; a missing value is a dot, never a low bar.
 SPARKS = "▁▂▃▄▅▆▇█"
@@ -130,24 +144,27 @@ def _pam_line(pam: tuple[int, int]) -> str:
     return " " * (LABEL_WIDTH + start) + bracket + f"  PAM {_span_text(start, end)}"
 
 
-def case_screen(reader: Cas12aReader, number: str) -> str:
-    """The one screen for one case number."""
-    key, case = case_for(reader, number)
+def _checked_case_row(reader: Cas12aReader, case: dict) -> int:
+    """The case's row, its cases.csv figures checked against predictions.csv."""
     row = int(case["source_row"])
     stored = reader.prediction(row)
-    for field in ("label", "raw_prediction"):
+    for field in ("label", "raw_prediction", "raw_absolute_error", "pam_stratum"):
         if stored[field] != case[field]:
             raise ArtifactMismatch(
                 f"source_row {row}: cases.csv의 {field}({case[field]})가 "
                 f"predictions.csv의 값({stored[field]})과 다르다"
             )
-    stratum = str(case["pam_stratum"])
-    if stored["pam_stratum"] != stratum:
-        raise ArtifactMismatch(
-            f"source_row {row}: PAM 집단이 cases.csv {stratum}, "
-            f"predictions.csv {stored['pam_stratum']}로 다르다"
-        )
+    return row
 
+
+def row_body(reader: Cas12aReader, row: int) -> list[str]:
+    """The screen's body for one row: figures, sequence, ISM, IG, rollout.
+
+    Shared by the number and the sequence input, so the two print the same
+    body for the same row; only the header and the provenance line differ.
+    Everything is read by `source_row` from `predictions.csv` and the arrays.
+    """
+    stored = reader.prediction(row)
     sequence = reader.sequence(row)
     ism = reader.ism_max_profile(row)
     spans = reader.token_spans
@@ -160,7 +177,6 @@ def case_screen(reader: Cas12aReader, number: str) -> str:
     ig = reader.ig_dna_mass(row)
     rollout = reader.rollout_referenced(row)
     peak = render.profile_peak(ism)
-    pool = reader.case_pool(str(case["role"]))
 
     caption = (
         "막대 = 위치별 대체염기 3개 중 최대 |raw Δ| (WT 칸 제외) · "
@@ -169,12 +185,11 @@ def case_screen(reader: Cas12aReader, number: str) -> str:
     if any(math.isnan(v) for v in ism):
         caption += f" ({MISSING} = 유효 대체염기 없음)"
     lines = [
-        f"{key}  {case['role']}  source_row {row}  {stratum}",
         (
             # Significant figures, not decimals: low_error cases' errors are
             # ~1e-4 and would all print as 0.000.
-            f"실측 {case['label']:.4g}   예측 {case['raw_prediction']:.4g}   "
-            f"오차 {case['raw_absolute_error']:.4g}   (raw, fraction)"
+            f"실측 {stored['label']:.4g}   예측 {stored['raw_prediction']:.4g}   "
+            f"오차 {stored['raw_absolute_error']:.4g}   (raw, fraction)"
         ),
         "",
         f"서열  {sequence}",
@@ -198,14 +213,81 @@ def case_screen(reader: Cas12aReader, number: str) -> str:
         + "  ".join(f"t{index} {value:.3f}" for index, value in enumerate(rollout, 1)),
         f"  {ROLLOUT_LIMIT}",
         "",
-        (
-            f"출처: 층={stratum} · head={reader.head} · 통계=ISM 최대 |raw Δ|, "
-            "IG signed mass, rollout DNA 블록 열 평균 · 분모=이 행 1행 · 선정="
-            f"{case['role']} 후보 {pool['available']:,}행 중 rank "
-            f"{case['rank_in_category']}"
+    ]
+    return lines
+
+
+def _provenance(reader: Cas12aReader, row: int, how: str) -> str:
+    """The one line that carries the four fields every figure above shares."""
+    return (
+        f"출처: 층={reader.prediction(row)['pam_stratum']} · head={reader.head} · "
+        "통계=ISM 최대 |raw Δ|, IG signed mass, rollout DNA 블록 열 평균 · "
+        f"분모=이 행 1행 · {how}"
+    )
+
+
+def case_screen(reader: Cas12aReader, number: str) -> str:
+    """The one screen for one case number."""
+    key, case = case_for(reader, number)
+    row = _checked_case_row(reader, case)
+    pool = reader.case_pool(str(case["role"]))
+    lines = [
+        f"{key}  {case['role']}  source_row {row}  {case['pam_stratum']}",
+        *row_body(reader, row),
+        _provenance(
+            reader,
+            row,
+            f"선정={case['role']} 후보 {pool['available']:,}행 중 rank "
+            f"{case['rank_in_category']}",
         ),
     ]
     return "\n".join(lines) + "\n"
+
+
+def sequence_screen(reader: Cas12aReader, typed: str) -> str:
+    """The same screen, opened by a 34bp target window instead of a number.
+
+    The window is looked up over every stored row, not only the 15 cases. A
+    window on several rows (cell-line replicates) shows the smallest
+    `source_row` with one line saying so; nothing is averaged.
+    """
+    index = reader.sequence_index
+    hit = index.find(typed)
+    row = hit.row
+    numbers = [
+        key
+        for key, case in numbered_cases(reader).items()
+        if int(case["source_row"]) == row
+    ]
+    header = f"서열 입력  source_row {row}  {reader.prediction(row)['pam_stratum']}"
+    if numbers:
+        header += f"  (= 사례 {', '.join(numbers)})"
+    lines = [header]
+    duplicate = hit.duplicate_line()
+    if duplicate:
+        lines.append(duplicate)
+    lines += [
+        *row_body(reader, row),
+        _provenance(
+            reader,
+            row,
+            f"입력={index.unit.name}, 저장된 {index.stored_rows:,}행에서 조회",
+        ),
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def screen_for(reader: Cas12aReader, typed: str) -> str:
+    """Route one input: a short input with a digit is a case number, else a sequence.
+
+    A number is a letter and a digit or two (`A1`); a sequence is letters. So
+    a mistyped number still gets the number's range in its refusal, and a
+    mistyped sequence - a stray digit included - gets the 34bp unit in its own.
+    """
+    text = typed.strip()
+    if len(text) <= NUMBER_MAX_LENGTH and any(c.isdigit() for c in text):
+        return case_screen(reader, typed)
+    return sequence_screen(reader, typed)
 
 
 # --------------------------------------------------------------------------- #

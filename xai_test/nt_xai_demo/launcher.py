@@ -47,7 +47,9 @@ class Session:
     data_dir: Path = DEFAULT_DATA_DIR
     _reader: Cas12aReader | None = field(default=None, repr=False)
 
-    prompt = "cas12a> "
+    # The prompt names the sequence unit: another nuclease's sequence, of
+    # another length, pasted here must not look like it should have matched.
+    prompt = "cas12a [번호 | 34bp 타깃 서열]> "
 
     @property
     def reader(self) -> Cas12aReader:
@@ -60,6 +62,10 @@ class Session:
             [
                 f"{NUCLEASES['cas12a']} — 저장된 산출물만 읽는다 (모델 로드 없음)",
                 f"  <번호>   사례 한 장: {cas12a_screen.number_range(self.reader)}",
+                (
+                    f"  <서열>   {self.reader.sequence_index.unit.name} → 같은 화면 "
+                    f"(저장된 {self.reader.sequence_index.stored_rows:,}행에서 찾는다)"
+                ),
                 "  report   성능 + IG–ISM 일치도 + 한계",
                 "  help     이 안내",
                 "  quit     종료",
@@ -76,7 +82,8 @@ class Session:
             return Outcome(stop=True)
         if len(parts) > 1:
             return Outcome(
-                f"입력은 하나씩 받는다: 번호 하나, report, help, quit. 받은 것 `{line.strip()}`",
+                "입력은 하나씩 받는다: 번호 하나, 서열 하나, report, help, quit. "
+                f"받은 것 `{line.strip()}`",
                 ok=False,
             )
         try:
@@ -84,9 +91,19 @@ class Session:
                 return Outcome(self.help_text())
             if command == "report":
                 return Outcome(cas12a_screen.report(self.reader))
-            return Outcome(cas12a_screen.case_screen(self.reader, parts[0]))
-        except cas12a_screen.UnknownCaseNumber as error:
+            return Outcome(cas12a_screen.screen_for(self.reader, parts[0]))
+        except (
+            cas12a_screen.UnknownCaseNumber,
+            cas12a_screen.SequenceNotStored,
+        ) as error:
             return Outcome(str(error), ok=False)
+        except cas12a_screen.NotASequence as error:
+            # Letters only, so it was read as a sequence; it may have been a
+            # number typed wrong, so the refusal names both inputs.
+            return Outcome(
+                f"{error}. 사례 번호라면: {cas12a_screen.number_range(self.reader)}",
+                ok=False,
+            )
         except (
             render.RenderRefused,
             ArtifactMismatch,
@@ -97,7 +114,10 @@ class Session:
 
 
 def usage() -> str:
-    lines = ["사용법: python -m xai_test.nt_xai_demo <뉴클레아제> [번호|report]", ""]
+    lines = [
+        "사용법: python -m xai_test.nt_xai_demo <뉴클레아제> [번호|서열|report]",
+        "",
+    ]
     for name, label in NUCLEASES.items():
         ready = f"  (준비 안 됨, {NOT_READY[name]})" if name in NOT_READY else ""
         lines.append(f"  {name:<8} {label}{ready}")
@@ -106,7 +126,10 @@ def usage() -> str:
         "  prepare  데모 자료를 data/에 모으고 manifest를 만든다",
         "  verify   data/를 manifest와 대조한다",
         "",
-        "예: cas12a (REPL), cas12a A1 (사례 한 장), cas12a report",
+        (
+            "예: cas12a (REPL), cas12a A1 (사례 한 장), cas12a <34bp 타깃 서열>, "
+            "cas12a report"
+        ),
     ]
     return "\n".join(lines)
 

@@ -43,6 +43,8 @@ from typing import Any
 
 import numpy as np
 
+from .sequence_lookup import SequenceIndex, SequenceUnit
+
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "data"
 SPLITS = ("train", "val", "test")
 BASES = ("A", "C", "G", "T")
@@ -56,6 +58,7 @@ CAS12A_AGREEMENT_SECTION = "설명과 IG–ISM 일치도"
 # IG's token axis is CLS, the 9 DNA tokens, then two specials: the analysis
 # fixes `special_mask` to [True] + [False] * 9 + [True, True] and its own
 # summary takes `mass[1:10]` as `dna_signed_mass` (`cas12a_NT_analysis/nt_ig`).
+CAS12A_SEQUENCE_UNIT = SequenceUnit(length=34, name="34bp 타깃 서열")
 CAS12A_IG_TOKENS = 12
 CAS12A_IG_DNA = slice(1, 10)
 _MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
@@ -1077,6 +1080,7 @@ class Cas12aReader:
                     "raw_prediction": float(record["raw_prediction"]),
                     "clipped_prediction": float(record["clipped_prediction"]),
                     "pam_stratum": record["pam_stratum"],
+                    "raw_absolute_error": float(record["raw_absolute_error"]),
                 }
         return rows
 
@@ -1092,6 +1096,24 @@ class Cas12aReader:
         """Label and prediction for one row, both fractions (`output_unit`)."""
         self.prediction_rows.position(row_id)
         return dict(self._predictions[int(row_id)])
+
+    @cached_property
+    def sequence_index(self) -> SequenceIndex:
+        """Every stored row's 34bp target window, for the raw-sequence input.
+
+        All Test rows, as `predictions.csv` holds them: on these artifacts ISM,
+        IG and rollout cover the same rows, so any hit has a full screen.
+        """
+        try:
+            return SequenceIndex(
+                {row: record["sequence"] for row, record in self._predictions.items()},
+                CAS12A_SEQUENCE_UNIT,
+                id_name="source_row",
+            )
+        except ValueError as error:
+            raise ArtifactMismatch(
+                f"{self.root / 'predictions.csv'}: {error}"
+            ) from None
 
     @cached_property
     def cases(self) -> list[dict[str, Any]]:

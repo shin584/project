@@ -176,3 +176,120 @@ def test_a_selection_that_repeats_a_number_is_refused():
 
 def test_spark_bar_scales_to_the_rows_own_max_and_marks_missing():
     assert screen.spark_bar([0.0, 0.5, 1.0, float("nan")]) == "▁▅█·"
+
+
+# --------------------------------------------------------------------------- #
+# raw 34bp sequence input (#172)
+# --------------------------------------------------------------------------- #
+
+#: Row 9's 34bp window in the fixture, i.e. case A1's.
+A1_SEQUENCE = "TGCATGCATGCATGCATGCATGCATGCATGCATG"
+
+
+def _body(screen_text: str) -> list[str]:
+    """The screen between its header and its provenance line."""
+    lines = screen_text.rstrip("\n").split("\n")
+    start = next(i for i, line in enumerate(lines) if line.startswith("실측 "))
+    assert lines[-1].startswith("출처: ")
+    return lines[start:-1]
+
+
+GOLDEN_SEQUENCE_HEAD = (
+    "서열 입력  source_row 9  TTTV  (= 사례 A1)\n"
+    + GOLDEN_A1.split("\n", 1)[1].rsplit("출처: ", 1)[0]
+    + "출처: 층=TTTV · head=단일 출력 · 통계=ISM 최대 |raw Δ|, IG signed mass, "
+    "rollout DNA 블록 열 평균 · 분모=이 행 1행 · 입력=34bp 타깃 서열, "
+    "저장된 3행에서 조회\n"
+)
+
+
+def test_a_stored_sequence_opens_its_rows_screen(reader):
+    assert screen.sequence_screen(reader, A1_SEQUENCE) == GOLDEN_SEQUENCE_HEAD
+
+
+def test_a_number_and_its_sequence_print_the_same_body(reader):
+    by_number = screen.case_screen(reader, "A1")
+    by_sequence = screen.sequence_screen(reader, A1_SEQUENCE.lower())
+    assert _body(by_number) == _body(by_sequence)
+    assert len(_body(by_number)) > 10
+
+
+def test_a_row_that_is_no_case_gets_no_case_number(reader):
+    sequence = reader.prediction(21)["sequence"]
+    text = screen.sequence_screen(reader, sequence)
+    assert text.startswith("서열 입력  source_row 21  TTTV\n")
+    assert "사례" not in text.split("\n")[0]
+
+
+@pytest.fixture
+def replicated(tmp_path):
+    """Row 21 carries row 9's window, as a second cell-line measurement would."""
+    data = fx.build_data_dir(tmp_path / "data")
+    fx.copy_sequence(data / "cas12a", 9, 21)
+    fx.reorder_cas12a_arrays(data / "cas12a", fx.CAS12A_SHUFFLED_ORDERS)
+    return rd.Cas12aReader(data)
+
+
+def test_a_replicated_sequence_shows_the_smallest_row_with_one_line(replicated):
+    lines = screen.sequence_screen(replicated, A1_SEQUENCE).split("\n")
+    assert lines[0] == "서열 입력  source_row 9  TTTV  (= 사례 A1)"
+    assert lines[1] == (
+        "이 타깃은 2행 중복(세포주 반복): source_row 9, 21 — "
+        "가장 작은 source_row 9를 보여준다"
+    )
+    assert lines[2].startswith("실측 ")
+
+
+def test_a_replicated_sequence_keeps_the_number_screens_body(replicated):
+    assert _body(screen.sequence_screen(replicated, A1_SEQUENCE)) == _body(
+        screen.case_screen(replicated, "A1")
+    )
+
+
+def test_a_sequence_not_stored_gives_the_count_and_examples(reader):
+    with pytest.raises(screen.SequenceNotStored) as miss:
+        screen.sequence_screen(reader, "A" * 34)
+    assert str(miss.value) == (
+        f"저장된 3행에 없음: {'A' * 34}. 예: "
+        "ATGCATGCATGCATGCATGCATGCATGCATGCAT, "
+        "TGCATGCATGCATGCATGCATGCATGCATGCATG, "
+        "GCATGCATGCATGCATGCATGCATGCATGCATGC"
+    )
+
+
+@pytest.mark.parametrize(
+    ("typed", "reason"),
+    [
+        (A1_SEQUENCE[:-1], "길이 33 (34이어야 한다)"),
+        ("ACGU" + A1_SEQUENCE[4:], "ACGT 외 문자 'U' (위치 3)"),
+        (A1_SEQUENCE[:10] + "1" + A1_SEQUENCE[11:], "ACGT 외 문자 '1' (위치 10)"),
+    ],
+)
+def test_a_wrong_unit_names_the_34bp_unit(reader, typed, reason):
+    with pytest.raises(screen.NotASequence) as refusal:
+        screen.screen_for(reader, typed)
+    assert str(refusal.value) == f"34bp 타깃 서열이 아니다: {reason}"
+
+
+@pytest.mark.parametrize(
+    ("typed", "route"),
+    [
+        ("A1", "case_screen"),
+        ("c1", "case_screen"),
+        ("B3", "case_screen"),
+        (A1_SEQUENCE, "sequence_screen"),
+        ("ACGT", "sequence_screen"),
+        (A1_SEQUENCE[:10] + "1" + A1_SEQUENCE[11:], "sequence_screen"),
+        ("A12", "case_screen"),
+    ],
+)
+def test_a_short_input_with_a_digit_is_a_number_and_else_a_sequence(
+    reader, monkeypatch, typed, route
+):
+    taken: list[str] = []
+    for name in ("case_screen", "sequence_screen"):
+        monkeypatch.setattr(
+            screen, name, lambda _reader, _typed, name=name: taken.append(name)
+        )
+    screen.screen_for(reader, typed)
+    assert taken == [route]
