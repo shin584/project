@@ -466,3 +466,96 @@ def test_a_layout_the_reader_was_not_written_against_is_refused(tmp_path, change
 
     with pytest.raises(rd.ArtifactMismatch, match=why):
         _ = rd.Cas12aReader(data).token_spans
+
+
+# --- Cas12a per-row reads for the case screen (#171) ------------------------ #
+
+
+@pytest.fixture
+def shuffled(data_dir):
+    """Each array file in its own row order, one position with no valid base."""
+    cas12a_dir = data_dir / "cas12a"
+    fx.reorder_cas12a_arrays(cas12a_dir, fx.CAS12A_SHUFFLED_ORDERS)
+    fx.drop_alternatives(cas12a_dir, fx.CAS12A_ROWS[1], 10)
+    return rd.Cas12aReader(data_dir)
+
+
+def test_cas12a_max_profile_is_the_largest_alternative_magnitude(cas12a):
+    """Per position, the most sensitive of the three substitutions, unsigned.
+
+    The fixture's alternatives are 0.1/0.2/0.3 plus offsets with alternating
+    sign, so the max is the 0.3 one in magnitude - a signed max would pick a
+    negative value's neighbour on odd positions.
+    """
+    for index, row in enumerate(fx.CAS12A_ROWS):
+        profile = cas12a.ism_max_profile(row)
+        assert profile.shape == (fx.CAS12A_POSITIONS,)
+        for position in (0, 1, 33):
+            expected = 0.01 + 0.3 + index * 0.001 + position * 0.0001
+            assert profile[position] == pytest.approx(expected, rel=1e-5)
+
+
+def test_cas12a_max_profile_keeps_the_mean_profile_beside_it(cas12a):
+    row = fx.CAS12A_ROWS[1]
+    assert cas12a.ism_profile(row)[1] == pytest.approx(
+        fx.expected_profile(1, 1, 0), rel=1e-5
+    )
+    assert cas12a.ism_max_profile(row)[1] > cas12a.ism_profile(row)[1]
+
+
+def test_a_position_with_no_valid_alternative_is_missing_not_zero(shuffled):
+    """The WT slot is a true zero; keeping it in the max would print 0 here."""
+    row = fx.CAS12A_ROWS[1]
+    profile = shuffled.ism_max_profile(row)
+    assert np.isnan(profile[10])
+    assert not np.isnan(profile[9]) and not np.isnan(profile[11])
+    assert np.isnan(shuffled.ism_profile(row)[10])
+
+
+def test_cas12a_per_row_reads_join_by_source_row_in_every_file(shuffled, data_dir):
+    row = fx.CAS12A_ROWS[1]  # stored first, second and second-from-last
+    original = rd.Cas12aReader(fx.build_cas12a(data_dir.parent / "plain").parent)
+
+    np.testing.assert_allclose(
+        shuffled.ism_max_profile(row)[:9], original.ism_max_profile(row)[:9]
+    )
+    np.testing.assert_allclose(shuffled.ig_dna_mass(row), original.ig_dna_mass(row))
+    np.testing.assert_allclose(
+        shuffled.rollout_referenced(row), original.rollout_referenced(row)
+    )
+
+
+def test_cas12a_ig_dna_mass_drops_the_three_special_tokens(cas12a, data_dir):
+    """IG's 12 columns are CLS, the 9 DNA tokens, then two specials (nt_ig)."""
+    row = fx.CAS12A_ROWS[1]
+    stored = np.load(data_dir / "cas12a/ig.npz")["signed_mass"][1]
+    np.testing.assert_array_equal(cas12a.ig_dna_mass(row), stored[1:10])
+    assert len(cas12a.ig_dna_mass(row)) == len(cas12a.token_spans)
+
+
+def test_cas12a_rollout_referenced_is_each_key_tokens_mean_over_queries(cas12a):
+    """Rows of the DNA block are queries; a column is how much a token is attended."""
+    row = fx.CAS12A_ROWS[1]
+    matrix = cas12a.rollout(row)
+    np.testing.assert_allclose(cas12a.rollout_referenced(row), matrix.mean(axis=0))
+    assert cas12a.rollout_referenced(row)[0] == pytest.approx(81 + 36)
+
+
+def test_cas12a_sequence_is_the_rows_own_and_matches_its_ism_reference(cas12a):
+    row = fx.CAS12A_ROWS[2]
+    reference = fx.reference_bases(len(fx.CAS12A_ROWS), fx.CAS12A_POSITIONS)[2]
+    assert cas12a.sequence(row) == "".join(rd.BASES[b] for b in reference)
+
+
+def test_a_sequence_that_disagrees_with_the_ism_reference_is_refused(data_dir):
+    """predictions.csv and ism.npz meet only at source_row; their bases must agree."""
+    path = data_dir / "cas12a/predictions.csv"
+    text = path.read_text(encoding="utf-8").splitlines()
+    fields = text[3].split(",")
+    fields[1] = "A" * fx.CAS12A_POSITIONS
+    text[3] = ",".join(fields)
+    path.write_text("\n".join(text) + "\n", encoding="utf-8")
+
+    with pytest.raises(rd.ArtifactMismatch) as refusal:
+        rd.Cas12aReader(data_dir).sequence(fx.CAS12A_ROWS[2])
+    assert "reference" in str(refusal.value)

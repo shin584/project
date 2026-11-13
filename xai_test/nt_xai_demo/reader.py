@@ -22,7 +22,8 @@ the synthetic fixture tests:
   output. Labels are returned as fractions, and every scale an artifact
   declares is checked on load instead of assumed.
 * **WT slot.** An ISM position profile is the mean |delta| over the three
-  alternative bases; the reference (WT) slot, a true zero, is excluded.
+  alternative bases (the case screen's bar is the max instead); either way the
+  reference (WT) slot, a true zero, is excluded.
 
 The profile definitions here are the ones the sidecars state, and on the real
 data they reproduce the analyses' own recorded profiles exactly
@@ -52,6 +53,11 @@ CAS12A_HEAD = "단일 출력"
 CAS12A_STRATA = ("all", "TTTV", "TTTT")
 CAS12A_LIMIT_SECTIONS = ("rollout 해석", "범위와 한계")
 CAS12A_AGREEMENT_SECTION = "설명과 IG–ISM 일치도"
+# IG's token axis is CLS, the 9 DNA tokens, then two specials: the analysis
+# fixes `special_mask` to [True] + [False] * 9 + [True, True] and its own
+# summary takes `mass[1:10]` as `dna_signed_mass` (`cas12a_NT_analysis/nt_ig`).
+CAS12A_IG_TOKENS = 12
+CAS12A_IG_DNA = slice(1, 10)
 _MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
 
 
@@ -163,21 +169,14 @@ def reference_mask(reference_base: np.ndarray, bases: int = len(BASES)) -> np.nd
     return np.eye(bases, dtype=bool)[reference_base]
 
 
-def ism_position_profile(
-    delta: np.ndarray,
-    reference_base: np.ndarray,
-    *,
-    valid: np.ndarray | None = None,
-) -> np.ndarray:
-    """Mean |delta| over the alternative bases, with the WT slot excluded.
+def _alternatives(
+    delta: np.ndarray, reference_base: np.ndarray, valid: np.ndarray | None
+) -> tuple[np.ndarray, np.ndarray]:
+    """`|delta|`-ready deltas and the mask of slots a profile may use.
 
-    `delta` is `(..., positions, bases)` for one head already selected and
-    `reference_base` is `(..., positions)`. The reference slot holds a true
-    zero - substituting a base for itself changes nothing - so averaging over
-    all four bases would divide a three-base sum by four and shrink every
-    position by a quarter. The divisor is the count of slots actually averaged,
-    and a position with no valid alternative yields NaN rather than a zero that
-    would read as "no effect".
+    Shared by the mean and the max profile: the axes must line up, the WT slot
+    must hold a true zero (else the axes were read wrong), and it is excluded
+    along with any alternative the artifact marks invalid.
     """
     delta = np.asarray(delta)
     reference_base = np.asarray(reference_base)
@@ -195,6 +194,26 @@ def ism_position_profile(
     alternatives = ~is_reference
     if valid is not None:
         alternatives &= np.asarray(valid, dtype=bool)
+    return delta, alternatives
+
+
+def ism_position_profile(
+    delta: np.ndarray,
+    reference_base: np.ndarray,
+    *,
+    valid: np.ndarray | None = None,
+) -> np.ndarray:
+    """Mean |delta| over the alternative bases, with the WT slot excluded.
+
+    `delta` is `(..., positions, bases)` for one head already selected and
+    `reference_base` is `(..., positions)`. The reference slot holds a true
+    zero - substituting a base for itself changes nothing - so averaging over
+    all four bases would divide a three-base sum by four and shrink every
+    position by a quarter. The divisor is the count of slots actually averaged,
+    and a position with no valid alternative yields NaN rather than a zero that
+    would read as "no effect".
+    """
+    delta, alternatives = _alternatives(delta, reference_base, valid)
     divisor = alternatives.sum(axis=-1)
     total = np.where(alternatives, np.abs(delta), 0.0).sum(axis=-1)
     return np.divide(
@@ -203,6 +222,27 @@ def ism_position_profile(
         out=np.full(total.shape, np.nan, dtype=np.float64),
         where=divisor > 0,
     )
+
+
+def ism_max_profile(
+    delta: np.ndarray,
+    reference_base: np.ndarray,
+    *,
+    valid: np.ndarray | None = None,
+) -> np.ndarray:
+    """Largest |delta| over the alternative bases, with the WT slot excluded.
+
+    The case screen's ISM bar: per position, how far the single most
+    disruptive substitution moves the prediction. Same contract as
+    `ism_position_profile` - `(..., positions, bases)` for one head, the WT
+    slot checked to be a true zero and left out, NaN where no valid
+    alternative remains. Leaving the WT zero in would not change a max over
+    nonzero alternatives, but it would turn a position with none into a 0
+    that reads as "no effect", which nothing measured.
+    """
+    delta, alternatives = _alternatives(delta, reference_base, valid)
+    largest = np.where(alternatives, np.abs(delta), -np.inf).max(axis=-1)
+    return np.where(alternatives.any(axis=-1), largest, np.nan).astype(np.float64)
 
 
 def aggregate_to_tokens(
@@ -1266,6 +1306,20 @@ class Cas12aReader:
         own stored `denominator`. So the exclusion is this reader's own code
         and the artifact still gets to contradict it.
         """
+        position = self._ism_position(row_id)
+        return ism_position_profile(
+            self._ism["raw_delta"][position],
+            self._ism["reference_base"][position],
+            valid=self._ism["base_valid_mask"][position],
+        )
+
+    def _ism_position(self, row_id: int) -> int:
+        """The row's ISM array position, its alternative count checked first.
+
+        The WT slot is excluded structurally, from `reference_base`, and the
+        divisor that excluding it produces is checked against the artifact's
+        own stored `denominator`, so the artifact can still contradict us.
+        """
         position = self.ism_rows.position(row_id)
         alternatives = (
             self._ism["non_wt_mask"][position] & self._ism["base_valid_mask"][position]
@@ -1275,11 +1329,62 @@ class Cas12aReader:
             raise ArtifactMismatch(
                 f"source_row {row_id}: 대체 염기 수가 저장된 denominator와 다르다"
             )
-        return ism_position_profile(
+        return position
+
+    def ism_max_profile(self, row_id: int) -> np.ndarray:
+        """Per-position max |raw_delta| over the valid alternatives (WT excluded).
+
+        Raw, not `relative_delta`: the relative form divides by the WT
+        prediction and breaks down where that is near zero.
+        """
+        position = self._ism_position(row_id)
+        return ism_max_profile(
             self._ism["raw_delta"][position],
             self._ism["reference_base"][position],
             valid=self._ism["base_valid_mask"][position],
         )
+
+    def sequence(self, row_id: int) -> str:
+        """The row's 34bp target window, checked against its ISM reference bases.
+
+        `predictions.csv` and `ism.npz` share nothing but `source_row`, so the
+        two must spell the same bases: a disagreement means one of them was
+        looked up under another row, and the screen would print one row's
+        letters above another row's bars.
+        """
+        sequence = self.prediction(row_id)["sequence"]
+        reference = self._ism["reference_base"][self.ism_rows.position(row_id)]
+        spelled = "".join(BASES[int(base)] for base in reference)
+        if sequence != spelled:
+            raise ArtifactMismatch(
+                f"source_row {row_id}: predictions.csv 서열 {sequence}이(가) ISM "
+                f"reference_base {spelled}와 다르다 (행 조인이 어긋났을 수 있다)"
+            )
+        return sequence
+
+    def ig_dna_mass(self, row_id: int) -> np.ndarray:
+        """IG signed mass on the 9 DNA tokens, in position order (specials dropped)."""
+        mass = self.ig_signed_mass(row_id)
+        if mass.shape != (CAS12A_IG_TOKENS,):
+            raise ArtifactMismatch(
+                f"IG signed_mass가 토큰 {CAS12A_IG_TOKENS}개가 아니라 {mass.shape}이다"
+            )
+        dna = mass[CAS12A_IG_DNA]
+        if len(dna) != len(self.token_spans):
+            raise ArtifactMismatch(
+                f"IG DNA 토큰 {len(dna)}개와 layout.json 구간 {len(self.token_spans)}개가 다르다"
+            )
+        return dna
+
+    def rollout_referenced(self, row_id: int) -> np.ndarray:
+        """How much each DNA token is attended to: the DNA block's column mean.
+
+        Rows of the stored block are queries, columns keys. On these artifacts
+        the queries are near-identical (`near_identical_query_count`), so the
+        mean is every row's value to display precision - it is a reading of a
+        stored matrix, not a new attribution.
+        """
+        return self.rollout(row_id).mean(axis=0)
 
     def ig_signed_mass(self, row_id: int) -> np.ndarray:
         return self._ig["signed_mass"][self.ig_rows.position(row_id)].astype(np.float64)

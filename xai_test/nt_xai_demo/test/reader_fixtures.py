@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -965,15 +966,31 @@ def build_cas12a(
                 "output_unit",
             ]
         )
+        case_rows = {row: reason for row, _, _, reason in CAS12A_CASES}
         for index, row in enumerate(CAS12A_ROWS):
-            writer.writerow(
-                [
-                    row,
-                    "T" * CAS12A_POSITIONS,
+            # A described case's stored label and prediction are its row's, as
+            # on the real data, where cases.csv and predictions.csv agree.
+            if row in case_rows:
+                case = cas12a_annotation(row, "", case_rows[row])
+                label, raw = case["label"], case["raw_prediction"]
+                clipped, stratum = min(max(raw, 0.0), 1.0), case["pam_stratum"]
+            else:
+                label, raw, clipped = (
                     0.2 + index * 0.1,
                     0.25 + index * 0.1,
                     0.25 + index * 0.1,
-                    "TTTV" if index else "TTTT",
+                )
+                stratum = "TTTV" if index else "TTTT"
+            writer.writerow(
+                [
+                    row,
+                    # The row's own reference bases, as on the real data: the
+                    # reader checks the two agree, which is a row join check.
+                    "".join(BASES[base] for base in reference[index]),
+                    label,
+                    raw,
+                    clipped,
+                    stratum,
                     0.05,
                     0.05,
                     0.0025,
@@ -1118,6 +1135,50 @@ def build_cas12a(
     for _, name in CAS12A_SVGS:
         (cas12a / name).write_text("<svg/>", encoding="utf-8")
     return cas12a
+
+
+#: A storage order per `.npz` in which no file keeps the default order's
+#: position for row 9 (the shown case) and no two files agree.
+CAS12A_SHUFFLED_ORDERS = {
+    "ism.npz": (CAS12A_ROWS[2], CAS12A_ROWS[0], CAS12A_ROWS[1]),
+    "ig.npz": (CAS12A_ROWS[1], CAS12A_ROWS[2], CAS12A_ROWS[0]),
+    "rollout.npz": (CAS12A_ROWS[1], CAS12A_ROWS[0], CAS12A_ROWS[2]),
+}
+
+
+def reorder_cas12a_arrays(cas12a: Path, orders: dict[str, Sequence[int]]) -> None:
+    """Store each `.npz`'s rows in its own `source_row` order.
+
+    The real ISM/IG/rollout arrays happen to share one row order, and so do
+    the default fixture's, so a lookup by array position instead of by
+    `source_row` would pass. Giving each file a different order makes that
+    misjoin print another row's numbers.
+    """
+    for name, rows in orders.items():
+        path = cas12a / name
+        with np.load(path) as archive:
+            arrays = {key: archive[key] for key in archive.files}
+        index = {int(row): i for i, row in enumerate(arrays["source_row"])}
+        take = np.array([index[int(row)] for row in rows], dtype=np.int64)
+        np.savez(path, **{key: value[take] for key, value in arrays.items()})
+
+
+def drop_alternatives(cas12a: Path, row: int, position: int) -> None:
+    """Mark every alternative base at one ISM position invalid.
+
+    The raw deltas are left nonzero there on purpose: a profile that ignored
+    `base_valid_mask` would print them, and one that kept the WT slot in the
+    max would print 0 - only "no valid alternative" is right.
+    """
+    path = cas12a / "ism.npz"
+    with np.load(path) as archive:
+        arrays = {key: archive[key] for key in archive.files}
+    at = int(np.flatnonzero(arrays["source_row"] == row)[0])
+    # Only the alternatives: the WT slot stays valid, as on the real data,
+    # so a max that forgot to exclude it would pick up its 0.
+    arrays["base_valid_mask"][at, position] = arrays["wt_mask"][at, position]
+    arrays["denominator"][at, position] = 0
+    np.savez(path, **arrays)
 
 
 def build_data_dir(root: Path, **kwargs) -> Path:

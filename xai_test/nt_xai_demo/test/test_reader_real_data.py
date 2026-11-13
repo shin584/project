@@ -309,3 +309,29 @@ def test_cas12a_reader_reads_the_recorded_token_spans_and_pam():
     assert [end - start for start, end in spans] == [6] * 5 + [1] * 4
     assert spans[0][0] == 0 and spans[-1][1] == 34
     assert cas12a.pam_span == (4, 8)
+
+
+def test_the_real_case_screens_open_for_all_fifteen_numbers_in_one_screen():
+    """Every number opens, rows join (sequence = ISM reference), ~25 lines each."""
+    from xai_test.nt_xai_demo import cas12a_screen
+
+    cas12a = _reader(
+        rd.Cas12aReader, "cas12a/ism.npz", "cas12a/ig.npz", "cas12a/rollout.npz"
+    )
+    assert cas12a_screen.number_range(cas12a) == (
+        "A1–A5 low_error · B1–B5 high_error · C1–C5 out_of_range"
+    )
+    for number, case in cas12a_screen.numbered_cases(cas12a).items():
+        text = cas12a_screen.case_screen(cas12a, number)
+        assert text.startswith(
+            f"{number}  {case['role']}  source_row {case['source_row']}"
+        )
+        assert len(text.splitlines()) <= 25
+        # The IG values on screen are the analysis' own recorded DNA masses.
+        recorded = cas12a.case_annotation(f"{case['source_row']}:{case['role']}")
+        np.testing.assert_allclose(
+            cas12a.ig_dna_mass(int(case["source_row"])),
+            recorded["methods"]["ig"]["summary"]["dna_signed_mass"],
+            rtol=1e-6,
+        )
+    assert len(cas12a_screen.report(cas12a).splitlines()) < 20
