@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from xai_test.nt_xai_demo import __main__ as entry
@@ -146,8 +148,40 @@ def test_main_with_an_unknown_nuclease_prints_usage(capsys):
     assert "모르는 뉴클레아제" in capsys.readouterr().err
 
 
-def test_main_no_longer_enters_the_old_menu_shell():
-    """`shell.py` stays until #175 deletes it, but nothing launches it."""
+#: The menu shell and the views it offered, deleted by #175. The `cases`,
+#: `explain`, `agreement` and `cross` paths went with them; `report` stayed.
+RETIRED = ("shell", "cas12a_views", "spcas9_views", "cross_views")
+
+
+def test_the_old_menu_shell_and_its_views_are_gone():
+    """Deleted, not left beside the new launcher (#175).
+
+    Keeping both would mean deciding which one to open the evening before the
+    meeting, which is the risk the ticket names. The files are checked as
+    files, and the imports with `ast`, since a module nothing imports still
+    runs if someone types its name.
+    """
+    import ast
+
+    package = Path(rd.__file__).parent
+    for name in RETIRED:
+        assert not (package / f"{name}.py").exists(), name
+
+    for module in sorted(package.glob("*.py")):
+        tree = ast.parse(module.read_text(encoding="utf-8"))
+        imported: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                # `from . import cas12a_views` names it as an alias;
+                # `from .cas12a_views import x` names it as the module.
+                imported.update(alias.name for alias in node.names)
+                if isinstance(node, ast.ImportFrom) and node.module:
+                    imported.add(node.module)
+        for name in RETIRED:
+            assert name not in imported, f"{module.name} imports {name}"
+
+
+def test_main_enters_the_launcher():
     import ast
     import inspect
 
@@ -157,7 +191,7 @@ def test_main_no_longer_enters_the_old_menu_shell():
         if isinstance(node, (ast.Import, ast.ImportFrom))
         for alias in node.names
     }
-    assert "shell" not in imported and "launcher" in imported
+    assert "launcher" in imported
 
 
 #: Case A1's 34bp window in the fixture (source_row 9).

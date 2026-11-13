@@ -292,25 +292,29 @@ def test_the_reader_loads_no_model_and_imports_no_analysis_package():
     import sys
     from pathlib import Path
 
+    # Every module in the package, so a new one is covered without being
+    # listed here. Names are kept whole rather than cut to their root: the
+    # entry point imports its own package absolutely (`from xai_test.nt_xai_demo
+    # import launcher`), which is not the reach-in this guards against.
     package = Path(rd.__file__).parent
     imported: set[str] = set()
-    for module in (
-        package / "reader.py",
-        package / "render.py",
-        package / "shell.py",
-        package / "cas12a_views.py",
-    ):
+    for module in sorted(package.glob("*.py")):
         for node in ast.walk(ast.parse(module.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Import):
-                imported.update(alias.name.split(".")[0] for alias in node.names)
+                imported.update(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
-                imported.add(node.module.split(".")[0])
+                imported.add(node.module)
 
-    assert not imported & {"torch", "transformers", "jax", "tensorflow"}
-    assert not any(
-        name.endswith("_NT_analysis") or name == "SpCas9" for name in imported
-    )
-    assert "xai_test" not in imported  # no sibling analysis module reaches in
+    roots = {name.split(".")[0] for name in imported}
+    assert not roots & {"torch", "transformers", "jax", "tensorflow"}
+    assert not any(name.endswith("_NT_analysis") or name == "SpCas9" for name in roots)
+    # No sibling analysis module reaches in; this package's own is the only
+    # `xai_test.` import allowed.
+    assert not {
+        name
+        for name in imported
+        if name.startswith("xai_test") and not name.startswith("xai_test.nt_xai_demo")
+    }
 
     # Transitively too, in a process of its own. Asserting on *this* process's
     # `sys.modules` only held while this subtree ran alone: inside the wider
@@ -321,7 +325,7 @@ def test_the_reader_loads_no_model_and_imports_no_analysis_package():
             sys.executable,
             "-c",
             (
-                "import sys; import xai_test.nt_xai_demo.shell; "
+                "import sys; import xai_test.nt_xai_demo.launcher; "
                 "print(sorted({'torch', 'transformers'} & set(sys.modules)))"
             ),
         ],

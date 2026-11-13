@@ -31,6 +31,11 @@ Git에는 경량 JSON·SVG·`cases.csv`와 `manifest.json`만 있다. `.npz`와 
 `cases_annotated.json`, `cases.csv`, SVG 3개, `report.ko.md`)과 `ism.npz` / `ig.npz` /
 `rollout.npz`.
 
+SVG 3개는 #175 이후 **어느 화면에도 나오지 않는다** (경로를 출력하던 `agreement` 뷰가
+삭제됐다 — 화면은 행 하나를 보여주고 층 단위 그림은 올릴 자리가 없다). 계속 꺼내고
+체크섬하는 것은 분석 산출물의 기록이기 때문이며, `report.ko.md`의 IG–ISM 절도 같다
+(`Cas12aReader.agreement_section`이 읽지만 호출하는 화면은 없다).
+
 꺼내지 않는 것: `shards/`(per-row 10,500개), `sessions/`, 모든 `*.sidecar.json`
 (ism 47MB, rollout 12MB, ig 8.6MB, predictions 0.4MB), per-row `rollout_diagnostics.json`
 (5MB). sidecar는 ZIP 안에서 읽어 `npz_sha256`·`plan_sha256` 대조에만 쓴다.

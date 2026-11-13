@@ -13,7 +13,6 @@ from collections import Counter
 import numpy as np
 import pytest
 
-from xai_test.nt_xai_demo import cas12a_views, cross_views, spcas9_views
 from xai_test.nt_xai_demo import reader as rd
 
 
@@ -128,8 +127,10 @@ def test_the_real_spcas9_report_shows_only_the_three_analysed_heads():
     The synthetic fixture pins this too, but the real ISM archive is where the
     nine actually live, and the head names come from it.
     """
+    from xai_test.nt_xai_demo import spcas9_screen
+
     spcas9 = _reader(rd.SpCas9Reader)
-    report = spcas9_views.report(spcas9)
+    report = spcas9_screen.report(spcas9)
 
     unanalysed = set(spcas9.ism_heads.names) - set(spcas9.analysed_heads)
     assert len(unanalysed) == 6
@@ -140,14 +141,18 @@ def test_the_real_spcas9_report_shows_only_the_three_analysed_heads():
 
 
 def test_the_real_spcas9_report_quotes_the_per_head_floor_not_the_pooled_one():
+    from xai_test.nt_xai_demo import spcas9_screen
+
     spcas9 = _reader(rd.SpCas9Reader)
-    report = spcas9_views.report(spcas9)
+    report = spcas9_screen.report(spcas9)
     pooled = float(spcas9.noise_floor["pooled"]["median"])
 
     for head in spcas9.analysed_heads:
         own = float(spcas9.noise_floor_by_head(head)["median"])
-        assert f"{own:.4g}" in report, head
-    assert f"{pooled:.4g}" not in report
+        assert f"{own:.3g}" in report, head
+    # The pooled median is a fourth number none of the three heads is, and
+    # printing it would invite reading one floor for all of them.
+    assert f"{pooled:.3g}" not in report and f"{pooled:.4g}" not in report
 
 
 def test_the_real_case_tables_keep_their_own_identifiers():
@@ -191,115 +196,6 @@ def test_every_real_spcas9_case_row_is_a_test_row():
     }
 
     assert roles == {"test"}
-
-
-def test_the_real_explain_shows_ig_for_the_one_case_and_its_absence_for_another():
-    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ig/ig.npz")
-
-    carried = spcas9_views.explain(spcas9, "GEN-HEADGAP-02")
-    absent = spcas9_views.explain(spcas9, "GEN-ERRHI-01")
-
-    assert "IG: 있음" in carried
-    assert "IG: 없음" in absent
-    assert f"IG 고정 명단 {spcas9.ig_rows.rows:,}행에 없음" in absent
-    # Both state the row's split role either way.
-    for text in (carried, absent):
-        assert "split 역할: test" in text
-
-
-def test_the_real_explain_reads_each_cases_own_head_order():
-    spcas9 = _reader(rd.SpCas9Reader)
-
-    for case_id in spcas9.case_ids():
-        order = spcas9.case_annotation(case_id)["head_order"]
-        text = spcas9_views.explain(spcas9, case_id)
-
-        assert "head 순서 (이 행)" in text
-        assert f"tau={float(order['tau']):.4g}" in text
-        # Every inverted pair the artifact recorded for this row is named, with
-        # that pair's own floor beside the measured gap.
-        for pair in order["inverted_pairs"]:
-            heads = str(pair["pair"]).replace("_vs_", " vs ")
-            assert heads in text
-            assert f"{float(pair['floor']):.4g}" in text
-
-
-def test_the_real_cases_views_name_every_case_and_no_other_id():
-    import re
-
-    spcas9 = _reader(rd.SpCas9Reader)
-    cas12a = _reader(rd.Cas12aReader)
-
-    spcas9_text = spcas9_views.cases(spcas9)
-    known = set(spcas9.case_ids())
-    found = set(re.findall(r"\b(?:GEN|LIB)-[A-Z]+-\d+\b", spcas9_text))
-    assert found == known
-
-    cas12a_text = cas12a_views.cases(cas12a)
-    for identifier in cas12a.case_ids():
-        row, role = identifier.split(":")
-        assert row in cas12a_text and role in cas12a_text
-
-
-def test_the_real_spcas9_profile_peaks_inside_the_pam_in_both_strata():
-    """The point the bars exist to show, on the real data: PAM 24-26 holds the peak."""
-    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
-    text = spcas9_views.agreement(spcas9)
-
-    peaks = [line for line in text.splitlines() if "최대 민감 위치" in line]
-    assert len(peaks) == len(spcas9.strata)
-    assert all("PAM 안" in line for line in peaks), peaks
-    # Each stratum's own denominator; never the 400-row list or the sweep.
-    for line in text.splitlines():
-        if line.strip().startswith("층="):
-            assert "분모=400행" not in line and "분모=3,851행" not in line, line
-    assert "분모=200행·193타깃" in text and "분모=200행·5타깃" in text
-
-
-def test_the_real_cas12a_profile_peaks_at_position_7_in_every_population():
-    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
-    text = cas12a_views.agreement(cas12a)
-
-    peaks = [line for line in text.splitlines() if "최대 민감 위치" in line]
-    assert len(peaks) == 3
-    assert all(line.strip().startswith("최대 민감 위치: 7 (PAM 안") for line in peaks)
-    assert cas12a.agreement_primary("all")["median"] == pytest.approx(0.4)
-
-
-def test_the_real_cross_view_states_the_four_spcas9_figures_and_their_ranges():
-    """#162's four SpCas9 numbers, their denominator, and the library counterparts.
-
-    The four (ISM 0.115 against 0.016-0.033, token IG 2.024 against 0.14-0.27)
-    are generalisation-stratum means over the IG fixed list for the SpCas9
-    head. The denominator of that stratum is printed with every one of them,
-    and the PAM library stratum's own values (ISM 0.0996 / IG 1.090) are shown
-    apart rather than averaged in.
-    """
-    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
-    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
-    text = cross_views.cross(spcas9=spcas9, cas12a=cas12a)
-
-    for number in ("0.1154", "0.01629", "0.03339", "2.024", "0.1401", "0.2741"):
-        assert number in text, number
-    library = [line for line in text.splitlines() if "층=pam_library" in line]
-    assert len(library) == 2  # the ISM and token IG counterparts, apart
-    assert "토큰(24-29): 0.09962" in text and "토큰(24-29): 1.09" in text
-    provenance = [line for line in text.splitlines() if "분모=" in line]
-    generalisation = [line for line in provenance if "층=generalisation" in line]
-    assert len(generalisation) == 2  # ISM and token IG, nothing else
-    for line in generalisation:
-        assert "분모=200행·193타깃" in line and "head=SpCas9 /" in line, line
-        assert "3,851행" in line and "400행" in line, line  # what it is not
-
-
-def test_the_real_cross_view_states_cas12as_two_pam_positions():
-    cas12a = _reader(rd.Cas12aReader, "cas12a/ism.npz")
-    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
-    text = cross_views.cross(spcas9=spcas9, cas12a=cas12a)
-
-    assert "위치 7·6 (PAM 4-7의 마지막 두 염기)" in text
-    assert "민감 위치 1위: 7 (PAM 안, 값 0.2405)" in text
-    assert "민감 위치 2위: 6 (PAM 안, 값 0.1341)" in text
 
 
 def test_cas12a_reader_reads_the_recorded_token_spans_and_pam():
@@ -401,6 +297,36 @@ def test_the_real_spcas9_screens_open_for_every_generalisation_case():
 
     assert len(with_ig) == 1
     assert numbered[with_ig[0]]["case_id"] == "GEN-HEADGAP-02"
+
+
+def test_the_checklists_demonstration_number_is_the_case_that_carries_ig():
+    """`spcas9> C2` and `GEN-HEADGAP-02` have to be the same row (#175).
+
+    The checklist tells the meeting to type a number and names the case beside
+    it. Nothing in the demo keeps those two in step - the number comes from the
+    selection's rank order - so if a re-run renumbered the cases, the meeting
+    would open a case with no IG while reading a line that promises it.
+    `test_docs.py` cannot see this: it has no data to resolve a number with.
+    """
+    import re
+    from pathlib import Path
+
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(rd.SpCas9Reader)
+    checklist = (Path(rd.__file__).parent / "demo_checklist.md").read_text(
+        encoding="utf-8"
+    )
+
+    numbers = {
+        number
+        for number in re.findall(r"`spcas9> ([A-C]\d)`", checklist)
+        if "GEN-HEADGAP-02" in checklist.split(f"`spcas9> {number}`", 1)[1][:200]
+    }
+    assert len(numbers) == 1, f"IG 사례를 가리키는 번호가 하나가 아니다: {numbers}"
+
+    numbered = spcas9_screen.numbered_cases(spcas9)
+    assert numbered[numbers.pop()]["case_id"] == "GEN-HEADGAP-02"
 
 
 def test_the_real_spcas9_headgap_screens_show_two_heads():

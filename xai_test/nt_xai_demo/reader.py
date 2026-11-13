@@ -1614,9 +1614,15 @@ class Cas12aReader:
 
         Cas12a records no `mismatch_note` key; the analysis states what a low
         agreement means in this section of `report.ko.md`, so that prose is
-        what a view quotes beside the number, verbatim. The SVGs are the ones
-        this section links, resolved under `data/cas12a/` - named by path,
-        never opened.
+        quotable beside the number, verbatim. The SVGs are the ones this
+        section links, resolved under `data/cas12a/` - named by path, never
+        opened.
+
+        No screen reads this since #175 deleted the `agreement` view: the one
+        screen shows a row, and a stratum-level figure has nowhere to go on
+        it. Kept because `prepare` still extracts and checksums the prose and
+        the three SVGs, so dropping the reading would leave stored artifacts
+        no code can account for.
         """
         sections = _markdown_sections(
             (self.root / "report.ko.md").read_text(encoding="utf-8")

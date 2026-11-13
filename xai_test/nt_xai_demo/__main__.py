@@ -36,8 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     """`prepare`/`verify`, or one nuclease's demo (`cas12a`, `cas12a A1`).
 
     The nuclease is the first argument and fixes the session (#171): `cas12a`
-    opens its REPL, `cas12a A1` prints the same screen once. The old menu
-    shell (`shell.py`) is no longer an entry point.
+    opens its REPL, `cas12a A1` prints the same screen once. The branching
+    menu this replaced was deleted in #175, so this is the only entry point.
     """
     _speak_utf8()
     tokens = list(sys.argv[1:] if argv is None else argv)
