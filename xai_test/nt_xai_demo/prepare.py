@@ -76,6 +76,17 @@ CAS12A_METHODS = ("ism", "ig", "rollout")
 AGREEMENT_KEPT = ("populations", "group_diagnostics", "protocol")
 AGREEMENT_SLICE = "cas12a/agreement.sliced.json"
 
+# Cas12a's DNA token spans and sequence layout are recorded per IG shard, and
+# the shards stay in the ZIP, so the screen that draws a bar per position and a
+# row per token would have nowhere to read them from. They are lifted into one
+# small file here instead of being re-derived: 34bp splits into 6-mers with a
+# 4-base remainder, which is guessable, and a guess is exactly what this demo
+# must not put under a number. `pam` is what makes the headline finding legible
+# (the most sensitive region overlaps the PAM), so it is carried with them.
+CAS12A_LAYOUT = "cas12a/layout.json"
+CAS12A_LAYOUT_KEYS = ("coordinates", "dna_spans", "layout")
+CAS12A_IG_SHARDS = "shards/ig/"
+
 # Destination under `spcas9/` -> (source root key, path under that root).
 SPCAS9_FILES = {
     **{
@@ -246,9 +257,9 @@ def _npz_ids(data: bytes, key: str) -> list[int]:
 
 def _cas12a(
     sources: Sources,
-) -> tuple[list[Pin], dict[str, bytes], dict[str, Any], str]:
-    """Pins, files to write (`cas12a/...` -> bytes), the agreement-slice record
-    and the archive's sha256."""
+) -> tuple[list[Pin], dict[str, bytes], dict[str, dict[str, Any]], str]:
+    """Pins, files to write (`cas12a/...` -> bytes), the derived-file records
+    (agreement slice, layout) and the archive's sha256."""
     prefix = sources.cas12a_report_prefix
     audit = json.loads(sources.cas12a_audit.read_text(encoding="utf-8"))
     archive_sha = sha256_file(sources.cas12a_zip)
@@ -313,14 +324,57 @@ def _cas12a(
 
         files = {f"cas12a/{name}": read(name) for name in CAS12A_TOP}
         files.update({f"cas12a/{name}": read(prefix + name) for name in CAS12A_REPORT})
+
+        # Every IG shard records the same spans and layout; reading all of them
+        # turns that into a checked fact rather than an assumption drawn from
+        # one row. A single disagreeing shard fails the pin and nothing is
+        # written, which is the point: the screen draws tokens at these spans.
+        shards = sorted(
+            name
+            for name in archive.namelist()
+            if name.startswith(CAS12A_IG_SHARDS) and name.endswith(".json")
+        )
+        layouts = {
+            json.dumps(
+                {key: _json(read(name)).get(key) for key in CAS12A_LAYOUT_KEYS},
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+            for name in shards
+        }
+        # Agreement among the shards present says nothing about a missing one,
+        # so the count is pinned to the plan's rows as well.
+        pins += [
+            Pin("IG shard 수 (plan statistics_ids)", len(plan_ids), len(shards)),
+            Pin(
+                f"IG shard {len(shards):,}개의 dna_spans·layout 일치",
+                1,
+                len(layouts),
+            ),
+        ]
+        # Without exactly one layout the pin above fails and nothing is
+        # written; no placeholder is staged in its place.
+        if len(layouts) == 1:
+            files[CAS12A_LAYOUT] = layouts.pop().encode("utf-8")
     sliced = {key: agreement[key] for key in AGREEMENT_KEPT}
     files[AGREEMENT_SLICE] = json.dumps(sliced, ensure_ascii=False).encode("utf-8")
     derived = {
-        "source": f"zip:{prefix}agreement.json",
-        "source_sha256": sha256_bytes(agreement_raw),
-        "operation": "최상위 키 선택만 함; 값은 원본 그대로이며 산술 없음",
-        "kept": list(AGREEMENT_KEPT),
-        "dropped": sorted(set(agreement) - set(AGREEMENT_KEPT)),
+        AGREEMENT_SLICE: {
+            "source": f"zip:{prefix}agreement.json",
+            "source_sha256": sha256_bytes(agreement_raw),
+            "operation": "최상위 키 선택만 함; 값은 원본 그대로이며 산술 없음",
+            "kept": list(AGREEMENT_KEPT),
+            "dropped": sorted(set(agreement) - set(AGREEMENT_KEPT)),
+        },
+        CAS12A_LAYOUT: {
+            "source": f"zip:{CAS12A_IG_SHARDS}*.json",
+            "shards": len(shards),
+            "operation": (
+                "모든 IG shard에서 같은 키를 골라 일치를 확인한 뒤 그 한 벌을 씀; "
+                "값은 원본 그대로이며 산술 없음"
+            ),
+            "kept": list(CAS12A_LAYOUT_KEYS),
+        },
     }
     return pins, files, derived, archive_sha
 
@@ -627,6 +681,8 @@ def prepare(
     def origin(name: str) -> str:
         if name == AGREEMENT_SLICE:
             return f"zip:{prefix}agreement.json (sliced)"
+        if name == CAS12A_LAYOUT:
+            return f"zip:{CAS12A_IG_SHARDS}*.json (모든 shard 일치, 키 선택)"
         if name.startswith("cas12a/"):
             member = name.removeprefix("cas12a/")
             return f"zip:{member if member in CAS12A_TOP else prefix + member}"
@@ -677,7 +733,7 @@ def prepare(
                     }
                 ),
             },
-            "derived": {AGREEMENT_SLICE: derived},
+            "derived": derived,
             "files": files,
         }
         (stage / MANIFEST).write_text(
@@ -700,6 +756,31 @@ def prepare(
         spcas9_missing=missing,
         spcas9_carried=sorted(carried),
     )
+
+
+def recorded_pins(data_dir: Path = DEFAULT_DATA_DIR) -> dict[str, list[str]]:
+    """The pins `prepare` checked, per prepared nuclease, as its manifest records.
+
+    `verify` compares files with the manifest only; it does not re-run these.
+    They are listed so the check behind a file (the layout pin above all: the
+    screen draws tokens at those spans) is visible without opening the JSON.
+    """
+    payload = _previous_manifest(Path(data_dir))
+    return {
+        nuclease: list(record.get("pins_checked", []))
+        for nuclease, record in payload.get("nucleases", {}).items()
+        if record.get("pins_checked")
+    }
+
+
+def render_verified(data_dir: Path = DEFAULT_DATA_DIR) -> str:
+    """The success text of `verify`: where, and which prepare-time pins stand behind it."""
+    data_dir = Path(data_dir)
+    lines = [f"온전성 확인 통과: {data_dir / MANIFEST}"]
+    for nuclease, pins in recorded_pins(data_dir).items():
+        lines.append(f"{nuclease}: prepare 시점에 대조한 고정 핀 {len(pins)}개")
+        lines += [f"  - {name}" for name in pins]
+    return "\n".join(lines)
 
 
 def verify(data_dir: Path = DEFAULT_DATA_DIR) -> list[str]:

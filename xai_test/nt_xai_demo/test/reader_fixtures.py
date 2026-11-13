@@ -674,6 +674,30 @@ CAS12A_CATEGORY_POOLS = {
     "high_error": (375, 375),
     "low_error": (372, 375),
 }
+#: `layout.json` as `prepare` lifts it from the IG shards. The singles sit
+#: first and the PAM is not the real `[4, 8]`, so a reader that assumed the
+#: real 6-mer split or PAM instead of reading this file reads it wrong.
+CAS12A_LAYOUT = {
+    "coordinates": "0-based half-open",
+    "dna_spans": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [4, 10],
+        [10, 16],
+        [16, 22],
+        [22, 28],
+        [28, 34],
+    ],
+    "layout": {
+        "coordinate_system": "0-based half-open",
+        "left_flank": [0, 5],
+        "pam": [5, 9],
+        "protospacer": [9, 31],
+        "right_flank": [31, 34],
+    },
+}
 CAS12A_IG_FAILED_ROW = 9
 CAS12A_IG_FAILURE = "completeness residual above limit"
 #: Per-token mean |signed mass| for a case: 9 DNA blocks, as the real one has.
@@ -869,7 +893,9 @@ def cas12a_agreement() -> dict:
     }
 
 
-def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
+def build_cas12a(
+    root: Path, *, output_unit: str = "fraction", layout: dict | None = None
+) -> Path:
     cas12a = root / "cas12a"
     cas12a.mkdir(parents=True, exist_ok=True)
 
@@ -1031,6 +1057,7 @@ def build_cas12a(root: Path, *, output_unit: str = "fraction") -> Path:
             for stratum, count in (("all", 3), ("TTTV", 2), ("TTTT", 1))
         },
         "agreement.sliced.json": cas12a_agreement(),
+        "layout.json": CAS12A_LAYOUT if layout is None else layout,
         "summary.json": {
             "complete": True,
             "population_count": 3,

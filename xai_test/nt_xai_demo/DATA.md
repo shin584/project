@@ -40,6 +40,17 @@ Git에는 경량 JSON·SVG·`cases.csv`와 `manifest.json`만 있다. `.npz`와 
 `statistics_ids`, `case_only_ids`, `ig_mode`를 버린다. 산술은 없다. 원본 sha256은
 manifest의 `derived`에 기록된다.
 
+`layout.json`은 `shards/ig/*.json` 1,500개에서 **꺼낸다**: 각 shard의 `coordinates`·
+`dna_spans`·`layout` 세 키만 골라, 1,500개가 모두 같을 때만 그 한 벌을 쓴다 (핀
+"IG shard 1,500개의 dna_spans·layout 일치"; 하나라도 다르면 아무것도 쓰지 않는다). shard 수도
+plan의 `statistics_ids` 수와 대조한다 (핀 "IG shard 수 (plan statistics_ids)").
+DNA 토큰 구간 9개(6-mer 5개 + 단일염기 4개)와 PAM `[4,8]`이 여기서 온다 — 화면은 토큰을
+이 구간에 그리며 6-mer 분할을 추측으로 재현하지 않는다. 산술은 없고, 출처와 shard 수는
+manifest의 `derived`에 기록된다.
+
+`verify`는 파일을 manifest와 대조한 뒤, `prepare` 시점에 대조한 고정 핀 목록을 뉴클레아제별로
+출력한다 (`verify`가 핀을 다시 대조하지는 않는다).
+
 ### 2. SpCas9 원본 묶음 (9-Hydra v3)
 
 모두 현재 Git 추적 대상이 아니다 (`.gitignore`의 `*.csv`와

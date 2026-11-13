@@ -280,5 +280,13 @@ _Avoid_: binary "seen / unseen"; "known target, new PAM" as the name for the mid
 ## Language — NT XAI 데모
 
 **NT XAI 데모**:
-The entry point (`xai_test/nt_xai_demo/`) over the **stored** XAI artifacts of the two NT fine-tunes — 9-Hydra v3 (SpCas9, its 3 analysed heads) and NT-Cas12a. A presentation surface for two finished analyses: not a comparison between them, and not an inference path (ADR 0012).
-_Avoid_: "the demo" (that is the SaCas9 Model A / B demo CLI of ADR 0003, which is comparative by design), "통합 데모" (integration is at the entry point only — this demo does not compare), calling it a live-inference or model-serving demo
+The entry point (`xai_test/nt_xai_demo/`) over the **stored** XAI artifacts of the two NT fine-tunes — 9-Hydra v3 (SpCas9, its 3 analysed heads) and NT-Cas12a. One nuclease is chosen when the process starts, and from there the demo does one thing: given a target, show that target's XAI result. A presentation surface for two finished analyses: not a comparison between them, and not an inference path (ADR 0012 with its #169 amendment).
+_Avoid_: "the demo" (that is the SaCas9 Model A / B demo CLI of ADR 0003, which is comparative by design), "통합 데모" (integration is at the entry point only — this demo does not compare), calling it a live-inference or model-serving demo, naming the retired `cross` / `cases` / `explain` / `agreement` views as part of it
+
+**데모 입력 단위**:
+What the demo accepts in place of a target, and it differs by nuclease because the two analyses stored different things: Cas12a takes a **34bp 타깃 서열**, SpCas9 a **20bp protospacer**. Each nuclease's prompt names its own unit, since the same word "서열" standing for two different lengths is the first thing a reader trips over.
+_Avoid_: one shared "sequence" input, implying the two lengths are the same quantity measured differently
+
+**데모 사례 번호**:
+The demo's own short labels for the curated cases it offers — `A` for the low-error cases, `B` for the high-error ones, `C` for the third group (Cas12a `out_of_range`, SpCas9 `HEADGAP`). A and B mean the same thing for both nucleases. The numbering is a typing convenience over the audited selections (`cases.json`) and never a selection of its own: the demo re-ranks nothing.
+_Avoid_: treating a number as a case identity (the artifacts' `case_id` and `row_index` remain the real ones), inventing numbers for rows outside the audited selections

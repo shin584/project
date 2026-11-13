@@ -23,7 +23,9 @@
         "predictions.sidecar plan_sha256",
         "cases.json plan_sha256",
         "cases_annotated selection.plan_sha256",
-        "agreement statistics_ids (plan)"
+        "agreement statistics_ids (plan)",
+        "IG shard 수 (plan statistics_ids)",
+        "IG shard 1,500개의 dna_spans·layout 일치"
       ]
     },
     "spcas9": {
@@ -75,6 +77,16 @@
         "rows",
         "statistics_ids"
       ]
+    },
+    "cas12a/layout.json": {
+      "source": "zip:shards/ig/*.json",
+      "shards": 1500,
+      "operation": "모든 IG shard에서 같은 키를 골라 일치를 확인한 뒤 그 한 벌을 씀; 값은 원본 그대로이며 산술 없음",
+      "kept": [
+        "coordinates",
+        "dna_spans",
+        "layout"
+      ]
     }
   },
   "files": {
@@ -125,6 +137,12 @@
       "bytes": 3260416,
       "git": "ignored",
       "source": "zip:reports/745133f240e1/ism.npz"
+    },
+    "cas12a/layout.json": {
+      "sha256": "09e0644af9766ddad8fd7714f0347a9c65899decbf26157e11c8c7199915d517",
+      "bytes": 278,
+      "git": "tracked",
+      "source": "zip:shards/ig/*.json (모든 shard 일치, 키 선택)"
     },
     "cas12a/metrics.json": {
       "sha256": "3c43a61108b133839c31a0ba5640bad2408a65ce687b35ee0ae3916a7cb6bb82",

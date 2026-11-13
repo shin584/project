@@ -73,14 +73,15 @@ def main(argv: list[str] | None = None) -> int:
         print(report.render())
         return 0
     if args.command == "verify":
-        problems = prepare.verify()
+        data_dir = prepare.DEFAULT_DATA_DIR
+        problems = prepare.verify(data_dir)
         if problems:
             print(
                 "온전성 확인 실패:\n" + "\n".join(f"  - {p}" for p in problems),
                 file=sys.stderr,
             )
             return 1
-        print(f"온전성 확인 통과: {prepare.DEFAULT_DATA_DIR / prepare.MANIFEST}")
+        print(prepare.render_verified(data_dir))
         return 0
     parser.print_help()
     return 0

@@ -19,6 +19,20 @@ from xai_test.nt_xai_demo.prepare import CAS12A_METHODS, Sources, population_dig
 PREFIX = "reports/abc123/"
 IDS = [3, 7, 11]
 
+# What every IG shard records about the sequence it tokenised (the real ZIP's
+# shape, shortened: two 6-mers and a single base over a 13bp sequence).
+SHARD_LAYOUT = {
+    "coordinates": "0-based half-open",
+    "dna_spans": [[0, 6], [6, 12], [12, 13]],
+    "layout": {
+        "coordinate_system": "0-based half-open",
+        "left_flank": [0, 2],
+        "pam": [2, 6],
+        "protospacer": [6, 12],
+        "right_flank": [12, 13],
+    },
+}
+
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -47,6 +61,19 @@ def build_cas12a(root: Path, *, corrupt: str | None = None) -> tuple[Path, Path]
     for source_id in IDS:
         for method in CAS12A_METHODS:
             members[f"shards/{method}/{source_id}.json"] = dump({})
+        # Only IG shards record the layout; the other keys stand for the
+        # per-row fields that differ between shards and must not be compared.
+        members[f"shards/ig/{source_id}.json"] = dump(
+            {**SHARD_LAYOUT, "source_row": source_id, "method": "ig"}
+        )
+        members[f"shards/ig/{source_id}-row.npz"] = b"not json"
+    if corrupt == "ig_missing_shard":
+        del members[f"shards/ig/{IDS[-1]}.json"]
+    if corrupt == "ig_layout":
+        moved = {**SHARD_LAYOUT["layout"], "pam": [3, 7]}
+        members[f"shards/ig/{IDS[-1]}.json"] = dump(
+            {**SHARD_LAYOUT, "layout": moved, "source_row": IDS[-1]}
+        )
     for method in CAS12A_METHODS:
         array = npz_bytes(source_row=np.array(IDS, dtype=np.int64))
         members[PREFIX + f"{method}.npz"] = array

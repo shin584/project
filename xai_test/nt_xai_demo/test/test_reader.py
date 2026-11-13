@@ -424,3 +424,45 @@ def test_the_per_row_reads_views_need_are_each_keyed_by_id(spcas9, cas12a):
     assert cas12a.rollout(cas_row).shape == (9, 9)
     assert cas12a.accepted(cas_row) is True
     assert cas12a.head == rd.CAS12A_HEAD
+
+
+# --- Cas12a token spans and PAM: read from layout.json, never re-derived ---- #
+
+
+def test_cas12a_token_spans_and_pam_are_read_from_the_layout_file(cas12a):
+    assert cas12a.token_spans == tuple(
+        tuple(span) for span in fx.CAS12A_LAYOUT["dna_spans"]
+    )
+    assert cas12a.pam_span == (5, 9)
+
+
+@pytest.mark.parametrize(
+    ("change", "why"),
+    [
+        ({"coordinates": "1-based closed"}, "coordinates"),
+        (
+            {"layout": {**fx.CAS12A_LAYOUT["layout"], "coordinate_system": "x"}},
+            "coordinate_system",
+        ),
+        # Swapped: the spans would no longer follow IG's token columns in order.
+        (
+            {"dna_spans": [[1, 2], [0, 1], *fx.CAS12A_LAYOUT["dna_spans"][2:]]},
+            "dna_spans",
+        ),
+        # A gap between tokens: a base no token covers.
+        (
+            {"dna_spans": [[0, 1], [2, 3], *fx.CAS12A_LAYOUT["dna_spans"][2:]]},
+            "dna_spans",
+        ),
+        (
+            {"layout": {**fx.CAS12A_LAYOUT["layout"], "pam": [30, 40]}},
+            "pam",
+        ),
+    ],
+)
+def test_a_layout_the_reader_was_not_written_against_is_refused(tmp_path, change, why):
+    data = tmp_path / "data"
+    fx.build_cas12a(data, layout={**fx.CAS12A_LAYOUT, **change})
+
+    with pytest.raises(rd.ArtifactMismatch, match=why):
+        _ = rd.Cas12aReader(data).token_spans

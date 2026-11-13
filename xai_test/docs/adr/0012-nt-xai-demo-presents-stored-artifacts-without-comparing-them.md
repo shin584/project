@@ -1,13 +1,44 @@
 # The NT XAI demo presents stored artifacts and compares no numbers across the two nucleases
 
-Status: accepted — the two restrictions were settled in the design session recorded on issue #155
-(Q1–Q28) and implemented across #156–#163. A Status line is carried here because this ADR re-frames
+Status: accepted, amended by #169 — the two restrictions were settled in the design session recorded
+on issue #155 (Q1–Q28) and implemented across #156–#163. Both restrictions stand; the `cross` view
+that section 1 describes as carrying them was retired in #169, which is recorded in the Amendment
+section below. A Status line is carried here because this ADR re-frames
 [ADR 0003](0003-demo-cli-compares-model-a-and-model-b.md) for a second surface, so a later reader
 needs to know which of the two is current for which demo: both are, for their own.
 
 The **NT XAI 데모** (`xai_test/nt_xai_demo/`) is one entry point over two finished NT fine-tune
 analyses — 9-Hydra v3 (SpCas9) and NT-Cas12a. Two decisions define what it is, and both are
 restrictions rather than features, so they are recorded together.
+
+## Amendment (#169): the restrictions stay, the screens that carried them are gone
+
+The demo's surface was rebuilt as one screen — pick a target, read that target's XAI result — because
+the branching menu below (`report` / `cases` / `explain` / `agreement` / `cross`, each gated on a
+nuclease choice) was the reason nobody could read it, including its author. The meeting it serves
+shows what was done; it is not a presentation that needs a table of contents.
+
+Neither decision in this ADR is reversed. Decision 2 (stored-artifact-only, no model loaded) is
+untouched. Decision 1 (no comparison across the two nucleases) is **strengthened**: the nuclease is
+now chosen when the process starts, so the two never appear on one screen and there is no surface on
+which a comparison could be built. What is retired is only the *implementation* — the `cross` view,
+and with it the `cases`, `explain` and `agreement` views. A future reader following section 1 to the
+`cross` view will not find it.
+
+Two consequences are worth recording, because each one closed a hole rather than opening one:
+
+- **The SpCas9 side shows the `generalisation` stratum only.** Section 1's prohibition on pooling the
+  two strata is now unreachable by construction: one stratum is displayed, so there is no pair to
+  average. The nine `pam_library` cases are dropped from the demo, not from the analysis.
+- **The one qualitative finding survives without the `cross` view.** "Each model's most
+  mutation-sensitive region overlaps that model's own PAM" is visible on each nuclease's own screen,
+  because the ISM bar and the IG tokens are laid out in position order one above the other. It is
+  read off each model separately, which is what the finding always was — stating it on a shared
+  screen was never what made it true.
+
+The retired `report` is rewritten short (performance figures, the IG–ISM agreement, one limit line),
+and it keeps the wording this ADR exists to protect: every displayed value carries its stratum, head,
+statistic and real denominator.
 
 ## 1. Integration is at the entry point only; the cross view is one qualitative finding
 

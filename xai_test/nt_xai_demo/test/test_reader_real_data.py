@@ -298,3 +298,14 @@ def test_the_real_cross_view_states_cas12as_two_pam_positions():
     assert "위치 7·6 (PAM 4-7의 마지막 두 염기)" in text
     assert "민감 위치 1위: 7 (PAM 안, 값 0.2405)" in text
     assert "민감 위치 2위: 6 (PAM 안, 값 0.1341)" in text
+
+
+def test_cas12a_reader_reads_the_recorded_token_spans_and_pam():
+    """Five 6-mers then four single bases over 34bp, PAM at [4, 8] - as recorded."""
+    cas12a = _reader(rd.Cas12aReader, "cas12a/layout.json")
+
+    spans = cas12a.token_spans
+    assert len(spans) == 9
+    assert [end - start for start, end in spans] == [6] * 5 + [1] * 4
+    assert spans[0][0] == 0 and spans[-1][1] == 34
+    assert cas12a.pam_span == (4, 8)

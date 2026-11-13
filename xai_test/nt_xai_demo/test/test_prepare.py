@@ -5,8 +5,17 @@ import zipfile
 
 import pytest
 
+from xai_test.nt_xai_demo import __main__ as entry
 from xai_test.nt_xai_demo import prepare as demo
-from xai_test.nt_xai_demo.test.fixtures import PREFIX, build_sources, sha
+from xai_test.nt_xai_demo.test.fixtures import (
+    IDS,
+    PREFIX,
+    SHARD_LAYOUT,
+    build_sources,
+    sha,
+)
+
+LAYOUT_PIN = f"IG shard {len(IDS)}개의 dna_spans·layout 일치"
 
 
 def manifest(data_dir):
@@ -55,7 +64,70 @@ def test_agreement_is_sliced_by_key_selection_only_and_source_hash_recorded(tmp_
     assert set(derived["dropped"]) >= {"rows", "statistics_ids"}
 
 
-@pytest.mark.parametrize("corrupt", ["archive", "plan", "ism_npz", "population"])
+def test_layout_shared_by_every_ig_shard_is_lifted_into_one_pinned_file(tmp_path):
+    sources = build_sources(tmp_path / "src")
+    data = tmp_path / "data"
+
+    demo.prepare(sources, data)
+
+    layout = json.loads((data / "cas12a/layout.json").read_text(encoding="utf-8"))
+    assert layout == SHARD_LAYOUT  # the recorded keys only, values untouched
+    payload = manifest(data)
+    assert LAYOUT_PIN in payload["nucleases"]["cas12a"]["pins_checked"]
+    entry = payload["files"]["cas12a/layout.json"]
+    assert entry["git"] == "tracked"
+    # It is lifted out of the shards, not copied from a report member.
+    assert "shards/ig/" in entry["source"] and PREFIX not in entry["source"]
+    derived = payload["derived"]["cas12a/layout.json"]
+    assert derived["kept"] == ["coordinates", "dna_spans", "layout"]
+    assert derived["shards"] == len(IDS)
+    assert demo.verify(data) == []
+
+
+def test_one_ig_shard_with_another_layout_fails_the_pin_and_writes_nothing(tmp_path):
+    sources = build_sources(tmp_path / "src", corrupt="ig_layout")
+    data = tmp_path / "data"
+
+    with pytest.raises(demo.PinMismatch, match="dna_spans·layout") as refused:
+        demo.prepare(sources, data)
+
+    assert [pin.actual for pin in refused.value.failed] == [2]  # two layouts seen
+    assert not data.exists()
+
+
+def test_a_missing_ig_shard_fails_the_shard_count_pin_and_writes_nothing(tmp_path):
+    """Agreement among the shards present is not enough: every plan row has one."""
+    sources = build_sources(tmp_path / "src", corrupt="ig_missing_shard")
+    data = tmp_path / "data"
+
+    with pytest.raises(demo.PinMismatch, match="IG shard 수") as refused:
+        demo.prepare(sources, data)
+
+    assert [(pin.expected, pin.actual) for pin in refused.value.failed] == [
+        (len(IDS), len(IDS) - 1)
+    ]
+    assert not data.exists()
+
+
+def test_verify_prints_the_pins_prepare_checked_including_the_layout_pin(
+    tmp_path, monkeypatch, capsys
+):
+    data = tmp_path / "data"
+    demo.prepare(build_sources(tmp_path / "src"), data)
+    monkeypatch.setattr(demo, "DEFAULT_DATA_DIR", data)
+
+    assert entry.main(["verify"]) == 0
+
+    out = capsys.readouterr().out
+    assert "온전성 확인 통과" in out
+    assert LAYOUT_PIN in out
+    assert "plan.json sha256 (plan.sha256)" in out
+
+
+@pytest.mark.parametrize(
+    "corrupt",
+    ["archive", "plan", "ism_npz", "population", "ig_layout", "ig_missing_shard"],
+)
 def test_pin_mismatch_writes_nothing(tmp_path, corrupt):
     sources = build_sources(tmp_path / "src", corrupt=corrupt)
     data = tmp_path / "data"

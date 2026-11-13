@@ -1,0 +1,1 @@
+{"coordinates": "0-based half-open", "dna_spans": [[0, 6], [6, 12], [12, 18], [18, 24], [24, 30], [30, 31], [31, 32], [32, 33], [33, 34]], "layout": {"coordinate_system": "0-based half-open", "left_flank": [0, 4], "pam": [4, 8], "protospacer": [8, 31], "right_flank": [31, 34]}}

@@ -964,6 +964,54 @@ class Cas12aReader:
     def cases_annotated(self) -> dict[str, Any]:
         return load_json(self.root / "cases_annotated.json")
 
+    @cached_property
+    def _layout(self) -> tuple[tuple[tuple[int, int], ...], tuple[int, int]]:
+        """DNA token spans and PAM span from `layout.json`, checked on load.
+
+        `prepare` lifted these from the IG shards (pinned equal across all of
+        them), so the screen can draw each IG token at its recorded bases
+        instead of re-deriving a 6-mer split. The spans are refused, never
+        re-sorted, when out of position order: their order is IG's token
+        column order, and sorting would silently re-pair values and bases.
+        """
+        path = self.root / "layout.json"
+        payload = load_json(path)
+        half_open = "0-based half-open"
+        expect(payload.get("coordinates"), half_open, what="coordinates", source=path)
+        layout = payload.get("layout", {})
+        expect(
+            layout.get("coordinate_system"),
+            half_open,
+            what="layout.coordinate_system",
+            source=path,
+        )
+        spans = tuple((int(start), int(end)) for start, end in payload["dna_spans"])
+        expect(
+            tuple(start for start, _ in spans),
+            (0, *(end for _, end in spans[:-1])),
+            what="dna_spans의 시작 위치 (0부터 빈틈없이 위치 순)",
+            source=path,
+        )
+        if not spans or any(end <= start for start, end in spans):
+            raise ArtifactMismatch(f"{path}: dna_spans에 빈 구간이 있다: {spans}")
+        start, end = (int(value) for value in layout["pam"])
+        if not 0 <= start < end <= spans[-1][1]:
+            raise ArtifactMismatch(
+                f"{path}: pam {[start, end]}이(가) dna_spans 범위 "
+                f"[0, {spans[-1][1]}) 밖이다"
+            )
+        return spans, (start, end)
+
+    @property
+    def token_spans(self) -> tuple[tuple[int, int], ...]:
+        """The DNA tokens' base spans, 0-based half-open, in position order."""
+        return self._layout[0]
+
+    @property
+    def pam_span(self) -> tuple[int, int]:
+        """The recorded PAM span, 0-based half-open (on the real data, `[4, 8]`)."""
+        return self._layout[1]
+
     @property
     def strata(self) -> tuple[str, ...]:
         return CAS12A_STRATA
