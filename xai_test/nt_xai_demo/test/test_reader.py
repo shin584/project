@@ -55,6 +55,62 @@ def test_ism_profile_reads_the_named_heads_slice_not_the_first(spcas9):
     assert not np.allclose(evo, primary)
 
 
+def test_spcas9_max_profile_reads_the_named_heads_slice_not_the_first(spcas9):
+    """The case screen's bar: per position, the single most disruptive base.
+
+    The fixture's three alternatives are 0.1/0.2/0.3 plus a per-head and
+    per-row offset, so the max is the 0.3 one and it differs per head. A max
+    taken over a wrongly selected head slice is caught by value here.
+    """
+    row = fx.ISM_ROWS[1]
+    row_position = fx.ISM_ROWS.index(row)
+
+    primary = spcas9.ism_max_profile(row, "SpCas9")
+    evo = spcas9.ism_max_profile(row, "evoCas9")
+
+    assert primary.shape == (fx.POSITIONS,)
+    for position in (0, 7, fx.POSITIONS - 1):
+        expected = 0.01 + 0.3 + row_position * 0.001 + position * 0.0001
+        assert primary[position] == pytest.approx(expected, rel=1e-5)
+    assert evo[3] == pytest.approx(
+        0.09 + 0.3 + row_position * 0.001 + 3 * 0.0001, rel=1e-5
+    )
+    assert not np.allclose(primary, evo)
+
+
+def test_spcas9_max_profile_keeps_the_mean_profile_beside_it(spcas9):
+    """Both statistics stay: the bar is the max, the recorded stratum profiles
+    the analyses check against are the mean."""
+    row = fx.ISM_ROWS[1]
+    row_position = fx.ISM_ROWS.index(row)
+
+    assert spcas9.ism_profile(row, "SpCas9")[4] == pytest.approx(
+        fx.expected_profile(row_position, 4, 0), rel=1e-5
+    )
+    assert (
+        spcas9.ism_max_profile(row, "SpCas9")[4] > spcas9.ism_profile(row, "SpCas9")[4]
+    )
+
+
+def test_spcas9_max_profile_refuses_a_head_that_is_stored_but_not_analysed(spcas9):
+    with pytest.raises(rd.UnknownHead):
+        spcas9.ism_max_profile(fx.ISM_ROWS[0], "HypaCas9")
+
+
+def test_spcas9_rollout_referenced_is_the_stored_blocks_column_mean(spcas9):
+    """How much each token is attended to, joined by `row_index` not position.
+
+    The fixture's matrices count upward row by row, so each row's column means
+    are its own and reading another row's block is caught by value. There is
+    no head argument: the stored matrix has no head axis (ADR 0008).
+    """
+    for position, row in enumerate(fx.ISM_ROWS):
+        referenced = spcas9.rollout_referenced(row)
+        assert referenced.shape == (5,)
+        base = position * 25 + 10
+        assert referenced == pytest.approx([base + token for token in range(5)])
+
+
 def test_ig_tokens_read_the_named_heads_slice(spcas9):
     row = fx.IG_ROWS[0]
 

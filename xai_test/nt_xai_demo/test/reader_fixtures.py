@@ -47,11 +47,16 @@ TOKEN_BOUNDARIES = ((0, 5), (6, 11), (12, 17), (18, 23), (24, 29))
 POSITIONS = 30
 BASES = ("A", "C", "G", "T")
 
-ISM_ROWS = (5, 11, 30)
+#: Row 44 is appended, never inserted: the tests above address these by
+#: position, and it exists so the generalisation stratum has an `ERRLO` case
+#: (the demo's `A1`) beside its `ERRHI` and `HEADGAP` ones.
+ISM_ROWS = (5, 11, 30, 44)
 IG_ROWS = (11, 30)  # misaligned with ISM_ROWS on purpose
-SPLIT_ROLE = {5: "test", 11: "test", 30: "val"}
+SPLIT_ROLE = {5: "test", 11: "test", 30: "val", 44: "test"}
 #: Percent, as the split files store it. 12.5 percent is 0.125 as a fraction.
-LABEL_PERCENT = {5: 12.5, 11: 40.0, 30: 1.25}
+#: Row 44 sits at the prediction, so its primary head's error is 0 - an
+#: `ERRLO` case, and a value a percent/fraction slip cannot hide.
+LABEL_PERCENT = {5: 12.5, 11: 40.0, 30: 1.25, 44: 10.0}
 #: A blank label cell: a head that was not measured on that row. Real and common.
 UNMEASURED = (30, "SpCas9-NG")
 CLAIM_LIMIT = (
@@ -260,10 +265,16 @@ def head_order_reversal() -> dict:
 
 #: The case table, keyed as the real one is: `<STRATUM>-<CRITERION>-<NN>`.
 #: GEN-HEADGAP-02 is the one case inside the IG list (as on the real data);
-#: GEN-ERRHI-01 is outside it. LIB-ERRLO-01 sits on a `val` row with no
-#: prediction and one unmeasured head - impossible on the real data, and here
-#: so the split-role safeguard and the missing-prediction path have a case.
+#: GEN-ERRLO-01 and GEN-ERRHI-01 are outside it, so the demo's screen has both
+#: the IG block and the "this row is not in the sample" line to print, in the
+#: same proportion the real selection has them. LIB-ERRLO-01 sits on a `val`
+#: row with no prediction and one unmeasured head - impossible on the real
+#: data, and here so the split-role safeguard and the missing-prediction path
+#: have a case; the demo offers no number for it, since it is not
+#: generalisation. The selection ranks leave the `HEADGAP` letter at 2 with no
+#: 1 or 3 beside it, so a number range printed as a span would be wrong.
 SPCAS9_CASES = (
+    ("GEN-ERRLO-01", "generalisation", "ERRLO", 44),
     ("GEN-ERRHI-01", "generalisation", "ERRHI", 5),
     ("GEN-HEADGAP-02", "generalisation", "HEADGAP", 11),
     ("LIB-ERRLO-01", "pam_library", "ERRLO", 30),
@@ -275,11 +286,18 @@ CASE_STRATA = {
 LIB_QUALIFIER = "observed in one of 5 targets"
 
 
+#: Labels step twice as fast across the head axis as predictions do, so each
+#: head's absolute error is its own: a screen that shows one head's error under
+#: another head's name is caught by value, and so is a comparison head chosen
+#: by anything but the stored errors.
+LABEL_HEAD_STEP = 2
+
+
 def label_fraction(row: int, head: str) -> float | None:
     """What the reader must return: the split file's percent, divided by 100."""
     if (row, head) == UNMEASURED:
         return None
-    return (LABEL_PERCENT[row] + ISM_HEADS.index(head)) / 100.0
+    return (LABEL_PERCENT[row] + ISM_HEADS.index(head) * LABEL_HEAD_STEP) / 100.0
 
 
 def prediction_fraction(row: int, head: str) -> float | None:
@@ -299,9 +317,25 @@ def spcas9_cases() -> dict:
             "row_index": row,
             "reporting_qualifier": LIB_QUALIFIER if stratum == "pam_library" else "",
         }
+        errors = {}
         for head in ANALYSED_HEADS:
-            case[f"label_{head}"] = label_fraction(row, head)
-            case[f"pred_{head}"] = prediction_fraction(row, head)
+            label = label_fraction(row, head)
+            prediction = prediction_fraction(row, head)
+            case[f"label_{head}"] = label
+            case[f"pred_{head}"] = prediction
+            error = (
+                None if label is None or prediction is None else abs(label - prediction)
+            )
+            case[f"abs_error_{head}"] = error
+            if error is not None:
+                errors[head] = error
+        # The selection's own recorded gap: max - min of the analysed heads'
+        # absolute errors. It is not the same quantity as the distance from the
+        # primary head to one comparison head, and the screen must not print
+        # one under the other's name.
+        case["head_gap"] = (
+            max(errors.values()) - min(errors.values()) if errors else None
+        )
         cases.append(case)
     return {
         "primary_head": "SpCas9",
@@ -385,6 +419,17 @@ def spcas9_annotation(case: tuple[str, str, str, int]) -> dict:
 #: Recorded IG-ISM agreement per stratum. Distinct on purpose, so a figure
 #: that pooled the two strata, or read one under the other's name, is caught.
 VALIDATION_MEDIAN = {"generalisation": 0.7, "pam_library": 0.45}
+#: Added per head, so each head's recorded median is its own value. On the
+#: real data the three differ widely (0.7 / 0.55 / 0.0 in `generalisation`); a
+#: fixture that gave them one value could not tell a report that shows the
+#: primary head's figure under another head's name.
+VALIDATION_HEAD_OFFSET = {"SpCas9": 0.0, "SpCas9-NG": -0.15, "evoCas9": -0.4}
+
+
+def validation_median(stratum: str, head: str) -> float:
+    return round(VALIDATION_MEDIAN[stratum] + VALIDATION_HEAD_OFFSET[head], 2)
+
+
 VALIDATION_MEAN_PROFILE = {"generalisation": 1.0, "pam_library": 0.9}
 #: The IG subset row each stratum holds (see `ig_subset.json` below).
 STRATUM_ROW = {"generalisation": 11, "pam_library": 30}
@@ -542,9 +587,9 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
                                 "per_row": {
                                     "rows": 1,
                                     "undefined_rows": 0,
-                                    "median": VALIDATION_MEDIAN[stratum],
-                                    "q1": VALIDATION_MEDIAN[stratum] - 0.3,
-                                    "q3": VALIDATION_MEDIAN[stratum] + 0.2,
+                                    "median": validation_median(stratum, head),
+                                    "q1": validation_median(stratum, head) - 0.3,
+                                    "q3": validation_median(stratum, head) + 0.2,
                                 },
                                 "mean_profile": VALIDATION_MEAN_PROFILE[stratum],
                                 "mean_token_profile": {
@@ -605,7 +650,9 @@ def build_spcas9(root: Path, *, label_scale: str = "percent") -> Path:
             )
             for row in rows:
                 labels = [
-                    "" if (row, head) == UNMEASURED else LABEL_PERCENT[row] + index
+                    ""
+                    if (row, head) == UNMEASURED
+                    else LABEL_PERCENT[row] + index * LABEL_HEAD_STEP
                     for index, head in enumerate(heads_header)
                 ]
                 writer.writerow(

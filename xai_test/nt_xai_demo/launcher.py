@@ -1,4 +1,4 @@
-"""데모 런처: 뉴클레아제를 첫 인자로 받고, 그 한 분석만 띄운다 (#169, #171).
+"""데모 런처: 뉴클레아제를 첫 인자로 받고, 그 한 분석만 띄운다 (#169, #171, #173).
 
 `python -m xai_test.nt_xai_demo cas12a` opens the `cas12a>` REPL;
 `python -m xai_test.nt_xai_demo cas12a A1` prints the same screen once. Both go
@@ -7,8 +7,11 @@ into the REPL cannot diverge.
 
 The nuclease is fixed when the demo starts. There is no switching inside a
 session: two nucleases never share a screen, which is ADR 0012's
-no-comparison decision made structural. SpCas9 says it is not ready until its
-own screen lands (#173).
+no-comparison decision made structural rather than stated in a caption.
+
+What differs between the two is held in a `Nuclease` record - its reader, its
+screen module, and the input its prompt names - so the loop, the refusals and
+the exit codes are written once and both nucleases get the same ones.
 """
 
 from __future__ import annotations
@@ -16,19 +19,61 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import ModuleType
+from typing import Any
 
-from . import cas12a_screen, render
-from .reader import DEFAULT_DATA_DIR, ArtifactMismatch, Cas12aReader
+from . import cas12a_screen, render, spcas9_screen
+from .reader import DEFAULT_DATA_DIR, ArtifactMismatch, Cas12aReader, SpCas9Reader
+from .screen_parts import UnknownCaseNumber
+from .sequence_lookup import NotASequence, SequenceNotStored
 
 QUIT_WORDS = ("quit", "exit", "q", "종료")
 
-#: What each nuclease is, as the launcher's usage lists it.
-NUCLEASES: dict[str, str] = {
-    "cas12a": "NT-Cas12a (Test 1,500행 본 분석)",
-    "spcas9": "9-Hydra v3 (SpCas9)",
+
+@dataclass(frozen=True)
+class Nuclease:
+    """One analysis the demo can open: what to read it with, and what to call it.
+
+    `screen` is the module that turns an input into the screen's text. Both
+    screen modules present the same four names - `screen_for`, `report`,
+    `help_lines` and `number_range` - so this launcher never asks which
+    nuclease it is holding. The refusals it catches are imported from the
+    modules that define them rather than read off `screen`, so a screen that
+    cannot raise one does not have to re-export it to be launchable.
+    """
+
+    key: str
+    label: str
+    #: What the prompt names as acceptable input, in this nuclease's own unit.
+    takes: str
+    reader_factory: Callable[[Path], Any]
+    screen: ModuleType
+
+    @property
+    def prompt(self) -> str:
+        # The prompt names the unit: another nuclease's sequence, of another
+        # length, pasted here must not look like it should have matched.
+        return f"{self.key} [{self.takes}]> "
+
+
+NUCLEASES: dict[str, Nuclease] = {
+    "cas12a": Nuclease(
+        key="cas12a",
+        label="NT-Cas12a (Test 1,500행 본 분석)",
+        takes="번호 | 34bp 타깃 서열",
+        reader_factory=Cas12aReader,
+        screen=cas12a_screen,
+    ),
+    "spcas9": Nuclease(
+        key="spcas9",
+        label="9-Hydra v3 (SpCas9, 분석 head 3개)",
+        # The raw 30bp input lands in #174; until then the prompt offers the
+        # numbers it can actually open rather than an input that would refuse.
+        takes="번호",
+        reader_factory=SpCas9Reader,
+        screen=spcas9_screen,
+    ),
 }
-#: Nucleases whose screen is not built yet, with the ticket that builds it.
-NOT_READY: dict[str, str] = {"spcas9": "#173"}
 
 
 @dataclass(frozen=True)
@@ -42,30 +87,28 @@ class Outcome:
 
 @dataclass
 class Session:
-    """One Cas12a session: the reader, built once, and the inputs it takes."""
+    """One nuclease's session: the reader, built once, and the inputs it takes."""
 
+    nuclease: Nuclease
     data_dir: Path = DEFAULT_DATA_DIR
-    _reader: Cas12aReader | None = field(default=None, repr=False)
-
-    # The prompt names the sequence unit: another nuclease's sequence, of
-    # another length, pasted here must not look like it should have matched.
-    prompt = "cas12a [번호 | 34bp 타깃 서열]> "
+    _reader: Any | None = field(default=None, repr=False)
 
     @property
-    def reader(self) -> Cas12aReader:
+    def prompt(self) -> str:
+        return self.nuclease.prompt
+
+    @property
+    def reader(self) -> Any:
         if self._reader is None:
-            self._reader = Cas12aReader(self.data_dir)
+            self._reader = self.nuclease.reader_factory(self.data_dir)
         return self._reader
 
     def help_text(self) -> str:
+        screen = self.nuclease.screen
         return "\n".join(
             [
-                f"{NUCLEASES['cas12a']} — 저장된 산출물만 읽는다 (모델 로드 없음)",
-                f"  <번호>   사례 한 장: {cas12a_screen.number_range(self.reader)}",
-                (
-                    f"  <서열>   {self.reader.sequence_index.unit.name} → 같은 화면 "
-                    f"(저장된 {self.reader.sequence_index.stored_rows:,}행에서 찾는다)"
-                ),
+                f"{self.nuclease.label} — 저장된 산출물만 읽는다 (모델 로드 없음)",
+                *screen.help_lines(self.reader),
                 "  report   성능 + IG–ISM 일치도 + 한계",
                 "  help     이 안내",
                 "  quit     종료",
@@ -74,6 +117,7 @@ class Session:
 
     def execute(self, line: str) -> Outcome:
         """Run one input line. The only path a screen's text comes out of."""
+        screen = self.nuclease.screen
         parts = line.strip().split()
         if not parts:
             return Outcome()
@@ -90,18 +134,15 @@ class Session:
             if command == "help":
                 return Outcome(self.help_text())
             if command == "report":
-                return Outcome(cas12a_screen.report(self.reader))
-            return Outcome(cas12a_screen.screen_for(self.reader, parts[0]))
-        except (
-            cas12a_screen.UnknownCaseNumber,
-            cas12a_screen.SequenceNotStored,
-        ) as error:
+                return Outcome(screen.report(self.reader))
+            return Outcome(screen.screen_for(self.reader, parts[0]))
+        except (UnknownCaseNumber, SequenceNotStored) as error:
             return Outcome(str(error), ok=False)
-        except cas12a_screen.NotASequence as error:
+        except NotASequence as error:
             # Letters only, so it was read as a sequence; it may have been a
             # number typed wrong, so the refusal names both inputs.
             return Outcome(
-                f"{error}. 사례 번호라면: {cas12a_screen.number_range(self.reader)}",
+                f"{error}. 사례 번호라면: {screen.number_range(self.reader)}",
                 ok=False,
             )
         except (
@@ -118,9 +159,8 @@ def usage() -> str:
         "사용법: python -m xai_test.nt_xai_demo <뉴클레아제> [번호|서열|report]",
         "",
     ]
-    for name, label in NUCLEASES.items():
-        ready = f"  (준비 안 됨, {NOT_READY[name]})" if name in NOT_READY else ""
-        lines.append(f"  {name:<8} {label}{ready}")
+    for nuclease in NUCLEASES.values():
+        lines.append(f"  {nuclease.key:<8} {nuclease.label}  ({nuclease.takes})")
     lines += [
         "",
         "  prepare  데모 자료를 data/에 모으고 manifest를 만든다",
@@ -128,7 +168,7 @@ def usage() -> str:
         "",
         (
             "예: cas12a (REPL), cas12a A1 (사례 한 장), cas12a <34bp 타깃 서열>, "
-            "cas12a report"
+            "spcas9 B1, spcas9 report"
         ),
     ]
     return "\n".join(lines)
@@ -148,13 +188,7 @@ def run(
     if nuclease not in NUCLEASES:
         error(f"모르는 뉴클레아제다: {nuclease!r}\n\n{usage()}")
         return 2
-    if nuclease in NOT_READY:
-        error(
-            f"{nuclease}: 준비 안 됨 — 사례 화면은 {NOT_READY[nuclease]}에서 만든다. "
-            "지금은 cas12a만 띄운다."
-        )
-        return 1
-    session = Session(data_dir=data_dir)
+    session = Session(nuclease=NUCLEASES[nuclease], data_dir=data_dir)
     if arguments:
         outcome = session.execute(" ".join(arguments))
         if outcome.text:
@@ -173,7 +207,7 @@ def repl(
     try:
         write(session.help_text())
     except (FileNotFoundError, ArtifactMismatch, KeyError) as error:
-        write(f"Cas12a 자료를 읽을 수 없다: {error}")
+        write(f"{session.nuclease.label} 자료를 읽을 수 없다: {error}")
         return 1
     while True:
         try:

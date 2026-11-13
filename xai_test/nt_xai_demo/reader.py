@@ -764,6 +764,26 @@ class SpCas9Reader:
             self._ism["reference_base"][position],
         )
 
+    def ism_max_profile(self, row_id: int, head: str) -> np.ndarray:
+        """Per-position max |delta| for one row and head, WT slot excluded.
+
+        The case screen's bar (#173), the same statistic Cas12a's screen draws:
+        how far the single most disruptive substitution at a position moves
+        this head's prediction. The mean `ism_profile` stays beside it, because
+        the recorded stratum profiles this reader checks itself against are
+        means and the two must not be confused for one another.
+
+        This artifact declares `nan_policy: forbidden` and stores no validity
+        mask, so every non-WT slot counts; `ism_max_profile` still returns NaN
+        for a position with no alternative at all rather than a zero.
+        """
+        position = self.ism_rows.position(row_id)
+        head_index = self.ism_heads.index(head)
+        return ism_max_profile(
+            self._ism["delta"][position, :, :, head_index],
+            self._ism["reference_base"][position],
+        )
+
     def ism_profiles(self, row_ids: Sequence[int], head: str) -> np.ndarray:
         positions = self.ism_rows.positions(row_ids)
         head_index = self.ism_heads.index(head)
@@ -813,6 +833,20 @@ class SpCas9Reader:
         return self._rollout["rollout"][self.rollout_rows.position(row_id)].astype(
             np.float64
         )
+
+    def rollout_referenced(self, row_id: int) -> np.ndarray:
+        """How much each token is attended to: the stored block's column mean.
+
+        Rows of the matrix are queries and columns are keys, so a column's
+        mean is how much that token is referenced across the queries. This is
+        a reading of a stored matrix, not a new attribution, and it has no
+        head axis because the artifact has none (ADR 0008).
+
+        The block is not renormalised after `<cls>` is dropped, so a row sums
+        to 1 minus the share that reached `<cls>`; the figures are the stored
+        ones and are never rescaled to look like a distribution.
+        """
+        return self.rollout(row_id).mean(axis=0)
 
     def ig_stratum(self, row_id: int) -> str | None:
         """The stratum the frozen IG manifest assigns the row, from that manifest."""

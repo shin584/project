@@ -9,7 +9,7 @@ from __future__ import annotations
 import pytest
 
 from xai_test.nt_xai_demo import __main__ as entry
-from xai_test.nt_xai_demo import cas12a_screen
+from xai_test.nt_xai_demo import cas12a_screen, spcas9_screen
 from xai_test.nt_xai_demo import launcher as ln
 from xai_test.nt_xai_demo import reader as rd
 from xai_test.nt_xai_demo.test import reader_fixtures as fx
@@ -91,24 +91,47 @@ def test_more_than_one_input_at_a_time_is_a_usage_message(data_dir):
     assert "하나씩" in errors[0]
 
 
-def test_spcas9_says_not_ready_and_exits(data_dir):
+def test_spcas9_opens_its_own_screen(data_dir):
+    """#173: the nuclease no longer reports itself as not ready."""
     written: list[str] = []
-    code = ln.run("spcas9", ("B1",), data_dir=data_dir, write=written.append)
-    assert code == 1
-    assert len(written) == 1
-    assert "준비 안 됨" in written[0] and "#173" in written[0]
+    errors: list[str] = []
+    code = ln.run(
+        "spcas9",
+        ("B1",),
+        data_dir=data_dir,
+        write=written.append,
+        write_error=errors.append,
+    )
+
+    assert code == 0 and not errors
+    expected = spcas9_screen.case_screen(rd.SpCas9Reader(data_dir), "B1")
+    assert written == [expected.rstrip("\n")]
+    assert not any("준비 안 됨" in line for line in written)
 
 
-def test_spcas9_does_not_open_a_repl(data_dir):
+def test_spcas9_opens_a_repl_that_names_its_own_input(data_dir):
+    pending = ["B1", "quit"]
+    written: list[str] = []
+
     def read(prompt: str) -> str:
-        raise AssertionError("spcas9 must not prompt")
+        assert prompt == "spcas9 [번호]> "
+        return pending.pop(0)
 
-    assert ln.run("spcas9", (), data_dir=data_dir, read=read, write=lambda _: None) == 1
+    assert ln.run("spcas9", (), data_dir=data_dir, read=read, write=written.append) == 0
+    assert written[0].startswith("9-Hydra v3")
+    assert written[1].startswith("B1  GEN-ERRHI-01")
 
 
-def test_main_routes_the_nuclease_and_spcas9_exits_non_zero(capsys):
-    assert entry.main(["spcas9"]) == 1
-    assert "준비 안 됨" in capsys.readouterr().err
+def test_the_two_nucleases_never_share_a_session(data_dir):
+    """ADR 0012 made structural: a session holds one nuclease's reader only."""
+    session = ln.Session(nuclease=ln.NUCLEASES["spcas9"], data_dir=data_dir)
+    assert isinstance(session.reader, rd.SpCas9Reader)
+    assert session.nuclease.screen is spcas9_screen
+
+
+def test_main_routes_the_nuclease_and_spcas9_succeeds(capsys):
+    assert entry.main(["spcas9", "report"]) == 0
+    assert "9-Hydra v3" in capsys.readouterr().out
 
 
 def test_main_without_arguments_prints_usage_naming_both_nucleases(capsys):
@@ -141,8 +164,11 @@ def test_main_no_longer_enters_the_old_menu_shell():
 A1_SEQUENCE = "TGCATGCATGCATGCATGCATGCATGCATGCATG"
 
 
-def test_the_prompt_states_the_sequence_unit():
-    assert "34bp 타깃 서열" in ln.Session.prompt
+def test_each_prompt_states_its_own_input_unit():
+    """The same word "서열" means two lengths, so each prompt names its own."""
+    assert "34bp 타깃 서열" in ln.NUCLEASES["cas12a"].prompt
+    assert ln.NUCLEASES["spcas9"].prompt.startswith("spcas9 [")
+    assert "34bp" not in ln.NUCLEASES["spcas9"].prompt
 
 
 def test_a_sequence_one_shot_prints_the_sequence_screen(data_dir):

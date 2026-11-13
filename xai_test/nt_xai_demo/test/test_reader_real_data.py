@@ -359,3 +359,67 @@ def test_the_real_sequences_open_the_number_screens_body_over_all_1500_rows():
         assert number in by_sequence.splitlines()[0]
         assert body(by_sequence) == body(cas12a_screen.case_screen(cas12a, number))
         assert len(by_sequence.splitlines()) <= 26
+
+
+def test_the_real_spcas9_screens_open_for_every_generalisation_case():
+    """All nine numbers open, and exactly one of them carries IG (#173).
+
+    The counts here are the artifacts' own facts, not the demo's: nine
+    generalisation cases, one of which (`GEN-HEADGAP-02`) happens to sit in
+    the frozen 400-row IG subset. If a re-run of the analyses changed either,
+    the screen's standing IG sentence would be wrong and this fails.
+    """
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(
+        rd.SpCas9Reader,
+        "spcas9/v3_ism/ism.npz",
+        "spcas9/v3_ig/ig.npz",
+        "spcas9/v3_rollout/rollout.npz",
+    )
+    numbered = spcas9_screen.numbered_cases(spcas9)
+    assert set(numbered) == {
+        f"{letter}{rank}" for letter in "ABC" for rank in (1, 2, 3)
+    }
+
+    with_ig = []
+    for number, case in numbered.items():
+        text = spcas9_screen.case_screen(spcas9, number)
+        row = int(case["row_index"])
+        assert text.startswith(f"{number}  {case['case_id']}")
+        assert f"row_index {row}" in text
+        # The 30bp window and its bar line up column for column.
+        sequence = next(
+            line for line in text.splitlines() if line.startswith("서열  ")
+        ).removeprefix("서열  ")
+        assert sequence == spcas9.reference_sequence(row) and len(sequence) == 30
+        assert len(text.splitlines()) <= 26
+        if spcas9_screen.IG_SAMPLE_NOTE not in text:
+            with_ig.append(number)
+
+    assert len(with_ig) == 1
+    assert numbered[with_ig[0]]["case_id"] == "GEN-HEADGAP-02"
+
+
+def test_the_real_spcas9_headgap_screens_show_two_heads():
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
+    for number, case in spcas9_screen.numbered_cases(spcas9).items():
+        heads = spcas9_screen.heads_shown(spcas9, case)
+        expected = 2 if case["criterion"] == "HEADGAP" else 1
+        assert len(heads) == expected, number
+        assert heads[0] == spcas9.primary_head
+
+
+def test_the_real_spcas9_report_states_both_populations_with_denominators():
+    """The selection pool and the agreement subset are different populations."""
+    from xai_test.nt_xai_demo import spcas9_screen
+
+    spcas9 = _reader(rd.SpCas9Reader, "spcas9/v3_ism/ism.npz")
+    text = spcas9_screen.report(spcas9)
+
+    assert "선정 모집단 = generalisation 895행 / 818 타깃" in text
+    assert "분모 200행 / 193 타깃" in text  # the agreement subset's own
+    assert "다른 모집단이다" in text
+    assert len(text.splitlines()) < 25

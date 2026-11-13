@@ -18,22 +18,30 @@ denominator, and the pooled `all` population marked as pooled.
 
 from __future__ import annotations
 
-import math
-import re
-from collections.abc import Sequence
-
-from . import render
+from . import render, screen_parts
 from .reader import ArtifactMismatch, Cas12aReader
+from .screen_parts import (
+    LABEL_WIDTH,
+    ROLLOUT_LIMIT,
+    UnknownCaseNumber,
+    spark_bar,
+)
 from .sequence_lookup import NotASequence, SequenceNotStored
 
+#: The refusal types are re-exported because the launcher catches a screen
+#: module's refusals through the module it was handed; `spark_bar` because the
+#: golden tests draw bars with it.
 __all__ = [
     "NotASequence",
     "SequenceNotStored",
     "UnknownCaseNumber",
     "case_screen",
+    "help_lines",
+    "number_range",
     "report",
     "screen_for",
     "sequence_screen",
+    "spark_bar",
 ]
 
 #: Letter -> role, in the order the screen lists them. A and B mean the same
@@ -43,25 +51,6 @@ CASE_LETTERS: tuple[tuple[str, str], ...] = (
     ("B", "high_error"),
     ("C", "out_of_range"),
 )
-_NUMBER = re.compile(r"([A-Za-z])(\d+)")
-#: Longer than this is read as a sequence even with a digit in it: no case
-#: number comes near it, and a pasted window with a typo must hear its unit.
-NUMBER_MAX_LENGTH = 4
-
-#: Eight heights for the ISM bar; a missing value is a dot, never a low bar.
-SPARKS = "▁▂▃▄▅▆▇█"
-MISSING = "·"
-
-ROLLOUT_LIMIT = "모델 내부 정보 의존성이며 물리적 결합의 근거가 아님"
-LABEL_WIDTH = 6  # "서열  " / "ISM   " in terminal columns
-
-
-class UnknownCaseNumber(KeyError):
-    """A case number the selection does not hold. Its message names the range."""
-
-    def __str__(self) -> str:  # KeyError would quote the message
-        return str(self.args[0])
-
 
 # --------------------------------------------------------------------------- #
 # case numbers
@@ -88,25 +77,24 @@ def numbered_cases(reader: Cas12aReader) -> dict[str, dict]:
 
 def number_range(reader: Cas12aReader) -> str:
     """The valid numbers, by letter: `A1–A5 low_error · B1–B5 high_error · ...`."""
-    numbered = numbered_cases(reader)
-    parts = []
-    for letter, role in CASE_LETTERS:
-        ranks = sorted(int(n[1:]) for n in numbered if n[0] == letter)
-        if not ranks:
-            continue
-        if ranks == list(range(ranks[0], ranks[-1] + 1)) and len(ranks) > 1:
-            span = f"{letter}{ranks[0]}–{letter}{ranks[-1]}"
-        else:
-            span = ", ".join(f"{letter}{rank}" for rank in ranks)
-        parts.append(f"{span} {role}")
-    return " · ".join(parts)
+    return screen_parts.number_range(numbered_cases(reader), CASE_LETTERS)
+
+
+def help_lines(reader: Cas12aReader) -> list[str]:
+    """The input lines of the launcher's help, in this nuclease's own units."""
+    return [
+        f"  <번호>   사례 한 장: {number_range(reader)}",
+        (
+            f"  <서열>   {reader.sequence_index.unit.name} → 같은 화면 "
+            f"(저장된 {reader.sequence_index.stored_rows:,}행에서 찾는다)"
+        ),
+    ]
 
 
 def case_for(reader: Cas12aReader, number: str) -> tuple[str, dict]:
     """The case a typed number names, or a refusal that states the valid range."""
-    match = _NUMBER.fullmatch(number.strip())
     numbered = numbered_cases(reader)
-    key = f"{match.group(1).upper()}{int(match.group(2))}" if match else None
+    key = screen_parts.parse_case_number(number)
     if key not in numbered:
         raise UnknownCaseNumber(
             f"없는 사례 번호다: {number.strip()!r}. 유효 번호: {number_range(reader)}"
@@ -119,29 +107,9 @@ def case_for(reader: Cas12aReader, number: str) -> tuple[str, dict]:
 # --------------------------------------------------------------------------- #
 
 
-def spark_bar(values: Sequence[float]) -> str:
-    """One character per position, scaled to the row's own max; NaN is a dot."""
-    finite = [v for v in values if not math.isnan(v)]
-    if not finite:
-        raise render.RenderRefused("ISM 막대에 그릴 값이 하나도 없다")
-    peak = max(finite)
-    top = len(SPARKS) - 1
-    return "".join(
-        MISSING if math.isnan(v) else SPARKS[round(v / peak * top) if peak > 0 else 0]
-        for v in values
-    )
-
-
-def _span_text(start: int, end: int) -> str:
-    """A half-open span as the inclusive positions a reader counts."""
-    return f"{start}" if end - start == 1 else f"{start}-{end - 1}"
-
-
 def _pam_line(pam: tuple[int, int]) -> str:
-    start, end = pam
-    width = end - start
-    bracket = "[" + "-" * max(width - 2, 0) + "]" if width > 1 else "^"
-    return " " * (LABEL_WIDTH + start) + bracket + f"  PAM {_span_text(start, end)}"
+    """Cas12a brackets its recorded `layout.pam` exactly, and names it PAM."""
+    return screen_parts.bracket_line(pam, f"PAM {screen_parts.span_text(*pam)}")
 
 
 def _checked_case_row(reader: Cas12aReader, case: dict) -> int:
@@ -176,14 +144,7 @@ def row_body(reader: Cas12aReader, row: int) -> list[str]:
         )
     ig = reader.ig_dna_mass(row)
     rollout = reader.rollout_referenced(row)
-    peak = render.profile_peak(ism)
-
-    caption = (
-        "막대 = 위치별 대체염기 3개 중 최대 |raw Δ| (WT 칸 제외) · "
-        f"이 행 최대 {ism[peak]:.3f} @ 위치 {peak}"
-    )
-    if any(math.isnan(v) for v in ism):
-        caption += f" ({MISSING} = 유효 대체염기 없음)"
+    caption = screen_parts.ism_caption(ism, delta="raw Δ")
     lines = [
         (
             # Significant figures, not decimals: low_error cases' errors are
@@ -199,19 +160,16 @@ def row_body(reader: Cas12aReader, row: int) -> list[str]:
         "",
         f"IG (DNA 토큰 {len(spans)}개, 위치 순, signed mass)",
     ]
-    width = max(len(_span_text(*span)) for span in spans)
+    width = max(len(screen_parts.span_text(*span)) for span in spans)
     bases = max(end - start for start, end in spans)
     for index, ((start, end), value) in enumerate(zip(spans, ig, strict=True), 1):
         lines.append(
-            f"  t{index}  {_span_text(start, end):<{width}}  "
+            f"  t{index}  {screen_parts.span_text(start, end):<{width}}  "
             f"{sequence[start:end]:<{bases}}  {value:+.3f}"
         )
     lines += [
         "",
-        f"Attention Rollout (토큰별 참조되는 정도, DNA query {len(rollout)}개 평균)",
-        "  "
-        + "  ".join(f"t{index} {value:.3f}" for index, value in enumerate(rollout, 1)),
-        f"  {ROLLOUT_LIMIT}",
+        *screen_parts.rollout_block(rollout, queries=len(rollout)),
         "",
     ]
     return lines
@@ -284,8 +242,7 @@ def screen_for(reader: Cas12aReader, typed: str) -> str:
     a mistyped number still gets the number's range in its refusal, and a
     mistyped sequence - a stray digit included - gets the 34bp unit in its own.
     """
-    text = typed.strip()
-    if len(text) <= NUMBER_MAX_LENGTH and any(c.isdigit() for c in text):
+    if screen_parts.looks_like_case_number(typed):
         return case_screen(reader, typed)
     return sequence_screen(reader, typed)
 
