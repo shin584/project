@@ -33,9 +33,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # · 공유 설정은 "링크가 있는 모든 사용자"로 바꿔 둬야 받아진다.
 #
 DRIVE_FILES: dict[str, str] = {
-    # 예시 (실제 링크로 바꿔 주세요)
-    # "models/drive/SpCas9.keras": "https://drive.google.com/file/d/.../view?usp=sharing",
-    # "models/drive/Cas12a.keras": "https://drive.google.com/file/d/.../view?usp=sharing",
+    "models/SpCas9.safetensors": "https://drive.google.com/file/d/1lJngweSQI9jcieD6-w6bpq8wyRHqLgIV/view?usp=sharing",
+    "models/Cas12a.safetensors": "https://drive.google.com/file/d/1od8MWspPGmWGj8lEaOc_tP_ABY0if5C8/view?usp=sharing",
 }
 
 # 폴더 하나에 모델이 모여 있다면 폴더 링크를 여기에 적어도 된다.
@@ -70,7 +69,13 @@ def _download_file(ref: str, dest: str) -> None:
     # id만 준 경우에도 받아지도록 fuzzy=True로 둔다.
     url = ref if ref.startswith("http") else f"https://drive.google.com/uc?id={ref}"
     print(f"[model_source] 구글 드라이브에서 내려받는 중 → {dest}")
-    gdown.download(url, dest, quiet=False, fuzzy=True)
+    # gdown 6부터 fuzzy 인자가 없어졌다(공유 링크 해석이 기본 동작이 됨).
+    # 5.x 이하에서는 fuzzy=True를 줘야 .../file/d/<id>/view 형태를 받는다.
+    import inspect
+    kwargs = {"quiet": False}
+    if "fuzzy" in inspect.signature(gdown.download).parameters:
+        kwargs["fuzzy"] = True
+    gdown.download(url, dest, **kwargs)
     if not os.path.exists(dest):
         raise RuntimeError(
             f"다운로드가 끝났는데 파일이 없습니다: {dest}\n"

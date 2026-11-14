@@ -10,3 +10,6 @@ __pycache__/
 
 # Precomputed Model B (SaCas9) arrays — large binary, feature is disabled
 *.npz
+
+# 시연용 SHAP 사전계산 값은 예외로 커밋한다 (서열당 수 KB, #152)
+!data/precomputed_shap/*.npz

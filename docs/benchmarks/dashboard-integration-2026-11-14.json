@@ -1,0 +1,66 @@
+{
+    "date":  "2026-11-14",
+    "unit":  "seconds except explicitly named errors and predictions",
+    "source_branches":  {
+                            "progress":  "7a6042f40569bacb4f412dce2e5b20e4d1fd407c",
+                            "warmup_cache":  "300ddcd8dc7648d1165f1652b88a61a95146b778"
+                        },
+    "notes":  [
+                  "Read existing local Cas12a weights without modifying them.",
+                  "First run includes first tokenizer download; second run uses the tokenizer cache in offline mode.",
+                  "Each run is a single observation, not a statistical performance comparison.",
+                  "IG completeness error is present with both chunk sizes and is not fixed by this integration."
+              ],
+    "first_run":  {
+                      "python":  "3.12.16",
+                      "cpu":  "Intel64 Family 6 Model 142 Stepping 11, GenuineIntel",
+                      "torch_threads":  4,
+                      "versions":  {
+                                       "torch":  "2.15.0",
+                                       "transformers":  "5.23.0",
+                                       "numpy":  "2.5.4",
+                                       "shap":  "0.54.1",
+                                       "streamlit":  "1.67.0"
+                                   },
+                      "startup_with_warmup":  89.76307860005181,
+                      "first_prediction_after_warmup":  0.9637098000384867,
+                      "subsequent_prediction":  0.4193320000777021,
+                      "batch_8":  2.233853599987924,
+                      "cached_predictors":  0.004182999953627586,
+                      "first_ig_steps32_chunk8":  18.57739120000042,
+                      "ig_completeness_error":  0.27008996640127075,
+                      "ig_prediction":  0.5440470576286316,
+                      "precomputed_shap_hit":  0.07649810006842017,
+                      "cached_shap_additivity_error":  1.7881393421514957E-07,
+                      "spcas9_remains_unloaded":  true
+                  },
+    "offline_validation":  {
+                               "python":  "3.12.16",
+                               "cpu":  "Intel64 Family 6 Model 142 Stepping 11, GenuineIntel",
+                               "torch_threads":  4,
+                               "versions":  {
+                                                "torch":  "2.15.0",
+                                                "transformers":  "5.23.0",
+                                                "numpy":  "2.5.4",
+                                                "shap":  "0.54.1",
+                                                "streamlit":  "1.67.0"
+                                            },
+                               "startup_with_warmup":  18.69223799998872,
+                               "first_prediction_after_warmup":  0.48396099999081343,
+                               "raw_prediction":  0.568683922290802,
+                               "subsequent_prediction":  0.4140299999853596,
+                               "batch_8":  1.3612006000475958,
+                               "cached_predictors":  9.1900001280009747E-05,
+                               "first_ig_steps32_chunk8":  14.640017800033092,
+                               "ig_completeness_error":  0.27008996640127075,
+                               "ig_prediction":  0.5440470576286316,
+                               "ig_single_batch_steps32":  11.077425400028005,
+                               "ig_chunk_max_abs_difference":  6.6786005892272016E-09,
+                               "ig_single_batch_completeness_error":  0.2700899758910751,
+                               "precomputed_shap_hit":  0.012392600066959858,
+                               "cached_shap_additivity_error":  1.7881393421514957E-07,
+                               "cached_shap_prediction":  0.5686838030815125,
+                               "cached_prediction_abs_difference":  1.1920928955078125E-07,
+                               "spcas9_remains_unloaded":  true
+                           }
+}
