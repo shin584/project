@@ -116,7 +116,7 @@ class Dispatcher:
         self._pending: tuple[int, Callable] | None = None
         self._lifecycle: deque[tuple[int, Callable]] = deque()
         self._running: int | None = None
-        self._outcomes: dict[int, str] = {}
+        self._outcomes: dict[int, Outcome] = {}
         self._closed = False
         self._worker = threading.Thread(
             target=self._serve, name="xai-desktop-worker", daemon=True
