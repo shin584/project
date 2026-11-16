@@ -51,6 +51,10 @@ _EXPORTS: dict[str, tuple[str, str]] = {
     "integrated_gradients": ("xai.explain", "integrated_gradients"),
     "kernel_shap": ("xai.explain", "kernel_shap"),
     "attention_rollout": ("xai.explain", "attention_rollout"),
+    # XAI 메모리 캐시. 프로세스당 하나이고 두 화면이 이것을 함께 쓴다 — 화면
+    # 계층에 두면 데스크톱에서 보기만 전환해도 SHAP이 다시 돈다.
+    # 캐시를 더 만들 일이 생기면 그때 ExplainCache 클래스도 내놓는다.
+    "EXPLAIN_CACHE": ("xai.explain_cache", "CACHE"),
     # 사전계산 SHAP 캐시 (키는 설정 전체를 포함한다 — ADR 0001).
     # 원래 이름 load/save는 facade 밖에서는 무엇을 읽고 쓰는지 드러나지 않아 이름을 붙인다.
     "shap_cache_key": ("xai.shap_cache", "shap_cache_key"),
@@ -101,6 +105,7 @@ if TYPE_CHECKING:
         IGResult, RolloutResult, SHAPResult, attention_rollout, integrated_gradients,
         kernel_shap,
     )
+    from xai.explain_cache import CACHE as EXPLAIN_CACHE
     from xai.shap_cache import load as load_cached_shap
     from xai.shap_cache import save as save_cached_shap
     from xai.shap_cache import shap_cache_key

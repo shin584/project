@@ -100,6 +100,17 @@ _Avoid_: "백엔드", "서버" (서버가 없다)
 - **데스크톱 화면** — 브라우저·서버·네트워크 없이 단독 실행되는 새 화면.
 _Avoid_: 수식어 없이 "앱"이라고만 쓰기 — 어느 화면인지 밝혀 적는다.
 
+**캐시**:
+이 저장소에 세 개가 있고 서로 다른 것을 아낀다. 수식어 없이 "캐시"라고만
+쓰면 어느 것인지 알 수 없다.
+- **예측기 캐시** — 올려 둔 모델 자체. `load_predictors()`의 모듈 수준
+  싱글턴이다 (ADR 0001).
+- **XAI 메모리 캐시** — IG·SHAP·Rollout 결과. `xai/explain_cache.py`에
+  있고 프로세스가 사는 동안만 남는다. 두 화면이 같은 것을 쓴다.
+- **사전계산 SHAP 캐시** — 디스크에 미리 만들어 둔 SHAP 결과
+  (`xai/shap_cache.py`, `data/precomputed_shap/*.npz`). 앱을 꺼도 남는다.
+_Avoid_: 수식어 없이 "캐시" — 특히 뒤의 두 개는 둘 다 SHAP을 담는다.
+
 **대시보드**:
 이 저장소의 `xai_dashboard`를 가리킨다. `xai_test`의 `visualization/`도
 "dashboard"로 불리며 자체 ADR을 갖고 있으므로(`xai_test/docs/adr/0002`),

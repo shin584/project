@@ -10,7 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import predict
-from xai import explain, shap_cache
+from xai import explain, explain_cache, shap_cache
 
 
 SEQ = "C" * 34
@@ -57,7 +57,9 @@ def test_disk_hit_and_streamlit_rerun_leave_no_progress(disk_cache):
     from streamlit.testing.v1 import AppTest
     from xai import view
 
-    view._compute_shap_cached.clear()
+    # XAI 메모리 캐시는 코어에 있고 프로세스 하나에 하나다 (#182). 다른
+    # 테스트가 남긴 항목이 이 테스트의 '1회차'를 적중으로 만들지 않게 비운다.
+    explain_cache.CACHE.clear()
     script = f'''
 from types import SimpleNamespace
 import streamlit as st
@@ -82,7 +84,7 @@ st.text(str(st.session_state["handle_calls"]))
             assert [t.value for t in app.text] == ["0.64", "1"]
             app.run()
     finally:
-        view._compute_shap_cached.clear()
+        explain_cache.CACHE.clear()
 
 
 def test_repeated_loads_warm_only_selected_model_once(monkeypatch):

@@ -2,11 +2,12 @@
 
 확인하는 것
   1) 계산이 끝나면 진행률 바가 화면에 남지 않는다
-  2) 캐시가 적중해도 0% 바가 남지 않는다 (@st.cache_data가 재생하는 출력까지 치운다)
-  3) 콜백 객체가 호출마다 달라도 캐시는 적중한다 (_ 접두사가 키에서 빠지는지)
+  2) 캐시가 적중해도 0% 바가 남지 않는다 (콜백이 안 불린 빈 슬롯까지 치운다)
+  3) 콜백 객체가 호출마다 달라도 캐시는 적중한다 (키는 콜백을 빼고 잡는지)
   4) 캐시 적중값이 처음 계산값과 같다
 
-왜 래퍼가 캐시되면 안 되는지는 xai/view.py의 compute_shap docstring 참고.
+XAI 메모리 캐시 자체는 코어(xai/explain_cache.py)에 있다. 여기서는 Streamlit
+화면이 그것을 제대로 쓰는지만 본다.
 """
 
 import sys
@@ -87,11 +88,11 @@ def test_no_progress_bar_left_on_cache_hit(runs):
 
 
 def test_callback_does_not_break_the_cache(runs):
-    """_on_batch는 호출마다 다른 함수 객체다. _ 접두사 덕에 캐시 키에서 빠져야 한다."""
+    """콜백은 호출마다 다른 함수 객체다. 캐시 키에서 빠져야 한다."""
     (_, first), (_, second) = runs
     assert first["handle_calls"] == "1", "1회차에 계산이 안 돌았다"
     assert second["handle_calls"] == "0", \
-        "캐시가 빗나갔다 — _on_batch의 _ 접두사를 확인하세요"
+        "캐시가 빗나갔다 — 콜백이 키에 섞였는지 확인하세요"
 
 
 def test_cached_value_matches(runs):

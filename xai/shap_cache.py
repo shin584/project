@@ -5,8 +5,8 @@
 캐시 키 계약
   키는 (model_key, head, window_seq, nsamples, n_background) 다섯 개 전부다.
   SHAP 값은 샘플 수·배경 수에 따라 달라지므로, 서열만으로 키를 잡으면
-  사용자가 샘플 수를 바꿔도 예전 값이 나온다. xai/view.py의 compute_shap
-  (@st.cache_data)과 같은 다섯 값을 쓴다.
+  사용자가 샘플 수를 바꿔도 예전 값이 나온다. XAI 메모리 캐시(xai/explain_cache.py)의
+  SHAP 키와 같은 다섯 값을 쓴다.
 
 저장 형식은 data_source.py가 Model B를 읽는 방식과 같은 npz다.
   data/precomputed_shap/<키 해시>.npz

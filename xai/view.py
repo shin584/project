@@ -13,65 +13,49 @@ import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
 
-from xai import charts, charts_modelb, data_source, explain
+import core
+from xai import charts, charts_modelb, data_source
 
 
-# ── 계산 (결과는 캐시. 모델 파일을 바꾼 뒤에는 앱을 다시 시작하거나 캐시를 비우세요) ──
-@st.cache_data(show_spinner="IG 계산 중...")
-def compute_ig(_predictor, model_key: str, head: str, window_seq: str, steps: int):
-    return explain.integrated_gradients(_predictor.explain_handle(head), window_seq, steps)
+# ── 계산 (결과는 XAI 메모리 캐시. 모델 파일을 바꾼 뒤에는 앱을 다시 시작하세요) ──
+# 캐시는 코어에 있고 데스크톱 화면과 같은 것을 쓴다. 여기서는 키 재료를 넘기고
+# 진행률만 그린다 (#182). 코어는 `core` facade로만 집는다 (ADR 0001).
+#
+# 인자에 붙어 있던 `_` 접두사는 없앴다. @st.cache_data의 "이 인자는 키에서 빼라"
+# 는 표시였는데, 이제 키는 코어가 정한다 — 예측기와 콜백은 애초에 키가 아니다.
+def compute_ig(predictor, model_key: str, head: str, window_seq: str, steps: int):
+    with st.spinner("IG 계산 중..."):
+        return core.EXPLAIN_CACHE.integrated_gradients(
+            predictor, model_key, head, window_seq, steps)
 
 
-# 진행률 바가 스피너 역할을 대신하므로 show_spinner는 끈다 (둘이 겹쳐 보인다).
-@st.cache_data(show_spinner=False)
-def _compute_shap_cached(_predictor, model_key: str, head: str, window_seq: str,
-                         nsamples: int, n_background: int, _on_batch=None):
-    """실제 계산 + 캐시.
-
-    언더스코어로 시작하는 인자(_predictor, _on_batch)는 캐시 키에서 빠진다.
-    콜백에 접두사가 없으면 호출마다 다른 함수 객체라 캐시가 매번 빗나간다.
-    """
-    return explain.kernel_shap(_predictor.explain_handle(head), window_seq,
-                               nsamples, n_background, on_batch=_on_batch)
-
-
-def compute_shap(_predictor, model_key: str, head: str, window_seq: str,
+def compute_shap(predictor, model_key: str, head: str, window_seq: str,
                  nsamples: int, n_background: int):
     """SHAP 계산 + 진행률 바. app.py의 호출 방식은 바뀌지 않는다.
 
-    이 래퍼는 캐시하지 않는다. 진행률 바를 캐시된 함수가 돌아가는 동안에만
-    띄우고, 끝나면 반드시 치우기 위해서다.
+    진행률 바가 스피너 역할을 대신하므로 st.spinner는 쓰지 않는다 (둘이 겹쳐 보인다).
 
-    바를 만드는 위치가 까다롭다.
-      · 래퍼에서 만든 st.empty()에 그리면 → CacheReplayClosureError.
-        @st.cache_data는 캐시 함수 안의 화면 출력을 기록했다가 적중 시 재생하는데,
-        함수 **바깥**에서 만든 블록에는 재생할 수 없다.
-      · 그래서 바는 콜백 안에서(= 캐시 함수가 도는 중에) 처음 한 번 만든다.
-      · 다만 그러면 캐시 적중 시 재생된 바가 화면에 남는다. 그래서 캐시 함수의
-        출력 전체를 컨테이너로 감싸고 finally에서 통째로 비운다.
+    바는 여기서 만들고 finally에서 치운다. 캐시가 Streamlit 바깥으로 나가면서
+    @st.cache_data의 출력 재생(CacheReplayClosureError)을 피하려고 바를 콜백
+    안에서 만들던 제약이 사라졌다 — 적중하면 콜백이 아예 불리지 않으므로
+    빈 슬롯만 남고, 그 슬롯도 아래에서 비운다.
     """
-    outer = st.empty()
-    bar = {"slot": None}
+    slot = st.empty()
 
-    def _on_batch(done: int, total: int) -> None:
-        if bar["slot"] is None:
-            bar["slot"] = st.empty()
+    def on_batch(done: int, total: int) -> None:
         pct = min(max(done / total, 0.0), 1.0) if total > 0 else 0.0
-        bar["slot"].progress(pct, text=f"SHAP 계산 중... {int(pct * 100)}%")
+        slot.progress(pct, text=f"SHAP 계산 중... {int(pct * 100)}%")
 
     try:
-        with outer.container():
-            return _compute_shap_cached(_predictor, model_key, head, window_seq,
-                                        nsamples, n_background, _on_batch=_on_batch)
+        return core.EXPLAIN_CACHE.kernel_shap(predictor, model_key, head, window_seq,
+                                              nsamples, n_background, on_batch=on_batch)
     finally:
-        # 캐시가 적중하면 콜백이 한 번도 불리지 않지만 재생된 바가 남는다.
-        # 미적중이면 100% 바가 남는다. 어느 쪽이든 여기서 치운다.
-        outer.empty()
+        slot.empty()
 
 
-@st.cache_data(show_spinner="Attention Rollout 계산 중...")
-def compute_rollout(_predictor, model_key: str, head: str, window_seq: str):
-    return explain.attention_rollout(_predictor.explain_handle(head), window_seq)
+def compute_rollout(predictor, model_key: str, head: str, window_seq: str):
+    with st.spinner("Attention Rollout 계산 중..."):
+        return core.EXPLAIN_CACHE.attention_rollout(predictor, model_key, head, window_seq)
 
 
 @st.cache_resource(show_spinner="Model B 사전계산 결과 불러오는 중...")
