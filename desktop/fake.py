@@ -2,7 +2,7 @@
 
 **사이트 탐색은 진짜다.** `pam_scanner`를 그대로 import해 쓴다 (#177: "계산·차트
 코드(`pam_scanner`, `predict`, `xai/explain`, `xai/charts.py`)는 그대로 재사용한다").
-그 모듈은 `math`와 `dataclasses`만 import하므로 가중치도 torch도 끌고 오지 않는다.
+그 모듈은 `dataclasses`만 import하므로 가중치도 torch도 끌고 오지 않는다.
 탐색 규칙을 베껴 두면 `pam_scanner`가 바뀔 때 조용히 어긋나고, 팀원들은 존재하지
 않는 `site_key`에 화면을 묶게 된다 — #178이 막으려는 바로 그 충돌이다.
 
@@ -19,31 +19,18 @@ import base64
 import hashlib
 import html
 import math
-import sys
 import time
 from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
-# 공용 코어는 형제 체크아웃에 있다 (`packaging/README.md`: branch `dashboard_core`).
-_CORE_PATH = Path(__file__).resolve().parents[2] / "xai_dashboard"
-if str(_CORE_PATH) not in sys.path:
-    sys.path.insert(0, str(_CORE_PATH))
-
-try:
-    from pam_scanner import (
-        SPCAS9_VARIANTS,
-        CandidateSite,
-        VariantResult,
-        dna_to_rna,
-        scan_all,
-        variant_compatible,
-    )
-except ModuleNotFoundError as exc:  # pragma: no cover - 체크아웃이 없을 때만
-    raise ModuleNotFoundError(
-        f"`pam_scanner`를 찾지 못했습니다. 형제 체크아웃 `xai_dashboard`가 "
-        f"{_CORE_PATH}에 있어야 합니다 (branch `dashboard_core`)."
-    ) from exc
+from pam_scanner import (
+    SPCAS9_VARIANTS,
+    CandidateSite,
+    VariantResult,
+    dna_to_rna,
+    scan_all,
+    variant_compatible,
+)
 
 BATCH = 8  # predict.NT_BATCH_SIZE
 EFF = "예측 점수 (%)"  # app.py:23. 의미는 '점수 종류'가 정한다.
@@ -109,7 +96,6 @@ def rows_of(site: CandidateSite) -> list[VariantResult]:
                 distance=site.distance,
                 strand=site.strand,
                 raw_score=raw,
-                final_score=0.0,  # 거리 보정 점수는 화면에 쓰지 않는다
                 efficiency_pct=round(unit * 100, 2),
                 score_kind="efficiency" if site.cas_type == "Cas12a" else "percentile",
                 site_key=site.site_key,

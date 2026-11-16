@@ -57,7 +57,7 @@ class Renderer(Protocol):
     """계산하고 HTML 조각을 만드는 쪽. 가짜와 진짜가 이 모양을 함께 따른다.
 
     진짜 구현은 #154 코어 facade 위에 올라가, 코어가 낸 숫자를 조각으로 바꾼다.
-    (`xai_dashboard/CONTEXT.md`의 '코어'가 _Avoid_로 적은 "백엔드"를 피해 부른다.)
+    (`CONTEXT.md`의 '코어'가 _Avoid_로 적은 "백엔드"를 피해 부른다.)
 
     모든 메서드는 `on_batch(done, total)`을 받아 진행률을 보고한다. 그 호출이
     `Cancelled`를 던지면 즉시 손을 떼야 한다 — 다만 모델 로딩·Rollout처럼 중간에

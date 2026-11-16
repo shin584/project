@@ -1,7 +1,13 @@
 # #179 gate 1 implementation and validation
 
+This is the original #179 validation record, before the #151/#180 integration.
+For the current local layout and subsequent validation, see
+[the integration record](../docs/integration-179-178-151-180.md).
+
 Date: 2026-11-16. Shared predictor commit: `0ec27e1` (`dashboard_core`).
-All new source files are under `xai_dashboard_desktop` on `model_analysis`.
+All new source files were under `xai_dashboard_desktop` on `model_analysis`
+at the time (`24506c1`). They now live at the repository root of
+`dashboard_core_v2` (`51fd7a1`); see the integration record for the mapping.
 
 ## Validation completed
 

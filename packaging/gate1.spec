@@ -3,7 +3,7 @@ from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules, copy_metadata
 
 root = Path(SPECPATH).parent
-core = root.parent / 'xai_dashboard'
+core = root
 assets = root / '.packaging' / 'assets'
 required = [assets / 'tokenizer' / 'vocab.txt',
             assets / 'webview2' / 'msedgewebview2.exe',
@@ -21,7 +21,7 @@ hiddenimports = (collect_submodules('transformers.models.esm') +
                  collect_submodules('transformers.models.auto') +
                  collect_submodules('shap') + ['matplotlib.backends.backend_agg'])
 datas += copy_metadata('streamlit')
-a = Analysis([str(root / 'packaging_spike.py')], pathex=[str(root), str(core)],
+a = Analysis([str(root / 'packaging_spike.py')], pathex=[str(root)],
              datas=datas, hiddenimports=hiddenimports,
              runtime_hooks=[str(root / 'packaging' / 'runtime_hook.py')],
              excludes=['tensorflow', 'keras', 'tensorboard', 'IPython', 'jupyter',

@@ -1,0 +1,111 @@
+{
+  "date": "2026-11-16",
+  "source_commits": {
+    "desktop": "5b7e0122259ea42f297a43bc4a25b576861cdc29",
+    "dashboard_offline_and_cancellation": "26fc5df8cf34737891920b1e8334a4e540527753",
+    "core_decouple": "5c2122606d216f4c3081f20c700a87499c25833b"
+  },
+  "source_context_includes_uncommitted_architecture_terms": true,
+  "local_models": [
+    {
+      "file": "models/Cas12a.safetensors",
+      "bytes": 1921804272,
+      "sha256": "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969"
+    },
+    {
+      "file": "models/SpCas9.safetensors",
+      "bytes": 1921845264,
+      "sha256": "8a1a84ab4542da1eef9720ab54c785d1d2faa721e43b4731da018ec8b64fe9d9"
+    }
+  ],
+  "unchanged_source_and_data_files_verified": 31,
+  "all_source_data_byte_identical": true,
+  "streamlit_screens_unchanged": [
+    "app.py",
+    "xai/view.py"
+  ],
+  "source_sha256": {
+    "predict.py": "aa296db7666dec0bae1b48ba6a92ea51b0ac7cb6a198ea9f0993fe462d603974",
+    "pam_scanner.py": "e588c8499091cacd8e79ec7f57950370aa12f33f0cc656112eeb4724fbfeb8f4",
+    "model_source.py": "e63b9abe1fcb351733052625d727b64360afd549be1c8f7768fdf5a05ed48ee1",
+    "xai/explain.py": "e8ce54f872b5c07ec35de8e204c6f23f881dca558b66719640c8599e66cf5ce0",
+    "desktop/api.py": "ce18ec743556c3a0b7f2dfe76f36495106d76f93ffc5c494d9381d7b1152a8d3",
+    "desktop/fake.py": "69aea285e314a94736db33e1ba4958e4b8ad288ac527cb361b66e336e6015e46",
+    "packaging/gate1.spec": "acceb431eaf14e920bab643c38602df7fcf2b2cc3da83121699f931cdd343e90",
+    "packaging/prepare.py": "326e345cccede1bd708aa60674c4f1096fa2c02c63b507ef1a3611b6c212f5a7"
+  },
+  "tests": {
+    "command": "python -X utf8 -m pytest test tests -q",
+    "passed": 121,
+    "warnings": 1,
+    "warning": "Existing SHAP singular-regression warning",
+    "junit_xml": ".packaging/evidence/integration-tests.xml",
+    "standalone_copy_without_sibling_checkout": "pass"
+  },
+  "lint": {
+    "command": "python -m ruff check desktop packaging tests/test_desktop_api.py tests/test_integrated_layout.py",
+    "status": "pass"
+  },
+  "bundled_code_validation": {
+    "bundled_predict_uses_functools_cache": true,
+    "bundled_predict_keeps_offline_loading": true,
+    "bundled_prediction_and_ig_keep_on_batch": true,
+    "bundled_core_sources": [
+      "xai.explain",
+      "predict",
+      "model_source",
+      "pam_scanner"
+    ],
+    "all_bundled_core_sources_are_local": true
+  },
+  "packaging": {
+    "build_status": "pass",
+    "build_command": "python -m PyInstaller --noconfirm --distpath .packaging/integrated-dist --workpath .packaging/integrated-build packaging/gate1.spec",
+    "build_log": ".packaging/evidence/integration-build.log",
+    "active_bundle": "dist/XaiGate1",
+    "previous_bundle": ".packaging/pre-integration-dist/XaiGate1",
+    "executable_sha256": "34924df9b1a5e34d9f7e7460a55f29734a19c5ef12836c2e3e39167afe632578",
+    "distribution_file_count": 6846,
+    "distribution_bytes": 5472844161,
+    "developer_smoke_exit_code": 0,
+    "developer_smoke": {
+      "smoke_status": "pass",
+      "gate_status": "pending_clean_environment",
+      "frozen": true,
+      "empty_hf_cache": true,
+      "webview2_policy": "bundled_fixed_version",
+      "chart_rendered": true,
+      "executable": "C:\\project\\MC_project\\xai_dashboard_desktop\\.packaging\\integrated-dist\\XaiGate1\\XaiGate1.exe",
+      "input_dna": "CAAAGTAGCCGGTCGCTTTAAGAATAAATAAAAGCGCCACAGGATTGACTAAACCACAGCCGGCGCCCTGGCCCCCTACCG",
+      "prediction_counts": {
+        "Cas12a": 1,
+        "SpCas9": 8
+      },
+      "shap": {
+        "cache_hit": false,
+        "nsamples": 8,
+        "n_background": 1,
+        "inference_batches": 3,
+        "pred": 0.35913217067718506
+      },
+      "ig": {
+        "steps": 2,
+        "pred": 0.15647462010383606
+      },
+      "rollout": {
+        "n_layers": 24
+      },
+      "elapsed_seconds": 113.39832040001056,
+      "webview2_peak_rss_bytes": 304902144,
+      "process_tree_peak_rss_bytes": 3127537664,
+      "tcp_listeners": [],
+      "monitor_errors": [],
+      "blocked_python_network_attempts": [],
+      "sampling_interval_seconds": 0.1
+    },
+    "original_gate1_numerical_results_match": true,
+    "smoke_working_directory": ".packaging/integration-smoke-workdir",
+    "smoke_path_contains_only_windows_directories": true,
+    "clean_offline_gate": "pending_clean_environment"
+  }
+}

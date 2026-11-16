@@ -1,14 +1,25 @@
-# XAI dashboard
+# XAI dashboard desktop
 
 81bp DNA에서 SpCas9·Cas12a 사이트를 찾고 예측과 XAI를 보여주는 Streamlit 앱이다.
-이 브랜치는 대시보드 파일이 저장소 루트에 있는 `dashboard_core`를 기준으로 한다.
+이 폴더에 #179 패키징, #178 데스크톱 호출 경계, #151 코어 분리,
+#180 취소 콜백을 통합했다. 코어·화면·모델·데이터가 모두 이 폴더 안에 있으며,
+형제 `xai_dashboard` 체크아웃이나 별도 워크트리가 필요하지 않다.
+
+- `desktop/`: 호출 경계와 가짜 구현. [경계 문서](docs/desktop-boundary.md).
+- `predict.py`, `pam_scanner.py`, `xai/`: 공용 코어와 기존 Streamlit 화면.
+- `models/`, `data/`: 로컬 가중치 두 개와 사전계산 데이터.
+- `packaging/`: PyInstaller 오프라인 실험. [빌드 절차](packaging/README.md).
+
+통합 출처와 검증 결과는 [통합 기록](docs/integration-179-178-151-180.md)에 있다.
+현재 데스크톱 구현은 호출 경계와 가짜 Renderer까지다. 실제 Renderer와
+완성된 데스크톱 화면은 후속 이슈에서 연결한다.
 
 ## 실행과 테스트
 
 ```powershell
 python -m pip install streamlit numpy pandas matplotlib logomaker shap torch transformers safetensors gdown pytest
 python -m streamlit run app.py
-python -m pytest test tests -q
+python -X utf8 -m pytest test tests -q
 ```
 
 가중치는 `models/SpCas9.safetensors`, `models/Cas12a.safetensors`에 둔다.

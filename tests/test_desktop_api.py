@@ -12,6 +12,7 @@
 
 import json
 import re
+import subprocess
 import sys
 import threading
 from pathlib import Path
@@ -90,9 +91,18 @@ def rig(tmp_path):
 
 
 def test_fake_needs_no_model_code():
-    assert "torch" not in sys.modules
-    assert "predict" not in sys.modules
-    assert "webview" not in sys.modules
+    script = '''
+import sys
+from desktop.fake import FakeRenderer
+assert "torch" not in sys.modules
+assert "predict" not in sys.modules
+assert "webview" not in sys.modules
+'''
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=Path(__file__).resolve().parent.parent,
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_scan_sites_returns_sites_fragment(rig):

@@ -2,10 +2,11 @@
 
 This is a packaging experiment, independent of the production desktop API (#178).
 The recorded outcome is in [gate1-result.md](gate1-result.md).
-The Streamlit screen remains the fallback. New spike files live in
-`xai_dashboard_desktop`; the shared predictor checkout is its sibling
-`xai_dashboard` (branch `dashboard_core`, required commit `0ec27e1`). The latter contains the small packaged
-loading changes in `model_source.py` and `predict.py`.
+The Streamlit screen remains the fallback. The predictor, model files, data,
+desktop API and spike now all live in `xai_dashboard_desktop`. No sibling
+checkout is required. The integrated predictor includes the offline loader
+from `0ec27e1`, the #151 cache changes and the #180 cancellation callbacks.
+See [integration details](../docs/integration-179-178-151-180.md).
 
 ## Decision: bundle a fixed WebView2 runtime
 
@@ -32,7 +33,7 @@ python -m venv .packaging/venv
 New-Item -ItemType Directory -Force .packaging/webview2
 expand.exe <downloaded-runtime.cab> -F:* .packaging/webview2
 .packaging/venv/Scripts/python packaging/prepare.py --webview2 <directory-containing-msedgewebview2.exe>
-# Required build inputs: ../xai_dashboard/models/{Cas12a,SpCas9}.safetensors
+# Required build inputs: models/{Cas12a,SpCas9}.safetensors
 .packaging/venv/Scripts/python -m PyInstaller --noconfirm packaging/gate1.spec
 ```
 
@@ -46,7 +47,8 @@ Resource paths are relative to the bundle, never the working directory.
 The runtime hook sets `HF_HUB_OFFLINE=1` before Hugging Face imports. The packaged
 predictor loads only `_internal/tokenizer` with `local_files_only=True`.
 Missing packaged weights raise immediately before any gdown import/download.
-Development-mode Streamlit downloads and caching are unchanged.
+Development-mode downloads remain available; resource caching uses the
+process-level cache from #151 without importing Streamlit in the predictor.
 
 ## Checks and evidence
 
@@ -96,9 +98,8 @@ folder, and record these conditions alongside the result JSON. Do not mark the
 gate passed based on a developer PC or a headless run. Failures retain the
 Streamlit fallback; #151 and #154 continue independently.
 
-Run regression tests only for the shared dashboard subtree:
+Run the integrated core, desktop API and Streamlit regression tests:
 
 ```powershell
-$env:PYTHONUTF8 = '1'
-python -m pytest ../xai_dashboard/tests -q
+python -X utf8 -m pytest test tests -q
 ```

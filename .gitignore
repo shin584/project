@@ -1,15 +1,16 @@
-*.xlsx
-*.h5
-
-__pycache__/
-.pytest_cache/
-
-# Model weights (too large for git; see model_source.py DRIVE_FILES)
-*.safetensors
-*.keras
-
-# Packaging gate (#179) outputs
 .packaging/
 build/
 dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.safetensors
+*.keras
+*.xlsx
+*.h5
 gate1-result.json
+
+# Preserve the dashboard's versioned CSV inputs despite the parent ignore rule.
+!data/test_metadata.csv
+!data/final_analysis_result/model_b_testset_predictions.csv

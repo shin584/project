@@ -186,10 +186,10 @@ pywebview는 노출된 함수를 **호출마다 다른 스레드에서** 실행�
 **설명으로 읽으면 안 된다.**
 
 사이트 탐색은 가짜가 아니다. `pam_scanner`를 그대로 import해 쓴다 — 그 모듈은
-`math`와 `dataclasses`만 import하므로 가중치도 torch도 끌고 오지 않는다. 탐색
+`dataclasses`만 import하므로 가중치도 torch도 끌고 오지 않는다. 탐색
 규칙을 베껴 두면 `pam_scanner`가 바뀔 때 조용히 어긋나고, 팀원들은 존재하지 않는
-`site_key`에 화면을 묶게 된다. 그래서 형제 체크아웃 `xai_dashboard`(브랜치
-`dashboard_core`)가 있어야 `desktop.fake`를 import할 수 있다.
+`site_key`에 화면을 묶게 된다. 코어는 현재 폴더의 `pam_scanner.py`를 사용하며,
+형제 체크아웃 없이 `desktop.fake`를 import할 수 있다.
 
 ```python
 import webview
