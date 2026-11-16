@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import html
 import math
@@ -182,11 +183,19 @@ def _marks(row: VariantResult) -> dict:
     return {"data-site-key": row.site_key, "data-head": row.cas_name}
 
 
-def _bars_svg(values: list[float], caption: str) -> str:
-    """막대 그림 하나. 조각에 바깥 주소가 없어야 해서 인라인 SVG로 그린다.
+def _chart_img(values: list[float], caption: str, size: int) -> str:
+    """막대 그림 하나를 `<img src="data:...">`로 돌려준다.
 
-    `xmlns`를 넣지 않는 것은 실수가 아니다. HTML 안의 인라인 SVG에는 필요 없고,
-    그 값(`http://www.w3.org/2000/svg`) 자체가 바깥 주소다.
+    차트는 언제나 data URI다 (#177: "차트는 data URI로 끼워 넣는다"). 진짜
+    구현은 matplotlib PNG를 쓰고 여기서는 SVG를 쓰지만, 화면이 보는 모양은
+    같다 — `<figure>` 안의 `<img>` 하나다. 그래서 화면은 둘을 구별하지 않는다.
+
+    `size`는 그림을 **다시 그리지 않는다.** 바깥 `<figure>`의 너비(%)만 바꾼다.
+    그래서 슬라이더를 움직여도 같은 data URI가 나오고, 진짜 구현에서도 캐시에
+    적중해 재계산이 일어나지 않는다 (#177).
+
+    data URI 안의 SVG는 인라인이 아니라 **독립 문서**라서 `xmlns`가 꼭 있어야
+    한다. base64로 감싸이므로 조각 본문에는 그 주소가 드러나지 않는다.
     """
     width, height, pad = 640, 140, 10
     span = max(1e-9, max(abs(v) for v in values))
@@ -200,11 +209,17 @@ def _bars_svg(values: list[float], caption: str) -> str:
             f'width="{max(1.0, step - 1):.2f}" height="{abs(tall):.2f}" '
             f'fill="{"#2b6cb0" if value >= 0 else "#c05621"}"></rect>'
         )
-    return (
-        f'<figure class="xai"><svg viewBox="0 0 {width} {height}" '
-        f'role="img" aria-label="{_esc(caption)}">'
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">'
         f'<line x1="{pad}" y1="{mid}" x2="{width - pad}" y2="{mid}" '
         f'stroke="#718096"></line>{"".join(bars)}</svg>'
+    )
+    uri = "data:image/svg+xml;base64," + base64.b64encode(svg.encode("utf-8")).decode(
+        "ascii"
+    )
+    return (
+        f'<figure class="xai" style="width:{size}%">'
+        f'<img src="{uri}" alt="{_esc(caption)}">'
         f"<figcaption>{_esc(caption)}</figcaption></figure>"
     )
 
@@ -250,8 +265,30 @@ class FakeRenderer:
     둔 것이고, 시험에서는 0에 가깝게 둔다.
     """
 
-    def __init__(self, step_delay: float = 0.05):
+    def __init__(self, step_delay: float = 0.05, load_steps: int = 4):
         self.step_delay = step_delay
+        self.load_steps = load_steps
+        self.warm_ups = 0  # 몇 번 **실제로** 올렸는지 (시험에서 본다)
+        self._ready = False
+
+    # ── 준비 ───────────────────────────────────────
+
+    def warm_up(self, on_batch) -> str:
+        """모델을 올리는 척한다. 두 번째부터는 올리지 않고 문구만 돌려준다.
+
+        진짜 구현도 이래야 한다. `load_predictors()`는 모듈 수준 싱글턴이라
+        (ADR 0001) 두 번째 호출이 공짜이고, 화면은 언제 물어도 답을 받는다.
+        """
+        if not self._ready:
+            for index in range(1, self.load_steps + 1):
+                # 모델 로딩은 중간에 끊을 수 없다(#177). 취소 신호가 와도 멈추지
+                # 않으므로 여기서는 진행률만 보내고 Cancelled를 받지 않는다.
+                on_batch(index, self.load_steps)
+                if self.step_delay:
+                    time.sleep(self.step_delay)
+            self.warm_ups += 1
+            self._ready = True
+        return '<p class="status">모델 준비 완료</p>'
 
     def _report_step(self, on_batch, done: int, total: int) -> None:
         """진행률 한 단계. **지금 요청이 아니면 여기서 `Cancelled`가 난다** —
@@ -348,6 +385,7 @@ class FakeRenderer:
         head: str,
         method: str,
         params: dict[str, Any],
+        size: int,
         on_batch,
     ) -> str:
         site = next((s for s in scan_all(dna).sites if s.site_key == site_key), None)
@@ -369,15 +407,11 @@ class FakeRenderer:
         values = [
             _fake_score(window, head, method, str(i)) - 0.5 for i in range(len(window))
         ]
-        return _bars_svg(values, caption)
+        return _chart_img(values, caption, size)
 
-    def csv_table(self, dna: str, view: str, on_batch) -> list[list[Any]]:
-        """CSV 한 장. Streamlit은 전체 상세만 내보내므로 열도 그것과 같다."""
+    def csv_table(self, dna: str, on_batch) -> list[list[Any]]:
+        """CSV 한 장. Streamlit과 같이 전체 상세 한 장뿐이고, 열도 그것과 같다."""
         rows = self._rows_with_progress(dna, on_batch)
-        if view == "variants":
-            rows = [r for r in rows if r.cas_type == "SpCas9"]
-        elif view == "best":
-            rows = rows[:20]
         return [DETAIL_COLUMNS] + [
             _detail_cells(r, i) for i, r in enumerate(rows, start=1)
         ]

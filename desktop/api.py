@@ -17,6 +17,7 @@ import html
 import itertools
 import json
 import threading
+from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal, Protocol
@@ -24,12 +25,22 @@ from typing import Any, Literal, Protocol
 #: 조각이 들어갈 수 있는 화면의 자리. 이 밖의 이름은 화면이 받지 않는다.
 SLOTS = ("sites", "best", "variants", "detail", "xai", "notice")
 
-#: XAI 기법별 기본 계산 설정. Streamlit 화면의 기본값과 같다 (`app.py:456-461`).
+#: XAI 기법별 기본 **계산** 설정. Streamlit 화면의 기본값과 같다 (`app.py:456-461`).
+#: 이 값들은 XAI 캐시 키에 들어간다 (ADR 0001).
 XAI_DEFAULTS: dict[str, dict[str, int]] = {
     "ig": {"steps": 32},
     "shap": {"nsamples": 64, "n_background": 4},
     "rollout": {},
 }
+
+#: XAI 그래프 크기(%). Streamlit 화면의 슬라이더와 같다 (`app.py:134`).
+#: **계산 설정이 아니라 그리기 설정이라서 `params`와 따로 받는다.** 캐시 키에
+#: 들어가면 안 된다 — 들어가면 슬라이더를 움직일 때마다 SHAP이 다시 돈다(#177).
+DEFAULT_GRAPH_SIZE = 80
+GRAPH_SIZE_RANGE = (40, 100)
+
+#: CSV는 한 장뿐이다. Streamlit 화면과 파일 이름도 같다 (`app.py:387`).
+CSV_FILENAME = "crispr_prediction_results.csv"
 
 OnBatch = Callable[[int, int], None]
 Fragments = dict[str, str]
@@ -54,6 +65,10 @@ class Renderer(Protocol):
     요청 ID로 버린다.
     """
 
+    def warm_up(self, on_batch: OnBatch) -> str:
+        """모델을 올리고 준비 완료 문구를 돌려준다. 여러 번 불려도 안전해야 한다."""
+        ...
+
     def sites_fragment(self, dna: str, on_batch: OnBatch) -> str: ...
 
     def prediction_fragments(self, dna: str, on_batch: OnBatch) -> Fragments: ...
@@ -65,10 +80,11 @@ class Renderer(Protocol):
         head: str,
         method: str,
         params: dict[str, Any],
+        size: int,
         on_batch: OnBatch,
     ) -> str: ...
 
-    def csv_table(self, dna: str, view: str, on_batch: OnBatch) -> list[list[str]]: ...
+    def csv_table(self, dna: str, on_batch: OnBatch) -> list[list[Any]]: ...
 
 
 # ════════════════════════════════════════════════
@@ -98,6 +114,7 @@ class Dispatcher:
         self._ids = itertools.count(1)
         self._latest = 0
         self._pending: tuple[int, Callable] | None = None
+        self._lifecycle: deque[tuple[int, Callable]] = deque()
         self._running: int | None = None
         self._outcomes: dict[int, str] = {}
         self._closed = False
@@ -116,6 +133,20 @@ class Dispatcher:
                 self._outcomes.setdefault(self._pending[0], "superseded")
             self._pending = (rid, job)
             self._latest = rid  # 진행 중인 작업의 다음 on_batch가 취소된다
+            self._cv.notify_all()
+        return rid
+
+    def submit_lifecycle(self, job: Callable[[OnBatch], str]) -> int:
+        """준비 작업을 맡긴다. 진행 중인 요청을 취소하지 않고, 버려지지도 않는다.
+
+        모델 로딩은 중간에 끊을 수 없고(#177), 그 완료 신호를 요청 번호로 버리면
+        화면의 분석 버튼이 영영 잠긴 채 남는다. 그래서 준비 작업은 요청이 아니라
+        **생애 주기 작업**으로 따로 둔다. 계산과 겹치지 않도록 같은 작업자에서
+        돌지만, 줄을 설 때는 먼저 선다.
+        """
+        with self._lock:
+            rid = next(self._ids)
+            self._lifecycle.append((rid, job))
             self._cv.notify_all()
         return rid
 
@@ -138,13 +169,19 @@ class Dispatcher:
     def wait_idle(self, timeout: float = 30.0) -> bool:
         with self._lock:
             return self._cv.wait_for(
-                lambda: self._pending is None and self._running is None, timeout
+                lambda: (
+                    self._pending is None
+                    and self._running is None
+                    and not self._lifecycle
+                ),
+                timeout,
             )
 
     def close(self) -> None:
         with self._lock:
             self._closed = True
             self._pending = None
+            self._lifecycle.clear()
             self._latest = next(self._ids)
             self._cv.notify_all()
         self._worker.join(timeout=5)
@@ -154,20 +191,29 @@ class Dispatcher:
     def _serve(self) -> None:
         while True:
             with self._lock:
-                self._cv.wait_for(lambda: self._pending is not None or self._closed)
-                if self._pending is None:
+                self._cv.wait_for(
+                    lambda: self._lifecycle or self._pending is not None or self._closed
+                )
+                if self._lifecycle:
+                    # 준비 작업이 먼저다. 모델이 올라오기 전에는 어차피 계산할 수
+                    # 없고, 이것만은 요청 번호로 버려지지 않는다.
+                    rid, job = self._lifecycle.popleft()
+                    run = self._execute_lifecycle
+                elif self._pending is not None:
+                    rid, job = self._pending
+                    self._pending = None
+                    if rid != self._latest:
+                        self._outcomes.setdefault(rid, "superseded")
+                        self._cv.notify_all()
+                        continue
+                    run = self._execute
+                else:
                     if self._closed:
                         return
                     continue
-                rid, job = self._pending
-                self._pending = None
-                if rid != self._latest:
-                    self._outcomes.setdefault(rid, "superseded")
-                    self._cv.notify_all()
-                    continue
                 self._running = rid
             try:
-                result = self._execute(rid, job)
+                result = run(rid, job)
             except Exception:  # noqa: BLE001 -- 작업자는 무슨 일이 있어도 살아남는다
                 # 여기 닿는 것은 이벤트 전송 자체가 터진 경우뿐이다 (창이 닫혀
                 # evaluate_js가 실패하는 등). 작업자가 죽으면 이후 모든 요청이
@@ -217,6 +263,33 @@ class Dispatcher:
             )
         return "delivered"
 
+    def _execute_lifecycle(self, rid: int, job: Callable[[OnBatch], str]) -> Outcome:
+        """준비 작업. 취소되지도, 요청 번호로 버려지지도 않는다 — `_latest` 관문이 없다."""
+
+        def on_batch(done: int, total: int) -> None:
+            with self._lock:
+                self._emit_event(
+                    {
+                        "type": "progress",
+                        "request_id": rid,
+                        "done": int(done),
+                        "total": int(total),
+                    }
+                )
+
+        try:
+            ready_html = job(on_batch)
+        except Exception as exc:  # noqa: BLE001 -- 준비 실패도 화면에 보여야 한다
+            with self._lock:
+                self._emit_event(
+                    {"type": "error", "request_id": rid, "html": _error_html(exc)}
+                )
+            return "failed"
+
+        with self._lock:
+            self._emit_event({"type": "ready", "request_id": rid, "html": ready_html})
+        return "delivered"
+
 
 def _checked_slots(fragments: Fragments) -> Fragments:
     unknown = set(fragments) - set(SLOTS)
@@ -252,6 +325,16 @@ class DesktopApi:
         self._dispatcher = dispatcher
         self._ask_save_path = ask_save_path or (lambda name: None)
 
+    def prepare(self) -> dict:
+        """모델을 올린다. 끝나면 `ready` 이벤트가 간다 (오래 걸리면 중간에 `progress`).
+
+        화면은 창을 먼저 띄우고 "모델 준비 중"을 보여준 뒤, `ready`를 받고 나서
+        분석 버튼을 연다(#177의 시작 화면). 여러 번 불러도 안전하다 — 로딩 자체는
+        한 번만 일어나고(ADR 0001의 모듈 수준 싱글턴), 그 뒤의 호출은 `ready`만
+        다시 보낸다. 그래서 화면은 언제 불러도 신호를 받는다.
+        """
+        return {"request_id": self._dispatcher.submit_lifecycle(self._renderer.warm_up)}
+
     def scan_sites(self, dna: str) -> dict:
         return self._submit(
             lambda on_batch: {"sites": self._renderer.sites_fragment(dna, on_batch)}
@@ -269,31 +352,44 @@ class DesktopApi:
         head: str,
         method: str,
         params: dict[str, Any] | None = None,
+        size: int | None = None,
     ) -> dict:
+        """XAI 한 기법. `params`는 **계산** 설정, `size`는 **그리기** 설정이다.
+
+        둘을 따로 받는 것이 핵심이다. `size`가 `params`에 섞이면 XAI 캐시 키에
+        딸려 들어가 그래프 크기를 바꿀 때마다 SHAP이 다시 돈다 (#177).
+        """
         settings = dict(XAI_DEFAULTS.get(method, {}))
         settings.update(params or {})
 
         def job(on_batch: OnBatch) -> Fragments:
             if method not in XAI_DEFAULTS:
                 raise ValueError(f"모르는 XAI 기법: {method}")
+            graph_size = DEFAULT_GRAPH_SIZE if size is None else int(size)
+            low, high = GRAPH_SIZE_RANGE
+            if not low <= graph_size <= high:
+                raise ValueError(
+                    f"그래프 크기는 {low}~{high} 사이여야 합니다: {graph_size}"
+                )
             return {
                 "xai": self._renderer.explanation_fragment(
-                    dna, site_key, head, method, settings, on_batch
+                    dna, site_key, head, method, settings, graph_size, on_batch
                 )
             }
 
         return self._submit(job)
 
-    def save_csv(self, dna: str, view: str) -> dict:
+    def save_csv(self, dna: str) -> dict:
+        """CSV 한 장을 저장한다. Streamlit 화면과 같이 전체 상세 한 장뿐이다."""
         # 저장 대화상자는 계산이 아니라 사용자 선택이므로 작업자에 맡기지 않는다.
         # 닫으면 요청 자체가 생기지 않아 진행 중인 계산도 건드리지 않는다.
-        chosen = self._ask_save_path(f"{view}.csv")
+        chosen = self._ask_save_path(CSV_FILENAME)
         if not chosen:
             return {"request_id": None}
         target = Path(chosen)
 
         def job(on_batch: OnBatch) -> Fragments:
-            table = self._renderer.csv_table(dna, view, on_batch)
+            table = self._renderer.csv_table(dna, on_batch)
             with target.open("w", encoding="utf-8-sig", newline="") as handle:
                 csv.writer(handle).writerows(table)
             return {

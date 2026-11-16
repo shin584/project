@@ -2,6 +2,8 @@
 
 확인하는 것
   1) 가짜 구현이 모델 가중치 없이 네 함수(탐색·예측·XAI·CSV) 모두 조각을 돌려준다
+  1b) 준비 완료(`ready`) 신호가 요청 번호로 버려지지 않는다
+  1c) 그래프 크기는 그리기 설정이라 그림 자체를 바꾸지 않는다
   2) 요청 2개를 연달아 보내면 앞의 것이 취소되고 뒤의 것만 결과를 돌려준다
   3) 지난 요청의 진행률·결과는 요청 ID로 폐기된다 (중간 취소가 안 되는 구간 포함)
   4) 계산은 언제나 작업자 1개에서만 돈다 (여러 스레드에서 동시에 불러도)
@@ -19,6 +21,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from desktop.api import (
+    CSV_FILENAME,
+    DEFAULT_GRAPH_SIZE,
     SLOTS,
     Cancelled,
     DesktopApi,
@@ -129,14 +133,14 @@ def test_explain_returns_chart_fragment(rig, method, params):
     rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", method, params)["request_id"]
     rec.wait_for(_is("result", rid))
     html = rec.of(rid)[-1]["fragments"]["xai"]
-    assert "<svg" in html
+    assert '<img src="data:image/' in html  # 차트는 언제나 data URI다
     if method != "rollout":  # Rollout은 순전파 1회라 진행률이 없다
         assert any(e["type"] == "progress" for e in rec.of(rid))
 
 
 def test_save_csv_writes_the_chosen_file(rig):
     api, rec, _, saved = rig
-    rid = api.save_csv(DNA, "variants")["request_id"]
+    rid = api.save_csv(DNA)["request_id"]
     rec.wait_for(_is("result", rid))
     header = saved.read_text(encoding="utf-8-sig").splitlines()[0]
     assert header.split(",") == DETAIL_COLUMNS  # app.py의 전체 상세 열과 같아야 한다
@@ -150,10 +154,122 @@ def test_save_csv_dialog_closed_submits_nothing(tmp_path):
         api = DesktopApi(
             FakeRenderer(step_delay=0), dispatcher, ask_save_path=lambda n: None
         )
-        assert api.save_csv(DNA, "variants") == {"request_id": None}
+        assert api.save_csv(DNA) == {"request_id": None}
         assert rec.events == []
     finally:
         dispatcher.close()
+
+
+def test_save_csv_offers_the_streamlit_filename(tmp_path):
+    """CSV는 한 장뿐이고 파일 이름도 Streamlit 화면과 같다."""
+    rec = Recorder()
+    dispatcher = Dispatcher(rec)
+    asked, saved = [], tmp_path / "x.csv"
+    try:
+        api = DesktopApi(
+            FakeRenderer(step_delay=0),
+            dispatcher,
+            ask_save_path=lambda name: (asked.append(name), str(saved))[1],
+        )
+        rid = api.save_csv(DNA)["request_id"]
+        rec.wait_for(_is("result", rid))
+        assert asked == [CSV_FILENAME]
+    finally:
+        dispatcher.close()
+
+
+# ══════════════════════════════════════════════════════
+# 1b) 준비 완료 신호
+# ══════════════════════════════════════════════════════
+
+
+def test_prepare_reports_progress_then_ready(rig):
+    api, rec, _, _ = rig
+    rid = api.prepare()["request_id"]
+    rec.wait_for(_is("ready", rid))
+    events = rec.of(rid)
+    assert any(e["type"] == "progress" for e in events), "로딩 진행률이 없다"
+    assert events[-1]["type"] == "ready"
+    assert "준비" in events[-1]["html"]
+
+
+def test_prepare_loads_once_but_always_answers():
+    """두 번 불러도 모델은 한 번만 올라가고, 화면은 두 번 다 신호를 받는다."""
+    rec = Recorder()
+    dispatcher = Dispatcher(rec)
+    renderer = FakeRenderer(step_delay=0, load_steps=2)
+    try:
+        api = DesktopApi(renderer, dispatcher)
+        first = api.prepare()["request_id"]
+        rec.wait_for(_is("ready", first))
+        second = api.prepare()["request_id"]
+        rec.wait_for(_is("ready", second))
+        assert second != first
+        assert renderer.warm_ups == 1, "모델을 두 번 올렸다"
+    finally:
+        dispatcher.close()
+
+
+def test_ready_is_not_discarded_by_a_later_request():
+    """준비 신호는 요청 번호로 버려지지 않는다.
+
+    버려지면 화면의 분석 버튼이 영영 잠긴 채 남는다. 모델 로딩은 중간에 끊을
+    수도 없으므로(#177), 이 신호만은 '지금 요청' 관문 밖에 있어야 한다.
+    """
+    rec = Recorder()
+    dispatcher = Dispatcher(rec)
+    try:
+        api = DesktopApi(FakeRenderer(step_delay=0.002, load_steps=20), dispatcher)
+        ready_id = api.prepare()["request_id"]
+        later = api.predict(DNA)["request_id"]  # 준비가 끝나기 전에 요청이 온다
+        rec.wait_for(_is("ready", ready_id))
+        rec.wait_for(_is("result", later))
+        dispatcher.wait_idle()
+
+        assert dispatcher.outcome(ready_id) == "delivered"
+        ids = [e["request_id"] for e in rec.events]
+        assert ids == sorted(ids), "준비 신호가 요청 뒤에 끼어들었다"
+    finally:
+        dispatcher.close()
+
+
+# ══════════════════════════════════════════════════════
+# 1c) 그래프 크기 (그리기 설정)
+# ══════════════════════════════════════════════════════
+
+
+def test_graph_size_changes_the_wrapper_not_the_image(rig):
+    """크기는 그리기 설정이다. 같은 계산이면 그림(data URI)이 같아야 한다 —
+    그래야 진짜 구현에서 슬라이더를 움직여도 다시 계산하지 않는다 (#177)."""
+    api, rec, _, _ = rig
+    drawn = {}
+    for size in (40, 100):
+        rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig", {"steps": 8}, size)[
+            "request_id"
+        ]
+        rec.wait_for(_is("result", rid))
+        drawn[size] = rec.of(rid)[-1]["fragments"]["xai"]
+
+    assert 'style="width:40%"' in drawn[40]
+    assert 'style="width:100%"' in drawn[100]
+    sources = {re.search(r'src="([^"]+)"', html).group(1) for html in drawn.values()}
+    assert len(sources) == 1, "크기가 그림 자체를 바꿨다 — 재계산을 부르게 된다"
+
+
+def test_default_graph_size_matches_the_streamlit_slider(rig):
+    api, rec, _, _ = rig
+    rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", "rollout", {})["request_id"]
+    rec.wait_for(_is("result", rid))
+    assert f'style="width:{DEFAULT_GRAPH_SIZE}%"' in rec.of(rid)[-1]["fragments"]["xai"]
+
+
+@pytest.mark.parametrize("size", [0, 39, 101, 1000])
+def test_graph_size_outside_the_slider_range_is_an_error(rig, size):
+    api, rec, _, _ = rig
+    rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig", {"steps": 4}, size)[
+        "request_id"
+    ]
+    rec.wait_for(_is("error", rid))
 
 
 def test_bad_input_becomes_an_error_event_and_worker_survives(rig):
