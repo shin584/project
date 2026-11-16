@@ -20,6 +20,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from xai import explain                                  # noqa: E402
+from pam_scanner import CandidateSite, ScanResult          # noqa: E402
 
 NSAMPLES = 64          # app.py의 'SHAP 샘플 수' 기본값
 N_BACKGROUND = 4       # app.py의 'SHAP 배경 서열 수' 기본값
@@ -169,6 +170,61 @@ def test_logits_without_callback(nt_predictor):
     assert p._logits(["A" * 30] * 20).shape == (20, 1)
 
 
+def _prediction_sites(n=19):
+    return [CandidateSite(
+        cas_type="Cas12a", strand="+", pam_start=i, cut_pos=i + 20,
+        distance=i, guide_seq="A" * 23, pam_seq="TTTA", model_input_seq="A" * 34,
+    ) for i in range(n)]
+
+
+def test_predict_batch_passes_progress_without_changing_results(nt_predictor):
+    p, _ = nt_predictor
+    sites = _prediction_sites()
+    expected = p.predict_batch(sites)
+    seen = []
+    got = p.predict_batch(sites, on_batch=lambda d, t: seen.append((d, t)))
+    assert got == expected
+    assert len(got) == 19
+    assert seen == [(8, 19), (16, 19), (19, 19)]
+
+
+def test_run_prediction_passes_progress_without_changing_results(nt_predictor):
+    p, predict = nt_predictor
+    predictors = {("A", "Cas12a"): p}
+    plain = predict.run_prediction(ScanResult("A" * 81, sites=_prediction_sites()), predictors)
+    seen = []
+    got = predict.run_prediction(
+        ScanResult("A" * 81, sites=_prediction_sites()), predictors,
+        on_batch=lambda d, t: seen.append((d, t)),
+    )
+    assert got == plain
+    assert seen == [(8, 19), (16, 19), (19, 19)]
+
+
+def test_run_prediction_without_callback_accepts_legacy_predictors(nt_predictor):
+    _, predict = nt_predictor
+
+    class LegacyPredictor:
+        def predict_batch(self, sites):
+            return []
+
+    scan = ScanResult("A" * 81, sites=_prediction_sites())
+    assert predict.run_prediction(scan, {("A", "Cas12a"): LegacyPredictor()}) is scan
+
+
+def test_empty_and_unconnected_predictions_report_no_batches(nt_predictor):
+    p, predict = nt_predictor
+
+    def unexpected(*args):
+        pytest.fail("No inference batch was run")
+
+    assert p.predict_batch([], on_batch=unexpected) == []
+    unconnected = predict.UnconnectedPredictor(p.spec)
+    assert unconnected.predict_batch(_prediction_sites(), on_batch=unexpected) == []
+    scan = ScanResult("A" * 81)
+    assert predict.run_prediction(scan, {("A", "Cas12a"): p}, on_batch=unexpected) is scan
+
+
 # ══════════════════════════════════════════════════════
 # IG 배치 청킹 (4b번)
 # ══════════════════════════════════════════════════════
@@ -243,3 +299,65 @@ def test_ig_chunking_caps_the_batch_size():
     handle = _IGHandle()
     explain.integrated_gradients(handle, "A" * L, steps=100, chunk_size=8)
     assert handle.max_batch <= 8, "청크 크기를 넘는 배치가 역전파로 올라갔다"
+
+
+@pytest.mark.parametrize("chunk_size,expected", [
+    (4, [(4, 10), (8, 10), (10, 10)]),
+    (32, [(10, 10)]),
+])
+def test_ig_reports_completed_integration_steps(chunk_size, expected):
+    plain = explain.integrated_gradients(_IGHandle(), SEQ, steps=10)
+    seen = []
+    got = explain.integrated_gradients(
+        _IGHandle(), SEQ, steps=10, chunk_size=chunk_size,
+        on_batch=lambda done, total: seen.append((done, total)),
+    )
+    assert seen == expected
+    np.testing.assert_allclose(got.attribution, plain.attribution)
+    assert got.pred == pytest.approx(plain.pred)
+    assert got.baseline_pred == pytest.approx(plain.baseline_pred)
+    assert got.completeness_error == pytest.approx(plain.completeness_error)
+
+
+class Cancelled(Exception):
+    """Screen-owned signal: core must propagate it without importing the screen."""
+
+
+@pytest.mark.parametrize("method", ["ig", "shap", "predict_batch", "run_prediction"])
+def test_cancellation_propagates_and_same_instance_can_be_reused(nt_predictor, method):
+    p, predict = nt_predictor
+    handle = _IGHandle() if method == "ig" else _BatchingHandle()
+
+    def compute(on_batch=None):
+        if method == "ig":
+            return explain.integrated_gradients(
+                handle, SEQ, steps=19, on_batch=on_batch).attribution
+        if method == "shap":
+            return explain.kernel_shap(
+                handle, SEQ, nsamples=64, n_background=4, on_batch=on_batch).values
+        sites = _prediction_sites()
+        if method == "predict_batch":
+            rows = p.predict_batch(sites, on_batch=on_batch)
+        else:
+            scan = predict.run_prediction(
+                ScanResult("A" * 81, sites=sites), {("A", "Cas12a"): p},
+                on_batch=on_batch,
+            )
+            rows = scan.variant_results
+        return np.array([row.efficiency_pct for row in rows])
+
+    expected = compute()
+    seen = []
+    cancelled = Cancelled("new request")
+
+    def cancel_after_second_batch(done, total):
+        seen.append((done, total))
+        if len(seen) == 2:
+            raise cancelled
+
+    with pytest.raises(Cancelled) as exc:
+        compute(on_batch=cancel_after_second_batch)
+    assert exc.value is cancelled
+    assert len(seen) == 2
+    assert seen[-1][0] < seen[-1][1], "Cancellation must interrupt unfinished work"
+    np.testing.assert_allclose(compute(), expected)

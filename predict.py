@@ -244,7 +244,12 @@ class BasePredictor(ABC):
         self.spec = spec
 
     @abstractmethod
-    def predict_batch(self, sites: list[CandidateSite]) -> list[VariantResult]:
+    def predict_batch(self, sites: list[CandidateSite],
+                      on_batch: Callable | None = None) -> list[VariantResult]:
+        """배치 완료마다 on_batch(완료 서열 수, 전체 서열 수)를 호출한다.
+
+        콜백 예외는 호출자에게 전파해 계산을 취소할 수 있다.
+        """
         ...
 
     def explain_heads(self, site: CandidateSite) -> list[str]:
@@ -259,7 +264,7 @@ class UnconnectedPredictor(BasePredictor):
     """아직 연동되지 않은 모델. 예측 결과를 만들지 않는다."""
     connected = False
 
-    def predict_batch(self, sites):
+    def predict_batch(self, sites, on_batch: Callable | None = None):
         return []
 
 
@@ -453,10 +458,10 @@ class NTClassifierPredictor(BasePredictor):
                 on_batch(min(i + NT_BATCH_SIZE, total), total)
         return np.concatenate(out, axis=0)
 
-    def predict_batch(self, sites):
+    def predict_batch(self, sites, on_batch: Callable | None = None):
         if not sites:
             return []
-        preds = self._logits([s.model_input_seq for s in sites])
+        preds = self._logits([s.model_input_seq for s in sites], on_batch=on_batch)
 
         results = []
         if self.is_multihead:
@@ -591,13 +596,22 @@ def connected_models(predictors: dict) -> set[str]:
 # 4. 실행
 # ════════════════════════════════════════════════
 
-def run_prediction(all_results: ScanResult, predictors: dict) -> ScanResult:
-    """연동된 모든 모델로 사이트들을 배치 예측한다."""
+def run_prediction(all_results: ScanResult, predictors: dict,
+                   on_batch: Callable | None = None) -> ScanResult:
+    """연동된 모든 모델로 사이트들을 배치 예측한다.
+
+    on_batch(done, total)은 각 예측기의 서열 수 기준이며 모델마다 다시 센다.
+    콜백 예외는 호출자에게 전파한다. 콜백이 없으면 기존 호출 방식을 유지한다.
+    """
     all_results.variant_results = []
 
     for (_, cas), predictor in predictors.items():
         sites = [s for s in all_results.sites if s.cas_type == cas and s.model_input_seq]
-        all_results.variant_results.extend(predictor.predict_batch(sites))
+        if on_batch is None:
+            rows = predictor.predict_batch(sites)
+        else:
+            rows = predictor.predict_batch(sites, on_batch=on_batch)
+        all_results.variant_results.extend(rows)
 
     # 사이트별 대표 값(효율이 가장 높은 변종)을 CandidateSite에 기록.
     # 변종마다 표준화 통계가 달라 원출력(z)이 커도 효율이 낮을 수 있으므로,

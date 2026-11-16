@@ -31,12 +31,15 @@ IG_CHUNK_SIZE = 8
 
 
 def integrated_gradients(handle, window_seq: str, steps: int = 64,
-                         chunk_size: int = IG_CHUNK_SIZE) -> IGResult:
+                         chunk_size: int = IG_CHUNK_SIZE, on_batch=None) -> IGResult:
     """Integrated Gradients. 기준 입력은 전부 0(빈 서열), 구간 적분은 중점법.
 
     적분 단계를 한 배치에 모두 올리면 역전파 그래프가 steps배로 커져 메모리를 많이 쓴다.
     청크로 나눠 기울기 '합'을 누적하고 마지막에 steps로 나누면
     평균을 한 번에 구한 것과 수학적으로 같은 값이 나온다 (mean = sum / steps).
+
+    on_batch(done, total)은 청크 완료마다 적분 단계 수를 보고한다 (total=steps).
+    콜백 예외는 호출자에게 전파되며 남은 청크와 완결성 평가를 실행하지 않는다.
     """
     inputs = handle.ig_inputs(window_seq)
     alphas = (np.arange(steps) + 0.5) / steps
@@ -49,6 +52,8 @@ def integrated_gradients(handle, window_seq: str, steps: int = 64,
         _, grads = handle.ig_grad_fn(batch)
         for s, g in zip(sums, grads):
             s += np.asarray(g, dtype=np.float64).sum(axis=0)
+        if on_batch is not None:
+            on_batch(min(i + chunk, steps), steps)
 
     attrs = [x * (s / steps) for x, s in zip(inputs, sums)]
 
