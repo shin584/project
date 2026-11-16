@@ -1,0 +1,89 @@
+{
+  "issue": 181,
+  "captured_at": "2026-11-16T09:35:14+00:00",
+  "input_seq": "CAAAGTAGCCGGTCGCTTTAAGAATAAATAAAAGCGCCACAGGATTGACTAAACCACAGCCGGCGCCCTGGCCCCCTACCG",
+  "settings": {
+    "ig_steps": 32,
+    "shap_nsamples": 64,
+    "shap_n_background": 4
+  },
+  "environment": {
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.3.2",
+    "pandas": "2.3.3",
+    "streamlit": "1.51.0",
+    "torch": "2.12.0+cpu",
+    "shap": "0.52.0"
+  },
+  "csv": {
+    "file": "crispr_prediction_results.csv",
+    "rows": 38,
+    "bytes": 2716,
+    "encoding": "utf-8-sig"
+  },
+  "xai": [
+    {
+      "file": "xai-SpCas9-SpCas9-NG.npz",
+      "site_key": "SpCas9|+|32",
+      "cas_type": "SpCas9",
+      "head": "SpCas9-NG",
+      "strand": "+",
+      "pam_seq": "AGC",
+      "distance": 11,
+      "window_seq": "CCGGTCGCTTTAAGAATAAATAAAAGCGCC",
+      "settings": {
+        "ig_steps": 32,
+        "shap_nsamples": 64,
+        "shap_n_background": 4
+      },
+      "ig": {
+        "pred": -0.615226686000824,
+        "baseline_pred": -0.6725708246231079,
+        "completeness_error": 1.1668063658998293
+      },
+      "shap": {
+        "base_value": -0.8921935558319092,
+        "pred": 1.6856820583343506,
+        "additivity_error": 3.5762786865234375e-07,
+        "cache_key": "A/SpCas9|SpCas9-NG|CCGGTCGCTTTAAGAATAAATAAAAGCGCC|64|4",
+        "cache_file": "data/precomputed_shap/e751bae6f380e425.npz"
+      },
+      "rollout": {
+        "n_layers": 24,
+        "n_tokens": 6
+      }
+    },
+    {
+      "file": "xai-Cas12a-Cas12a.npz",
+      "site_key": "Cas12a|+|16",
+      "cas_type": "Cas12a",
+      "head": "Cas12a",
+      "strand": "+",
+      "pam_seq": "TTTA",
+      "distance": 0,
+      "window_seq": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT",
+      "settings": {
+        "ig_steps": 32,
+        "shap_nsamples": 64,
+        "shap_n_background": 4
+      },
+      "ig": {
+        "pred": 0.15647462010383606,
+        "baseline_pred": 0.2622549533843994,
+        "completeness_error": 0.30689201787177944
+      },
+      "shap": {
+        "base_value": 0.4819796681404114,
+        "pred": 0.35913217067718506,
+        "additivity_error": 2.0861625676937834e-07,
+        "cache_key": "A/Cas12a|Cas12a|TTTAAGAATAAATAAAAGCGCCACAGGATTGACT|64|4",
+        "cache_file": "data/precomputed_shap/a2ef222fa4018914.npz"
+      },
+      "rollout": {
+        "n_layers": 24,
+        "n_tokens": 10
+      }
+    }
+  ]
+}
