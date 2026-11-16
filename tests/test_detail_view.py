@@ -245,7 +245,7 @@ def test_fragment_offers_a_checkbox_per_variant_in_sorted_order():
     fragment = detail_fragment(rows)
     for text in ("원하는 조건을 설정한 뒤", "필터 설정", "Cas 변종 선택", "전체 선택",
                  "전체 해제", "효율 범위 및 거리 설정", "점수 범위 (%)",
-                 "거리 범위 (bp)", "검색", "CSV 저장",
+                 "거리 범위 (bp)", "검색", "CSV 다운로드",
                  "선택 범위: 0.0% ~ 100.0%",    # app.py:331의 캡션
                  "변이로부터 0 ~ 15 bp 이내"):  # app.py:335의 캡션
         assert text in fragment

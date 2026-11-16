@@ -1,0 +1,21 @@
+{
+  "core": true,
+  "desktop.cli": true,
+  "desktop.app": true,
+  "desktop.renderer": true,
+  "desktop.screen": true,
+  "desktop.api": true,
+  "desktop.detail_view": true,
+  "desktop.xai_view": true,
+  "desktop.validation": true,
+  "desktop.fake": true,
+  "desktop.instance": true,
+  "predict": true,
+  "pam_scanner": true,
+  "model_source": true,
+  "bundle_runtime": true,
+  "xai.charts": true,
+  "xai.explain": true,
+  "xai.explain_cache": true,
+  "xai.shap_cache": true
+}

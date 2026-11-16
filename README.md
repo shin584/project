@@ -10,11 +10,15 @@
 - `models/`, `data/`: 로컬 가중치 두 개와 사전계산 데이터.
 - `packaging/`: PyInstaller 오프라인 실험. [빌드 절차](packaging/README.md).
 
+#188의 실제 데스크톱 최종 빌드·수치 비교·다른 PC 검증 절차는
+[게이트 2 문서](docs/gate2/README.md)에 있다. 배포 대상은 `dist/XaiDashboard/`
+전체 폴더이며, 게이트 통과 전에는 Streamlit 시연 경로를 유지한다.
+
 통합 출처와 검증 결과는 [통합 기록](docs/integration-179-178-151-180.md)에 있다.
 데스크톱은 Best Candidates·변종 비교와 #187의 실제 XAI 보기를 구현했다. Best Candidates와 변종 비교는 실제 코어 예측을
 Streamlit과 같은 열·문구·정렬·색 규칙으로 표시한다. 서로 다른 `score_kind`는
 표를 나누며, Cas12a는 Best Candidates에 포함하고 SpCas9 변종 비교에서 제외한다.
-전체 상세 보기의 필터·저장 대화상자는 #185에서 연결한다.
+전체 상세 보기에서 조건을 검색하고 필터된 CSV를 저장할 수 있다.
 
 ## 실행과 테스트
 

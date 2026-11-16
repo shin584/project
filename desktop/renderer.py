@@ -69,6 +69,11 @@ class PredictionRenderer:
 
     def sites_fragment(self, dna: str, on_batch: OnBatch) -> str:
         sites = core.scan_all(dna).sites
+        metrics = '<div class="metrics">' + "".join(
+            f'<div><span>{html.escape(config.name)}</span><strong>'
+            f'{sum(s.cas_type == config.name for s in sites)}개 발견</strong></div>'
+            for config in core.CAS_CONFIGS
+        ) + '</div>'
         table = _table(
             ["Cas", "가닥", "PAM 위치", "PAM", "가이드 서열 (RNA)", "거리 (bp)"],
             [
@@ -85,13 +90,29 @@ class PredictionRenderer:
             [{"data-site-key": s.site_key} for s in sites],
         )
         return (
-            f'<section id="sites"><h2>후보 사이트 {len(sites)}개</h2>{table}</section>'
+            f'<section id="sites">{metrics}<details><summary>후보 사이트 {len(sites)}개</summary>'
+            f'{table}</details></section>'
         )
 
     def prediction_fragments(self, dna: str, on_batch: OnBatch) -> dict[str, str]:
         rows = self._rows_with_progress(dna, on_batch)
+        diagnostics = []
+        for cas in sorted({row.cas_type for row in rows}):
+            items = [row for row in rows if row.cas_type == cas]
+            # Preview subclasses deliberately have no predictors and must not
+            # import predict/torch just to describe their synthetic scores.
+            spec = core.MODEL_REGISTRY.get(("A", cas)) if self._predictors is not None else None
+            mode = spec.output_mode if spec else "?"
+            what = "효율(%)" if items[0].score_kind == "efficiency" else "백분위(%)"
+            diagnostics.append(
+                f'<li><strong>{html.escape(cas)}</strong> · 원출력 '
+                f'{min(r.raw_score for r in items):.3f} ~ {max(r.raw_score for r in items):.3f}'
+                f' · 해석 <code>{html.escape(mode)}</code> → 화면 표시는 {what}</li>'
+            )
+        diagnostic_html = ('<details id="model-diagnostics"><summary>모델 출력 해석 상태</summary><ul>'
+                           + ''.join(diagnostics) + '</ul></details>')
         return {
-            "best": best_candidates_fragment(rows),
+            "best": diagnostic_html + best_candidates_fragment(rows),
             "variants": variant_comparison_fragment(rows),
             "detail": (
                 detail_fragment(rows)

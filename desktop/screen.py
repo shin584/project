@@ -34,6 +34,10 @@ SCREEN_HTML = r"""<!doctype html>
     #model-status { min-height: 48px; margin: 20px 0; }
     #model-status p { margin: 0; }
     .caption { font-size: 13px; color: #58677c; }
+    .metrics { display: flex; flex-wrap: wrap; gap: 30px; margin: 20px 0; }
+    .metrics span, .metrics strong { display: block; }
+    .metrics strong { font-size: 24px; margin-top: 8px; }
+    .success { padding: 16px; background: #e6f4ea; border-radius: 6px; }
     .demo, .warning, #notice:not(:empty) { padding: 12px 16px; background: #fff6df;
       border: 1px solid #ecd7a2; border-radius: 6px; }
     .error { color: #ac2830; }
@@ -106,7 +110,9 @@ SCREEN_HTML = r"""<!doctype html>
       <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
       <h2>절단 효율 예측 결과</h2>
       <p class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
-        SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다.</p>
+        SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다. 자세한 내용은 아래
+        '모델 출력 해석 상태'를 펼쳐 보세요. 거리 보정은 적용하지 않았고,
+        변이와의 거리는 '거리 (bp)' 열에서 확인할 수 있습니다.</p>
     </section>
     <div role="tablist" aria-label="보기">
       <button id="tab-best" role="tab" aria-selected="true" aria-controls="view-best" tabindex="0">Best Candidates</button>
@@ -125,6 +131,17 @@ SCREEN_HTML = r"""<!doctype html>
     </section>
     <section id="view-xai" role="tabpanel" aria-labelledby="tab-xai" hidden>
       <h2>모델 예측 근거 상세 분석 (XAI)</h2>
+      <details><summary>처음이신가요? 5분이면 되는 배경 설명</summary>
+        <h3>이 도구가 하는 일</h3><p>CRISPR 단백질은 DNA를 자르는 가위입니다.
+        이 도구는 자를 수 있는 지점을 찾고 절단 효율과 모델의 예측 근거를 보여줍니다.</p>
+        <h3>서열의 세 구간</h3><p>PAM은 가위가 찾는 표지판, guide는 자를 위치를 지정하는 주소,
+        flank는 주변 환경입니다.</p><h3>숫자 읽는 법</h3>
+        <p>예측 절단 효율은 높을수록 좋습니다. %p는 효율의 변화량으로, 30%에서 35%는 +5%p입니다.
+        변이와의 거리는 고치려는 지점과 절단 위치 사이의 거리이며 가까울수록 유리합니다.</p>
+        <h3>세 가지 분석 방법의 차이</h3><p>Attention Rollout은 자주 참고한 자리(빠름),
+        IG는 각 글자가 효율을 올렸는지 내렸는지(보통), SHAP은 평균적인 서열 대비 각 자리의 기여(느림)를 봅니다.
+        서로 다른 질문에 답하므로 결과가 달라도 모순이 아닙니다.</p>
+      </details>
       <form id="xai-controls" hidden>
         <label for="xai-site">분석 대상 사이트 (효율 높은 순)</label>
         <select id="xai-site"></select>
@@ -133,6 +150,7 @@ SCREEN_HTML = r"""<!doctype html>
           <select id="xai-head"></select>
         </div>
         <p id="xai-single-head" hidden></p>
+        <div class="metrics" id="xai-metrics"></div>
         <details>
           <summary>계산 설정</summary>
           <p class="caption">IG는 단계 수만큼, SHAP은 (샘플 수 × 배경 수)만큼 추론을 반복합니다.</p>
@@ -224,6 +242,18 @@ SCREEN_HTML = r"""<!doctype html>
         byId("xai-cost").textContent = `현재 설정 기준 추론 횟수 — IG ${Number(byId("ig-steps").value) + 2}회, ` +
           `SHAP 약 ${Number(byId("shap-n").value) * Number(byId("shap-bg").value)}회`;
         const head = byId("xai-head").value;
+        const option = byId("xai-site").selectedOptions[0];
+        const scores = option ? JSON.parse(option.dataset.scores || '{}') : {};
+        const score = scores[head];
+        const metrics = [['설명 대상', head],
+          [score?.[1] === 'percentile' ? '학습 분포 백분위' : '예측 절단 효율', score ? `${score[0].toFixed(1)}%` : '—'],
+          ['PAM', option?.dataset.pam || ''], ['변이와의 거리', `${option?.dataset.distance || ''} bp`]];
+        byId('xai-metrics').replaceChildren(...metrics.map(([label, value]) => {
+          const div = document.createElement('div');
+          const span = document.createElement('span'); span.textContent = label;
+          const strong = document.createElement('strong'); strong.textContent = value;
+          div.append(span, strong); return div;
+        }));
         if (!head) {
           // Still supersede a previous site's calculation.
           cancelTask();
@@ -296,8 +326,7 @@ SCREEN_HTML = r"""<!doctype html>
         if (counter) counter.textContent = selected;
       }
 
-      // A two-handle slider cannot be crossed over; two number inputs can, so
-      // each half bounds the other and the pair stays within Streamlit's range.
+      // Each end bounds the other so paired range sliders cannot cross.
       function detailBounds() {
         const [effLow, effHigh] = [byId("detail-eff-low"), byId("detail-eff-high")];
         const [distLow, distHigh] = [byId("detail-dist-low"), byId("detail-dist-high")];
@@ -354,7 +383,7 @@ SCREEN_HTML = r"""<!doctype html>
         detailSearch();
       });
       byId("view-detail").addEventListener("input", event => {
-        if (event.target.type === "number") detailBounds();
+        if (event.target.type === "range") detailBounds();
       });
       byId("view-detail").addEventListener("click", event => {
         const id = event.target.id;
@@ -407,6 +436,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("xai-controls").hidden = true;
         byId("task-state").hidden = true;
         detailSearched = null;  // the new analysis brings its own detail fragment
+        byId('model-diagnostics')?.remove();
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
@@ -467,6 +497,8 @@ SCREEN_HTML = r"""<!doctype html>
             byId("notice").textContent = "모델 예측 중...";
             request("predict", analysisDna);
           } else if (operation === "predict") {
+            const diagnostics = byId("model-diagnostics");
+            if (diagnostics) byId("results").append(diagnostics);
             byId("welcome").hidden = true;
             byId("results").hidden = false;
             const template = byId("xai-sites-template");

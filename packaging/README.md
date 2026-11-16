@@ -1,5 +1,10 @@
 # #179: disposable offline packaging gate
 
+For the **production desktop / gate 2 (#188)**, use
+[`docs/gate2/README.md`](../docs/gate2/README.md) and
+`python packaging/build_desktop.py`. The final folder is `dist/XaiDashboard`;
+the `XaiGate1` harness below remains a separate gate-1 experiment.
+
 This is a packaging experiment, independent of the production desktop API (#178).
 The recorded outcome is in [gate1-result.md](gate1-result.md).
 The Streamlit screen remains the fallback. The predictor, model files, data,

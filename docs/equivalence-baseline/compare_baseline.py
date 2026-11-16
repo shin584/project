@@ -100,6 +100,8 @@ def compare_npz(base: Path, other: Path, msgs: list[str]) -> None:
         if str(a["window_seq"]) != str(b["window_seq"]):
             _fail(msgs, f"{name}: 설명 대상 윈도우 서열이 다르다")
             return
+        if "rollout_token_labels" not in b or not np.array_equal(a["rollout_token_labels"], b["rollout_token_labels"]):
+            _fail(msgs, f"{name}: Rollout 토큰 라벨이 다르다")
         for key in ARRAY_KEYS:
             if key not in b:
                 _fail(msgs, f"{name}:{key} 배열이 없다")
@@ -110,6 +112,8 @@ def compare_npz(base: Path, other: Path, msgs: list[str]) -> None:
                 continue
             if np.allclose(x, y, rtol=RTOL, atol=ATOL):
                 print(f"  {key}: allclose (최대 차 {np.max(np.abs(x - y)):.3e})")
+                if key == "shap_values" and not np.array_equal(x, y):
+                    _fail(msgs, f"{name}:{key} 사전계산 캐시와 완전 일치하지 않는다")
             else:
                 _fail(msgs, f"{name}:{key} allclose 실패 "
                             f"(최대 차 {np.max(np.abs(x - y)):.3e})")

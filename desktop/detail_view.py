@@ -186,8 +186,8 @@ def _rows_html(rows: Sequence[VariantResult]) -> str:
 def _filters_html(rows: Sequence[VariantResult]) -> str:
     """Streamlit's filter block (`app.py:303-340`) as plain controls.
 
-    Streamlit's two-handle slider has no HTML equivalent, so each range is a
-    pair of number inputs with the same limits and step. The values a user can
+    Streamlit's two-handle slider has no native HTML equivalent, so each range
+    has lower/upper sliders with the same limits and step. The values a user can
     reach are the same, and `DetailFilter` rejects anything outside them.
     """
     boxes = "".join(
@@ -205,22 +205,22 @@ def _filters_html(rows: Sequence[VariantResult]) -> str:
         f'<div class="checklist">{boxes}</div></fieldset>'
         "<fieldset><legend>효율 범위 및 거리 설정</legend>"
         '<label for="detail-eff-low">점수 범위 (%)</label>'
-        f'<p><input id="detail-eff-low" type="number" min="{eff_low}" max="{eff_high}"'
+        f'<p><input id="detail-eff-low" type="range" aria-label="최소 점수 (%)" min="{eff_low}" max="{eff_high}"'
         f' step="0.5" value="{eff_low}"> ~ '
-        f'<input id="detail-eff-high" type="number" min="{eff_low}" max="{eff_high}"'
+        f'<input id="detail-eff-high" type="range" aria-label="최대 점수 (%)" min="{eff_low}" max="{eff_high}"'
         f' step="0.5" value="{eff_high}"></p>'
         f'<p class="caption" id="detail-eff-caption">선택 범위: {eff_low:.1f}% ~ '
         f"{eff_high:.1f}%</p>"
         '<label for="detail-dist-low">거리 범위 (bp)</label>'
-        f'<p><input id="detail-dist-low" type="number" min="{dist_low}"'
+        f'<p><input id="detail-dist-low" type="range" aria-label="최소 거리 (bp)" min="{dist_low}"'
         f' max="{dist_high}" step="1" value="{dist_low}"> ~ '
-        f'<input id="detail-dist-high" type="number" min="{dist_low}"'
+        f'<input id="detail-dist-high" type="range" aria-label="최대 거리 (bp)" min="{dist_low}"'
         f' max="{dist_high}" step="1" value="{dist_high}"></p>'
         f'<p class="caption" id="detail-dist-caption">변이로부터 {dist_low} ~ '
         f"{dist_high} bp 이내</p></fieldset></div>"
         '<p><button type="submit" id="detail-search">검색</button> '
         # Streamlit은 검색을 누른 뒤에야 다운로드 버튼을 그린다 (`app.py:385`).
-        '<button type="button" id="detail-csv" disabled>CSV 저장</button></p>'
+        '<button type="button" id="detail-csv" disabled>CSV 다운로드</button></p>'
         '<p class="caption">CSV는 지금 검색해 둔 결과를 그대로 저장합니다.</p></form>'
     )
 
