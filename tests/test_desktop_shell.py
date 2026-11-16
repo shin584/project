@@ -25,6 +25,7 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     result = subprocess.run(
         [sys.executable, "-X", "utf8", str(ROOT / "tests/desktop_shell_probe.py"), str(output)],
         cwd=tmp_path, capture_output=True, text=True, encoding="utf-8", timeout=90,
+        check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
     report = json.loads(output.read_text(encoding="utf-8"))
@@ -50,6 +51,30 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
         marker = "data:image/" if panel == "xai" else "<table"
         assert marker in view["content"]
     assert report["resize"] == {"sameImage": True, "width": "40%", "label": "40%"}
+    assert not report["display_changes_sent_requests"]
+    controls = report["xai_controls"]
+    assert controls["siteLabel"] == "분석 대상 사이트 (효율 높은 순)"
+    assert controls["headLabel"] == "설명할 출력(변종)"
+    assert controls["methods"] == [
+        "Attention Rollout", "Integrated Gradients (IG)",
+        "SHAP (Shapley Additive exPlanations)",
+    ]
+    assert controls["settings"] == [["8", "256", "8", "32"], ["16", "1024", "16", "64"], ["2", "32", "2", "4"]]
+    from core import scan_all
+    from desktop.fake import heads_of
+
+    sites = scan_all("GATCCAGTCAGCATGCTTTACGATCGTACGATCGAATCGTAGGCTAGCATCGATCGATGCATCGTAGCTAGCTAGCATCGA").sites
+    assert set(controls["sites"]) == {s.site_key for s in sites}
+    assert report["sp_heads"] == heads_of(next(s for s in sites if s.site_key == "SpCas9|+|40"))
+    assert 0 < report["shap_progress"]["value"] < 100
+    assert "SHAP 계산 중..." in report["shap_progress"]["label"]
+    assert "IG · SpCas9-NG · 40단계" in report["replacement_chart"]
+    assert report["cancelled_ui"] == {
+        "hidden": True, "notice": "계산을 취소했습니다.", "canAnalyze": True, "canRetry": True,
+    }
+    calls = [c for c in report["bridge_calls"] if c["name"] == "explain"]
+    assert any(c["args"][3:5] == ["shap", {"nsamples": 80, "n_background": 6}] for c in calls)
+    assert any(c["args"][3:5] == ["ig", {"steps": 40}] for c in calls)
     assert report["keyboard_view"] == "Best Candidates"
     assert report["listeners"] == []
     assert not report["server_created"]

@@ -211,6 +211,9 @@ class FakeRenderer(PredictionRenderer):
 
     # ── 경계가 부르는 네 가지 ──────────────────────
 
+    def _explain_heads(self, site: CandidateSite) -> list[str]:
+        return heads_of(site)
+
     def explanation_fragment(
         self,
         dna: str,

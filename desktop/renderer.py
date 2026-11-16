@@ -1,9 +1,4 @@
-"""Real core predictions for the desktop's first two views (#184).
-
-The weight-free renderer inherits the same tables with a fake row source.
-Detail filtering and XAI controls belong to #185/#187; real mode never presents
-fake explanations as real analysis.
-"""
+"""Core predictions and cached explanations for the desktop views."""
 
 from __future__ import annotations
 
@@ -17,6 +12,7 @@ from desktop.prediction_views import (
     best_candidates_fragment,
     variant_comparison_fragment,
 )
+from desktop.xai_view import controls_template, explanation_fragment
 
 EFF = "예측 점수 (%)"
 DETAIL_COLUMNS = [
@@ -129,8 +125,19 @@ class PredictionRenderer:
         return {
             "best": best_candidates_fragment(rows),
             "variants": variant_comparison_fragment(rows),
-            "detail": f'<section id="detail"><h2>전체 상세 보기</h2>{detail}</section>',
+            "detail": (
+                f'<section id="detail"><h2>전체 상세 보기</h2>{detail}</section>'
+                + controls_template(core.scan_all(dna).sites, rows, self._explain_heads)
+            ),
         }
+
+    def _explain_heads(self, site: core.CandidateSite) -> list[str]:
+        predictor = (self._predictors or {}).get(("A", site.cas_type))
+        if predictor is None or not predictor.connected:
+            return []
+        # Small prediction-only adapters may not expose explanation support.
+        heads = getattr(predictor, "explain_heads", None)
+        return heads(site) if heads else []
 
     def explanation_fragment(
         self,
@@ -142,7 +149,16 @@ class PredictionRenderer:
         size: int,
         on_batch: OnBatch,
     ) -> str:
-        return '<p class="empty">XAI 설명 보기는 준비 중입니다.</p>'
+        site = next((s for s in core.scan_all(dna).sites if s.site_key == site_key), None)
+        if site is None:
+            raise LookupError(f"그런 사이트가 없습니다: {site_key}")
+        if self._predictors is None:
+            self._predictors = core.load_predictors()
+        if head not in self._explain_heads(site):
+            raise LookupError(f"이 사이트에 없는 헤드입니다: {head}")
+        return explanation_fragment(
+            self._predictors[("A", site.cas_type)], site, head, method, params, size, on_batch
+        )
 
     def csv_table(self, dna: str, on_batch: OnBatch) -> list[list[Any]]:
         rows = self._rows_with_progress(dna, on_batch)

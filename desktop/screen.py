@@ -50,7 +50,14 @@ SCREEN_HTML = r"""<!doctype html>
     th { background: #f0f4f8; }
     tr:hover td { background: #f7faff; }
     figure { margin: 20px 0; }
+    figure.xai { margin-left: auto; margin-right: auto; }
     figure img { width: 100%; display: block; }
+    select, input[type=number] { font: inherit; padding: 8px; max-width: 100%; }
+    select { width: 100%; }
+    fieldset { margin: 20px 0; border: 1px solid #dce3eb; }
+    fieldset label { display: inline-block; margin: 10px 16px 10px 0; }
+    progress { width: min(500px, 70%); }
+    .window-sequence { font: 22px monospace; letter-spacing: 2px; overflow-wrap: anywhere; }
     figcaption { margin-top: 12px; color: #58677c; }
     details { margin: 18px 0; }
     summary { cursor: pointer; }
@@ -81,6 +88,11 @@ SCREEN_HTML = r"""<!doctype html>
     <p class="demo">화면 미리보기 · 예측 점수와 XAI는 가짜 값입니다. 실제 분석에 사용하지 마세요.</p>
     <p id="welcome">왼쪽 사이드바에 81bp DNA 서열을 입력하고 <strong>분석 시작</strong>을 눌러 주세요.</p>
     <div id="notice" data-slot="notice" role="alert" aria-live="polite"></div>
+    <div id="task-state" role="status" aria-live="polite" hidden>
+      <span id="task-label"></span>
+      <progress id="task-progress" max="100"></progress>
+      <button id="cancel-task" type="button">계산 취소</button>
+    </div>
     <section id="results" hidden>
       <h2>PAM 탐색 결과</h2>
       <div data-slot="sites"></div>
@@ -105,6 +117,34 @@ SCREEN_HTML = r"""<!doctype html>
       <div data-slot="detail"><p>예측 결과가 없습니다.</p></div>
     </section>
     <section id="view-xai" role="tabpanel" aria-labelledby="tab-xai" hidden>
+      <h2>모델 예측 근거 상세 분석 (XAI)</h2>
+      <form id="xai-controls" hidden>
+        <label for="xai-site">분석 대상 사이트 (효율 높은 순)</label>
+        <select id="xai-site"></select>
+        <div id="xai-head-control">
+          <label for="xai-head">설명할 출력(변종)</label>
+          <select id="xai-head"></select>
+        </div>
+        <p id="xai-single-head" hidden></p>
+        <details>
+          <summary>계산 설정</summary>
+          <p class="caption">IG는 단계 수만큼, SHAP은 (샘플 수 × 배경 수)만큼 추론을 반복합니다.</p>
+          <label for="ig-steps">IG 적분 단계 수</label>
+          <input id="ig-steps" type="number" min="8" max="256" value="32" step="8">
+          <label for="shap-n">SHAP 샘플 수</label>
+          <input id="shap-n" type="number" min="16" max="1024" value="64" step="16">
+          <label for="shap-bg">SHAP 배경 서열 수</label>
+          <input id="shap-bg" type="number" min="2" max="32" value="4" step="2">
+          <p id="xai-cost" class="caption"></p>
+        </details>
+        <fieldset>
+          <legend>XAI 분석 기법 선택</legend>
+          <label><input type="radio" name="xai-method" value="rollout" checked>Attention Rollout</label>
+          <label><input type="radio" name="xai-method" value="ig">Integrated Gradients (IG)</label>
+          <label><input type="radio" name="xai-method" value="shap">SHAP (Shapley Additive exPlanations)</label>
+        </fieldset>
+        <button type="submit">설명 계산</button>
+      </form>
       <div data-slot="xai"><p>예측 결과가 없습니다.</p></div>
     </section>
   </main>
@@ -119,18 +159,100 @@ SCREEN_HTML = r"""<!doctype html>
       let busy = false;
       let analysisDna = "";
       let operation = "prepare";
+      let serial = 0;
+      let activeId = null;
+      let earlyEvents = [];
+      let submissions = Promise.resolve();
 
-      const updateButton = () => { byId("analyze").disabled = !ready || busy; };
-      const finish = () => { busy = false; updateButton(); };
+      const updateButton = () => {
+        byId("analyze").disabled = !ready || (busy && operation !== "explain");
+      };
+      const finish = () => {
+        busy = false;
+        byId("task-state").hidden = true;
+        updateButton();
+      };
       const showError = (error) => {
         byId("notice").textContent = `오류: ${error.message || error}`;
         if (!ready) byId("model-status").textContent = "모델 준비 실패";
         finish();
       };
       const request = (name, ...args) => {
+        const token = ++serial;
+        activeId = null;
+        earlyEvents = [];
         operation = name;
-        return window.pywebview.api[name](...args).catch(showError);
+        busy = true;
+        updateButton();
+        // Bridge calls can arrive on different Python threads. Preserve intent
+        // order and buffer events that arrive before the request-id reply.
+        submissions = submissions.then(() => window.pywebview.api[name](...args))
+          .then(reply => {
+            if (token !== serial) return;
+            activeId = reply.request_id;
+            const events = earlyEvents;
+            earlyEvents = [];
+            events.forEach(event => window.xaiDesktop.onEvent(event));
+          }).catch(error => { if (token === serial) showError(error); });
+        return submissions;
       };
+
+      function selectHeads() {
+        const option = byId("xai-site").selectedOptions[0];
+        const heads = option ? JSON.parse(option.dataset.heads) : [];
+        const select = byId("xai-head");
+        const previous = select.value;
+        select.replaceChildren(...heads.map(head => new Option(head, head)));
+        if (heads.includes(previous)) select.value = previous;
+        byId("xai-head-control").hidden = heads.length <= 1;
+        byId("xai-single-head").hidden = heads.length !== 1;
+        byId("xai-single-head").textContent = `설명 대상: ${heads[0] || ""}`;
+      }
+
+      function explain() {
+        if (!byId("xai-controls").reportValidity()) return;
+        byId("xai-cost").textContent = `현재 설정 기준 추론 횟수 — IG ${Number(byId("ig-steps").value) + 2}회, ` +
+          `SHAP 약 ${Number(byId("shap-n").value) * Number(byId("shap-bg").value)}회`;
+        const head = byId("xai-head").value;
+        if (!head) {
+          // Still supersede a previous site's calculation.
+          cancelTask();
+          slot("xai").textContent = "이 사이트의 PAM을 인식하는 변종이 없어 설명할 출력이 없습니다.";
+          return;
+        }
+        const method = document.querySelector('[name="xai-method"]:checked').value;
+        const params = method === "ig" ? {steps: Number(byId("ig-steps").value)} :
+          method === "shap" ? {nsamples: Number(byId("shap-n").value),
+            n_background: Number(byId("shap-bg").value)} : {};
+        slot("xai").textContent = "설명 계산 중...";
+        byId("notice").textContent = "";
+        byId("task-label").textContent = method === "shap" ? "SHAP 계산 중..." :
+          method === "ig" ? "IG 계산 중..." : "Attention Rollout 계산 중...";
+        byId("task-progress").removeAttribute("value");
+        byId("task-state").hidden = false;
+        request("explain", analysisDna, byId("xai-site").value, head, method, params,
+          Number(byId("graph-size").value));
+      }
+
+      function cancelTask() {
+        ++serial;
+        activeId = -1;
+        earlyEvents = [];
+        submissions = submissions.then(() => window.pywebview.api.cancel()).catch(showError);
+        finish();
+      }
+      byId("cancel-task").addEventListener("click", () => {
+        cancelTask();
+        byId("notice").textContent = "계산을 취소했습니다.";
+      });
+      byId("xai-controls").addEventListener("submit", event => {
+        event.preventDefault();
+        explain();
+      });
+      byId("xai-controls").addEventListener("change", event => {
+        if (event.target.id === "xai-site") selectHeads();
+        explain();
+      });
 
       function selectTab(tab) {
         for (const item of tabs) {
@@ -167,12 +289,12 @@ SCREEN_HTML = r"""<!doctype html>
 
       byId("analysis-form").addEventListener("submit", (event) => {
         event.preventDefault();
-        if (!ready || busy) return;
-        busy = true;
-        updateButton();
+        if (!ready || (busy && operation !== "explain")) return;
         analysisDna = byId("dna").value;
         byId("notice").textContent = "PAM 탐색 중...";
         byId("results").hidden = true;
+        byId("xai-controls").hidden = true;
+        byId("task-state").hidden = true;
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
@@ -198,7 +320,22 @@ SCREEN_HTML = r"""<!doctype html>
           if (event.type === "ready") {
             ready = true;
             byId("model-status").innerHTML = event.html;
-            updateButton();
+            if (operation === "prepare") finish();
+            else updateButton();
+            return;
+          }
+          if (activeId === null) {
+            earlyEvents.push(event);
+            return;
+          }
+          if (event.request_id !== activeId) return;
+          if (event.type === "progress") {
+            if (operation === "explain") {
+              const pct = event.total > 0 ? Math.min(100, Math.max(0, event.done / event.total * 100)) : 0;
+              byId("task-progress").value = pct;
+              const method = document.querySelector('[name="xai-method"]:checked').value;
+              byId("task-label").textContent = `${method === "shap" ? "SHAP" : "IG"} 계산 중... ${Math.floor(pct)}%`;
+            }
             return;
           }
           if (event.type === "error") {
@@ -218,21 +355,15 @@ SCREEN_HTML = r"""<!doctype html>
           } else if (operation === "predict") {
             byId("welcome").hidden = true;
             byId("results").hidden = false;
-            if (document.querySelector(".demo").hidden) {
-              slot("xai").textContent = "XAI 설명 보기는 준비 중입니다.";
-              byId("notice").textContent = "";
-              finish();
-              return;
-            }
-            // One fake chart fills the fourth view; full XAI controls follow in #187.
-            const row = slot("detail").querySelector("[data-site-key][data-head]");
-            if (row) {
-              byId("notice").textContent = "XAI 설명 준비 중...";
-              request("explain", analysisDna, row.dataset.siteKey, row.dataset.head,
-                "rollout", {}, Number(byId("graph-size").value));
+            const template = byId("xai-sites-template");
+            byId("xai-site").replaceChildren(...(template ? template.content.cloneNode(true).children : []));
+            if (byId("xai-site").options.length) {
+              byId("xai-controls").hidden = false;
+              selectHeads();
+              explain();
             } else {
-              slot("xai").textContent = "예측 결과가 없습니다.";
-              byId("notice").textContent = "예측 결과가 없습니다.";
+              slot("xai").textContent = "후보 사이트가 없어 XAI를 표시할 수 없습니다.";
+              byId("notice").textContent = "";
               finish();
             }
           } else {

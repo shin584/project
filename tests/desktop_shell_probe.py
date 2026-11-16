@@ -57,6 +57,17 @@ def observe_window(*args, **kwargs):
     expose = window.expose
 
     def observe_exposed(*functions):
+        def track(function):
+            def invoke(*args):
+                reply = function(*args)
+                report.setdefault("bridge_calls", []).append({
+                    "name": function.__name__, "args": args, "reply": reply,
+                })
+                return reply
+
+            invoke.__name__ = function.__name__
+            return invoke
+
         def prepare():
             # JS has requested preparation, but no renderer has started yet.
             report["initial"] = window.evaluate_js("""({
@@ -69,7 +80,7 @@ def observe_window(*args, **kwargs):
                 raise TimeoutError("Test did not release preparation")
             return next(f for f in functions if f.__name__ == "prepare")()
 
-        expose(*(prepare if f.__name__ == "prepare" else f for f in functions))
+        expose(*(prepare if f.__name__ == "prepare" else track(f) for f in functions))
 
     window.expose = observe_exposed
 
@@ -140,6 +151,7 @@ runpy.run_module('desktop', run_name='__main__')
             )
             wait_for("""!document.getElementById('analyze').disabled &&
               document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            requests_before_display_changes = len(report["bridge_calls"])
             report["views"] = window.evaluate_js("""(() => {
               return Array.from(document.querySelectorAll('[role="tab"]')).map(tab => {
                 tab.click();
@@ -158,6 +170,70 @@ runpy.run_module('desktop', run_name='__main__')
               return {sameImage: image.src === before, width: image.closest('figure').style.width,
                 label: document.getElementById('graph-size-value').textContent};
             })()""")
+            time.sleep(0.2)
+            report["display_changes_sent_requests"] = (
+                len(report["bridge_calls"]) != requests_before_display_changes
+            )
+            report["xai_controls"] = window.evaluate_js("""({
+              siteLabel: document.querySelector('label[for="xai-site"]').textContent,
+              headLabel: document.querySelector('label[for="xai-head"]').textContent,
+              methods: Array.from(document.querySelectorAll('[name="xai-method"]')).map(e => e.parentElement.textContent),
+              settings: ['ig-steps','shap-n','shap-bg'].map(id => {
+                const e = document.getElementById(id);
+                return ['min','max','step','value'].map(k => e[k]);
+              }),
+              sites: Array.from(document.getElementById('xai-site').options).map(e => e.value)
+            })""")
+            # Changing site/head/settings sends a new calculation while leaving
+            # the controls usable during the running request.
+            window.evaluate_js("""
+              const site = document.getElementById('xai-site');
+              site.value = 'SpCas9|+|40';
+              site.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            wait_for("document.getElementById('task-state').hidden && document.querySelector('[data-slot=\"xai\"] img')?.naturalWidth > 0")
+            report["sp_heads"] = window.evaluate_js("Array.from(document.getElementById('xai-head').options).map(e => e.value)")
+            window.evaluate_js("""
+              const head = document.getElementById('xai-head');
+              head.selectedIndex = 1;
+              head.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            wait_for("document.getElementById('task-state').hidden && document.querySelector('[data-slot=\"xai\"] figcaption')?.textContent.includes('SpCas9-NG')")
+            window.evaluate_js("""
+              document.getElementById('ig-steps').value = 40;
+              document.getElementById('shap-n').value = 80;
+              document.getElementById('shap-bg').value = 6;
+              const shap = document.querySelector('[name="xai-method"][value="shap"]');
+              shap.checked = true;
+              shap.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            report["shap_progress"] = wait_for("""(() => {
+              const progress = document.getElementById('task-progress');
+              if (!document.getElementById('task-state').hidden && progress.value > 0 && progress.value < 100)
+                return {value:progress.value, label:document.getElementById('task-label').textContent};
+              return null;
+            })()""")
+            window.evaluate_js("""
+              const ig = document.querySelector('[name="xai-method"][value="ig"]');
+              ig.checked = true;
+              ig.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            wait_for("document.getElementById('task-state').hidden && document.querySelector('[data-slot=\"xai\"] figcaption')?.textContent.includes('IG')")
+            report["replacement_chart"] = window.evaluate_js("document.querySelector('[data-slot=\"xai\"] figcaption').textContent")
+            # Explicit cancellation must also leave the form ready to retry.
+            window.evaluate_js("""
+              const shap = document.querySelector('[name="xai-method"][value="shap"]');
+              shap.checked = true;
+              shap.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            wait_for("!document.getElementById('task-state').hidden && document.getElementById('task-progress').value > 0")
+            window.evaluate_js("document.getElementById('cancel-task').click()")
+            report["cancelled_ui"] = window.evaluate_js("""({
+              hidden: document.getElementById('task-state').hidden,
+              notice: document.getElementById('notice').textContent,
+              canAnalyze: !document.getElementById('analyze').disabled,
+              canRetry: !document.querySelector('#xai-controls button[type=submit]').disabled
+            })""")
             # Check the accessible tab keyboard interaction through DOM events.
             report["keyboard_view"] = window.evaluate_js("""(() => {
               document.getElementById('tab-xai').dispatchEvent(new KeyboardEvent('keydown', {key:'Home'}));
