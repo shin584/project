@@ -31,6 +31,7 @@ import numpy as np
 import streamlit as st
 
 import model_source
+from model_source import configure_offline, is_packaged, resource_root
 from pam_scanner import (
     CAS_CONFIGS,
     SPCAS9_VARIANTS, CandidateSite, ScanResult, VariantResult,
@@ -268,6 +269,13 @@ class UnconnectedPredictor(BasePredictor):
 
 @st.cache_resource(show_spinner="토크나이저 준비 중...")
 def load_nt_tokenizer(repo: str = NT_TOKENIZER_REPO):
+    if is_packaged():
+        configure_offline()
+        local = resource_root() / "tokenizer"
+        if not local.is_dir():
+            raise FileNotFoundError(f"Offline bundle is missing tokenizer: {local}")
+        from transformers import AutoTokenizer
+        return AutoTokenizer.from_pretrained(str(local), local_files_only=True)
     from transformers import AutoTokenizer
     return AutoTokenizer.from_pretrained(repo)
 
@@ -342,6 +350,7 @@ class NTClassifierPredictor(BasePredictor):
 
         dtype = getattr(torch, NT_DTYPE)
         path = model_source.resolve(self.spec.paths[0])
+        tokenizer = load_nt_tokenizer()
 
         # 텐서를 하나씩 읽어 바로 목표 자료형으로 바꾼다.
         # 파일 전체를 통째로 올린 뒤 변환하면 순간 사용량이 두 배가 된다.
@@ -386,7 +395,7 @@ class NTClassifierPredictor(BasePredictor):
         self._model = model
         self._dtype = dtype
         self._num_labels = num_labels
-        self._tokenizer = load_nt_tokenizer()
+        self._tokenizer = tokenizer
         del state
         gc.collect()
 

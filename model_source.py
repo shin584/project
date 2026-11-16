@@ -15,8 +15,25 @@ model_source.py
 """
 
 import os
+import sys
+from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def is_packaged() -> bool:
+    return bool(getattr(sys, "frozen", False))
+
+
+def resource_root() -> Path:
+    return Path(BASE_DIR)
+
+
+def configure_offline() -> None:
+    """Call before importing Hugging Face; override inherited online settings."""
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 
 
 # ════════════════════════════════════════════════
@@ -96,6 +113,12 @@ def resolve(rel_path: str) -> str:
     local = _abs(rel_path)
     if os.path.exists(local):
         return local
+
+    if is_packaged():
+        raise FileNotFoundError(
+            f"Offline bundle is missing model: {local}. "
+            "Copy the complete application folder; downloads are disabled."
+        )
 
     if rel_path in DRIVE_FILES:
         _download_file(DRIVE_FILES[rel_path], local)
