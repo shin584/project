@@ -103,10 +103,11 @@ class RejectUI(importlib.abc.MetaPathFinder):
         if fullname.split('.')[0] == 'webview' or fullname == 'desktop.fake':
             raise AssertionError('Duplicate launched UI: ' + fullname)
 sys.meta_path.insert(0, RejectUI())
+sys.argv = ['desktop']
 runpy.run_module('desktop', run_name='__main__')
 """, str(ROOT)],
                 cwd=Path(sys.argv[1]).parent, capture_output=True, text=True,
-                encoding="utf-8", timeout=15,
+                encoding="utf-8", timeout=15, check=False,
             )
             report["duplicate_exit"] = duplicate.returncode
             report["duplicate_error"] = duplicate.stderr
@@ -170,7 +171,7 @@ runpy.run_module('desktop', run_name='__main__')
                 if conn.status == psutil.CONN_LISTEN
             ]
             report["server_created"] = webview_http.global_server is not None
-        except Exception:
+        except Exception:  # noqa: BLE001 -- persist failures before closing the WebView
             report["error"] = traceback.format_exc()
         finally:
             release_prepare.set()
@@ -190,4 +191,4 @@ webview.create_window = observe_window
 
 from desktop.app import main
 
-raise SystemExit(main())
+raise SystemExit(main(preview=True))

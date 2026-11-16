@@ -30,7 +30,8 @@ from desktop.api import (
     Dispatcher,
     webview_emitter,
 )
-from desktop.fake import DETAIL_COLUMNS, FakeRenderer
+from desktop.fake import FakeRenderer
+from desktop.renderer import DETAIL_COLUMNS
 
 # 81bp. + 가닥 16에 Cas12a TTTA, 40에 SpCas9 AGG가 있다 (#179 게이트 입력과 같은 배치).
 DNA = (

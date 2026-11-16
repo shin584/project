@@ -19,7 +19,7 @@ def test_core_and_fake_work_in_an_isolated_copy(tmp_path):
     standalone.mkdir()
     for name in ("pam_scanner.py", "predict.py", "model_source.py"):
         shutil.copy2(ROOT / name, standalone / name)
-    for name in ("desktop", "xai"):
+    for name in ("core", "desktop", "xai"):
         shutil.copytree(
             ROOT / name, standalone / name,
             ignore=shutil.ignore_patterns("__pycache__"),

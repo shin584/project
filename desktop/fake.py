@@ -27,45 +27,13 @@ from pam_scanner import (
     SPCAS9_VARIANTS,
     CandidateSite,
     VariantResult,
-    dna_to_rna,
     scan_all,
     variant_compatible,
 )
 
+from desktop.renderer import PredictionRenderer
+
 BATCH = 8  # predict.NT_BATCH_SIZE
-EFF = "예측 점수 (%)"  # app.py:23. 의미는 '점수 종류'가 정한다.
-
-#: 전체 상세 보기의 열. `app.py:353-364`의 `df_detail`과 같다. CSV도 이것이다.
-DETAIL_COLUMNS = [
-    "순위",
-    "Cas 변종",
-    "PAM",
-    "가이드 서열 (RNA)",
-    "가닥",
-    "거리 (bp)",
-    "원출력",
-    EFF,
-    "점수 기준",
-]
-
-#: Best Candidates 보기의 열. `app.py:221-229`.
-BEST_COLUMNS = [
-    "순위",
-    "최적 Cas 변종",
-    "PAM",
-    "가이드 서열 (RNA)",
-    "가닥",
-    "거리 (bp)",
-    EFF,
-    "원출력",
-]
-
-_SCORE_KIND_LABEL = {"efficiency": "절단 효율", "percentile": "학습 분포 백분위"}
-
-
-# ════════════════════════════════════════════════
-# 가짜 예측 행
-# ════════════════════════════════════════════════
 
 
 def _fake_score(*parts: str) -> float:
@@ -107,14 +75,6 @@ def rows_of(site: CandidateSite) -> list[VariantResult]:
     return rows
 
 
-def _guide_label(row: VariantResult) -> str:
-    """변종 비교 표의 행 이름. `app.py:261-263`과 같다."""
-    return (
-        f"{dna_to_rna(row.guide_seq)}  dist:{row.distance}  "
-        f"PAM:{row.pam_seq}  strand:{row.strand}"
-    )
-
-
 # ════════════════════════════════════════════════
 # 조각 만들기
 # ════════════════════════════════════════════════
@@ -122,51 +82,6 @@ def _guide_label(row: VariantResult) -> str:
 
 def _esc(value: Any) -> str:
     return html.escape(str(value))
-
-
-def _table(headers: list[str], rows: list[list[Any]], attrs: list[dict]) -> str:
-    head = "".join(f"<th>{_esc(h)}</th>" for h in headers)
-    body = []
-    for cells, attr in zip(rows, attrs):
-        marks = "".join(f' {k}="{_esc(v)}"' for k, v in attr.items())
-        body.append(
-            f"<tr{marks}>" + "".join(f"<td>{_esc(c)}</td>" for c in cells) + "</tr>"
-        )
-    return (
-        f'<table class="grid"><thead><tr>{head}</tr></thead>'
-        f"<tbody>{''.join(body)}</tbody></table>"
-    )
-
-
-def _detail_cells(row: VariantResult, rank: int) -> list[Any]:
-    return [
-        rank,
-        row.cas_name,
-        row.pam_seq,
-        dna_to_rna(row.guide_seq),
-        row.strand,
-        row.distance,
-        round(row.raw_score, 4),
-        round(row.efficiency_pct, 2),
-        _SCORE_KIND_LABEL[row.score_kind],
-    ]
-
-
-def _best_cells(row: VariantResult, rank: int) -> list[Any]:
-    return [
-        rank,
-        row.cas_name,
-        row.pam_seq,
-        dna_to_rna(row.guide_seq),
-        row.strand,
-        row.distance,
-        round(row.efficiency_pct, 2),
-        round(row.raw_score, 4),
-    ]
-
-
-def _marks(row: VariantResult) -> dict:
-    return {"data-site-key": row.site_key, "data-head": row.cas_name}
 
 
 def _chart_img(values: list[float], caption: str, size: int) -> str:
@@ -244,7 +159,7 @@ _XAI_PLANS: dict[str, Callable[[dict[str, Any], str], tuple[int, str]]] = {
 # ════════════════════════════════════════════════
 
 
-class FakeRenderer:
+class FakeRenderer(PredictionRenderer):
     """경계의 `Renderer` 프로토콜을 가중치 없이 만족시키는 구현.
 
     `step_delay`는 한 단계에 쉬는 시간이다. 진행률과 취소가 눈에 보이게 하려고
@@ -252,6 +167,7 @@ class FakeRenderer:
     """
 
     def __init__(self, step_delay: float = 0.05, load_steps: int = 4):
+        super().__init__()
         self.step_delay = step_delay
         self.load_steps = load_steps
         self.warm_ups = 0  # 몇 번 **실제로** 올렸는지 (시험에서 본다)
@@ -295,75 +211,6 @@ class FakeRenderer:
 
     # ── 경계가 부르는 네 가지 ──────────────────────
 
-    def sites_fragment(self, dna: str, on_batch) -> str:
-        sites = scan_all(dna).sites
-        table = _table(
-            ["Cas", "가닥", "PAM 위치", "PAM", "가이드 서열 (RNA)", "거리 (bp)"],
-            [
-                [
-                    s.cas_type,
-                    s.strand,
-                    s.pam_start,
-                    s.pam_seq,
-                    dna_to_rna(s.guide_seq),
-                    s.distance,
-                ]
-                for s in sites
-            ],
-            [{"data-site-key": s.site_key} for s in sites],
-        )
-        return (
-            f'<section id="sites"><h2>후보 사이트 {len(sites)}개</h2>{table}</section>'
-        )
-
-    def prediction_fragments(self, dna: str, on_batch) -> dict[str, str]:
-        rows = self._rows_with_progress(dna, on_batch)
-        best = _table(
-            BEST_COLUMNS,
-            [_best_cells(r, i) for i, r in enumerate(rows[:20], start=1)],
-            [_marks(r) for r in rows[:20]],
-        )
-        detail = _table(
-            DETAIL_COLUMNS,
-            [_detail_cells(r, i) for i, r in enumerate(rows, start=1)],
-            [_marks(r) for r in rows],
-        )
-        return {
-            "best": f'<section id="best"><h2>Best Candidates</h2>{best}</section>',
-            "variants": (
-                '<section id="variants"><h2>변종 비교</h2>'
-                f"{self._variant_pivot(rows)}</section>"
-            ),
-            "detail": f'<section id="detail"><h2>전체 상세 보기</h2>{detail}</section>',
-        }
-
-    def _variant_pivot(self, rows: list[VariantResult]) -> str:
-        """변종 비교는 평평한 목록이 아니라 피벗이다 (`app.py:260-270`).
-
-        행은 가이드, 열은 그 입력에 실제로 나타난 변종(`SPCAS9_VARIANTS` 순서),
-        칸은 표시 점수. Cas12a는 변종이 없어 이 표에 들어가지 않는다.
-        """
-        sp = [r for r in rows if r.cas_type == "SpCas9"]
-        if not sp:
-            return (
-                '<p class="empty">SpCas9 사이트가 없어 비교할 변종이 없습니다. '
-                "Cas12a는 변종이 없습니다.</p>"
-            )
-        present = [v for v in SPCAS9_VARIANTS if any(r.cas_name == v for r in sp)]
-        labels: dict[str, VariantResult] = {}
-        for row in sp:
-            labels.setdefault(_guide_label(row), row)
-        cells, attrs = [], []
-        for label, sample in labels.items():
-            scores = {
-                r.cas_name: r.efficiency_pct for r in sp if _guide_label(r) == label
-            }
-            cells.append(
-                [label] + [round(scores[v], 2) if v in scores else "-" for v in present]
-            )
-            attrs.append({"data-site-key": sample.site_key})
-        return _table(["가이드"] + present, cells, attrs)
-
     def explanation_fragment(
         self,
         dna: str,
@@ -394,10 +241,3 @@ class FakeRenderer:
             _fake_score(window, head, method, str(i)) - 0.5 for i in range(len(window))
         ]
         return _chart_img(values, caption, size)
-
-    def csv_table(self, dna: str, on_batch) -> list[list[Any]]:
-        """CSV 한 장. Streamlit과 같이 전체 상세 한 장뿐이고, 열도 그것과 같다."""
-        rows = self._rows_with_progress(dna, on_batch)
-        return [DETAIL_COLUMNS] + [
-            _detail_cells(r, i) for i, r in enumerate(rows, start=1)
-        ]

@@ -218,6 +218,12 @@ SCREEN_HTML = r"""<!doctype html>
           } else if (operation === "predict") {
             byId("welcome").hidden = true;
             byId("results").hidden = false;
+            if (document.querySelector(".demo").hidden) {
+              slot("xai").textContent = "XAI 설명 보기는 준비 중입니다.";
+              byId("notice").textContent = "";
+              finish();
+              return;
+            }
             // One fake chart fills the fourth view; full XAI controls follow in #187.
             const row = slot("detail").querySelector("[data-site-key][data-head]");
             if (row) {

@@ -5,29 +5,33 @@
 #180 취소 콜백을 통합했다. 코어·화면·모델·데이터가 모두 이 폴더 안에 있으며,
 형제 `xai_dashboard` 체크아웃이나 별도 워크트리가 필요하지 않다.
 
-- `desktop/`: 데스크톱 화면 뼈대, 호출 경계와 가짜 구현. [경계 문서](docs/desktop-boundary.md).
+- `desktop/`: 데스크톱 화면, 코어 예측 Renderer와 가중치 없는 미리보기. [경계 문서](docs/desktop-boundary.md).
 - `predict.py`, `pam_scanner.py`, `xai/`: 공용 코어와 기존 Streamlit 화면.
 - `models/`, `data/`: 로컬 가중치 두 개와 사전계산 데이터.
 - `packaging/`: PyInstaller 오프라인 실험. [빌드 절차](packaging/README.md).
 
 통합 출처와 검증 결과는 [통합 기록](docs/integration-179-178-151-180.md)에 있다.
-데스크톱은 #183의 화면 뼈대까지 구현했다. 시작 화면·사이드바·4개 보기와
-중복 실행 방지가 동작하며, 예측 점수와 XAI는 가짜 Renderer에서 온다.
-실제 Renderer·필터·CSV 저장·XAI 기법 선택은 후속 이슈에서 연결한다.
+데스크톱은 #184까지 구현했다. Best Candidates와 변종 비교는 실제 코어 예측을
+Streamlit과 같은 열·문구·정렬·색 규칙으로 표시한다. 서로 다른 `score_kind`는
+표를 나누며, Cas12a는 Best Candidates에 포함하고 SpCas9 변종 비교에서 제외한다.
+전체 상세 보기의 필터·저장 대화상자는 #185, 실제 XAI 보기는 #187에서 연결한다.
 
 ## 실행과 테스트
 
-Windows에서 가중치 없이 데스크톱 화면을 실행한다 (WebView2 필요):
+Windows에서 데스크톱 화면을 실행한다 (WebView2와 아래 코어 의존성 필요):
 
 ```powershell
 python -m pip install pywebview==6.2.1
 python -m desktop
+# 모델 가중치 없이 화면과 가짜 XAI를 확인할 때:
+python -m desktop --preview
 ```
 
 창의 "모델 준비 중" 표시가 "모델 준비 완료"로 바뀌면 분석할 수 있다.
-서열 입력 후 네 보기를 전환해도 계산을 다시 하지 않는다. XAI 보기에는
-첫 예측 행의 가짜 Attention Rollout을 표시하며, 그래프 크기는 그림의 너비만 바꾼다.
-이 화면의 점수와 XAI를 실제 분석에 사용하면 안 된다.
+서열 입력 후 네 보기를 전환해도 예측을 다시 하지 않는다. 기본 실행은 실제
+모델 점수를 사용하며 XAI 보기에는 준비 중 문구를 표시한다. `--preview`에서는
+가짜 점수와 첫 예측 행의 가짜 Attention Rollout을 표시한다. 미리보기의 점수와
+XAI를 실제 분석에 사용하면 안 된다. 미리보기에는 torch나 모델 가중치가 필요 없다.
 HTML·CSS·JS는 문자열로 로드하고 그림은 data URI를 사용한다.
 Windows 세션의 이름 있는 mutex를 창 생성 전에 잡으므로, 다른 작업 폴더에서
 다시 실행해도 두 번째 창이나 모델 작업자가 생기지 않는다. 종료·강제 종료 시
