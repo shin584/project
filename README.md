@@ -5,16 +5,35 @@
 #180 취소 콜백을 통합했다. 코어·화면·모델·데이터가 모두 이 폴더 안에 있으며,
 형제 `xai_dashboard` 체크아웃이나 별도 워크트리가 필요하지 않다.
 
-- `desktop/`: 호출 경계와 가짜 구현. [경계 문서](docs/desktop-boundary.md).
+- `desktop/`: 데스크톱 화면 뼈대, 호출 경계와 가짜 구현. [경계 문서](docs/desktop-boundary.md).
 - `predict.py`, `pam_scanner.py`, `xai/`: 공용 코어와 기존 Streamlit 화면.
 - `models/`, `data/`: 로컬 가중치 두 개와 사전계산 데이터.
 - `packaging/`: PyInstaller 오프라인 실험. [빌드 절차](packaging/README.md).
 
 통합 출처와 검증 결과는 [통합 기록](docs/integration-179-178-151-180.md)에 있다.
-현재 데스크톱 구현은 호출 경계와 가짜 Renderer까지다. 실제 Renderer와
-완성된 데스크톱 화면은 후속 이슈에서 연결한다.
+데스크톱은 #183의 화면 뼈대까지 구현했다. 시작 화면·사이드바·4개 보기와
+중복 실행 방지가 동작하며, 예측 점수와 XAI는 가짜 Renderer에서 온다.
+실제 Renderer·필터·CSV 저장·XAI 기법 선택은 후속 이슈에서 연결한다.
 
 ## 실행과 테스트
+
+Windows에서 가중치 없이 데스크톱 화면을 실행한다 (WebView2 필요):
+
+```powershell
+python -m pip install pywebview==6.2.1
+python -m desktop
+```
+
+창의 "모델 준비 중" 표시가 "모델 준비 완료"로 바뀌면 분석할 수 있다.
+서열 입력 후 네 보기를 전환해도 계산을 다시 하지 않는다. XAI 보기에는
+첫 예측 행의 가짜 Attention Rollout을 표시하며, 그래프 크기는 그림의 너비만 바꾼다.
+이 화면의 점수와 XAI를 실제 분석에 사용하면 안 된다.
+HTML·CSS·JS는 문자열로 로드하고 그림은 data URI를 사용한다.
+Windows 세션의 이름 있는 mutex를 창 생성 전에 잡으므로, 다른 작업 폴더에서
+다시 실행해도 두 번째 창이나 모델 작업자가 생기지 않는다. 종료·강제 종료 시
+Windows가 핸들을 정리하므로 잠금 파일을 지울 필요가 없다.
+
+기존 Streamlit 화면 실행과 전체 테스트:
 
 ```powershell
 python -m pip install streamlit numpy pandas matplotlib logomaker shap torch transformers safetensors gdown pytest
@@ -27,6 +46,12 @@ python -X utf8 -m pytest test tests -q
 토크나이저는 최초 실행 시 Hugging Face에서 받는다. 부스에서는 모델과 토크나이저를
 미리 준비하고, 실제 사용할 서열로 각 기법을 한 번씩 실행해 둔다.
 테스트는 가짜 모델을 사용하므로 가중치·토크나이저 다운로드 없이 실행된다.
+`tests/test_desktop_shell.py`는 Windows에서 `pywebview`, `psutil`이 설치되어 있으면
+실제 WebView2 창으로 시작 상태·입력·보기 전환·중복 실행·HTTP 서버 미생성을 검증한다.
+데스크톱이 이미 실행 중이면 실제 창 테스트는 건너뛰며, 창을 닫고 다시 실행하면 된다.
+추가 의존성은 `python -m pip install pytest psutil pywebview==6.2.1`로 설치한다.
+타입 검사는 `python -m pip install pyright` 후
+`python -m pyright desktop/app.py desktop/instance.py desktop/screen.py desktop/__main__.py tests/test_desktop_shell.py tests/desktop_shell_probe.py`로 실행한다.
 `test/`는 #151의 코어 테스트이며 `numpy`, `pytest`, `transformers`만으로 실행한다.
 `tests/`에는 SHAP·진행률·Streamlit 통합 테스트가 있다.
 `tests/test_nt_cancellation.py`는 설치된 PyTorch의 소형 메모리 텐서로 실제 설명 핸들을

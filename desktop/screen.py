@@ -1,0 +1,243 @@
+"""Self-contained shell, supplied to pywebview as HTML rather than a URL.
+
+The six fragment slots and onEvent entry point follow docs/desktop-boundary.md.
+No asset requests, CDN, local HTTP server, or model imports are needed.
+"""
+
+SCREEN_HTML = r"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRISPR PAM Scanner + XAI</title>
+  <style>
+    :root { font-family: "Segoe UI", "Malgun Gothic", sans-serif; color: #202938;
+      background: #fff; font-size: 15px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; display: flex; min-height: 100vh; }
+    aside { width: 280px; flex-shrink: 0; background: #f4f6f9; padding: 30px 24px;
+      border-right: 1px solid #e2e7ee; }
+    main { flex: 1; min-width: 0; padding: 30px 36px; }
+    h1 { font-size: 28px; margin: 0 0 12px; }
+    h2 { font-size: 20px; margin: 0 0 18px; }
+    p { line-height: 1.65; }
+    label { display: block; margin: 20px 0 8px; }
+    input[type=text] { width: 100%; padding: 11px; border: 1px solid #bbc6d4;
+      border-radius: 6px; font: inherit; }
+    input[type=range] { width: 100%; accent-color: #245fa6; }
+    button { border: 1px solid #bbc6d4; border-radius: 6px; background: white;
+      padding: 10px 14px; font: inherit; cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #8cb6ec; outline-offset: 2px; }
+    button:disabled { opacity: .5; cursor: default; }
+    #analyze { display: block; width: 100%; margin-top: 16px; color: white;
+      border-color: #245fa6; background: #245fa6; }
+    #model-status { min-height: 48px; margin: 20px 0; }
+    #model-status p { margin: 0; }
+    .caption { font-size: 13px; color: #58677c; }
+    .demo, #notice:not(:empty) { padding: 12px 16px; background: #fff6df;
+      border: 1px solid #ecd7a2; border-radius: 6px; }
+    .error { color: #ac2830; }
+    #welcome { padding: 14px 18px; background: #edf4fc; border-radius: 6px; }
+    [role=tablist] { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 22px;
+      border-bottom: 1px solid #dce3eb; padding-bottom: 12px; }
+    [role=tab][aria-selected=true] { color: #174b89; background: #e9f1fb;
+      border-color: #245fa6; font-weight: 600; }
+    [role=tabpanel] { overflow-x: auto; }
+    [hidden] { display: none !important; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e1e7ef; text-align: left;
+      white-space: nowrap; }
+    th { background: #f0f4f8; }
+    tr:hover td { background: #f7faff; }
+    figure { margin: 20px 0; }
+    figure img { width: 100%; display: block; }
+    figcaption { margin-top: 12px; color: #58677c; }
+    details { margin: 18px 0; }
+    summary { cursor: pointer; }
+    hr { border: 0; border-top: 1px solid #dce3eb; margin: 24px 0; }
+    @media (max-width: 1000px) { aside { width: 240px; padding: 24px 18px; }
+      main { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <aside aria-label="입력">
+    <h2>서열 입력</h2>
+    <form id="analysis-form">
+      <label for="dna">81bp DNA 서열</label>
+      <input id="dna" type="text" placeholder="ATCG..." autocomplete="off" spellcheck="false">
+      <button id="analyze" type="submit" disabled>분석 시작</button>
+    </form>
+    <div id="model-status" role="status" aria-live="polite">모델 준비 중</div>
+    <hr>
+    <label for="graph-size">XAI 그래프 크기</label>
+    <input id="graph-size" type="range" min="40" max="100" value="80" step="5"
+      aria-describedby="graph-size-help">
+    <output id="graph-size-value" for="graph-size">80%</output>
+    <p id="graph-size-help" class="caption">XAI 탭의 그래프 가로 폭입니다. 줄이면 그래프 높이도 함께 줄어듭니다.</p>
+  </aside>
+  <main>
+    <h1>CRISPR PAM Scanner + XAI</h1>
+    <p>81bp DNA 서열을 입력하면 PAM 탐색, 절단 효율 예측, 예측 근거(XAI)를 보여줍니다.</p>
+    <p class="demo">화면 미리보기 · 예측 점수와 XAI는 가짜 값입니다. 실제 분석에 사용하지 마세요.</p>
+    <p id="welcome">왼쪽 사이드바에 81bp DNA 서열을 입력하고 <strong>분석 시작</strong>을 눌러 주세요.</p>
+    <div id="notice" data-slot="notice" role="alert" aria-live="polite"></div>
+    <section id="results" hidden>
+      <h2>PAM 탐색 결과</h2>
+      <div data-slot="sites"></div>
+      <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
+      <h2>절단 효율 예측 결과</h2>
+      <p class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
+        SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다.</p>
+    </section>
+    <div role="tablist" aria-label="보기">
+      <button id="tab-best" role="tab" aria-selected="true" aria-controls="view-best" tabindex="0">Best Candidates</button>
+      <button id="tab-variants" role="tab" aria-selected="false" aria-controls="view-variants" tabindex="-1">변종 비교</button>
+      <button id="tab-detail" role="tab" aria-selected="false" aria-controls="view-detail" tabindex="-1">전체 상세 보기</button>
+      <button id="tab-xai" role="tab" aria-selected="false" aria-controls="view-xai" tabindex="-1">XAI 설명</button>
+    </div>
+    <section id="view-best" role="tabpanel" aria-labelledby="tab-best">
+      <div data-slot="best"><p>예측 결과가 없습니다.</p></div>
+    </section>
+    <section id="view-variants" role="tabpanel" aria-labelledby="tab-variants" hidden>
+      <div data-slot="variants"><p>예측 결과가 없습니다.</p></div>
+    </section>
+    <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+      <div data-slot="detail"><p>예측 결과가 없습니다.</p></div>
+    </section>
+    <section id="view-xai" role="tabpanel" aria-labelledby="tab-xai" hidden>
+      <div data-slot="xai"><p>예측 결과가 없습니다.</p></div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const byId = (id) => document.getElementById(id);
+      const slot = (name) => document.querySelector(`[data-slot="${name}"]`);
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      let ready = false;
+      let started = false;
+      let busy = false;
+      let analysisDna = "";
+      let operation = "prepare";
+
+      const updateButton = () => { byId("analyze").disabled = !ready || busy; };
+      const finish = () => { busy = false; updateButton(); };
+      const showError = (error) => {
+        byId("notice").textContent = `오류: ${error.message || error}`;
+        if (!ready) byId("model-status").textContent = "모델 준비 실패";
+        finish();
+      };
+      const request = (name, ...args) => {
+        operation = name;
+        return window.pywebview.api[name](...args).catch(showError);
+      };
+
+      function selectTab(tab) {
+        for (const item of tabs) {
+          const selected = item === tab;
+          item.setAttribute("aria-selected", String(selected));
+          item.tabIndex = selected ? 0 : -1;
+          byId(item.getAttribute("aria-controls")).hidden = !selected;
+        }
+      }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => selectTab(tab));
+        tab.addEventListener("keydown", (event) => {
+          let next;
+          if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+          if (event.key === "ArrowLeft") next = (index + tabs.length - 1) % tabs.length;
+          if (event.key === "Home") next = 0;
+          if (event.key === "End") next = tabs.length - 1;
+          if (next !== undefined) {
+            event.preventDefault();
+            selectTab(tabs[next]);
+            tabs[next].focus();
+          }
+        });
+      });
+
+      function resizeChart() {
+        const size = byId("graph-size").value;
+        byId("graph-size-value").textContent = `${size}%`;
+        slot("xai").querySelectorAll("figure").forEach((figure) => {
+          figure.style.width = `${size}%`;
+        });
+      }
+      byId("graph-size").addEventListener("input", resizeChart);
+
+      byId("analysis-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!ready || busy) return;
+        busy = true;
+        updateButton();
+        analysisDna = byId("dna").value;
+        byId("notice").textContent = "PAM 탐색 중...";
+        byId("results").hidden = true;
+        for (const name of ["sites", "best", "variants", "detail", "xai"]) {
+          slot(name).textContent = "";
+        }
+        request("scan_sites", analysisDna);
+      });
+
+      window.xaiDesktop = {
+        start() {
+          if (started) return;
+          started = true;
+          // Allow a paint first. Occluded/minimized WebViews can suspend animation
+          // frames, so preparation must also have a timer fallback.
+          let preparing = false;
+          const prepare = () => {
+            if (preparing) return;
+            preparing = true;
+            request("prepare");
+          };
+          requestAnimationFrame(() => requestAnimationFrame(prepare));
+          setTimeout(prepare, 250);
+        },
+        onEvent(event) {
+          if (event.type === "ready") {
+            ready = true;
+            byId("model-status").innerHTML = event.html;
+            updateButton();
+            return;
+          }
+          if (event.type === "error") {
+            byId("notice").innerHTML = event.html;
+            if (!ready) byId("model-status").textContent = "모델 준비 실패";
+            finish();
+            return;
+          }
+          if (event.type !== "result") return;
+          for (const [name, html] of Object.entries(event.fragments)) {
+            const target = slot(name);
+            if (target) target.innerHTML = html;
+          }
+          if (operation === "scan_sites") {
+            byId("notice").textContent = "모델 예측 중...";
+            request("predict", analysisDna);
+          } else if (operation === "predict") {
+            byId("welcome").hidden = true;
+            byId("results").hidden = false;
+            // One fake chart fills the fourth view; full XAI controls follow in #187.
+            const row = slot("detail").querySelector("[data-site-key][data-head]");
+            if (row) {
+              byId("notice").textContent = "XAI 설명 준비 중...";
+              request("explain", analysisDna, row.dataset.siteKey, row.dataset.head,
+                "rollout", {}, Number(byId("graph-size").value));
+            } else {
+              slot("xai").textContent = "예측 결과가 없습니다.";
+              byId("notice").textContent = "예측 결과가 없습니다.";
+              finish();
+            }
+          } else {
+            resizeChart();
+            byId("notice").textContent = "";
+            finish();
+          }
+        }
+      };
+    })();
+  </script>
+</body>
+</html>
+"""
