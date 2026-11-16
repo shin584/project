@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-16",
+  "base_commit": "8d3a85e550960a0581036efb11f41c0e21b620ca",
+  "method": "Streamlit AppTest on unchanged app.py, real local Cas12a weights, offline tokenizer cache",
+  "python": "3.13.7",
+  "versions": {
+    "torch": "2.12.0",
+    "transformers": "5.8.1",
+    "streamlit": "1.51.0",
+    "numpy": "2.3.2"
+  },
+  "torch_threads": 4,
+  "startup_with_warmup_seconds": 34.39245480000682,
+  "input_edits": 5,
+  "analysis_button_clicks_after_edits": 1,
+  "model_weight_load_count": 1,
+  "loaded_model": "A/Cas12a",
+  "spcas9_remains_unloaded": true,
+  "predictor_identity_preserved": true,
+  "prediction_rows": 1,
+  "load_messages": [
+    "Loading model weights: A/Cas12a from <existing-local-dashboard>\\models/Cas12a.safetensors"
+  ]
+}

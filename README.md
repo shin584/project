@@ -8,21 +8,27 @@
 ```powershell
 python -m pip install streamlit numpy pandas matplotlib logomaker shap torch transformers safetensors gdown pytest
 python -m streamlit run app.py
-python -m pytest tests -q
+python -m pytest test tests -q
 ```
 
 가중치는 `models/SpCas9.safetensors`, `models/Cas12a.safetensors`에 둔다.
 가중치가 없으면 `model_source.py`에 등록된 Drive 주소로 다운로드를 시도한다.
 토크나이저는 최초 실행 시 Hugging Face에서 받는다. 부스에서는 모델과 토크나이저를
 미리 준비하고, 실제 사용할 서열로 각 기법을 한 번씩 실행해 둔다.
-테스트는 가짜 모델을 사용하므로 가중치·PyTorch·토크나이저 다운로드 없이 실행된다.
+테스트는 가짜 모델을 사용하므로 가중치·토크나이저 다운로드 없이 실행된다.
+`test/`는 #151의 코어 테스트이며 `numpy`, `pytest`, `transformers`만으로 실행한다.
+`tests/`에는 SHAP·진행률·Streamlit 통합 테스트가 있다.
 
 ## #150 통합 범위
 
 [#150의 최신 정리](https://github.com/shin584/project/issues/150#issuecomment-6794974525)에
 따라 #153의 진행률·IG 청킹과 #152의 선택 워밍업·SHAP 디스크 캐시를 통합했다.
-#151의 Streamlit 결합 제거와 #154의 facade는 보류 상태다.
-`load_predictors`의 `st.cache_resource`를 유지하므로 재실행마다 모델과 워밍업을 반복하지 않는다.
+#151에서 `predict.py`의 UI 의존성을 제거했다. #154의 facade는 별도 작업이다.
+`load_predictors`와 `load_nt_tokenizer`는 프로세스 수준 `functools.cache`로
+재사용하므로 같은 인자의 재실행마다 모델과 워밍업을 반복하지 않는다.
+모델 파일이나 설정을 바꾸면 앱을 재시작한다. 코드에서 캐시를 초기화할 때는
+`load_predictors.cache_clear()`와 `load_nt_tokenizer.cache_clear()`를 사용한다.
+사용하지 않던 거리 보정 점수(`final_score`)는 제거했으며 표시 점수와 정렬 기준은 유지한다.
 `app.py`는 변경하지 않았고 화면 변경은 #153의 `xai/view.py`에 한정한다.
 
 - 워밍업은 `WARMUP_KEYS = (("A", "Cas12a"),)`만 대상으로 한다.
@@ -34,6 +40,20 @@ python -m pytest tests -q
   진행률을 전달하고, 계산 완료·캐시 적중·예외 시 화면 래퍼가 진행률 영역을 비운다.
   콜백의 `done/total` 단위는 #153 구현의 **누적 서열 수**이고, 배치 번호가 아니다.
 - IG는 최대 8개 적분 단계씩 역전파한다. IG 진행률 표시는 추가하지 않았다.
+
+실제 가중치 읽기는 `predict` 로거의 INFO 메시지 `Loading model weights:`로
+관찰할 수 있다. 화면 파일을 수정하지 않고 로그를 켜려면 다음처럼 실행한다.
+
+```powershell
+python -c "import logging, sys; logging.basicConfig(level=logging.INFO); from streamlit.web import cli; sys.argv = ['streamlit', 'run', 'app.py']; cli.main()"
+```
+
+기본 워밍업 대상인 Cas12a의 로드 메시지는 입력칸을 5번 변경해도 1개다.
+SpCas9 사이트를 실제로 예측하면 그 모델의 로드 메시지가 별도로 1개 생긴다.
+2026-11-16에는 실제 로컬 가중치와 오프라인 토크나이저로 변경하지 않은 `app.py`를
+AppTest에서 실행해 확인했다. 입력칸 5회 변경과 분석 버튼 1회 실행 뒤에도
+Cas12a 가중치 로드 로그는 1개였고, SpCas9은 로드되지 않았다.
+[검증 기록](docs/benchmarks/core-decouple-2026-11-16.json)에 환경과 관측값을 남겼다.
 
 ## 사전계산과 시연 범위
 

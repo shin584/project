@@ -9,7 +9,6 @@ SaCas9는 모델을 연동하지 않기로 했으므로 탐색 대상에서도 �
  predict.py의 MODEL_REGISTRY에 경로를 등록하면 된다.)
 """
 
-import math
 from dataclasses import dataclass, field
 
 
@@ -88,7 +87,6 @@ class CandidateSite:
     pam_seq:         str
     model_input_seq: str
     raw_score:       float = 0.0
-    final_score:     float = 0.0
     efficiency_pct:  float = 0.0
     score_kind:      str   = "efficiency"   # efficiency | percentile
 
@@ -107,7 +105,6 @@ class VariantResult:
     distance:    int
     strand:      str
     raw_score:   float
-    final_score: float            # raw × 거리 패널티 × 스케일 (화면에는 쓰지 않음)
     efficiency_pct: float = 0.0   # 화면에 띄우는 점수 (%) — 의미는 score_kind가 정한다
     #: "efficiency" = 예측 절단 효율(%),  "percentile" = 학습 분포 내 백분위(%)
     #: 모델이 z-score로 학습된 경우, 평균·표준편차를 모르면 효율로 되돌릴 수 없어 백분위로 보여준다.
@@ -182,10 +179,6 @@ def validate_sequence(seq: str) -> str:
     if invalid:
         raise ValueError(f"허용되지 않는 문자 포함: {invalid}")
     return seq
-
-
-def gaussian_penalty(distance: int, sigma: float = 10.0) -> float:
-    return math.exp(-(distance ** 2) / (2 * sigma ** 2))
 
 
 def dna_to_rna(seq: str) -> str:
