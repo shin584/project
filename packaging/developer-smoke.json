@@ -1,0 +1,35 @@
+{
+  "smoke_status": "pass",
+  "gate_status": "pending_clean_environment",
+  "frozen": true,
+  "empty_hf_cache": true,
+  "webview2_policy": "bundled_fixed_version",
+  "chart_rendered": true,
+  "executable": "C:\\project\\MC_project\\xai_dashboard_desktop\\.packaging\\copied\\XaiGate1\\XaiGate1.exe",
+  "input_dna": "CAAAGTAGCCGGTCGCTTTAAGAATAAATAAAAGCGCCACAGGATTGACTAAACCACAGCCGGCGCCCTGGCCCCCTACCG",
+  "prediction_counts": {
+    "Cas12a": 1,
+    "SpCas9": 8
+  },
+  "shap": {
+    "cache_hit": false,
+    "nsamples": 8,
+    "n_background": 1,
+    "inference_batches": 3,
+    "pred": 0.35913217067718506
+  },
+  "ig": {
+    "steps": 2,
+    "pred": 0.15647462010383606
+  },
+  "rollout": {
+    "n_layers": 24
+  },
+  "elapsed_seconds": 112.72983849998855,
+  "webview2_peak_rss_bytes": 305274880,
+  "process_tree_peak_rss_bytes": 2949451776,
+  "tcp_listeners": [],
+  "monitor_errors": [],
+  "blocked_python_network_attempts": [],
+  "sampling_interval_seconds": 0.1
+}

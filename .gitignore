@@ -7,3 +7,9 @@ __pycache__/
 # Model weights (too large for git; see model_source.py DRIVE_FILES)
 *.safetensors
 *.keras
+
+# Packaging gate (#179) outputs
+.packaging/
+build/
+dist/
+gate1-result.json

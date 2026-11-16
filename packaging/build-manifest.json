@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-16",
+  "shared_predictor_commit": "0ec27e17120d6e66d52987845310642ade48ffbd",
+  "python": "3.13.7",
+  "pyinstaller": "6.22.3",
+  "webview2_fixed_x64": "157.0.4341.60",
+  "executable_sha256": "2f7e7911c94a50f678a9536fdf645a766301495b07b03aa1d0ae8fe5dfc9335c",
+  "distribution_file_count": 6911,
+  "distribution_bytes": 5498628576,
+  "developer_smoke": "pass",
+  "clean_offline_gate": "pending_clean_environment"
+}
