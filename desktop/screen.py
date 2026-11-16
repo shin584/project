@@ -34,7 +34,7 @@ SCREEN_HTML = r"""<!doctype html>
     #model-status { min-height: 48px; margin: 20px 0; }
     #model-status p { margin: 0; }
     .caption { font-size: 13px; color: #58677c; }
-    .demo, #notice:not(:empty) { padding: 12px 16px; background: #fff6df;
+    .demo, .warning, #notice:not(:empty) { padding: 12px 16px; background: #fff6df;
       border: 1px solid #ecd7a2; border-radius: 6px; }
     .error { color: #ac2830; }
     #welcome { padding: 14px 18px; background: #edf4fc; border-radius: 6px; }
@@ -49,6 +49,13 @@ SCREEN_HTML = r"""<!doctype html>
       white-space: nowrap; }
     th { background: #f0f4f8; }
     tr:hover td { background: #f7faff; }
+    /* The score cell keeps its own inline gradient, as in the Streamlit Styler. */
+    tr.selected td { background: #ffe8a3; color: #000; }
+    .filter-columns { display: flex; flex-wrap: wrap; gap: 20px; }
+    .filter-columns fieldset { flex: 1 1 320px; min-width: 0; }
+    .checklist { max-height: 280px; overflow-y: auto; padding: 4px 12px;
+      border: 1px solid #dce3eb; border-radius: 6px; }
+    .checklist label { display: block; margin: 8px 0; }
     figure { margin: 20px 0; }
     figure.xai { margin-left: auto; margin-right: auto; }
     figure img { width: 100%; display: block; }
@@ -190,6 +197,9 @@ SCREEN_HTML = r"""<!doctype html>
           .then(reply => {
             if (token !== serial) return;
             activeId = reply.request_id;
+            // save_csv answers null when the user closes the save dialog: no
+            // request was made, so no event will ever arrive to end this one.
+            if (activeId === null) { finish(); return; }
             const events = earlyEvents;
             earlyEvents = [];
             events.forEach(event => window.xaiDesktop.onEvent(event));
@@ -250,8 +260,109 @@ SCREEN_HTML = r"""<!doctype html>
         explain();
       });
       byId("xai-controls").addEventListener("change", event => {
-        if (event.target.id === "xai-site") selectHeads();
+        if (event.target.id === "xai-site") {
+          selectHeads();
+          highlightDetail();
+        }
         explain();
+      });
+
+      // ── 전체 상세 보기 (#185) ──────────────────────────
+      // The fragment is replaced on every analysis, so its controls are reached
+      // by delegation from the panel, which is part of the shell.
+      let detailSearched = null;
+
+      const detailBoxes = () =>
+        Array.from(document.querySelectorAll('[name="detail-cas"]'));
+      const detailRows = () =>
+        Array.from(document.querySelectorAll("#detail-results tbody tr"));
+      const detailFilters = () => ({
+        cas_names: detailBoxes().filter(box => box.checked).map(box => box.value),
+        eff_range: [Number(byId("detail-eff-low").value),
+          Number(byId("detail-eff-high").value)],
+        dist_range: [Number(byId("detail-dist-low").value),
+          Number(byId("detail-dist-high").value)],
+      });
+
+      function highlightDetail() {
+        const key = byId("xai-site").value;
+        let selected = 0;
+        detailRows().forEach(row => {
+          const on = !row.hidden && row.dataset.siteKey === key;
+          row.classList.toggle("selected", on);
+          if (on) selected += 1;
+        });
+        const counter = byId("detail-selected");
+        if (counter) counter.textContent = selected;
+      }
+
+      // A two-handle slider cannot be crossed over; two number inputs can, so
+      // each half bounds the other and the pair stays within Streamlit's range.
+      function detailBounds() {
+        const [effLow, effHigh] = [byId("detail-eff-low"), byId("detail-eff-high")];
+        const [distLow, distHigh] = [byId("detail-dist-low"), byId("detail-dist-high")];
+        effLow.max = effHigh.value;
+        effHigh.min = effLow.value;
+        distLow.max = distHigh.value;
+        distHigh.min = distLow.value;
+        byId("detail-eff-caption").textContent =
+          `선택 범위: ${Number(effLow.value).toFixed(1)}% ~ ${Number(effHigh.value).toFixed(1)}%`;
+        byId("detail-dist-caption").textContent =
+          `변이로부터 ${distLow.value} ~ ${distHigh.value} bp 이내`;
+      }
+
+      function detailSearch() {
+        // Same predicate and bounds as Python's DetailFilter, on the same
+        // unrounded values, so the saved CSV holds exactly these rows.
+        const filters = detailFilters();
+        const chosen = new Set(filters.cas_names);
+        const [effLow, effHigh] = filters.eff_range;
+        const [distLow, distHigh] = filters.dist_range;
+        let shown = 0;
+        detailRows().forEach(row => {
+          const eff = Number(row.dataset.eff);
+          const dist = Number(row.dataset.dist);
+          // casName, not head: the filter picks a Cas variant, not a model output.
+          const keep = chosen.has(row.dataset.casName) && eff >= effLow && eff <= effHigh
+            && dist >= distLow && dist <= distHigh;
+          row.hidden = !keep;
+          if (keep) row.cells[0].textContent = ++shown;  // Streamlit renumbers too
+        });
+        const results = byId("detail-results");
+        results.hidden = false;
+        results.querySelector("table").hidden = shown === 0;
+        byId("detail-highlight").hidden = shown === 0;
+        byId("detail-no-match").hidden = shown > 0;
+        byId("detail-count").textContent =
+          `검색 결과: ${shown}개 / 전체 ${results.dataset.total}개`;
+        detailSearched = shown > 0 ? filters : null;
+        byId("detail-csv").disabled = shown === 0;
+        highlightDetail();
+      }
+
+      function saveCsv() {
+        if (!detailSearched) return;
+        byId("notice").textContent = "CSV를 저장하는 중...";
+        byId("task-label").textContent = "CSV 저장 준비 중...";
+        byId("task-progress").removeAttribute("value");
+        byId("task-state").hidden = false;
+        request("save_csv", analysisDna, detailSearched);
+      }
+
+      byId("view-detail").addEventListener("submit", event => {
+        event.preventDefault();
+        detailSearch();
+      });
+      byId("view-detail").addEventListener("input", event => {
+        if (event.target.type === "number") detailBounds();
+      });
+      byId("view-detail").addEventListener("click", event => {
+        const id = event.target.id;
+        if (id === "detail-all" || id === "detail-none") {
+          detailBoxes().forEach(box => { box.checked = id === "detail-all"; });
+        } else if (id === "detail-csv") {
+          saveCsv();
+        }
       });
 
       function selectTab(tab) {
@@ -295,6 +406,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("results").hidden = true;
         byId("xai-controls").hidden = true;
         byId("task-state").hidden = true;
+        detailSearched = null;  // the new analysis brings its own detail fragment
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
@@ -330,11 +442,13 @@ SCREEN_HTML = r"""<!doctype html>
           }
           if (event.request_id !== activeId) return;
           if (event.type === "progress") {
-            if (operation === "explain") {
+            if (operation === "explain" || operation === "save_csv") {
               const pct = event.total > 0 ? Math.min(100, Math.max(0, event.done / event.total * 100)) : 0;
               byId("task-progress").value = pct;
               const method = document.querySelector('[name="xai-method"]:checked').value;
-              byId("task-label").textContent = `${method === "shap" ? "SHAP" : "IG"} 계산 중... ${Math.floor(pct)}%`;
+              byId("task-label").textContent = operation === "save_csv"
+                ? `CSV 저장 준비 중... ${Math.floor(pct)}%`
+                : `${method === "shap" ? "SHAP" : "IG"} 계산 중... ${Math.floor(pct)}%`;
             }
             return;
           }
@@ -368,7 +482,8 @@ SCREEN_HTML = r"""<!doctype html>
             }
           } else {
             resizeChart();
-            byId("notice").textContent = "";
+            // save_csv reports where it saved through the notice slot itself.
+            if (operation !== "save_csv") byId("notice").textContent = "";
             finish();
           }
         }

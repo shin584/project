@@ -56,6 +56,16 @@ def observe_window(*args, **kwargs):
     assert window is not None
     expose = window.expose
 
+    # The save dialog is a blocking OS window. Answer it with a fixed path so
+    # the CSV path is driven end to end without a human at the keyboard.
+    csv_target = Path(sys.argv[1]).parent / "saved.csv"
+
+    def stub_file_dialog(*dialog_args, **dialog_kwargs):
+        report["save_dialog"] = dialog_kwargs.get("save_filename")
+        return str(csv_target)
+
+    window.create_file_dialog = stub_file_dialog
+
     def observe_exposed(*functions):
         def track(function):
             def invoke(*args):
@@ -234,6 +244,74 @@ runpy.run_module('desktop', run_name='__main__')
               canAnalyze: !document.getElementById('analyze').disabled,
               canRetry: !document.querySelector('#xai-controls button[type=submit]').disabled
             })""")
+            # ── 전체 상세 보기: 필터 · 검색 · CSV 저장 (#185) ──
+            window.evaluate_js("document.getElementById('tab-detail').click()")
+            report["detail_before_search"] = window.evaluate_js("""({
+              hidden: document.getElementById('detail-results').hidden,
+              csvDisabled: document.getElementById('detail-csv').disabled,
+              variants: Array.from(document.querySelectorAll('[name="detail-cas"]')).map(b => b.value),
+              total: Number(document.getElementById('detail-results').dataset.total)
+            })""")
+            report["detail_unfiltered"] = window.evaluate_js("""(() => {
+              document.getElementById('detail-search').click();
+              const rows = Array.from(document.querySelectorAll('#detail-results tbody tr'));
+              return {count: document.getElementById('detail-count').textContent,
+                shown: rows.filter(r => !r.hidden).length,
+                ranks: rows.filter(r => !r.hidden).map(r => r.cells[0].textContent),
+                names: rows.filter(r => !r.hidden).map(r => r.cells[1].textContent),
+                keys: rows.filter(r => !r.hidden).map(r => r.dataset.siteKey),
+                selected: rows.filter(r => r.classList.contains('selected'))
+                  .map(r => r.dataset.siteKey),
+                highlightCount: document.getElementById('detail-selected').textContent,
+                csvDisabled: document.getElementById('detail-csv').disabled};
+            })()""")
+            # Deselect every variant but one and narrow both ranges.
+            report["detail_filtered"] = window.evaluate_js("""(() => {
+              document.getElementById('detail-none').click();
+              const boxes = Array.from(document.querySelectorAll('[name="detail-cas"]'));
+              const keep = boxes.find(b => b.value === 'Cas12a') || boxes[0];
+              keep.checked = true;
+              const distHigh = document.getElementById('detail-dist-high');
+              distHigh.value = 10;
+              distHigh.dispatchEvent(new Event('input', {bubbles: true}));
+              document.getElementById('detail-search').click();
+              const rows = Array.from(document.querySelectorAll('#detail-results tbody tr'));
+              const shown = rows.filter(r => !r.hidden);
+              return {variant: keep.value, count: document.getElementById('detail-count').textContent,
+                ranks: shown.map(r => r.cells[0].textContent),
+                names: shown.map(r => r.cells[1].textContent),
+                distances: shown.map(r => Number(r.dataset.dist)),
+                distCaption: document.getElementById('detail-dist-caption').textContent,
+                effCaption: document.getElementById('detail-eff-caption').textContent,
+                // The upper handle now bounds the lower one, as a slider would.
+                lowMax: document.getElementById('detail-dist-low').max};
+            })()""")
+            window.evaluate_js("document.getElementById('detail-csv').click()")
+            # "저장하는 중..." also contains 저장; wait for the saved-path notice.
+            wait_for("""document.getElementById('task-state').hidden &&
+              document.getElementById('notice').textContent.includes('저장했습니다')""")
+            report["csv_notice"] = window.evaluate_js(
+                "document.getElementById('notice').textContent"
+            )
+            # Hex, not text: reading as text would translate the CRLF the
+            # Streamlit download writes, and that is part of what gate 2 diffs.
+            report["csv_hex"] = csv_target.read_bytes().hex()
+            # An empty result offers no download, exactly as Streamlit does.
+            report["detail_empty"] = window.evaluate_js("""(() => {
+              document.getElementById('detail-none').click();
+              document.getElementById('detail-search').click();
+              return {csvDisabled: document.getElementById('detail-csv').disabled,
+                noMatch: !document.getElementById('detail-no-match').hidden,
+                // Streamlit's 노란 줄 caption lives inside `if filtered:`.
+                highlightHidden: document.getElementById('detail-highlight').hidden,
+                tableHidden: document.querySelector('#detail-results table').hidden,
+                count: document.getElementById('detail-count').textContent};
+            })()""")
+            window.evaluate_js("""
+              document.getElementById('detail-all').click();
+              document.getElementById('detail-dist-high').value = 15;
+              document.getElementById('detail-search').click();
+            """)
             # Check the accessible tab keyboard interaction through DOM events.
             report["keyboard_view"] = window.evaluate_js("""(() => {
               document.getElementById('tab-xai').dispatchEvent(new KeyboardEvent('keydown', {key:'Home'}));

@@ -63,7 +63,11 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     from core import scan_all
     from desktop.fake import heads_of
 
-    sites = scan_all("GATCCAGTCAGCATGCTTTACGATCGTACGATCGAATCGTAGGCTAGCATCGATCGATGCATCGTAGCTAGCTAGCATCGA").sites
+    dna = (
+        "GATCCAGTCAGCATGCTTTACGATCGTACGATCGAATCGTAGG"
+        "CTAGCATCGATCGATGCATCGTAGCTAGCTAGCATCGA"
+    )
+    sites = scan_all(dna).sites
     assert set(controls["sites"]) == {s.site_key for s in sites}
     assert report["sp_heads"] == heads_of(next(s for s in sites if s.site_key == "SpCas9|+|40"))
     assert 0 < report["shap_progress"]["value"] < 100
@@ -75,6 +79,61 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     calls = [c for c in report["bridge_calls"] if c["name"] == "explain"]
     assert any(c["args"][3:5] == ["shap", {"nsamples": 80, "n_background": 6}] for c in calls)
     assert any(c["args"][3:5] == ["ig", {"steps": 40}] for c in calls)
+    # #185: 전체 상세 보기 · 필터 · 검색 · CSV 저장
+    from desktop.api import CSV_FILENAME, csv_bytes
+    from desktop.detail_view import DETAIL_COLUMNS
+    from desktop.fake import FakeRenderer
+
+    def table(filters=None):
+        return FakeRenderer(step_delay=0).csv_table(dna, lambda d, t: None, filters)
+
+    full = table()[1:]
+    before = report["detail_before_search"]
+    assert before == {
+        "hidden": True,  # Streamlit shows nothing until the search button
+        "csvDisabled": True,
+        "variants": sorted({cells[1] for cells in full}),
+        "total": len(full),
+    }
+    unfiltered = report["detail_unfiltered"]
+    assert unfiltered["shown"] == len(full)
+    assert unfiltered["names"] == [cells[1] for cells in full]  # same order as Python
+    assert unfiltered["count"] == f"검색 결과: {len(full)}개 / 전체 {len(full)}개"
+    assert unfiltered["ranks"] == [str(i) for i in range(1, len(full) + 1)]
+    assert not unfiltered["csvDisabled"]
+    # The yellow rows are exactly the rows of the site the XAI tab has selected.
+    selected_key = report["xai_controls"]["sites"][0]
+    assert unfiltered["selected"] == [
+        key for key in unfiltered["keys"] if key == selected_key
+    ]
+    assert unfiltered["selected"], "선택한 사이트의 줄이 칠해지지 않았다"
+    assert unfiltered["highlightCount"] == str(len(unfiltered["selected"]))
+
+    filtered = report["detail_filtered"]
+    chosen = table({"cas_names": [filtered["variant"]], "dist_range": [0, 10]})
+    assert set(filtered["names"]) == {filtered["variant"]}
+    assert all(d <= 10 for d in filtered["distances"])
+    assert filtered["ranks"] == [str(i) for i in range(1, len(chosen))]
+    assert filtered["count"] == f"검색 결과: {len(chosen) - 1}개 / 전체 {len(full)}개"
+    # The captions echo the live values, as Streamlit's do (app.py:331, 335).
+    assert filtered["distCaption"] == "변이로부터 0 ~ 10 bp 이내"
+    assert filtered["effCaption"] == "선택 범위: 0.0% ~ 100.0%"
+    assert filtered["lowMax"] == "10"  # the pair cannot be crossed over
+
+    # The saved file holds what the screen searched, byte for byte.
+    assert report["save_dialog"] == CSV_FILENAME
+    saved = bytes.fromhex(report["csv_hex"])
+    assert saved == csv_bytes(chosen)
+    assert saved.startswith(b"\xef\xbb\xbf")  # utf-8-sig, like the download button
+    assert saved.decode("utf-8-sig").split("\r\n")[0].split(",") == DETAIL_COLUMNS
+
+    assert report["detail_empty"] == {
+        "csvDisabled": True,  # Streamlit draws no download button for an empty result
+        "noMatch": True,
+        "highlightHidden": True,  # nor the 노란 줄 caption beside the warning
+        "tableHidden": True,
+        "count": f"검색 결과: 0개 / 전체 {len(full)}개",
+    }
     assert report["keyboard_view"] == "Best Candidates"
     assert report["listeners"] == []
     assert not report["server_created"]

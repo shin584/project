@@ -30,7 +30,7 @@ def _guide_label(row: VariantResult) -> str:
     )
 
 
-def _score_cell(value: float, precision: int) -> str:
+def score_cell(value: float, precision: int) -> str:
     if math.isnan(value):
         return '<td style="background-color:transparent;color:inherit">None</td>'
 
@@ -143,7 +143,7 @@ def best_candidates_fragment(rows: Sequence[VariantResult]) -> str:
             body.append(
                 f'<tr data-site-key="{_esc(row.site_key)}" data-head="{_esc(row.cas_name)}">'
                 + "".join(f"<td>{_esc(c)}</td>" for c in cells)
-                + _score_cell(round(row.efficiency_pct, 2), 2)
+                + score_cell(round(row.efficiency_pct, 2), 2)
                 + f"<td>{row.raw_score:.4f}</td></tr>"
             )
         parts.append(
@@ -213,7 +213,7 @@ def variant_comparison_fragment(rows: Sequence[VariantResult]) -> str:
         parts.append(_limit_caption(len(pivot)))
         body = [
             f'<tr data-site-key="{_esc(site_keys[guide])}"><th scope="row">{_esc(guide)}</th>'
-            + "".join(_score_cell(float(value), 1) for value in values)
+            + "".join(score_cell(float(value), 1) for value in values)
             + "</tr>"
             for guide, *values in pivot.head(MAX_ROWS).itertuples(name=None)
         ]

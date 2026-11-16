@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import csv
 import html
+import io
 import itertools
 import json
 import threading
@@ -41,6 +42,19 @@ GRAPH_SIZE_RANGE = (40, 100)
 
 #: CSV는 한 장뿐이다. Streamlit 화면과 파일 이름도 같다 (`app.py:387`).
 CSV_FILENAME = "crispr_prediction_results.csv"
+
+
+def csv_bytes(table: list[list[Any]]) -> bytes:
+    """표 하나를 Streamlit의 다운로드 버튼과 **같은 바이트**로 만든다.
+
+    기준은 `df.to_csv(index=False).encode("utf-8-sig")`이다 (`app.py:387`).
+    그래서 BOM이 앞에 붙고 줄 끝은 `\\r\\n`이다 — 둘 다 여기 적어 둔다. pandas는
+    줄 끝을 `os.linesep`에서 가져오지만, #181 기준 파일은 고정된 산출물이고
+    게이트 2가 **바이트로** 비교하므로 돌아가는 OS에 맡기지 않는다.
+    """
+    buffer = io.StringIO(newline="")
+    csv.writer(buffer, lineterminator="\r\n").writerows(table)
+    return buffer.getvalue().encode("utf-8-sig")
 
 OnBatch = Callable[[int, int], None]
 Fragments = dict[str, str]
@@ -84,7 +98,9 @@ class Renderer(Protocol):
         on_batch: OnBatch,
     ) -> str: ...
 
-    def csv_table(self, dna: str, on_batch: OnBatch) -> list[list[Any]]: ...
+    def csv_table(
+        self, dna: str, on_batch: OnBatch, filters: dict[str, Any] | None = None
+    ) -> list[list[Any]]: ...
 
 
 # ════════════════════════════════════════════════
@@ -379,8 +395,14 @@ class DesktopApi:
 
         return self._submit(job)
 
-    def save_csv(self, dna: str) -> dict:
-        """CSV 한 장을 저장한다. Streamlit 화면과 같이 전체 상세 한 장뿐이다."""
+    def save_csv(self, dna: str, filters: dict[str, Any] | None = None) -> dict:
+        """CSV 한 장을 저장한다. Streamlit 화면과 같이 전체 상세 한 장뿐이다.
+
+        `filters`는 '전체 상세 보기'가 지금 **검색해 둔** 조건이다. Streamlit의
+        다운로드 버튼이 거른 표를 그대로 내려주므로(`app.py:385-389`), 여기서도
+        같은 조건을 다시 적용하고 순위를 1부터 다시 매긴다. 화면이 거른 행을
+        파이썬에 보내는 대신 조건만 보내므로, 두 쪽이 같은 술어를 쓴다.
+        """
         # 저장 대화상자는 계산이 아니라 사용자 선택이므로 작업자에 맡기지 않는다.
         # 닫으면 요청 자체가 생기지 않아 진행 중인 계산도 건드리지 않는다.
         chosen = self._ask_save_path(CSV_FILENAME)
@@ -389,9 +411,8 @@ class DesktopApi:
         target = Path(chosen)
 
         def job(on_batch: OnBatch) -> Fragments:
-            table = self._renderer.csv_table(dna, on_batch)
-            with target.open("w", encoding="utf-8-sig", newline="") as handle:
-                csv.writer(handle).writerows(table)
+            table = self._renderer.csv_table(dna, on_batch, filters)
+            target.write_bytes(csv_bytes(table))
             return {
                 "notice": '<p class="notice">저장했습니다: '
                 f"{html.escape(str(target))}</p>"

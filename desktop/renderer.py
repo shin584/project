@@ -8,25 +8,12 @@ from typing import Any
 import core
 
 from desktop.api import OnBatch
+from desktop.detail_view import DetailFilter, detail_fragment, detail_table
 from desktop.prediction_views import (
     best_candidates_fragment,
     variant_comparison_fragment,
 )
 from desktop.xai_view import controls_template, explanation_fragment
-
-EFF = "예측 점수 (%)"
-DETAIL_COLUMNS = [
-    "순위",
-    "Cas 변종",
-    "PAM",
-    "가이드 서열 (RNA)",
-    "가닥",
-    "거리 (bp)",
-    "원출력",
-    EFF,
-    "점수 기준",
-]
-_SCORE_KIND_LABEL = {"efficiency": "절단 효율", "percentile": "학습 분포 백분위"}
 
 
 def _table(headers: list[str], rows: list[list[Any]], attrs: list[dict]) -> str:
@@ -44,20 +31,6 @@ def _table(headers: list[str], rows: list[list[Any]], attrs: list[dict]) -> str:
         f'<table class="grid"><thead><tr>{head}</tr></thead>'
         f"<tbody>{''.join(body)}</tbody></table>"
     )
-
-
-def _detail_cells(row: core.VariantResult, rank: int) -> list[Any]:
-    return [
-        rank,
-        row.cas_name,
-        row.pam_seq,
-        core.dna_to_rna(row.guide_seq),
-        row.strand,
-        row.distance,
-        round(row.raw_score, 4),
-        round(row.efficiency_pct, 2),
-        _SCORE_KIND_LABEL[row.score_kind],
-    ]
 
 
 class PredictionRenderer:
@@ -117,16 +90,11 @@ class PredictionRenderer:
 
     def prediction_fragments(self, dna: str, on_batch: OnBatch) -> dict[str, str]:
         rows = self._rows_with_progress(dna, on_batch)
-        detail = _table(
-            DETAIL_COLUMNS,
-            [_detail_cells(r, i) for i, r in enumerate(rows, start=1)],
-            [{"data-site-key": r.site_key, "data-head": r.cas_name} for r in rows],
-        )
         return {
             "best": best_candidates_fragment(rows),
             "variants": variant_comparison_fragment(rows),
             "detail": (
-                f'<section id="detail"><h2>전체 상세 보기</h2>{detail}</section>'
+                detail_fragment(rows)
                 + controls_template(core.scan_all(dna).sites, rows, self._explain_heads)
             ),
         }
@@ -160,8 +128,9 @@ class PredictionRenderer:
             self._predictors[("A", site.cas_type)], site, head, method, params, size, on_batch
         )
 
-    def csv_table(self, dna: str, on_batch: OnBatch) -> list[list[Any]]:
-        rows = self._rows_with_progress(dna, on_batch)
-        return [DETAIL_COLUMNS] + [
-            _detail_cells(r, i) for i, r in enumerate(rows, start=1)
-        ]
+    def csv_table(
+        self, dna: str, on_batch: OnBatch, filters: dict[str, Any] | None = None
+    ) -> list[list[Any]]:
+        # 거르고 나서 번호를 다시 매긴다 — Streamlit이 내려주는 표와 같다.
+        chosen = DetailFilter.parse(filters)
+        return detail_table(chosen.apply(self._rows_with_progress(dna, on_batch)))

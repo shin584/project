@@ -206,6 +206,22 @@ def test_real_renderer_uses_core_with_monotonic_progress_across_both_models():
     assert {cells[1] for cells in best[1:]} == {"SpCas9-NG", "Cas12a"}
 
 
+def test_real_renderer_csv_filters_then_renumbers():
+    """진짜 렌더러도 거른 뒤 1부터 번호를 다시 매긴다 (Streamlit의 다운로드와 같다)."""
+    renderer = PredictionRenderer(
+        {("A", "SpCas9"): FixedPredictor(), ("A", "Cas12a"): FixedPredictor()}
+    )
+    noop = lambda done, total: None  # noqa: E731
+    everything = renderer.csv_table(DNA, noop)
+    only_cas12a = renderer.csv_table(DNA, noop, {"cas_names": ["Cas12a"]})
+    assert only_cas12a[0] == everything[0]  # same columns
+    assert {cells[1] for cells in only_cas12a[1:]} == {"Cas12a"}
+    assert [cells[0] for cells in only_cas12a[1:]] == list(
+        range(1, len(only_cas12a))
+    )
+    assert 0 < len(only_cas12a) < len(everything)
+
+
 def test_real_renderer_propagates_progress_cancellation():
     renderer = PredictionRenderer({("A", "SpCas9"): FixedPredictor()})
 

@@ -48,8 +48,21 @@ def main(*, preview: bool = False) -> int:
         )
         if window is None:
             raise RuntimeError("Could not create the desktop window.")
+        def ask_save_path(filename: str) -> str | None:
+            """The OS save dialog, standing in for the browser download (#185).
+
+            pywebview answers with a path, a one-item sequence, or nothing when
+            the dialog is closed; the boundary wants a path or None.
+            """
+            chosen = window.create_file_dialog(
+                webview.SAVE_DIALOG, save_filename=filename
+            )
+            if not chosen:
+                return None
+            return chosen if isinstance(chosen, str) else chosen[0]
+
         dispatcher = Dispatcher(webview_emitter(window))
-        api = DesktopApi(renderer, dispatcher)
+        api = DesktopApi(renderer, dispatcher, ask_save_path=ask_save_path)
         window.expose(
             api.prepare,
             api.scan_sites,

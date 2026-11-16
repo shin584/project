@@ -39,7 +39,7 @@ JS ◀──(evaluate_js)────── window.xaiDesktop.onEvent(event)
 | `scan_sites(dna)` | 사이트 탐색 | 조각 `sites` |
 | `predict(dna)` | 예측 | 조각 `best`, `variants`, `detail` |
 | `explain(dna, site_key, head, method, params, size)` | XAI 한 기법 | 조각 `xai` |
-| `save_csv(dna)` | CSV 저장 | 조각 `notice` |
+| `save_csv(dna, filters)` | CSV 저장 | 조각 `notice` |
 | `cancel()` | 진행 중·대기 중 요청 취소 | 없음 |
 
 - `dna` — 사용자가 넣은 81bp 서열 그대로. 검증은 파이썬이 한다 (실패는 `error` 이벤트).
@@ -64,6 +64,22 @@ JS ◀──(evaluate_js)────── window.xaiDesktop.onEvent(event)
 돌려주고 **아무 작업도 맡기지 않는다** — 진행 중인 계산도 건드리지 않는다.
 CSV는 Streamlit 화면과 같이 **전체 상세 한 장뿐**이고, 파일 이름도 같다
 (`crispr_prediction_results.csv`). `cancel()`도 `{"request_id": null}`이다.
+
+- `filters` — '전체 상세 보기'가 **검색해 둔** 조건. 생략하면 전부 통과다(= 화면의
+  기본값). `{"cas_names": [이름...], "eff_range": [최소, 최대], "dist_range": [최소, 최대]}`
+  이고, 범위는 양끝을 포함하며 화면의 슬라이더 한계(점수 0~100, 거리 0~15) 밖이면
+  `error` 이벤트가 간다. Streamlit의 다운로드 버튼이 **거른 표**를 내려주므로
+  (`app.py:385-389`) 데스크톱도 같은 조건을 다시 적용하고 순위를 1부터 다시 매긴다.
+  화면이 거른 행 대신 조건만 보내는 이유는 양쪽이 같은 술어를 쓰게 하려는 것이다
+  (`desktop/detail_view.py`의 `DetailFilter`). 화면은 각 행의 `data-cas-name`·
+  `data-eff`·`data-dist`로 같은 비교를 하고, 뒤의 둘은 **반올림 전** 값이라
+  경계에서도 결과가 갈라지지 않는다. 필터가 보는 것은 `data-cas-name`이지
+  `data-head`가 아니다 — 지금은 값이 같지만 헤드는 모델 출력의 인덱스이고
+  `cas_name`은 예측 행의 이름이다 (`CONTEXT.md`).
+
+저장한 파일은 Streamlit의 다운로드와 **바이트까지 같다**: UTF-8 BOM으로 시작하고
+줄 끝은 CRLF다 (`desktop/api.py`의 `csv_bytes`). 둘 다 `os.linesep`에 맡기지 않고
+못 박았다 — #181 기준 파일은 고정된 산출물이고 게이트 2가 바이트로 비교한다.
 
 `prepare()`는 창을 띄운 직후에 부른다. 화면은 "모델 준비 중"을 보여주다가
 `ready`를 받고 분석 버튼을 연다. 여러 번 불러도 안전하다 — 로딩은 한 번만
@@ -103,6 +119,12 @@ data URI 안에 SVG를 넣을 때는 `xmlns`가 **있어야 한다**. 인라인�
 문서이기 때문이고, base64로 감싸이므로 조각 본문에는 그 주소가 드러나지 않는다.
 
 JS가 할 일은 슬롯 이름에 맞는 자리에 조각을 끼워 넣는 것뿐이다.
+
+**예외 하나: '전체 상세 보기'의 검색이다** (#185). 거기서 JS는 조각이 이미 들고 온
+행을 **숨기고 번호만 다시 매긴다** — HTML을 새로 만들지도, 값을 계산하지도 않는다.
+검색마다 파이썬에 다녀오면 예측을 통째로 다시 돌려야 하기 때문이다. 대신 거르는
+기준은 양쪽에 똑같이 있어야 해서, 저장할 때는 화면이 **거른 행이 아니라 조건**을
+보내고 파이썬이 같은 술어로 다시 거른다 (§1의 `filters`).
 
 ### 표의 열
 
@@ -198,12 +220,19 @@ from desktop.fake import FakeRenderer
 
 window = webview.create_window("XAI", html=SCREEN_HTML)  # 로컬 서버 없이 문자열로
 # 창을 띄운 뒤 api.prepare() 를 한 번 부르고, ready 를 받으면 버튼을 연다.
+def ask_save_path(name):
+    # pywebview는 경로 하나, 한 칸짜리 묶음, 또는 (닫으면) 빈 값을 돌려준다.
+    # 경계가 받는 것은 경로 아니면 None 둘뿐이다 (`desktop/app.py`와 같다).
+    chosen = window.create_file_dialog(webview.SAVE_DIALOG, save_filename=name)
+    if not chosen:
+        return None
+    return chosen if isinstance(chosen, str) else chosen[0]
+
+
 api = DesktopApi(
     FakeRenderer(step_delay=0.05),
     Dispatcher(webview_emitter(window)),
-    ask_save_path=lambda name: window.create_file_dialog(
-        webview.SAVE_DIALOG, save_filename=name
-    ),
+    ask_save_path=ask_save_path,
 )
 window.expose(api.scan_sites, api.predict, api.explain, api.save_csv, api.cancel)
 webview.start(gui="edgechromium", http_server=False)
@@ -223,6 +252,12 @@ webview.start(gui="edgechromium", http_server=False)
 | **그래프 크기 인자를 추가** | `explain`의 `size` 인자. `params`와 **따로** 받아 캐시 키에 들어가지 않게 했다 |
 | **차트는 URI 방식으로 통일** | 인라인 SVG를 없애고 `<img src="data:…">` 하나로 고정했다 (§2) |
 | **CSV는 단일 파일 저장** | `save_csv(dna)`에서 `view`를 뺐다. Streamlit과 같이 전체 상세 한 장이다 |
+
+2026-11-16, #185 작업 중 아래 하나를 더 승인받아 넣었다.
+
+| 결정 | 어떻게 들어갔나 |
+|---|---|
+| **CSV에 필터 조건을 전달** | `save_csv(dna, filters)`와 `Renderer.csv_table(dna, on_batch, filters)`에 **선택** 인자를 더했다. 빠뜨리면 전부 통과라 기존 호출은 그대로 돈다. Streamlit이 **거른 표**를 내려주는데 `save_csv(dna)`만으로는 전체 행밖에 저장할 수 없어, 기본 필터가 아닌 상태에서 게이트 2의 CSV diff가 깨진다 |
 
 다음에 경계를 바꿀 때도 같은 절차를 따른다: #177에서 승인을 받고, 이 문서와
 `desktop/api.py`, `tests/test_desktop_api.py`를 같은 PR에서 함께 고친다.

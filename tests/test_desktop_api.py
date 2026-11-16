@@ -31,7 +31,7 @@ from desktop.api import (
     webview_emitter,
 )
 from desktop.fake import FakeRenderer
-from desktop.renderer import DETAIL_COLUMNS
+from desktop.detail_view import DETAIL_COLUMNS
 
 # 81bp. + 가닥 16에 Cas12a TTTA, 40에 SpCas9 AGG가 있다 (#179 게이트 입력과 같은 배치).
 DNA = (
@@ -156,6 +156,41 @@ def test_save_csv_writes_the_chosen_file(rig):
     header = saved.read_text(encoding="utf-8-sig").splitlines()[0]
     assert header.split(",") == DETAIL_COLUMNS  # app.py의 전체 상세 열과 같아야 한다
     assert str(saved) in rec.of(rid)[-1]["fragments"]["notice"]
+
+
+def test_saved_csv_is_written_like_the_streamlit_download(rig):
+    """BOM + CRLF. `df.to_csv(index=False).encode("utf-8-sig")`와 같아야 한다."""
+    api, rec, _, saved = rig
+    rid = api.save_csv(DNA)["request_id"]
+    rec.wait_for(_is("result", rid))
+    raw = saved.read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf")
+    assert raw.count(b"\r\n") == raw.count(b"\n")
+
+
+def test_save_csv_applies_the_filters_and_renumbers_ranks(rig):
+    """화면이 검색해 둔 조건을 CSV에도 적용한다 (Streamlit은 거른 표를 내려준다)."""
+    api, rec, _, saved = rig
+    rid = api.save_csv(DNA, {"cas_names": ["Cas12a"], "dist_range": [0, 15]})[
+        "request_id"
+    ]
+    rec.wait_for(_is("result", rid))
+    rows = [
+        line.split(",")
+        for line in saved.read_text(encoding="utf-8-sig").splitlines()[1:]
+    ]
+    assert rows, "거른 CSV가 비었다"
+    assert {cells[1] for cells in rows} == {"Cas12a"}
+    assert [cells[0] for cells in rows] == [str(i) for i in range(1, len(rows) + 1)]
+
+
+def test_save_csv_with_an_impossible_filter_is_an_error_not_a_dead_worker(rig):
+    api, rec, _, saved = rig
+    rid = api.save_csv(DNA, {"eff_range": [80, 20]})["request_id"]
+    rec.wait_for(_is("error", rid))
+    assert not saved.exists()
+    after = api.predict(DNA)["request_id"]
+    rec.wait_for(_is("result", after))
 
 
 def test_save_csv_dialog_closed_submits_nothing(tmp_path):
