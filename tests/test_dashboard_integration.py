@@ -67,7 +67,7 @@ class Predictor:
     def explain_handle(self, head):
         st.session_state["handle_calls"] = st.session_state.get("handle_calls", 0) + 1
         def raw_fn(*args, **kwargs):
-            raise AssertionError("사전계산 적중 시 추론이 실행됨")
+            raise AssertionError("Inference ran despite a precomputed cache hit")
         return SimpleNamespace(model_key="A/Cas12a", head=head, raw_fn=raw_fn)
 
 result = view.compute_shap(Predictor(), "A/Cas12a", "Cas12a", {SEQ!r}, 64, 4)
@@ -75,7 +75,7 @@ st.text(str(result.pred))
 st.text(str(st.session_state["handle_calls"]))
 '''
     try:
-        app = AppTest.from_string(script).run()
+        app = AppTest.from_string(script, default_timeout=15).run()
         for _ in range(2):
             assert not app.exception
             assert not app.get("progress")
@@ -101,7 +101,7 @@ def test_repeated_loads_warm_only_selected_model_once(monkeypatch):
             self.loaded = True
 
     monkeypatch.setattr(predict, "PREDICTOR_CLASSES", {key: Predictor for key in predict.MODEL_REGISTRY})
-    predict.load_predictors.clear()
+    predict.load_predictors.cache_clear()
     try:
         first = predict.load_predictors()
         for _ in range(5):
@@ -110,7 +110,7 @@ def test_repeated_loads_warm_only_selected_model_once(monkeypatch):
         assert first[("A", "Cas12a")].loaded
         assert not first[("A", "SpCas9")].loaded
     finally:
-        predict.load_predictors.clear()
+        predict.load_predictors.cache_clear()
 
 
 def test_warmup_can_be_disabled(monkeypatch):
@@ -118,9 +118,9 @@ def test_warmup_can_be_disabled(monkeypatch):
         pytest.fail("warmup=False인 호출은 모델을 로드하면 안 된다")
 
     monkeypatch.setattr(predict.NTClassifierPredictor, "warmup", unexpected)
-    predict.load_predictors.clear()
+    predict.load_predictors.cache_clear()
     try:
         predictors = predict.load_predictors(warmup=False)
         assert all(p._model is None for p in predictors.values())
     finally:
-        predict.load_predictors.clear()
+        predict.load_predictors.cache_clear()

@@ -25,17 +25,17 @@ import logging
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from functools import cache
 from typing import Callable
 
 import numpy as np
-import streamlit as st
 
 import model_source
 from model_source import configure_offline, is_packaged, resource_root
 from pam_scanner import (
     CAS_CONFIGS,
     SPCAS9_VARIANTS, CandidateSite, ScanResult, VariantResult,
-    gaussian_penalty, variant_compatible,
+    variant_compatible,
 )
 
 
@@ -85,7 +85,6 @@ class ModelSpec:
     model:       str               # 'A' | 'B'
     cas:         str               # 'SpCas9' | 'Cas12a'
     paths:       tuple[str, ...]   # 모델 파일 (미연동이면 빈 튜플)
-    score_scale: float             # 모델 출력 → 거리 보정 점수 환산 배율
     output_mode: str = "raw"       # 위 OUTPUT_MODES 중 하나
     #: output_mode가 "zscore"일 때만 쓴다. **학습 때 타깃을 표준화하며 쓴** 평균·표준편차.
     #: 평가 데이터로 다시 구한 값이 아니라, 학습 파이프라인이 적용한 바로 그 값이어야 한다.
@@ -126,11 +125,11 @@ _SPCAS9_TARGET_STD = (
 
 MODEL_REGISTRY: dict[tuple[str, str], ModelSpec] = {
     ("A", "SpCas9"): ModelSpec(
-        "A", "SpCas9", ("models/SpCas9.safetensors",), 100,
+        "A", "SpCas9", ("models/SpCas9.safetensors",),
         output_mode="zscore",
         target_mean=_SPCAS9_TARGET_MEAN, target_std=_SPCAS9_TARGET_STD),
     ("A", "Cas12a"): ModelSpec(
-        "A", "Cas12a", ("models/Cas12a.safetensors",), 1,
+        "A", "Cas12a", ("models/Cas12a.safetensors",),
         output_mode="raw"),
 }
 
@@ -197,16 +196,13 @@ def _result(spec: ModelSpec, site: CandidateSite, cas_name: str, raw: float) -> 
     efficiency_pct(화면 표시용)의 의미는 score_kind가 정한다.
       · "efficiency" — 예측 절단 효율 (%)
       · "percentile" — 학습 분포 안에서의 백분위 (%)   ← z-score 모델에서 평균·표준편차가 없을 때
-    final_score(거리 보정 점수) = 표시값 × 가우시안 거리 패널티 × 스케일 — 화면에는 쓰지 않는다.
     """
     head_index = SPCAS9_VARIANTS.index(cas_name) if cas_name in SPCAS9_VARIANTS else 0
     display, kind = _to_display_score(spec, raw, head_index)
-    clipped = display / 100.0
     return VariantResult(
         cas_name=cas_name, pam_seq=site.pam_seq, guide_seq=site.guide_seq,
         distance=site.distance, strand=site.strand,
         raw_score=float(raw),
-        final_score=clipped * gaussian_penalty(site.distance) * spec.score_scale,
         efficiency_pct=display,
         score_kind=kind,
         site_key=site.site_key, cas_type=site.cas_type,
@@ -272,7 +268,7 @@ class UnconnectedPredictor(BasePredictor):
 # 3. NT 예측기
 # ════════════════════════════════════════════════
 
-@st.cache_resource(show_spinner="토크나이저 준비 중...")
+@cache
 def load_nt_tokenizer(repo: str = NT_TOKENIZER_REPO):
     if is_packaged():
         configure_offline()
@@ -359,6 +355,7 @@ class NTClassifierPredictor(BasePredictor):
 
         # 텐서를 하나씩 읽어 바로 목표 자료형으로 바꾼다.
         # 파일 전체를 통째로 올린 뒤 변환하면 순간 사용량이 두 배가 된다.
+        logger.info("Loading model weights: %s/%s from %s", self.spec.model, self.spec.cas, path)
         with safe_open(path, framework="pt") as f:
             state = {k: f.get_tensor(k).to(dtype) for k in f.keys()}
 
@@ -572,14 +569,15 @@ PREDICTOR_CLASSES: dict[tuple[str, str], type[BasePredictor]] = {
 }
 
 
-@st.cache_resource(show_spinner="모델 불러오는 중... (처음 한 번은 오래 걸립니다)")
+@cache
 def load_predictors(warmup: bool = True) -> dict[tuple[str, str], BasePredictor]:
+    """프로세스에서 예측기와 선택 워밍업을 재사용한다. 초기화는 cache_clear()로 한다."""
     predictors = {}
     for key, spec in MODEL_REGISTRY.items():
         cls = PREDICTOR_CLASSES.get(key)
         predictors[key] = cls(spec) if (cls and spec.paths) else UnconnectedPredictor(spec)
     # 워밍업은 WARMUP_KEYS만. 전부 데우면 지연 로딩이 깨져 모든 가중치가 상주한다.
-    # 이 함수는 @st.cache_resource라 세션당 한 번만 돈다 (#151에서 캐시를 바꿀 때 유지할 것).
+    # 모듈 캐시는 화면 재실행 사이에도 유지되므로 같은 설정의 워밍업은 한 번만 돈다.
     if warmup:
         for key in WARMUP_KEYS:
             p = predictors.get(key)
@@ -627,8 +625,7 @@ def run_prediction(all_results: ScanResult, predictors: dict,
     for site in all_results.sites:
         if site.site_key in best:
             b = best[site.site_key]
-            site.raw_score, site.final_score, site.efficiency_pct = \
-                b.raw_score, b.final_score, b.efficiency_pct
+            site.raw_score, site.efficiency_pct = b.raw_score, b.efficiency_pct
             site.score_kind = b.score_kind
 
     return all_results
