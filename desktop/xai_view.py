@@ -165,10 +165,12 @@ def explanation_fragment(
         for name, a, b in layout
     )
     return (
-        '<section><h3>모델이 실제로 읽은 구간</h3>'
+        '<section><div class="xai-window" '
+        f'data-site-key="{html.escape(site.site_key, quote=True)}">'
+        '<h3>모델이 실제로 읽은 구간</h3>'
         f'<div class="window-sequence">{sequence}</div><p>{legend}</p>'
         '<p class="caption">초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, '
-        '회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.</p>'
+        '회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.</p></div>'
         f'<p>설명 대상: {html.escape(head)} · PAM {html.escape(site.pam_seq)} · '
         f'변이와의 거리 {site.distance} bp · 윈도우 {len(window)}bp (0부터 시작)</p>'
         + body + '</section>'

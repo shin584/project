@@ -1,0 +1,1088 @@
+{
+  "baseline": "5faeeec50e402325ef7659795cacaf6208f27495",
+  "captured_at": "2026-11-17T07:02:06.057950+00:00",
+  "source_sha256": {
+    "desktop/screen.py": "ce9bbde06a53d7b3b712b0160147666ba6a214f1a20d87aebdcfbc31db4c1594",
+    "desktop/xai_view.py": "de00c35ba1e60e354dab197f092fbddc3c1f73369eddf324d76def602d9ed6c3"
+  },
+  "events": [
+    {
+      "type": "progress",
+      "request_id": 1,
+      "done": 1,
+      "total": 1,
+      "operation": "prepare"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 8,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 11,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 13,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 5,
+      "done": 8,
+      "total": 32,
+      "operation": "explain"
+    },
+    {
+      "type": "progress",
+      "request_id": 5,
+      "done": 16,
+      "total": 32,
+      "operation": "explain"
+    },
+    {
+      "type": "progress",
+      "request_id": 5,
+      "done": 24,
+      "total": 32,
+      "operation": "explain"
+    },
+    {
+      "type": "progress",
+      "request_id": 5,
+      "done": 32,
+      "total": 32,
+      "operation": "explain"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 8,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 10,
+      "done": 8,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 12,
+      "done": 8,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 12,
+      "done": 11,
+      "total": 13,
+      "operation": "predict"
+    },
+    {
+      "type": "progress",
+      "request_id": 12,
+      "done": 13,
+      "total": 13,
+      "operation": "predict"
+    }
+  ],
+  "calls": [
+    "prepare",
+    "scan_sites",
+    "predict",
+    "explain",
+    "explain",
+    "scan_sites",
+    "predict",
+    "cancel",
+    "scan_sites",
+    "predict",
+    "scan_sites",
+    "predict",
+    "explain"
+  ],
+  "window_size": [
+    1280,
+    840
+  ],
+  "prediction_starts": {
+    "3": {
+      "label": "모델 예측 중... 61%",
+      "value": "61.53846153846154",
+      "hidden": false,
+      "viewport": [
+        1266,
+        803
+      ],
+      "boxes": {
+        "task-state": {
+          "top": 190.10000610351562,
+          "bottom": 231.70000839233398,
+          "visible": true
+        },
+        "task-label": {
+          "top": 200.90000915527344,
+          "bottom": 220.90000915527344,
+          "visible": true
+        },
+        "task-progress": {
+          "top": 204.90000915527344,
+          "bottom": 219.90000915527344,
+          "visible": true
+        },
+        "xai-site": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-head-control": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-window": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-metrics": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-controls": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      "settings": {
+        "top": 0,
+        "bottom": 0
+      },
+      "defaults": [
+        "80",
+        "32",
+        "64",
+        "4"
+      ]
+    },
+    "7": {
+      "label": "모델 예측 중... 61%",
+      "value": "61.53846153846154",
+      "hidden": false,
+      "viewport": [
+        1266,
+        803
+      ],
+      "boxes": {
+        "task-state": {
+          "top": 122.3499984741211,
+          "bottom": 163.95000076293945,
+          "visible": true
+        },
+        "task-label": {
+          "top": 133.15000915527344,
+          "bottom": 153.15000915527344,
+          "visible": true
+        },
+        "task-progress": {
+          "top": 137.15000915527344,
+          "bottom": 152.15000915527344,
+          "visible": true
+        },
+        "xai-site": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-head-control": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-window": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-metrics": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-controls": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      "settings": {
+        "top": 0,
+        "bottom": 0
+      },
+      "defaults": [
+        "80",
+        "32",
+        "64",
+        "4"
+      ]
+    },
+    "10": {
+      "label": "모델 예측 중... 61%",
+      "value": "61.53846153846154",
+      "hidden": false,
+      "viewport": [
+        1266,
+        803
+      ],
+      "boxes": {
+        "task-state": {
+          "top": 122.3499984741211,
+          "bottom": 163.95000076293945,
+          "visible": true
+        },
+        "task-label": {
+          "top": 133.15000915527344,
+          "bottom": 153.15000915527344,
+          "visible": true
+        },
+        "task-progress": {
+          "top": 137.15000915527344,
+          "bottom": 152.15000915527344,
+          "visible": true
+        },
+        "xai-site": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-head-control": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-window": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-metrics": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-controls": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      "settings": {
+        "top": 0,
+        "bottom": 0
+      },
+      "defaults": [
+        "80",
+        "32",
+        "64",
+        "4"
+      ]
+    },
+    "12": {
+      "label": "모델 예측 중... 61%",
+      "value": "61.53846153846154",
+      "hidden": false,
+      "viewport": [
+        1266,
+        803
+      ],
+      "boxes": {
+        "task-state": {
+          "top": 122.3499984741211,
+          "bottom": 163.95000076293945,
+          "visible": true
+        },
+        "task-label": {
+          "top": 133.15000915527344,
+          "bottom": 153.15000915527344,
+          "visible": true
+        },
+        "task-progress": {
+          "top": 137.15000915527344,
+          "bottom": 152.15000915527344,
+          "visible": true
+        },
+        "xai-site": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-head-control": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-window": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-metrics": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "xai-controls": {
+          "top": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      "settings": {
+        "top": 0,
+        "bottom": 0
+      },
+      "defaults": [
+        "80",
+        "32",
+        "64",
+        "4"
+      ]
+    }
+  },
+  "prediction": {
+    "rect": [
+      58,
+      50,
+      1642,
+      1092
+    ],
+    "label": "모델 예측 중... 61%",
+    "value": "61.53846153846154",
+    "hidden": false,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 190.10000610351562,
+        "bottom": 231.70000839233398,
+        "visible": true
+      },
+      "task-label": {
+        "top": 200.90000915527344,
+        "bottom": 220.90000915527344,
+        "visible": true
+      },
+      "task-progress": {
+        "top": 204.90000915527344,
+        "bottom": 219.90000915527344,
+        "visible": true
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "completed": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "tabs": [
+    {
+      "selected": "tab-best",
+      "resultsVisible": true,
+      "diagnosticsVisible": true,
+      "sitesVisible": true
+    },
+    {
+      "selected": "tab-variants",
+      "resultsVisible": false,
+      "diagnosticsVisible": false,
+      "sitesVisible": false
+    },
+    {
+      "selected": "tab-detail",
+      "resultsVisible": false,
+      "diagnosticsVisible": false,
+      "sitesVisible": false
+    },
+    {
+      "selected": "tab-xai",
+      "resultsVisible": false,
+      "diagnosticsVisible": false,
+      "sitesVisible": false
+    }
+  ],
+  "best": {
+    "rect": [
+      58,
+      50,
+      1642,
+      1092
+    ],
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "xai_running": {
+    "rect": [
+      58,
+      50,
+      1642,
+      1092
+    ],
+    "label": "IG 계산 중... 25%",
+    "value": "25",
+    "hidden": false,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 122.3499984741211,
+        "bottom": 163.95000076293945,
+        "visible": true
+      },
+      "task-label": {
+        "top": 133.15000915527344,
+        "bottom": 153.15000915527344,
+        "visible": true
+      },
+      "task-progress": {
+        "top": 137.15000915527344,
+        "bottom": 152.15000915527344,
+        "visible": true
+      },
+      "xai-site": {
+        "top": 378.75,
+        "bottom": 417.95000076293945,
+        "visible": true
+      },
+      "xai-head-control": {
+        "top": 437.95001220703125,
+        "bottom": 505.15001678466797,
+        "visible": true
+      },
+      "xai-window": {
+        "top": 515.1500244140625,
+        "bottom": 616.7500228881836,
+        "visible": true
+      },
+      "xai-metrics": {
+        "top": 636.75,
+        "bottom": 696.75,
+        "visible": true
+      },
+      "xai-controls": {
+        "top": 350.75,
+        "bottom": 893.7750244140625,
+        "visible": true
+      }
+    },
+    "settings": {
+      "top": 716.75,
+      "bottom": 736.75
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "after_ig": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 322.1499938964844,
+        "bottom": 361.3499946594238,
+        "visible": true
+      },
+      "xai-head-control": {
+        "top": 381.3500061035156,
+        "bottom": 448.55001068115234,
+        "visible": true
+      },
+      "xai-window": {
+        "top": 458.5500183105469,
+        "bottom": 560.150016784668,
+        "visible": true
+      },
+      "xai-metrics": {
+        "top": 580.1500244140625,
+        "bottom": 640.1500244140625,
+        "visible": true
+      },
+      "xai-controls": {
+        "top": 294.1499938964844,
+        "bottom": 837.1750183105469,
+        "visible": true
+      }
+    },
+    "settings": {
+      "top": 660.1500244140625,
+      "bottom": 680.1500244140625
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "xai_completed": {
+    "rect": [
+      58,
+      50,
+      1642,
+      1092
+    ],
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 322.1499938964844,
+        "bottom": 361.3499946594238,
+        "visible": true
+      },
+      "xai-head-control": {
+        "top": 381.3500061035156,
+        "bottom": 448.55001068115234,
+        "visible": true
+      },
+      "xai-window": {
+        "top": 458.5500183105469,
+        "bottom": 560.150016784668,
+        "visible": true
+      },
+      "xai-metrics": {
+        "top": 580.1500244140625,
+        "bottom": 640.1500244140625,
+        "visible": true
+      },
+      "xai-controls": {
+        "top": 294.1499938964844,
+        "bottom": 837.1750183105469,
+        "visible": true
+      }
+    },
+    "settings": {
+      "top": 660.1500244140625,
+      "bottom": 680.1500244140625
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "tab_switch_sent_requests": false,
+  "prediction_cancelled": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "after_stale_cancelled_event": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "prediction_error_event": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "after_stale_error_event": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-head-control": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-window": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-metrics": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-controls": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      }
+    },
+    "settings": {
+      "top": 0,
+      "bottom": 0
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  },
+  "after_retry": {
+    "label": "",
+    "value": null,
+    "hidden": true,
+    "viewport": [
+      1266,
+      803
+    ],
+    "boxes": {
+      "task-state": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-label": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "task-progress": {
+        "top": 0,
+        "bottom": 0,
+        "visible": false
+      },
+      "xai-site": {
+        "top": 322.1499938964844,
+        "bottom": 361.3499946594238,
+        "visible": true
+      },
+      "xai-head-control": {
+        "top": 381.3500061035156,
+        "bottom": 448.55001068115234,
+        "visible": true
+      },
+      "xai-window": {
+        "top": 458.5500183105469,
+        "bottom": 560.150016784668,
+        "visible": true
+      },
+      "xai-metrics": {
+        "top": 580.1500244140625,
+        "bottom": 640.1500244140625,
+        "visible": true
+      },
+      "xai-controls": {
+        "top": 294.1499938964844,
+        "bottom": 837.1750183105469,
+        "visible": true
+      }
+    },
+    "settings": {
+      "top": 660.1500244140625,
+      "bottom": 680.1500244140625
+    },
+    "defaults": [
+      "80",
+      "32",
+      "64",
+      "4"
+    ]
+  }
+}

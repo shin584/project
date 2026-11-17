@@ -69,6 +69,8 @@ SCREEN_HTML = r"""<!doctype html>
     fieldset label { display: inline-block; margin: 10px 16px 10px 0; }
     progress { width: min(500px, 70%); }
     .window-sequence { font: 22px monospace; letter-spacing: 2px; overflow-wrap: anywhere; }
+    .xai-window h3 { font-size: 16px; margin: 10px 0 6px; }
+    .xai-window p { font-size: 13px; line-height: 1.4; margin: 6px 0; }
     figcaption { margin-top: 12px; color: #58677c; }
     details { margin: 18px 0; }
     summary { cursor: pointer; }
@@ -104,16 +106,6 @@ SCREEN_HTML = r"""<!doctype html>
       <progress id="task-progress" max="100"></progress>
       <button id="cancel-task" type="button">계산 취소</button>
     </div>
-    <section id="results" hidden>
-      <h2>PAM 탐색 결과</h2>
-      <div data-slot="sites"></div>
-      <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
-      <h2>절단 효율 예측 결과</h2>
-      <p class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
-        SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다. 자세한 내용은 아래
-        '모델 출력 해석 상태'를 펼쳐 보세요. 거리 보정은 적용하지 않았고,
-        변이와의 거리는 '거리 (bp)' 열에서 확인할 수 있습니다.</p>
-    </section>
     <div role="tablist" aria-label="보기">
       <button id="tab-best" role="tab" aria-selected="true" aria-controls="view-best" tabindex="0">Best Candidates</button>
       <button id="tab-variants" role="tab" aria-selected="false" aria-controls="view-variants" tabindex="-1">변종 비교</button>
@@ -121,6 +113,16 @@ SCREEN_HTML = r"""<!doctype html>
       <button id="tab-xai" role="tab" aria-selected="false" aria-controls="view-xai" tabindex="-1">XAI 설명</button>
     </div>
     <section id="view-best" role="tabpanel" aria-labelledby="tab-best">
+      <section id="results" hidden>
+        <h2>PAM 탐색 결과</h2>
+        <div data-slot="sites"></div>
+        <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
+        <h2>절단 효율 예측 결과</h2>
+        <p class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
+          SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다. 자세한 내용은 아래
+          '모델 출력 해석 상태'를 펼쳐 보세요. 거리 보정은 적용하지 않았고,
+          변이와의 거리는 '거리 (bp)' 열에서 확인할 수 있습니다.</p>
+      </section>
       <div data-slot="best"><p>예측 결과가 없습니다.</p></div>
     </section>
     <section id="view-variants" role="tabpanel" aria-labelledby="tab-variants" hidden>
@@ -150,6 +152,7 @@ SCREEN_HTML = r"""<!doctype html>
           <select id="xai-head"></select>
         </div>
         <p id="xai-single-head" hidden></p>
+        <div id="xai-window"></div>
         <div class="metrics" id="xai-metrics"></div>
         <details>
           <summary>계산 설정</summary>
@@ -194,7 +197,11 @@ SCREEN_HTML = r"""<!doctype html>
       };
       const finish = () => {
         busy = false;
+        activeId = -1;
+        earlyEvents = [];
         byId("task-state").hidden = true;
+        byId("task-label").textContent = "";
+        byId("task-progress").removeAttribute("value");
         updateButton();
       };
       const showError = (error) => {
@@ -239,6 +246,9 @@ SCREEN_HTML = r"""<!doctype html>
 
       function explain() {
         if (!byId("xai-controls").reportValidity()) return;
+        if (byId("xai-window").firstElementChild?.dataset.siteKey !== byId("xai-site").value) {
+          byId("xai-window").replaceChildren();
+        }
         byId("xai-cost").textContent = `현재 설정 기준 추론 횟수 — IG ${Number(byId("ig-steps").value) + 2}회, ` +
           `SHAP 약 ${Number(byId("shap-n").value) * Number(byId("shap-bg").value)}회`;
         const head = byId("xai-head").value;
@@ -434,6 +444,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("notice").textContent = "PAM 탐색 중...";
         byId("results").hidden = true;
         byId("xai-controls").hidden = true;
+        byId("xai-window").replaceChildren();
         byId("task-state").hidden = true;
         detailSearched = null;  // the new analysis brings its own detail fragment
         byId('model-diagnostics')?.remove();
@@ -472,11 +483,13 @@ SCREEN_HTML = r"""<!doctype html>
           }
           if (event.request_id !== activeId) return;
           if (event.type === "progress") {
-            if (operation === "explain" || operation === "save_csv") {
+            if (operation === "predict" || operation === "explain" || operation === "save_csv") {
               const pct = event.total > 0 ? Math.min(100, Math.max(0, event.done / event.total * 100)) : 0;
               byId("task-progress").value = pct;
               const method = document.querySelector('[name="xai-method"]:checked').value;
-              byId("task-label").textContent = operation === "save_csv"
+              byId("task-label").textContent = operation === "predict"
+                ? `모델 예측 중... ${Math.floor(pct)}%`
+                : operation === "save_csv"
                 ? `CSV 저장 준비 중... ${Math.floor(pct)}%`
                 : `${method === "shap" ? "SHAP" : "IG"} 계산 중... ${Math.floor(pct)}%`;
             }
@@ -493,10 +506,16 @@ SCREEN_HTML = r"""<!doctype html>
             const target = slot(name);
             if (target) target.innerHTML = html;
           }
+          const windowSummary = slot("xai").querySelector(".xai-window");
+          if (windowSummary) byId("xai-window").replaceChildren(windowSummary);
           if (operation === "scan_sites") {
-            byId("notice").textContent = "모델 예측 중...";
+            byId("notice").textContent = "";
+            byId("task-label").textContent = "모델 예측 중... 0%";
+            byId("task-progress").value = 0;
+            byId("task-state").hidden = false;
             request("predict", analysisDna);
           } else if (operation === "predict") {
+            finish();
             const diagnostics = byId("model-diagnostics");
             if (diagnostics) byId("results").append(diagnostics);
             byId("welcome").hidden = true;
