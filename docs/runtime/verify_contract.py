@@ -798,6 +798,7 @@ def run_investigation(work: Path) -> int:
     """
     protocol = read_json(work / "snapshot/protocol.json")
     command = protocol.get("investigation_command")
+    producer_report, producer_raw = {}, {}
     if command:
         argv = [part.replace("{python}", sys.executable).replace("{work}", str(work))
                 .replace("{root}", str(ROOT)) for part in command]
@@ -816,13 +817,25 @@ def run_investigation(work: Path) -> int:
             report["execution"] = {"command": argv, "exit_code": finished.returncode,
                                    "executable": sys.executable}
             path.write_text(json.dumps(report, indent=2), encoding="utf-8")
-        return finished.returncode
-    report = {"investigations": [
+        if finished.returncode != 0 or protocol.get("diagnostic_producer") != 211:
+            return finished.returncode
+        producer_report = read_json(path)
+        with np.load(work / "investigation-raw.npz", allow_pickle=False) as archive:
+            producer_raw = {name: archive[name] for name in archive.files}
+    diagnostic_rows, diagnostic_raw = [], {}
+    if protocol.get("diagnostic_producer") == 211:
+        from gradient_diagnostics import run_diagnostics
+        diagnostic_rows, diagnostic_raw = run_diagnostics(work, CONTRACT, protocol)
+    produced = {r["id"] for r in diagnostic_rows}
+    report = producer_report or {"investigations": [
         {"id": name, "state": "unverified", "planned": definition["planned"],
          "completed": 0, "raw_arrays": [], "reason": "Measurement producer not yet registered"}
         for name, definition in protocol["investigations"].items()]}
+    report["investigations"] = [r for r in report["investigations"] if r["id"] not in produced] + diagnostic_rows
+    if set(producer_raw) & set(diagnostic_raw):
+        raise ValueError("Duplicate candidate/diagnostic raw array identity")
     (work / "investigations.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-    np.savez_compressed(work / "investigation-raw.npz")
+    np.savez_compressed(work / "investigation-raw.npz", **producer_raw, **diagnostic_raw)
     # Stage collection finished; Q17 still reports incomplete/nonzero in assembly.
     return 0
 

@@ -289,6 +289,25 @@ def assemble(work: Path) -> dict:
             outcome, counts = investigation_outcome(investigation, protocol)
             report["investigation_counts"] = counts
             report["investigations"] = investigation["investigations"]
+            if protocol.get("diagnostic_producer") == 211:
+                from gradient_diagnostics import (boundary_layer_inventory, plan_locations, validate_diagnostic_report,
+                                                   validate_settings)
+                validate_settings(protocol["diagnostic_protocol"])
+                targets = plan_locations(contract, read_json(work / "snapshot/diagnostic-history.json"),
+                                         documents["verify"], documents["diagnose"])
+                plan = read_json(work / "diagnostic-plan.json")
+                boundary_layers = boundary_layer_inventory(work, contract)
+                if (plan["targets"] != targets or plan["settings"] != protocol["diagnostic_protocol"]
+                        or plan["boundary_layers"] != boundary_layers
+                        or plan["history_sha256"] != digest(work / "snapshot/diagnostic-history.json")
+                        or plan["core_sha256"] != digest(work / "verification-core.json")
+                        or plan["diagnose_sha256"] != digest(work / "diagnose.json")
+                        or report["execution"]["investigation"].get("auxiliary_artifacts", {}).get(
+                            "diagnostic-plan.json") != digest(work / "diagnostic-plan.json")):
+                    raise ValueError("Diagnostic preregistration/input identity mismatch")
+                with np.load(work / "snapshot/inputs.npz", allow_pickle=False) as inputs:
+                    validate_diagnostic_report(investigation, raw["investigation"], targets,
+                                               documents["reference"]["models"], inputs, boundary_layers)
             if "selection" in protocol.get("candidate_protocol", {}):
                 errors += candidate_evidence_errors(investigation, raw.get("investigation", {}),
                                                     protocol, contract)

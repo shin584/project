@@ -257,6 +257,10 @@ carries the same 64/4 default, so it inherits the decision rather than making it
 
 ## Measurement scope and limits
 
+The additive fixed-location/conditional float64 producer is documented in
+[diagnostics-211.md](diagnostics-211.md). Its fixture validation is separate from
+the official #212/#213 measurements.
+
 `verification.json` records, for both models: forward parity against the
 TensorFlow backend, layer-by-layer activation parity, bitwise weight placement,
 IG path function match, finite-difference gradient checks, IG completeness and

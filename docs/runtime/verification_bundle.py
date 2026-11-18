@@ -126,6 +126,8 @@ def initialize(work: Path, run_id: str, contract_path: Path,
 
     retain(contract_path, "contract.json")
     retain(protocol_path, "protocol.json")
+    if protocol.get("diagnostic_producer") == 211:
+        retain(ROOT / "docs/runtime/verification.json", "diagnostic-history.json")
     retain(ROOT / "docs/runtime/offline-requirements.txt", "offline-requirements.txt")
     # Include the local import closure, not the unrelated UI or NT model bytes.
     code = [ROOT / name for name in (
@@ -287,7 +289,7 @@ def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
         receipt.update(ended_at=now(), exit_code=result["exit_code"],
                        final_environment=environment(),
                        auxiliary_artifacts={name: digest(work / name) for name in (
-                           ("investigation-stdout.txt", "investigation-stderr.txt") if stage == "investigation" else
+                           ("investigation-stdout.txt", "investigation-stderr.txt", "diagnostic-plan.json") if stage == "investigation" else
                            ("offline-install-stdout.txt", "offline-install-stderr.txt",
                             "offline-run-stdout.txt", "offline-run-stderr.txt") if stage == "offline" else ())
                            if (work / name).exists()},
