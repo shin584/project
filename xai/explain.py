@@ -4,6 +4,7 @@
 모든 값은 모델 원출력(0~1 비율, clip 전) 기준이고, 화면에서 ×100(%p)으로 바꿔 보여준다.
 """
 
+import threading
 from dataclasses import dataclass
 
 import numpy as np
@@ -23,6 +24,9 @@ class SHAPResult:
     base_value: float          # E[f] (배경 서열 평균 예측)
     pred: float                # f(x)
     additivity_error: float    # |base + Σ SHAP − f(x)|
+    # 값을 만든 두 seed (provenance). kernel_shap은 항상 채운다. 직접 만든 결과는 None.
+    background_seed: int | None = None   # 배경 서열 seed
+    subset_seed: int | None = None       # 부분집합 표본추출 seed
 
 
 #: IG 적분 단계를 한 번에 몇 개씩 역전파할지. 메모리가 부족하면 줄인다.
@@ -77,6 +81,8 @@ def _onehot(seq: str) -> np.ndarray:
 
 
 def _random_backgrounds(length: int, n: int, seed: int) -> np.ndarray:
+    """seed로 정한 무작위 원핫 배경 n개. 행 우선으로 뽑으므로 n을 늘려도 앞 n개는
+    같은 난수열 prefix를 공유한다 (배경 수 비교 실험이 같은 배경 위에서 늘어난다)."""
     rng = np.random.default_rng(seed)
     idx = rng.integers(0, 4, size=(n, length))
     out = np.zeros((n, length, 4), dtype=np.float32)
@@ -84,9 +90,17 @@ def _random_backgrounds(length: int, n: int, seed: int) -> np.ndarray:
     return out
 
 
+#: 공용 kernel_shap 호출끼리 NumPy 전역 RNG 저장→seed→부분집합 표본추출→복원을
+#: 직렬화하는 잠금. 이 함수를 거치는 호출만 서로 보호한다. 전역 RNG를 직접 쓰는
+#: 관련 없는 코드가 같은 시각에 끼어드는 것까지 막지는 못한다.
+_SHAP_RNG_LOCK = threading.Lock()
+
+
 def kernel_shap(handle, window_seq: str, nsamples: int = 512,
                 n_background: int = 16, seed: int = 0,
-                on_batch=None, *, use_disk_cache: bool = True) -> SHAPResult:
+                on_batch=None, *, background_seed: int | None = None,
+                subset_seed: int | None = None,
+                use_disk_cache: bool = True) -> SHAPResult:
     """염기 위치를 특징으로 하는 KernelSHAP.
 
     '꺼진' 위치는 무작위 배경 서열의 염기로 바꿔 모델에 넣고, 배경 n개의 평균을 쓴다.
@@ -98,14 +112,26 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
 
     계산 전에 사전계산 저장소(xai/shap_cache.py)를 먼저 조회한다. 적중하면 추론 없이
     바로 돌려준다. 키 재료(model_key, head)는 handle에 실려 온다. 사전계산은 seed=0으로
-    만들므로 다른 seed는 조회하지 않는다.
+    만들므로 두 seed가 모두 0일 때만 조회한다.
 
-    seed는 배경 서열과 shap의 부분집합 표본추출을 **함께** 정한다. 둘 다 고정해야
-    같은 화면을 두 번 열었을 때 같은 기여도가 나온다.
+    seed는 배경 서열(background_seed)과 shap의 부분집합 표본추출(subset_seed)을
+    **함께** 정한다. 둘 다 고정해야 같은 화면을 두 번 열었을 때 같은 기여도가 나온다.
+    비교 실험은 background_seed·subset_seed로 한 축씩 따로 바꾼다. 따로 주지 않은
+    축은 seed를 따른다. 결과에는 실제로 쓴 두 seed가 남는다.
+
+    동시 호출: 부분집합 표본추출은 NumPy 전역 RNG를 쓴다. 공용 잠금으로 이 함수의
+    호출끼리 직렬화하므로, 같은 입력·seed면 동시에 불러도 직렬 호출과 같은 값이 나온다.
+    정상 완료·예외·협력 취소(on_batch가 던지는 예외) 모두 호출 전 RNG 상태로 되돌린다.
+    shap은 표본추출과 모델 평가를 한 호출 안에서 이어 하므로 잠금은 계산 전체를
+    덮는다. on_batch도 잠금 안에서 불리니, 콜백에서 오래 막히거나 다른 kernel_shap
+    호출을 기다리면 그동안 다른 호출이 모두 기다린다.
     """
+    background_seed = seed if background_seed is None else background_seed
+    subset_seed = seed if subset_seed is None else subset_seed
     model_key = getattr(handle, "model_key", None)
     head = getattr(handle, "head", None)
-    if use_disk_cache and model_key is not None and head is not None and seed == 0:
+    if (use_disk_cache and model_key is not None and head is not None
+            and background_seed == 0 and subset_seed == 0):
         from xai import shap_cache
         hit = shap_cache.load(shap_cache.shap_cache_key(
             model_key, head, window_seq, nsamples, n_background))
@@ -116,7 +142,7 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
 
     onehot = _onehot(window_seq)
     length = onehot.shape[0]
-    backgrounds = _random_backgrounds(length, n_background, seed)
+    backgrounds = _random_backgrounds(length, n_background, background_seed)
 
     # shap은 f를 여러 번 부른다(배경 기준값 1회 + 샘플 1회). 호출마다 0부터 다시 세면
     # 진행률이 뒤로 돌아가므로, 누적 서열 수를 전체 예상치에 대고 보고한다.
@@ -145,18 +171,22 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     # 훨씬 작으므로(기본 64 vs 2^30) 표본추출 결과가 값에 그대로 남는다. seed를
     # 걸지 않으면 같은 입력·같은 설정으로도 호출마다 다른 기여도가 나온다 (#193에서
     # 실측: 같은 seed 재호출로 최대 1.0 차이). 호출자의 RNG 상태는 되돌려 준다.
-    rng_state = np.random.get_state()
-    np.random.seed(seed)
-    try:
-        values = explainer.shap_values(np.ones((1, length)), nsamples=nsamples,
-                                       l1_reg=0, silent=True)
-    finally:
-        np.random.set_state(rng_state)
+    # 다른 kernel_shap 호출이 저장과 복원 사이에 seed를 바꾸지 못하게 잠근다. 표본추출과
+    # 모델 평가가 shap_values 안에서 이어지므로 계산 전체가 잠금 안에 있다.
+    with _SHAP_RNG_LOCK:
+        rng_state = np.random.get_state()
+        np.random.seed(subset_seed)
+        try:
+            values = explainer.shap_values(np.ones((1, length)), nsamples=nsamples,
+                                           l1_reg=0, silent=True)
+        finally:
+            np.random.set_state(rng_state)
     values = np.asarray(values, dtype=np.float64).reshape(-1)[:length]
     base = float(np.asarray(explainer.expected_value).reshape(-1)[0])
     pred = float(handle.raw_fn(onehot[None])[0])
     return SHAPResult(values=values, base_value=base, pred=pred,
-                      additivity_error=abs(base + values.sum() - pred))
+                      additivity_error=abs(base + values.sum() - pred),
+                      background_seed=int(background_seed), subset_seed=int(subset_seed))
 
 @dataclass
 class RolloutResult:

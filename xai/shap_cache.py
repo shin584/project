@@ -45,7 +45,9 @@ def load(key: str, root: Path | str | None = None):
             return SHAPResult(values=np.asarray(f["values"], dtype=np.float64),
                               base_value=float(f["base_value"]),
                               pred=float(f["pred"]),
-                              additivity_error=float(f["additivity_error"]))
+                              additivity_error=float(f["additivity_error"]),
+                              # 사전계산은 seed=0으로만 만들고 그때만 조회한다.
+                              background_seed=0, subset_seed=0)
     except Exception:
         return None
 
