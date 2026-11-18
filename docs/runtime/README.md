@@ -6,6 +6,9 @@ measurements below describe historical #193 evidence; its contract, report and
 raw results are preserved. #206 fixture tests do not constitute official
 remeasurement or independent recovery (#212/#213).
 
+Declared-wheel preparation and independent minimum recovery are documented in
+[Independent minimum recovery (#209)](recovery-209.md).
+
 Work in `C:/project/MC_project/dashboard_v3`, branch `dashboard_v3`.
 This ticket picks the runtime that will run the two adopted non-NT checkpoints
 on offline Windows and freezes the numeric contract the later tickets verify
@@ -126,7 +129,7 @@ python docs/runtime/verify_contract.py reference   # tensorflow backend, separat
 python docs/runtime/verify_contract.py verify      # torch backend, judges the frozen criteria
 python docs/runtime/verify_contract.py diagnose    # addendum 1 gradient diagnostics
 python docs/runtime/verify_contract.py ram         # per-stage RSS, one model per process
-python docs/runtime/stage_offline.py <path>        # TF-free staging, network blocked
+python docs/runtime/stage_offline.py <path>        # historical #193 staging command
 python docs/runtime/assemble_verification.py       # writes verification.json
 ```
 
