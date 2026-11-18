@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "issue": 193,
+  "status": "frozen",
+  "frozen_at": "2026-11-18",
+  "freeze_rule": "Every threshold and case in this file is registered before the corresponding measurement runs. Measured values are recorded in verification.json only. A failing criterion is reported as a failure; it is never relaxed after the fact.",
+  "runtime": {
+    "adopted": "keras-3-on-torch-backend",
+    "versions": {
+      "python": "3.13.7",
+      "keras": "3.14.1",
+      "torch": "2.12.0+cpu",
+      "numpy": "2.3.2",
+      "shap": "0.52.0",
+      "h5py": "3.14.0"
+    },
+    "backend_env": {"KERAS_BACKEND": "torch"},
+    "inference_mode": "model(x, training=False); no Model.predict, no optimizer, compile=False on load",
+    "dtype": "float32 for every model input, weight and forward output; reductions over gradients and attributions accumulate in float64",
+    "threads": {"torch_num_threads": 4},
+    "gradient_owner": "same runtime - torch autograd on the Keras 3 graph. No forward-only runtime, no auxiliary runtime, no second model copy.",
+    "conversion_artifacts": "none. The adopted .keras files are loaded as-is, so there is no converted-model SHA to track.",
+    "reference_runtime_for_parity": "keras 3.14.1 on the tensorflow 2.21.0 backend, same .keras bytes, separate process"
+  },
+  "models": {
+    "spcas9_non_nt": {
+      "path": "models/non_nt/spcas9-9hydra-v2/model.keras",
+      "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+      "inputs": [{"name": "In_Seq", "shape": [30, 4]}],
+      "n_outputs": 9,
+      "raw_unit": "z-score (training-distribution standardized), order equals SPCAS9_VARIANTS",
+      "verified_head": {"index": 1, "name": "Output_SpCas9_NG"},
+      "ops_to_confirm": ["Conv1D", "BatchNormalization", "LSTM", "Dropout", "Dense"]
+    },
+    "cas12a_non_nt": {
+      "path": "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",
+      "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+      "inputs": [{"name": "Input_Seq", "shape": [34, 4]}, {"name": "Input_Feat", "shape": [354]}],
+      "n_outputs": 1,
+      "raw_unit": "sigmoid probability in [0, 1]",
+      "verified_head": {"index": 0, "name": "dense_2"},
+      "ops_to_confirm": ["Conv1D", "BatchNormalization", "LeakyReLU", "Concatenate", "Bidirectional(LSTM)", "GlobalAveragePooling1D", "Dropout", "Dense"],
+      "feature_source": "cas12a.features.extract_seq_features (354 = 2 GC + 22x16 dinucleotide)"
+    }
+  },
+  "cases": {
+    "note": "Numeric probes, not biological targets. The two real windows come from the #190 demo sequences through core.scan_all; the homopolymer and alternating windows are degenerate inputs chosen to expose backend differences, and neither carries a valid PAM in the Cas12a layout.",
+    "spcas9": [
+      {"id": "S1", "window": "CCGGTCGCTTTAAGAATAAATAAAAGCGCC", "origin": "demo sequence 1, + strand, PAM start 32"},
+      {"id": "S2", "window": "TCCGCATCGAGCCAACCTTCTGTAAGAGGG", "origin": "demo sequence 3, + strand, PAM start 42"},
+      {"id": "S3", "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "origin": "degenerate homopolymer"},
+      {"id": "S4", "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGC", "origin": "degenerate alternating GC"}
+    ],
+    "cas12a": [
+      {"id": "C1", "window": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT", "origin": "demo sequence 1, + strand"},
+      {"id": "C2", "window": "TTTATAAAGTTTTGGCTCCTTACCTGGTTCCCCT", "origin": "demo sequence 3, - strand"},
+      {"id": "C3", "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "origin": "degenerate homopolymer"},
+      {"id": "C4", "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC", "origin": "degenerate alternating GC"}
+    ]
+  },
+  "settings": {
+    "user_default": {
+      "ig_steps": 32,
+      "ig_rule": "midpoint, alpha = (i + 0.5) / steps",
+      "ig_baseline": "zero vector for every model input",
+      "shap_nsamples": 64,
+      "shap_n_background": 4,
+      "shap_seed": 0,
+      "shap_background": "uniform random ACGT one-hot, numpy default_rng(seed)"
+    },
+    "finer_verification_run": {
+      "ig_steps": 256,
+      "shap_nsamples": 512,
+      "shap_n_background": 32,
+      "purpose": "Reference for resolution and background-sampling stability only. The user-facing default stays at 32 / 64 / 4 and is never raised without telling the user."
+    },
+    "cas12a_ig_inputs": "The dual-input path already implemented in xai/explain.py (both Input_Seq and Input_Feat interpolated from their own zero baselines). #193 verifies only that the runtime supplies finite gradients for both inputs. Choosing between the dual-input and the composite F(x) = model(x, derive(x)) path, and that path's own completeness contract, is #195."
+  },
+  "criteria": {
+    "forward_parity": {
+      "what": "Same .keras bytes under the torch backend vs the tensorflow backend, inference mode, float32, every fixed case, every output head.",
+      "max_abs_diff": 1e-4,
+      "max_rel_diff": 1e-3,
+      "rationale": "float32 eps is about 1.2e-7 and both graphs accumulate over a 30-34 step recurrence plus convolution reductions, so a few hundred eps of reordering noise is expected. 1e-4 raw is still below the 0.01 %p resolution the screen can show for the Cas12a probability, and far below the 0.5 %p a SpCas9 z-score moves per 1e-4."
+    },
+    "layerwise_parity": {
+      "what": "Every layer output of both models, torch backend vs tensorflow backend, same inputs.",
+      "max_rel_diff": 1e-3,
+      "max_abs_diff_scaled": "1e-4 * max(1, max|reference activation|)",
+      "purpose": "This is the evidence for 'same ops', including LSTM gate order and Bidirectional forward/backward halves: a transposed kernel or a swapped gate shows up as a layer-output mismatch even when the final scalar happens to agree."
+    },
+    "weight_placement": {
+      "what": "Per-variable path, shape, dtype and SHA-256 of the float32 bytes, torch backend vs tensorflow backend.",
+      "requirement": "identical variable set, identical shapes and dtypes, bitwise identical weight bytes",
+      "rationale": "Loading must not reinterpret or transpose stored weights. Bitwise equality is the right bar here because no arithmetic happens during load."
+    },
+    "function_match": {
+      "what": "The forward value the IG path returns at alpha = 1 vs the prediction forward for the same window.",
+      "max_abs_diff": 1e-6,
+      "rationale": "Same runtime, same dtype, same graph; only batching differs, so this should be 0 up to batch-reduction order."
+    },
+    "gradient_check": {
+      "what": "Autograd input gradient vs central finite differences on every model input, at the real one-hot point and at an interior interpolation point alpha = 0.5.",
+      "fd_step": 1e-2,
+      "min_cosine": 0.999,
+      "max_rel_l2_error": 2e-2,
+      "rationale": "The forward is float32, so its noise floor is about 1e-6; a central difference with h = 1e-2 therefore carries about 1e-4 of noise against gradient components of order 1e-2 to 1e-0. A 2 percent relative L2 bound is what that noise allows, and cosine 0.999 catches any wrong direction, transposition or missing term."
+    },
+    "finiteness": {
+      "what": "Every forward output, input gradient, IG attribution, IG completeness term, SHAP value and SHAP base value in the whole verification run.",
+      "requirement": "all finite; no NaN, no inf"
+    },
+    "ig_completeness": {
+      "what": "|sum(attributions) - (f(x) - f(baseline))| in raw units, at the user default 32 steps and again at 256 steps.",
+      "max_abs_error": {"spcas9": 5e-3, "cas12a": 1e-3},
+      "rationale": "Midpoint-rule discretization dominates here, not float noise. The bounds are set at roughly 0.5 %p of the Cas12a probability scale and at the same relative size against a z-score of order 1, which is the point where a completeness gap would start to change what the screen tells the user."
+    },
+    "ig_resolution_stability": {
+      "what": "Per-position attribution at 32 steps vs 256 steps, after projection to the window positions.",
+      "min_pearson_r": 0.99,
+      "max_abs_diff_scaled": "0.05 * max|attribution at 256 steps|",
+      "sign_agreement": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+      "purpose": "Decides whether the user's 32 steps is enough, rather than assuming it."
+    },
+    "shap_additivity": {
+      "what": "|base_value + sum(values) - f(x)| in raw units at the user default 64 samples / 4 backgrounds.",
+      "max_abs_error": {"spcas9": 5e-3, "cas12a": 1e-3}
+    },
+    "shap_repeat_stability": {
+      "same_seed_determinism": {"what": "Two runs at seed 0 with identical settings", "max_abs_diff": 1e-9},
+      "cross_seed": {"what": "seeds 0, 1, 2 at the user default; the background set changes with the seed", "min_pairwise_pearson_r": 0.9, "max_abs_diff_scaled": "0.25 * max|values at seed 0|"},
+      "default_vs_finer": {"what": "user default vs 512 samples / 32 backgrounds at seed 0", "min_pearson_r": 0.9},
+      "rationale": "Same-seed determinism is a correctness gate. The cross-seed and finer-run bounds test whether 4 backgrounds and 64 samples are a stable enough estimate of the same quantity; they are pre-registered precisely because this is the user's current default and #191 lists it as subject to verification."
+    }
+  },
+  "out_of_scope": {
+    "cas12a_ig_path_choice": "#195",
+    "process_split_and_full_tree_ram": "#194",
+    "prediction_view_and_csv_wiring": "#196, #197",
+    "new_distribution_build_and_clean_offline_pc": "#204",
+    "cas12a_held_out_test_evaluation": "#202"
+  }
+}
