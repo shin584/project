@@ -26,11 +26,14 @@ import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cache
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 
 import model_source
+
+if TYPE_CHECKING:
+    from xai.identity import ExplanationIdentity
 from model_source import configure_offline, is_packaged, resource_root
 from pam_scanner import (
     CAS_CONFIGS,
@@ -62,6 +65,39 @@ NT_BATCH_SIZE = 8
 #:   "bfloat16" — 절반 크기(약 1.0GB). 메모리가 부족하면 이걸로 바꾼다.
 #:                예측값이 소수점 아래에서 조금 달라질 수 있다.
 NT_DTYPE = "float32"
+
+#: NT 설명의 계산 프로토콜 식별자 (#208). XAI 메모리 캐시·사전계산 SHAP 캐시의
+#: 재사용은 이 값까지 같아야 한다.
+#: 지금 값은 유지 중인 계산 정의를 가리킬 뿐, 예전 기여도 단위가 맞다는 주장이
+#: 아니다. 단위를 교정하는 #201이 이 값을 올리면 이전 결과는 재사용되지 않는다.
+NT_EXPLANATION_PROTOCOL = "nt-legacy-calculation-v1-units-pending-201"
+
+
+#: 식별 memo. 키는 (설정, 프로토콜, 파일별 경로·크기·mtime)이다. 파일이나
+#: 프로토콜·설정이 바뀌면 키가 달라져 다시 해시한다. 모델이 아니라 해시만 든다.
+_NT_IDENTITIES: dict = {}
+
+
+def nt_explanation_identity(spec):
+    """NT 모델 하나의 계산 식별. checkpoint 파일 바이트를 해시한다 (경로 이름이 아니다).
+
+    spec 전체와 dtype·배치 크기를 설정으로 담는다. 출력 해석·dtype이 바뀌면 같은
+    checkpoint라도 다른 계산이다. 파일 해시(NT는 Cas당 약 1.9GB)는 파일 상태와
+    프로토콜·설정이 그대로인 동안 한 번만 한다 — 예측기와 데스크톱 worker가 함께 쓴다.
+    """
+    import json
+    import os
+    from dataclasses import asdict
+
+    from xai import identity
+    configuration = {"spec": asdict(spec), "dtype": NT_DTYPE, "batch_size": NT_BATCH_SIZE}
+    paths = [model_source.resolve(path) for path in spec.paths]
+    stats = tuple((str(p), os.stat(p).st_size, os.stat(p).st_mtime_ns) for p in paths)
+    key = (json.dumps(configuration, sort_keys=True), NT_EXPLANATION_PROTOCOL, stats)
+    if key not in _NT_IDENTITIES:
+        _NT_IDENTITIES[key] = identity.from_files(
+            "nt", f"{spec.model}/{spec.cas}", paths, NT_EXPLANATION_PROTOCOL, configuration)
+    return _NT_IDENTITIES[key]
 
 
 # ════════════════════════════════════════════════
@@ -227,9 +263,10 @@ class ExplainHandle:
     #: 서열 → (층별 attention [H,T,T] 목록, 토큰별 서열구간, 서열 길이).
     #: attention이 없는 모델(CNN 등)은 None으로 둔다.
     attention_fn: Callable | None = None
-    #: SHAP 사전계산 캐시 키 재료. app.py가 compute_shap에 넘기는 값과 같아야 한다
-    #: (model_key = "A/Cas12a" 형식, head = 출력 이름). None이면 캐시를 조회하지 않는다.
-    model_key: str | None = None
+    #: SHAP 사전계산 캐시 키 재료 (head = 출력 이름). model_key가 입증된
+    #: `xai.identity.ExplanationIdentity`일 때만 캐시를 조회한다 (#208). 이름 문자열이나
+    #: None이면 조회하지 않고 계산한다.
+    model_key: "ExplanationIdentity | str | None" = None
     head:      str | None = None
 
 
@@ -338,6 +375,11 @@ class NTClassifierPredictor(BasePredictor):
         self._model = None
         self._num_labels = None
         self._tokenizer = None
+
+    def explanation_identity(self):
+        """이 예측기가 든 모델의 계산 식별 (#208). 부를 때마다 현재 파일·프로토콜을
+        따른다 (해시는 nt_explanation_identity가 memo한다)."""
+        return nt_explanation_identity(self.spec)
 
     def _ensure_loaded(self) -> None:
         if self._model is not None:
@@ -556,7 +598,7 @@ class NTClassifierPredictor(BasePredictor):
             return layers, self._token_spans(seq), len(seq)
 
         return ExplainHandle(raw_fn, ig_inputs, ig_grad_fn, project, attention_fn,
-                             model_key=f"{self.spec.model}/{self.spec.cas}", head=head)
+                             model_key=self.explanation_identity(), head=head)
 
 
 # 앱 시작 때 미리 데울 모델 (시연용). 여기 없는 모델은 계속 지연 로딩된다.

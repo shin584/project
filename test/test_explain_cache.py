@@ -8,6 +8,7 @@
   5) 캐시는 Streamlit을 import하지 않는다
 """
 
+import hashlib
 import subprocess
 import sys
 from pathlib import Path
@@ -16,17 +17,31 @@ import numpy as np
 import pytest
 
 from xai import explain, explain_cache
+from xai.identity import ExplanationIdentity
 
 SEQ = "ACGTACGTAGGCTTACGATCGATCGGATCCAT"
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _identity(model):
+    """이름 model에 대한 입증된 식별 (#208). 이름별로 다른 checkpoint 해시를 준다."""
+    return ExplanationIdentity("nt", model, (hashlib.sha256(model.encode()).hexdigest(),),
+                               "test-protocol")
+
+
 class FakePredictor:
-    """explain_handle 호출을 센다. 캐시 적중이면 늘어나지 않아야 한다."""
+    """explain_handle 호출을 센다. 캐시 적중이면 늘어나지 않아야 한다.
+
+    이름 문자열 model_key로 부르는 화면(Streamlit) 경로처럼, 예측기가 자기 식별을
+    댄다 (#208). 식별이 없는 예측기는 캐시를 쓰지 못한다 (test_cache_identity.py).
+    """
 
     def __init__(self, label="p"):
         self.label = label
         self.handle_calls = 0
+
+    def explanation_identity(self):
+        return _identity("A/Cas12a")
 
     def explain_handle(self, head):
         self.handle_calls += 1
@@ -43,7 +58,7 @@ def calls(monkeypatch):
         return {"kind": "ig", "n": len(recorded)}
 
     def fake_shap(handle, window_seq, nsamples=512, n_background=16, seed=0, on_batch=None,
-                  *, use_disk_cache=True):
+                  *, background_seed=None, subset_seed=None, use_disk_cache=True):
         recorded.append(("shap", handle, window_seq, nsamples, n_background, on_batch))
         return {"kind": "shap", "n": len(recorded)}
 
@@ -249,6 +264,9 @@ def test_a_real_ig_result_is_returned_and_then_reused():
     class Predictor:
         def explain_handle(self, head):
             return handle
+
+        def explanation_identity(self):
+            return _identity("A/Cas12a")
 
     first = cache.integrated_gradients(Predictor(), "A/Cas12a", "Cas12a", SEQ, 16)
     after_first = handle.grad_calls

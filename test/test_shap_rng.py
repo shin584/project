@@ -280,17 +280,29 @@ def test_more_backgrounds_extend_the_same_random_prefix(small, large):
     np.testing.assert_array_equal(_backgrounds(h_large)[:small], _backgrounds(h_small))
 
 
-def test_disk_cache_is_only_consulted_when_both_seeds_are_zero(monkeypatch):
+def test_disk_cache_keys_carry_both_seeds(monkeypatch):
+    """#208: 사전계산 조회 키에 두 seed가 들어간다 (예전에는 0/0일 때만 조회했다).
+    이름 문자열 model_key는 식별을 입증하지 못하므로 아예 조회하지 않는다."""
+    import json
+
     from xai import shap_cache
+    from xai.identity import ExplanationIdentity
 
     looked_up = []
     monkeypatch.setattr(shap_cache, "load", lambda key, root=None: looked_up.append(key))
 
-    class Keyed(_RecordingHandle):
+    class Named(_RecordingHandle):
         model_key, head = "A/Cas12a", "Cas12a"
 
-    for kwargs in ({"subset_seed": 1}, {"background_seed": 1}):
-        kernel_shap(Keyed(), SEQ, nsamples=8, n_background=2, **kwargs)
+    kernel_shap(Named(), SEQ, nsamples=8, n_background=2, seed=0)
     assert looked_up == []
-    kernel_shap(Keyed(), SEQ, nsamples=8, n_background=2, seed=0)
-    assert len(looked_up) == 1
+
+    class Keyed(_RecordingHandle):
+        model_key = ExplanationIdentity("nt", "A/Cas12a", ("d" * 64,), "p")
+        head = "Cas12a"
+
+    for kwargs in ({"subset_seed": 1}, {"background_seed": 1}, {"seed": 0}):
+        kernel_shap(Keyed(), SEQ, nsamples=8, n_background=2, **kwargs)
+    seeds = [(json.loads(k)["background_seed"], json.loads(k)["subset_seed"])
+             for k in looked_up]
+    assert seeds == [(0, 1), (1, 0), (0, 0)]

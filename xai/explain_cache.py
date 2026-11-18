@@ -5,17 +5,25 @@
   데코레이터는 따라오지 않으므로, 데스크톱 화면에서는 보기를 전환하거나 그래프
   크기만 바꿔도 SHAP이 처음부터 다시 돌았다. 성능이 아니라 기능 문제다 (#182).
 
-캐시 키 계약
-  키는 (기법, model_key, head, window_seq, 기법별 설정)뿐이다.
+캐시 키 계약 (#208)
+  키는 (기법, 모델 식별, head, window_seq, 기법별 설정)이다.
     IG       : steps
-    SHAP     : nsamples, n_background
+    SHAP     : nsamples, n_background, background_seed, subset_seed
     Rollout  : (없음)
-  **예측기 객체와 진행률 콜백은 키에 들어가지 않는다.** 콜백은 호출마다 새 함수
-  객체라 키에 넣으면 캐시가 매번 빗나간다. 예측기는 한 프로세스에 하나뿐이고
-  model_key·head가 이미 어느 모델의 어느 출력인지 특정한다.
+  **모델 식별**은 이름이 아니라 입증된 `xai.identity.ExplanationIdentity`다 —
+  계열, checkpoint sha256, 설명 프로토콜, 런타임 설정을 담는다. 두 가지로 얻는다.
+    1) model_key 자리에 식별을 직접 넘긴다 (데스크톱 계산 프로세스).
+    2) model_key가 이름 문자열("A/Cas12a")이면 예측기에게 묻는다
+       (`predictor.explanation_identity()`). 이름과 식별의 model이 같아야 한다.
+  둘 다 안 되면 식별을 입증할 수 없다. 그 요청은 **적중으로 처리하지 않고** 매번
+  새로 계산하며, 결과를 저장하지도 않는다.
 
-  그래프 크기는 애초에 키 재료가 아니다 (화면이 그릴 때만 쓴다). 크기를 바꿔도
-  다시 계산되지 않는 건 그래서다.
+  예측기 객체와 진행률 콜백은 키에 들어가지 않는다. 콜백은 호출마다 새 함수
+  객체라 키에 넣으면 캐시가 매번 빗나간다. 예측기가 무엇을 계산하는지는 식별이
+  정한다. 그래프 크기는 애초에 키 재료가 아니다 (화면이 그릴 때만 쓴다).
+
+  SHAP seed는 explain.kernel_shap과 같은 규칙으로 정한다 (#207): 단일 seed는 두
+  축에 같은 값으로 대응하고, background_seed·subset_seed를 주면 그 축만 바뀐다.
 
 handle은 미적중일 때만 만든다
   `predictor.explain_handle(head)`는 모델을 올리게 할 수 있다. 적중이면 부르지
@@ -33,7 +41,10 @@ from collections import OrderedDict
 from collections.abc import Callable
 from typing import Any
 
-from xai import explain
+from xai import explain, identity
+
+#: 입증된 계산 식별, 또는 예측기가 식별을 대야 하는 이름 문자열 ("A/Cas12a").
+ModelKey = identity.ExplanationIdentity | str
 
 #: 들고 있을 결과 개수. 하나는 서열 길이만 한 배열 몇 개라 작다. 화면은 사이트와
 #: 설정을 오가므로 몇 개만 두면 금방 밀려나고, 무제한이면 오래 켜 둔 데스크톱
@@ -57,33 +68,41 @@ class ExplainCache:
         self._use_disk_cache = use_disk_cache
 
     # ── 기법별 입구 ──────────────────────────────────────────────────
-    def integrated_gradients(self, predictor, model_key: str, head: str, window_seq: str,
+    def integrated_gradients(self, predictor, model_key: ModelKey, head: str, window_seq: str,
                              steps: int, on_batch: Callable | None = None) -> explain.IGResult:
         return self._get_or_compute(
-            ("ig", str(model_key), str(head), window_seq.upper(), int(steps)),
+            model_key, predictor,
+            ("ig", str(head), window_seq.upper(), int(steps)),
             lambda handle: explain.integrated_gradients(handle, window_seq, int(steps),
                                                         on_batch=on_batch),
-            predictor, head,
+            head,
         )
 
-    def kernel_shap(self, predictor, model_key: str, head: str, window_seq: str,
+    def kernel_shap(self, predictor, model_key: ModelKey, head: str, window_seq: str,
                     nsamples: int, n_background: int,
-                    on_batch: Callable | None = None) -> explain.SHAPResult:
+                    on_batch: Callable | None = None, seed: int = 0, *,
+                    background_seed: int | None = None,
+                    subset_seed: int | None = None) -> explain.SHAPResult:
+        background_seed, subset_seed = explain.resolve_seeds(seed, background_seed, subset_seed)
         return self._get_or_compute(
-            ("shap", str(model_key), str(head), window_seq.upper(),
-             int(nsamples), int(n_background)),
+            model_key, predictor,
+            ("shap", str(head), window_seq.upper(), int(nsamples), int(n_background),
+             background_seed, subset_seed),
             lambda handle: explain.kernel_shap(handle, window_seq, int(nsamples),
                                                int(n_background), on_batch=on_batch,
+                                               background_seed=background_seed,
+                                               subset_seed=subset_seed,
                                                use_disk_cache=self._use_disk_cache),
-            predictor, head,
+            head,
         )
 
-    def attention_rollout(self, predictor, model_key: str, head: str,
+    def attention_rollout(self, predictor, model_key: ModelKey, head: str,
                           window_seq: str) -> explain.RolloutResult:
         return self._get_or_compute(
-            ("rollout", str(model_key), str(head), window_seq.upper()),
+            model_key, predictor,
+            ("rollout", str(head), window_seq.upper()),
             lambda handle: explain.attention_rollout(handle, window_seq),
-            predictor, head,
+            head,
         )
 
     # ── 살림 ─────────────────────────────────────────────────────────
@@ -97,8 +116,27 @@ class ExplainCache:
             return len(self._entries)
 
     # ── 내부 ─────────────────────────────────────────────────────────
-    def _get_or_compute(self, key: tuple, compute: Callable[[Any], Any],
-                        predictor, head: str):
+    @staticmethod
+    def _identity(model_key, predictor) -> identity.ExplanationIdentity | None:
+        """입증된 모델 식별, 또는 입증할 수 없으면 None."""
+        direct = identity.verified(model_key)
+        if direct is not None or isinstance(model_key, identity.ExplanationIdentity):
+            return direct
+        ask = getattr(predictor, "explanation_identity", None)
+        if ask is None:
+            return None
+        found = identity.verified(ask())
+        # 이름이 가리키는 모델과 예측기가 실제로 든 모델이 다르면 입증이 아니다.
+        return found if found is not None and found.model == str(model_key) else None
+
+    def _get_or_compute(self, model_key, predictor, request: tuple,
+                        compute: Callable[[Any], Any], head: str):
+        model_identity = self._identity(model_key, predictor)
+        if model_identity is None:
+            # 식별을 입증할 수 없다: 적중으로 처리하지도, 저장하지도 않는다.
+            return compute(predictor.explain_handle(head))
+
+        key = (request[0], model_identity) + request[1:]
         with self._lock:
             if key in self._entries:
                 self._entries.move_to_end(key)

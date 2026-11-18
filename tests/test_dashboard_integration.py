@@ -11,16 +11,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import predict
 from xai import explain, explain_cache, shap_cache
+from xai.identity import ExplanationIdentity
 
 
 SEQ = "C" * 34
+#: 입증된 계산 식별 (#208). 이름 "A/Cas12a"만으로는 디스크·메모리 캐시가 적중하지 않는다.
+IDENTITY = ExplanationIdentity("nt", "A/Cas12a", ("c" * 64,), "test-protocol")
 
 
 @pytest.fixture
 def disk_cache(tmp_path, monkeypatch):
     monkeypatch.setattr(shap_cache, "DEFAULT_DIR", tmp_path)
-    result = explain.SHAPResult(np.full(34, 0.01), 0.3, 0.64, 0.0)
-    shap_cache.save(shap_cache.shap_cache_key("A/Cas12a", "Cas12a", SEQ, 64, 4), result)
+    result = explain.SHAPResult(np.full(34, 0.01), 0.3, 0.64, 0.0,
+                                background_seed=0, subset_seed=0)
+    shap_cache.save(shap_cache.shap_cache_key(IDENTITY, "Cas12a", SEQ, 64, 4), result)
     return result
 
 
@@ -28,7 +32,7 @@ def test_disk_hit_skips_inference_and_progress(disk_cache):
     def unexpected(*args, **kwargs):
         pytest.fail("디스크 캐시 적중 시 추론과 진행률 콜백은 실행되면 안 된다")
 
-    handle = SimpleNamespace(model_key="A/Cas12a", head="Cas12a", raw_fn=unexpected)
+    handle = SimpleNamespace(model_key=IDENTITY, head="Cas12a", raw_fn=unexpected)
     got = explain.kernel_shap(handle, SEQ, 64, 4, on_batch=unexpected)
     np.testing.assert_array_equal(got.values, disk_cache.values)
 
@@ -43,7 +47,7 @@ def test_changed_settings_compute_with_progress(disk_cache, settings):
                 on_batch(min(done, len(x)), len(x))
         return np.asarray(x)[:, :, 1].sum(axis=1) / 34
 
-    handle = SimpleNamespace(model_key="A/Cas12a", head="Cas12a", raw_fn=raw_fn)
+    handle = SimpleNamespace(model_key=IDENTITY, head="Cas12a", raw_fn=raw_fn)
     got = explain.kernel_shap(handle, SEQ, *settings, on_batch=lambda d, t: seen.append(d / t))
     assert len(seen) > 1
     assert all(a <= b for a, b in zip(seen, seen[1:]))
@@ -64,13 +68,18 @@ def test_disk_hit_and_streamlit_rerun_leave_no_progress(disk_cache):
 from types import SimpleNamespace
 import streamlit as st
 from xai import view
+from xai.identity import ExplanationIdentity
+IDENTITY = {IDENTITY!r}
 
 class Predictor:
+    def explanation_identity(self):
+        return IDENTITY
+
     def explain_handle(self, head):
         st.session_state["handle_calls"] = st.session_state.get("handle_calls", 0) + 1
         def raw_fn(*args, **kwargs):
             raise AssertionError("Inference ran despite a precomputed cache hit")
-        return SimpleNamespace(model_key="A/Cas12a", head=head, raw_fn=raw_fn)
+        return SimpleNamespace(model_key=IDENTITY, head=head, raw_fn=raw_fn)
 
 result = view.compute_shap(Predictor(), "A/Cas12a", "Cas12a", {SEQ!r}, 64, 4)
 st.text(str(result.pred))

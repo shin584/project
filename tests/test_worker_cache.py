@@ -63,6 +63,26 @@ def test_new_checkpoint_and_settings_do_not_reuse_old_explanations(renderer, tmp
     assert predictor.handles == 3
 
 
+def test_a_new_explanation_protocol_does_not_reuse_old_explanations(renderer, monkeypatch):
+    """#208: when #201 advances the NT protocol, earlier explanations are not reused."""
+    import predict
+
+    view, predictors = renderer
+    predictor = predictors[("A", "Cas12a")]
+
+    def render():
+        return view.explanation_fragment(DNA, "Cas12a|+|16", "Cas12a", "shap",
+                                         {"nsamples": 16, "n_background": 2}, 80, lambda d, t: None)
+
+    first = render()
+    render()
+    assert predictor.handles == 1
+    monkeypatch.setattr(predict, "NT_EXPLANATION_PROTOCOL", "nt-units-corrected-v2")
+    again = render()
+    assert predictor.handles == 2
+    assert pngs(again) == pngs(first), "fresh recomputation must match the earlier result"
+
+
 def test_child_shap_ignores_unverified_disk_results(renderer, monkeypatch):
     from xai import shap_cache
 

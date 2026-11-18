@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from xai import identity
+
 
 @dataclass
 class IGResult:
@@ -90,6 +92,14 @@ def _random_backgrounds(length: int, n: int, seed: int) -> np.ndarray:
     return out
 
 
+def resolve_seeds(seed: int, background_seed: int | None,
+                  subset_seed: int | None) -> tuple[int, int]:
+    """단일 seed → (배경 seed, 부분집합 seed). 따로 주지 않은 축은 seed를 따른다 (#207).
+    kernel_shap과 XAI 메모리 캐시 키가 같은 규칙을 쓰도록 한 곳에 둔다."""
+    return (int(seed if background_seed is None else background_seed),
+            int(seed if subset_seed is None else subset_seed))
+
+
 #: 공용 kernel_shap 호출끼리 NumPy 전역 RNG 저장→seed→부분집합 표본추출→복원을
 #: 직렬화하는 잠금. 이 함수를 거치는 호출만 서로 보호한다. 전역 RNG를 직접 쓰는
 #: 관련 없는 코드가 같은 시각에 끼어드는 것까지 막지는 못한다.
@@ -111,8 +121,9 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
         코어는 숫자만 넘기고 표시 문구는 화면이 정한다.
 
     계산 전에 사전계산 저장소(xai/shap_cache.py)를 먼저 조회한다. 적중하면 추론 없이
-    바로 돌려준다. 키 재료(model_key, head)는 handle에 실려 온다. 사전계산은 seed=0으로
-    만들므로 두 seed가 모두 0일 때만 조회한다.
+    바로 돌려준다. 키 재료는 handle의 model_key(입증된 `ExplanationIdentity`)·head와
+    윈도우·설정·두 seed다 (#208). model_key가 이름 문자열뿐이면 식별을 입증할 수
+    없으므로 조회하지 않고 계산한다.
 
     seed는 배경 서열(background_seed)과 shap의 부분집합 표본추출(subset_seed)을
     **함께** 정한다. 둘 다 고정해야 같은 화면을 두 번 열었을 때 같은 기여도가 나온다.
@@ -126,15 +137,14 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     덮는다. on_batch도 잠금 안에서 불리니, 콜백에서 오래 막히거나 다른 kernel_shap
     호출을 기다리면 그동안 다른 호출이 모두 기다린다.
     """
-    background_seed = seed if background_seed is None else background_seed
-    subset_seed = seed if subset_seed is None else subset_seed
-    model_key = getattr(handle, "model_key", None)
+    background_seed, subset_seed = resolve_seeds(seed, background_seed, subset_seed)
+    model_identity = identity.verified(getattr(handle, "model_key", None))
     head = getattr(handle, "head", None)
-    if (use_disk_cache and model_key is not None and head is not None
-            and background_seed == 0 and subset_seed == 0):
+    if use_disk_cache and model_identity is not None and head is not None:
         from xai import shap_cache
         hit = shap_cache.load(shap_cache.shap_cache_key(
-            model_key, head, window_seq, nsamples, n_background))
+            model_identity, head, window_seq, nsamples, n_background,
+            background_seed, subset_seed))
         if hit is not None:
             return hit
 

@@ -1,43 +1,26 @@
 """Child-only NT renderer with provenance-aware, process-lifetime caches."""
 
-import hashlib
 import json
 from collections import OrderedDict
-from dataclasses import asdict
 
 import core
-import model_source
 import predict
 from xai.explain_cache import ExplainCache
 
 from desktop.renderer import PredictionRenderer
 
-# This identifies the retained calculation definitions, not a claim that the
-# old attribution unit labels are correct. #201 must advance this protocol.
-EXPLANATION_PROTOCOL = "nt-legacy-calculation-v1-units-pending-201"
-
 
 class ComputationRenderer(PredictionRenderer):
     def __init__(self, predictors=None):
         super().__init__(predictors, explanation_cache=ExplainCache(use_disk_cache=False))
-        self._identities = {}
         self._predictions = OrderedDict()
         self._charts = OrderedDict()
 
     def _model_key(self, cas):
-        spec = core.MODEL_REGISTRY[("A", cas)]
-        configuration = json.dumps({"spec": asdict(spec), "dtype": predict.NT_DTYPE,
-                                    "batch_size": predict.NT_BATCH_SIZE}, sort_keys=True)
-        if configuration not in self._identities:
-            checkpoints = []
-            for path in spec.paths:
-                with open(model_source.resolve(path), "rb") as source:
-                    checkpoints.append(hashlib.file_digest(source, "sha256").hexdigest())
-            self._identities[configuration] = json.dumps({
-                "family": "nt", "cas": cas, "checkpoints": checkpoints,
-                "configuration": configuration, "protocol": EXPLANATION_PROTOCOL,
-            }, sort_keys=True)
-        return self._identities[configuration]
+        # A verified identity (checkpoint bytes, family, protocol) is what lets
+        # the explanation cache reuse anything at all (#208). predict memoizes the
+        # hash per file state and protocol, so registry or protocol changes show.
+        return predict.nt_explanation_identity(core.MODEL_REGISTRY[("A", cas)])
 
     @staticmethod
     def _remember(cache, key, value):

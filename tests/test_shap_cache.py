@@ -15,9 +15,12 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from xai import explain, shap_cache                      # noqa: E402
+from xai.identity import ExplanationIdentity             # noqa: E402
 from xai.shap_cache import shap_cache_key                # noqa: E402
 
-MODEL_KEY = "A/Cas12a"
+#: 입증된 계산 식별 (#208). 이름 문자열만으로는 조회·저장할 수 없다.
+MODEL_KEY = ExplanationIdentity("nt", "A/Cas12a", ("a" * 64,), "test-protocol")
+OTHER_MODEL = ExplanationIdentity("nt", "A/SpCas9", ("b" * 64,), "test-protocol")
 HEAD = "Cas12a"
 SEQ = "A" * 34
 NSAMPLES = 64          # app.py의 'SHAP 샘플 수' 기본값
@@ -41,6 +44,7 @@ def _result(length=34, fill=0.01):
     return explain.SHAPResult(
         values=np.full(length, fill, dtype=np.float64),
         base_value=0.3, pred=0.3 + length * fill, additivity_error=0.0,
+        background_seed=0, subset_seed=0,
     )
 
 
@@ -61,7 +65,7 @@ def test_key_is_stable():
 
 
 @pytest.mark.parametrize("changed", [
-    {"model_key": "A/SpCas9"},
+    {"model_key": OTHER_MODEL},
     {"head": "SpCas9-NG"},
     {"window_seq": "C" + SEQ[1:]},
     {"nsamples": 128},            # 샘플 수만 달라도 다른 키여야 한다

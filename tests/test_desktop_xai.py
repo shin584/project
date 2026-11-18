@@ -34,6 +34,12 @@ class LinearPredictor:
     def explain_heads(self, site):
         return ["Cas12a"] if self.cas == "Cas12a" else ["SpCas9-NG", "xCas9"]
 
+    def explanation_identity(self):
+        """Like the real NT predictor, prove which computation this is (#208)."""
+        from xai.identity import ExplanationIdentity
+        return ExplanationIdentity("nt", f"A/{self.cas}", (("f" if self.cas == "Cas12a" else "e") * 64,),
+                                   "test-protocol")
+
     def predict_batch(self, sites, on_batch=None):
         rows = []
         for done, site in enumerate(sites, 1):

@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
 from xai import view
+from xai.identity import ExplanationIdentity
 
 SEQ = {SEQ!r}
 
@@ -52,6 +53,10 @@ class FakeHandle:
 
 
 class FakePredictor:
+    # Like the real NT predictor, it proves which computation it holds (#208).
+    def explanation_identity(self):
+        return ExplanationIdentity("nt", "A/Cas12a", ("e" * 64,), "test-protocol")
+
     def explain_handle(self, head):
         st.session_state["handle_calls"] = st.session_state.get("handle_calls", 0) + 1
         return FakeHandle()

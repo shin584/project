@@ -8,6 +8,10 @@
 
 서열은 대시보드에 넣는 것과 같은 81bp DNA다. 스캐너가 그 안에서 사이트를 찾고,
 Cas12a 사이트의 모델 입력 윈도우에 대해 SHAP을 계산한다.
+
+키는 예측기의 계산 식별(checkpoint sha256·계열·설명 프로토콜, #208)과 seed까지
+포함한다. 저장소의 legacy 파일 4개는 이 식별이 없어 조회에서 거부된다. NT의 단위
+교정 프로토콜과 재생성은 #201 소관이므로, 그 전에 이 스크립트로 다시 만들지 않는다.
 """
 
 import sys
@@ -57,7 +61,7 @@ def main(seqs: list[str]) -> int:
             window = site.model_input_seq
             for head in predictor.explain_heads(site):
                 key = shap_cache.shap_cache_key(
-                    f"A/{site.cas_type}", head, window, NSAMPLES, N_BACKGROUND)
+                    predictor.explanation_identity(), head, window, NSAMPLES, N_BACKGROUND)
                 if shap_cache.load(key) is not None:
                     print(f"  이미 있음 — {head} {window[:12]}...")
                     skipped += 1
