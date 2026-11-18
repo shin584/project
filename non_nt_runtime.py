@@ -77,11 +77,17 @@ def runtime_versions() -> dict[str, str]:
     """계약에 적어 둔 버전과 실제 실행 버전을 대조할 수 있게 한다."""
     keras = import_keras()
     import torch
+    import platform
+    import h5py
+    from importlib.metadata import version
 
     return {
+        "python": platform.python_version(),
         "keras": keras.__version__,
         "torch": torch.__version__,
         "numpy": np.__version__,
+        "shap": version("shap"),
+        "h5py": h5py.__version__,
         "backend": keras.backend.backend(),
         "torch_threads": str(torch.get_num_threads()),
     }

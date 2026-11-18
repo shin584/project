@@ -46,6 +46,10 @@ def test_contract_versions_match_the_running_runtime():
     recorded = rt.runtime_versions()
     assert recorded["keras"] == "3.14.1"
     assert recorded["torch"].startswith("2.12.0")
+    assert recorded["python"] == "3.13.7"
+    assert recorded["numpy"] == "2.3.2"
+    assert recorded["shap"] == "0.52.0"
+    assert recorded["h5py"] == "3.14.0"
     assert recorded["backend"] == "torch"
 
 

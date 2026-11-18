@@ -17,6 +17,7 @@ site-packages를 경로에서 제외하므로 TensorFlow는 import 자체가 불
 깨끗한 오프라인 PC는 #204의 몫이며 여기서 입증하지 않는다.
 """
 
+import argparse
 import json
 import os
 import shutil
@@ -26,24 +27,29 @@ import sysconfig
 import time
 from pathlib import Path
 
+from verification_bundle import stage_execution
+
 SITE = Path(sysconfig.get_paths()["purelib"])
-STAGE = Path(sys.argv[1])
+STAGE = None
 REPO = Path(__file__).resolve().parents[2]
 
 # 채택 런타임이 실제로 쓰는 것만. TensorFlow와 그 전용 의존성은 일부러 제외한다.
 WANTED = [
-    "keras", "torch", "numpy", "h5py", "ml_dtypes", "namex", "optree",
+    "keras", "torch", "numpy", "h5py", "shap", "ml_dtypes", "namex", "optree",
     "typing_extensions.py", "sympy", "mpmath", "networkx", "filelock",
     "fsspec", "jinja2", "markupsafe", "packaging", "rich", "pygments",
     "markdown_it", "mdurl", "colorama", "six.py", "setuptools", "pkg_resources",
     # 확장 모듈이 의존하는 재배포 DLL 묶음. 빠지면 numpy C 확장이 로드되지 않는다.
     "numpy.libs", "torchgen", "yaml", "_yaml", "absl", "google", "psutil",
 ]
+# runtime_versions reads SHAP distribution metadata without importing its optional
+# plotting/scientific dependencies during the minimum forward/gradient run.
+WANTED += [path.name for path in SITE.glob("shap-*.dist-info")]
 
 RUNNER = r'''
 import json, os, sys
 
-staging, repo = sys.argv[1], sys.argv[2]
+staging, repo, raw_output = sys.argv[1:4]
 # 표준 라이브러리는 남기고 site-packages만 경로에서 뺀다. -S로 이미 추가되지 않지만
 # 혹시 섞여 들어와도 스테이징만 보도록 명시한다.
 sys.path[:] = [staging, repo] + [
@@ -101,17 +107,23 @@ rt.import_keras()
 report["rss"]["runtime_import"] = rss()
 report["versions"] = rt.runtime_versions()
 report["models"] = {}
+raw = {}
+held_models = {}
 for key, head, window in (
     ("spcas9", 1, "CCGGTCGCTTTAAGAATAAATAAAAGCGCC"),
     ("cas12a", 0, "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT"),
 ):
     runtime = rt.NonNTRuntime.load(key)
+    held_models[key] = runtime
     report["rss"][f"{key}_model_loaded"] = rss()
     inputs = [rt.one_hot(window)[None]]
     if key == "cas12a":
         inputs.append(rt.cas12a_derive(window)[None])
     value = runtime.forward(inputs, head=head)
     output, grads = runtime.gradients(inputs, head=head)
+    raw[f"{key}/output"] = value
+    for index, grad in enumerate(grads):
+        raw[f"{key}/gradient/{index}"] = grad
     report["models"][key] = {
         "raw_output": float(value[0]),
         "n_outputs": runtime.n_outputs,
@@ -119,6 +131,7 @@ for key, head, window in (
         "all_finite": bool(np.isfinite(value).all()
                            and all(np.isfinite(g).all() for g in grads)),
         "ops": sorted({type(layer).__name__ for layer in runtime._model.layers}),
+        "held_models": list(held_models),
     }
     report["rss"][f"{key}_after_gradients"] = rss()
 report["tensorflow_in_sys_modules_after_load"] = "tensorflow" in sys.modules
@@ -128,10 +141,12 @@ report["rss"]["note"] = ("one process, both models loaded in sequence and both k
 report["status"] = "pass" if (
     report["network_blocked"]
     and not report["tensorflow_importable"]
+    and not report["tensorflow_in_sys_modules_after_load"]
     and all(m["all_finite"] and all(s > 0 for s in m["gradient_abs_sum"])
             for m in report["models"].values())
 ) else "fail"
 print("STAGEDJSON" + json.dumps(report))
+np.savez_compressed(raw_output, **raw)
 '''
 
 
@@ -163,25 +178,51 @@ def stage() -> dict:
             "source": str(SITE), "staging": str(STAGE), "network_used": False}
 
 
-def main() -> int:
+def run(work: Path) -> int:
     info = stage()
     runner = STAGE.parent / "staged_runner.py"
     runner.write_text(RUNNER, encoding="utf-8")
     finished = subprocess.run(
-        [sys.executable, "-S", str(runner), str(STAGE), str(REPO)],
+        [sys.executable, "-S", str(runner), str(STAGE), str(REPO), str(work / "offline-raw.npz")],
         capture_output=True, text=True, cwd=str(REPO),
         env={k: v for k, v in os.environ.items()
              if k not in ("PYTHONPATH", "KERAS_BACKEND")},
     )
     lines = [l for l in finished.stdout.splitlines() if l.startswith("STAGEDJSON")]
-    out = {"staging": info}
+    out = {"staging": info, "command": finished.args, "exit_code": finished.returncode,
+           "executable": sys.executable}
     if lines:
         out["run"] = json.loads(lines[0][len("STAGEDJSON"):])
     else:
         out["run"] = {"status": "fail", "stderr": finished.stderr[-4000:],
                       "stdout": finished.stdout[-2000:]}
+    (work / "staged.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+    if not (work / "offline-raw.npz").exists():
+        # Preserve a completed failure report; missing arrays fail required inventory.
+        import numpy as np
+        np.savez_compressed(work / "offline-raw.npz")
     print(json.dumps(out, indent=2))
-    return 0 if out["run"].get("status") == "pass" else 1
+    return 0 if finished.returncode == 0 and out["run"].get("status") == "pass" else 1
+
+
+def main() -> int:
+    global STAGE
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("staging", type=Path)
+    parser.add_argument("--work", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    work = args.work.resolve()
+    STAGE = args.staging.resolve()
+    if args.output.resolve() != work / "staged.json":
+        parser.error("--output must be <work>/staged.json to retain stage provenance")
+    try:
+        with stage_execution(work, "offline") as result:
+            result["exit_code"] = run(work)
+        return result["exit_code"]
+    except (OSError, ValueError, RuntimeError) as error:
+        print(json.dumps({"status": "fail", "error": str(error)}))
+        return 1
 
 
 if __name__ == "__main__":

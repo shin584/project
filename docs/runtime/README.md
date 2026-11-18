@@ -1,5 +1,11 @@
 # non-NT forward and gradient runtime (#193)
 
+For new runs, use the explicit bundle commands in
+[Runtime verification bundles (#206)](verification-206.md). The commands and
+measurements below describe historical #193 evidence; its contract, report and
+raw results are preserved. #206 fixture tests do not constitute official
+remeasurement or independent recovery (#212/#213).
+
 Work in `C:/project/MC_project/dashboard_v3`, branch `dashboard_v3`.
 This ticket picks the runtime that will run the two adopted non-NT checkpoints
 on offline Windows and freezes the numeric contract the later tickets verify
