@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "archive_sha256": "4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c",
+  "archive_bytes": 14452045,
+  "archive_filename": "non-nt-models-4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c.zip",
+  "locations": [
+    "C:\\project-backups\\dashboard-v3\\issue192-20261118\\non-nt-models-4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c.zip",
+    "D:\\MC_project-backups\\dashboard-v3\\issue192-20261118\\non-nt-models-4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c.zip"
+  ],
+  "manifest_sha256": "bb66b688a630fc5c85c5a30b3ae890f169e551688ca361abbde7dc39cb65fb5c",
+  "manifest_path": "models/non_nt/manifest.json",
+  "file_count": 22,
+  "provenance": "Original evidence bytes preserved; no training/evaluation/parity rerun. Local version-pinned archives; no remote/off-host durability claim."
+}

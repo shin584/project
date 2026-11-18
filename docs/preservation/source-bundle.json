@@ -1,0 +1,8 @@
+{
+  "path": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\desktop-source.bundle",
+  "bytes": 15144966,
+  "sha256": "62cef6e9088b9a8693e55ffc86fefe14b50504c17f4a6f6ddb5363702c7ec2ad",
+  "ref": "refs/heads/dashboard_core_v2",
+  "source_commit": "9d680575212ad343f060570ea0490ff53ebc2473",
+  "bundle_verify": "passed; complete history"
+}

@@ -11,6 +11,9 @@ __pycache__/
 *.h5
 gate1-result.json
 
+# Bulk adopted-model evidence is recoverable from the pinned offline archive.
+models/non_nt/**/*.csv
+
 # Preserve the dashboard's versioned CSV inputs despite the parent ignore rule.
 !data/test_metadata.csv
 !data/final_analysis_result/model_b_testset_predictions.csv

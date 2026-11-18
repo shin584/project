@@ -1,0 +1,16 @@
+{
+  "status": "verified",
+  "network_guard": "Python socket connect/DNS/bind audit hook during restore",
+  "source_archive": "D:\\MC_project-backups\\dashboard-v3\\issue192-20261118\\non-nt-models-4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c.zip",
+  "archive_sha256": "4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c",
+  "restored_root": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\recovered-models",
+  "files_verified": 22,
+  "total_bytes": 14441300,
+  "acquisition_paths": [
+    "C:\\project-backups\\dashboard-v3\\issue192-20261118\\recovered-models\\models/non_nt/spcas9-9hydra-v2/model.keras",
+    "C:\\project-backups\\dashboard-v3\\issue192-20261118\\recovered-models\\models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras"
+  ],
+  "source_bundle_restore_commit": "9d680575212ad343f060570ea0490ff53ebc2473",
+  "source_bundle_checkout": "dashboard_core_v2",
+  "scope": "Model byte recovery and source Git recovery. No new inference/runtime conversion or performance evaluation."
+}

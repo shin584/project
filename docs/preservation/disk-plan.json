@@ -1,0 +1,42 @@
+{
+  "recorded_at": "2026-11-18T06:43:16.196408+00:00",
+  "issue": 192,
+  "source_commit": "9d680575212ad343f060570ea0490ff53ebc2473",
+  "release_build_commit": "54b77ee207891a8b90b21e818542ae9f9ed7911b",
+  "original": "C:\\project\\MC_project\\xai_dashboard_desktop",
+  "backup": "C:\\project-backups\\dashboard-v3\\issue192-20261118",
+  "worktree": "C:\\project\\MC_project\\dashboard_v3",
+  "model_vault": "D:/MC_project-backups/dashboard-v3/issue192-20261118",
+  "backup_medium": "C: local SATA SSD; full folder + git bundle. D: additional local volume for version-pinned non-NT archive; independent physical/off-host durability not established.",
+  "free_bytes_before_copy": 58209132544,
+  "incremental_peak_components_bytes": {
+    "full_original_workfolder_including_dist": 10100655311,
+    "v3_source_models_assets": 4628214999,
+    "promoted_models_provenance_and_local_recovery_stage": 100000000,
+    "git_bundle_and_metadata_allowance": 1000000000,
+    "future_build_environment": 8000000000,
+    "future_package_caches": 4000000000,
+    "future_temporary_build": 10000000000,
+    "future_new_distribution": 8000000000,
+    "safety_reserve": 5000000000
+  },
+  "incremental_peak_bytes": 50828870310,
+  "total_application_bytes_at_peak_excluding_existing_environments": 60929525621,
+  "fits": true,
+  "runtime_decision": "Deferred to #193; no v3 build in #192. Recalculate measured requirements before runtime install/build; allowances are provisional caps, not measurements.",
+  "restore": [
+    "Verify workfolder inventory SHA-256 before using restored files. Launch backup/workfolder/dist/XaiDashboard/XaiDashboard.exe --validate NEW_OUTPUT from unrelated cwd.",
+    "Do not copy the .git pointer into an independent clone. Clone preserved desktop-source.bundle, checkout dashboard_core_v2, overlay backed-up contents except .git, retain original separately.",
+    "Recover the content-addressed non-NT archive from D: or C: vault into fresh staging, verify every file using checked-in model-assets manifest, then copy to v3 paths.",
+    "NT models and tokenizer/WebView2 are independently copied from preserved models/ and .packaging/assets/. No hardlinks, cache links, or symlinks."
+  ],
+  "revision_reason": "Include complete SpCas9 published split (9 MB), predictions and source evidence in both archive and recovery staging.",
+  "additional_volume": {
+    "drive": "D:",
+    "label": "DNA",
+    "free_bytes_observed_before_copy": 5353144320,
+    "archive_budget_bytes": 20000000,
+    "archive_actual_bytes": 14452045,
+    "physical_independence": "not established"
+  }
+}

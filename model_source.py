@@ -14,11 +14,25 @@ model_source.py
     pip install gdown
 """
 
+import hashlib
 import os
 import sys
 from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Adopted #191 checkpoints. Recovery is local and checksum-pinned; these must
+# never fall through to the legacy Drive-folder filename search.
+NON_NT_FILES = {
+    "models/non_nt/spcas9-9hydra-v2/model.keras": {
+        "bytes": 396500,
+        "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+    },
+    "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras": {
+        "bytes": 1261811,
+        "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+    },
+}
 
 
 def is_packaged() -> bool:
@@ -111,6 +125,19 @@ def _download_folder() -> None:
 def resolve(rel_path: str) -> str:
     """모델 파일의 로컬 절대 경로를 돌려준다. 없으면 드라이브에서 받아 온다."""
     local = _abs(rel_path)
+    if rel_path in NON_NT_FILES:
+        expected = NON_NT_FILES[rel_path]
+        path = Path(local)
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"Missing pinned model: {local}. Restore the offline archive with "
+                "model_assets.py; see docs/preservation/README.md."
+            )
+        with path.open("rb") as stream:
+            checksum = hashlib.file_digest(stream, "sha256").hexdigest()
+        if path.stat().st_size != expected["bytes"] or checksum != expected["sha256"]:
+            raise ValueError(f"Pinned model checksum mismatch: {local}")
+        return local
     if os.path.exists(local):
         return local
 

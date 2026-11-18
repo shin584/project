@@ -1,0 +1,1062 @@
+{
+  "status": "verified",
+  "source": "C:\\project\\MC_project\\xai_dashboard_desktop",
+  "destination": "C:\\project\\MC_project\\dashboard_v3",
+  "independent_regular_files": true,
+  "file_count": 263,
+  "total_bytes": 4554741829,
+  "files": {
+    "models/.gitignore": {
+      "bytes": 155,
+      "sha256": "56250562372b329ea703f0dc06bd612dc275c284c12b6e139247423499746f05"
+    },
+    "models/.gitkeep": {
+      "bytes": 2,
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+    },
+    "models/Cas12a.safetensors": {
+      "bytes": 1921804272,
+      "sha256": "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969"
+    },
+    "models/SpCas9.safetensors": {
+      "bytes": 1921845264,
+      "sha256": "8a1a84ab4542da1eef9720ab54c785d1d2faa721e43b4731da018ec8b64fe9d9"
+    },
+    ".packaging/assets/tokenizer/tokenizer_config.json": {
+      "bytes": 1048,
+      "sha256": "e5cdd63d5f8feb1eaaf4d04ff596944cc6028e93e6ca91a4d25381b3cf5d39cf"
+    },
+    ".packaging/assets/tokenizer/vocab.txt": {
+      "bytes": 32824,
+      "sha256": "afa9b1cf611ab623d9fae2beb94db924796014b0054b3aaf1c9e047b13386e77"
+    },
+    ".packaging/assets/webview2/157.0.4341.60.manifest": {
+      "bytes": 226,
+      "sha256": "0f0eaefc339e4b8a4798c4ec2966edd04b5136735c152d91228e404565115df3"
+    },
+    ".packaging/assets/webview2/AdSelectionAttestationsPreloaded/ad-selection-attestations.dat": {
+      "bytes": 63,
+      "sha256": "dc94c97fb9437a5137a1d47b376e212732a15cb1266148792b94da6fa9939d17"
+    },
+    ".packaging/assets/webview2/AdSelectionAttestationsPreloaded/manifest.json": {
+      "bytes": 128,
+      "sha256": "e92ad2a1a517ec4c6db1538513b0a529966249182b3a571fab3941ea3eff5ff0"
+    },
+    ".packaging/assets/webview2/concrt140.dll": {
+      "bytes": 384264,
+      "sha256": "868f5f12b57972bcf26c27bdae78c5f0d120670843ab05e5697fc553f4f4d95b"
+    },
+    ".packaging/assets/webview2/Copilot.dat": {
+      "bytes": 8192,
+      "sha256": "d79e27858722fcb4c2db9a7fa6bb4fb958eb90c2ab12fd35370be8c05dee7878"
+    },
+    ".packaging/assets/webview2/copilot_overlay_images_100_percent.pak": {
+      "bytes": 8684,
+      "sha256": "3e11d07e0829c1d8547915f351370e775d3c18958df60a8b7b2ddf817df27d08"
+    },
+    ".packaging/assets/webview2/copilot_overlay_images_200_percent.pak": {
+      "bytes": 23614,
+      "sha256": "09f33744da33ec4290d78c830b76e6ff09e1611016dea2090f871b75f5fa8364"
+    },
+    ".packaging/assets/webview2/copilot_overlay_unscaled_images.pak": {
+      "bytes": 38789,
+      "sha256": "7a8bf84c03de5113410d6f3b5a98ef9fd2a12407df72446e2f16fd916f3747af"
+    },
+    ".packaging/assets/webview2/copilotapp.exe": {
+      "bytes": 4668224,
+      "sha256": "c186f2b631032b8e129f813ed70f46733afad8b2c724b2a714e92a871291495c"
+    },
+    ".packaging/assets/webview2/d3dcompiler_47.dll": {
+      "bytes": 4763944,
+      "sha256": "f93b86f70ad713944824caa3d233f5569041b91f15d44ca39e095d691de4fe4a"
+    },
+    ".packaging/assets/webview2/dual_engine_adapter_x64.dll": {
+      "bytes": 5688520,
+      "sha256": "45dcd6ea20ee835fa9724181b4ad3fdcb68c0f531eb3c29881b6d62a2e1e17bc"
+    },
+    ".packaging/assets/webview2/dxcompiler.dll": {
+      "bytes": 20537672,
+      "sha256": "ca1d1e6548118f7a9aade08c23bd5ce2b63b06bc89ef161685c729fe7a0948c7"
+    },
+    ".packaging/assets/webview2/EBWebView/x64/EmbeddedBrowserWebView.dll": {
+      "bytes": 9104192,
+      "sha256": "f37634e5fe7138ae4cb9fbddacb3992987507db01f72a28151ab1bc77c9b6f6b"
+    },
+    ".packaging/assets/webview2/EBWebView/x86/EmbeddedBrowserWebView.dll": {
+      "bytes": 5836104,
+      "sha256": "2b04038107e1ce247eb0833ab5ba50db9ddc8fcbaf0cf944905f065c2fa8a656"
+    },
+    ".packaging/assets/webview2/Edge.dat": {
+      "bytes": 12288,
+      "sha256": "aad5a84356ee96f3d6ca9742b23b6124eafba558f6d60ceed6c3067dac459c81"
+    },
+    ".packaging/assets/webview2/edge_feedback/camera_mf_trace.wprp": {
+      "bytes": 24910,
+      "sha256": "3f2eb6455f54365c27829f85dd64ca0bafaa8577a6c8e79a54a6dd4c67df6470"
+    },
+    ".packaging/assets/webview2/edge_feedback/mf_trace.wprp": {
+      "bytes": 12735,
+      "sha256": "79a228f8f85310c27c292055d9e0e9b827c319c2472b4ba5b40e88851bc4b4f3"
+    },
+    ".packaging/assets/webview2/EdgeWebView.dat": {
+      "bytes": 8192,
+      "sha256": "482297326005fcb6e961e9b3e327e4cbb151901e7ca55cbe2bf982823bc06934"
+    },
+    ".packaging/assets/webview2/eventlog_provider.dll": {
+      "bytes": 16200,
+      "sha256": "253fe00d5187b3b2823876dbc109d9c88eb7b7683ecc86be31fe8153b85c8add"
+    },
+    ".packaging/assets/webview2/Extensions/external_extensions.json": {
+      "bytes": 99,
+      "sha256": "a68cafd7d78d5c671c2560656653f2a4d83ab66d87a8728356a88fb1f477b3e6"
+    },
+    ".packaging/assets/webview2/ffmpeg.dll": {
+      "bytes": 3112768,
+      "sha256": "df7577041ab6e7e77bdcbbfa6952980e50ec4e314435bb03eb5101f28919d5af"
+    },
+    ".packaging/assets/webview2/icudtl.dat": {
+      "bytes": 12271232,
+      "sha256": "38b249954e25346833f6ea1a142422b9fe4578b6c47aa0da2e1cc42a27dbe23b"
+    },
+    ".packaging/assets/webview2/Installer/copilot_setup.exe": {
+      "bytes": 105288,
+      "sha256": "38fe897b281fe63286acdba3d4134e9776cc51f978a6cbc9df31f0e12cd5ce8d"
+    },
+    ".packaging/assets/webview2/learning_tools.dll": {
+      "bytes": 1311048,
+      "sha256": "a04f0da7d8849917defd1632cbb94b9a9ed6d93070f38da73fe22ec9b52ee8cf"
+    },
+    ".packaging/assets/webview2/Locales/af.pak": {
+      "bytes": 1115933,
+      "sha256": "316ad59d214f3ba1a563dde0a965aec8843bc185657812fd1db5e5b8929b10e8"
+    },
+    ".packaging/assets/webview2/Locales/am.pak": {
+      "bytes": 1648063,
+      "sha256": "5927fdeb6de226efae247d5be6984c1ffccc9496f32e44e4c5d33b912373d420"
+    },
+    ".packaging/assets/webview2/Locales/ar.pak": {
+      "bytes": 1709443,
+      "sha256": "63834444dcebb1a93ab6f3dc5d662580bc7ddb12120c71716fe726c05113d9c3"
+    },
+    ".packaging/assets/webview2/Locales/as.pak": {
+      "bytes": 2436218,
+      "sha256": "597c7d9df0799ae6892ba79e84887476cf82134ae951884e819f5b9afcda6a23"
+    },
+    ".packaging/assets/webview2/Locales/az.pak": {
+      "bytes": 1284899,
+      "sha256": "46752793abe732995801198b6e927bd1c138c4747177abf445cec40f06ee237e"
+    },
+    ".packaging/assets/webview2/Locales/bg.pak": {
+      "bytes": 1923230,
+      "sha256": "af69b50062c851974a0ea4cd885bfca1a0b52ade2efcace3a0c396069584417d"
+    },
+    ".packaging/assets/webview2/Locales/bn-IN.pak": {
+      "bytes": 2519518,
+      "sha256": "04af8580964fc2de5b7c58b2e9529e82e587a532fc854a3e79310452d5d0470c"
+    },
+    ".packaging/assets/webview2/Locales/bs.pak": {
+      "bytes": 1193176,
+      "sha256": "655e589366845fbaf68b533e013a053d528e822e4429bebc6c811cbd386067fd"
+    },
+    ".packaging/assets/webview2/Locales/ca-Es-VALENCIA.pak": {
+      "bytes": 1251587,
+      "sha256": "1567a89862e3d65ddb4578b2c891167343b6509b499a17bb4ebd761ae299cd4b"
+    },
+    ".packaging/assets/webview2/Locales/ca.pak": {
+      "bytes": 1253080,
+      "sha256": "ab90545ab6b54ebc3cee7453a942add6876f46fa3728f5eef7943b44a0d1f2f9"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_af.pak": {
+      "bytes": 65146,
+      "sha256": "c72447fa7559cc7723b3cf60ae7fb9837beed6bfc27c060f210a4939aa60feab"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_am.pak": {
+      "bytes": 95236,
+      "sha256": "97af527a9c04f35ec2730a6f4d69dfaa40b4beb0a55f1137dc36692559cd6673"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ar.pak": {
+      "bytes": 92138,
+      "sha256": "8b2210ab2fbbc63526d16a30ab3d90bae4e536bb8f2d2f46510e21f2decba8ef"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_as.pak": {
+      "bytes": 142024,
+      "sha256": "9205ca01bbc24db1defc805f875a40ce5fe713c1f6b6ce8da375616b702f5cbf"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_az.pak": {
+      "bytes": 73213,
+      "sha256": "3bb51e16fc775be2415baec7850409551a0346fccc9c8806fb23588a4b08baa6"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_bg.pak": {
+      "bytes": 108089,
+      "sha256": "acb71a1a788363d51c11a11ea24706f83bf38d84b8e7546ed050f1019ed1c4e8"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_bn-IN.pak": {
+      "bytes": 148441,
+      "sha256": "717e7015d60c31fd498174233f34005c1f654e870bfad0e18a986adf394ef812"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_bs.pak": {
+      "bytes": 67772,
+      "sha256": "d88724ca8fc9121b1e79d2ede9df401141af4f5f6d639f2569b9c2224c76a761"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ca-Es-VALENCIA.pak": {
+      "bytes": 71410,
+      "sha256": "f66306ad8ff7338e0dc99f7c786535011a132cb56126b00e3606b757afa7c509"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ca.pak": {
+      "bytes": 71197,
+      "sha256": "5ed5e2878dbe2988214b3e8d53a4dd4076c8786a7d5bb4298734b0c586592a5e"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_cs.pak": {
+      "bytes": 69351,
+      "sha256": "3bca4d6fec9ba76f6e794293849110a3d346439c5c3c339879518731d9e2ca04"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_cy.pak": {
+      "bytes": 69492,
+      "sha256": "7587307e34b403893c2da3e1cacf4f80fa07a59dac4673c8e21fe015a9cf7c3a"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_da.pak": {
+      "bytes": 64674,
+      "sha256": "088b17b10efe74e316ef9eab9ae920e9fe20e80007675e5c9cc6615f76f23594"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_de.pak": {
+      "bytes": 72199,
+      "sha256": "5a409cd5405412dbc156b9dea12db86f7d7ba7c34bd7db30d591814c20cbcc30"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_el.pak": {
+      "bytes": 122440,
+      "sha256": "9639e1b4315ecae4e583670da4000a2e2b361d225cec1d3fbfaeace0cc395835"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_en-GB.pak": {
+      "bytes": 59559,
+      "sha256": "d712571680c01edcf276e73745062e1c75f5f8dce0f8f69102a5d1e10ff3991f"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_en-US.pak": {
+      "bytes": 58915,
+      "sha256": "50cdb0f643d4e3f1bdeba2a0ccadd5f751b53d677911f8dd0fc4deffe9685867"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_es-419.pak": {
+      "bytes": 69694,
+      "sha256": "034a13554cca9012b38e48668be1c8ad9829fd6f560d7d92acdc9deef18d31b7"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_es.pak": {
+      "bytes": 69499,
+      "sha256": "4b2270a885fc6b9b2c7c1aec27bec7678807309075a8573b068e471968e25cd7"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_et.pak": {
+      "bytes": 63511,
+      "sha256": "64fcdc32dc7db9e688fc423dd8de2f84d9b7f6db97d77fcda1772a6ff91f83d4"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_eu.pak": {
+      "bytes": 65472,
+      "sha256": "9af524936da1285b1dff3a8cf12e99ef8f080843390848a26114a736e73c6f9b"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_fa.pak": {
+      "bytes": 101734,
+      "sha256": "c04dcae3eca3ed4983f3fba81502c886730ee764ffafec95dc36a56ee84e3f7c"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_fi.pak": {
+      "bytes": 67003,
+      "sha256": "7312369ca9b6b5a0aac7aa65e6cfde783d04545dbd19ecbc53bd50d309d40d5d"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_fil.pak": {
+      "bytes": 72906,
+      "sha256": "97c92c36d068202b6655a0ceff0ab4e7e1f8c2f8b20e1c8c12b153d2b1bb1080"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_fr-CA.pak": {
+      "bytes": 76767,
+      "sha256": "5bf985b560a2b6583f19efa4984e2d67466642dd06107a3e4118ed7e899c8663"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_fr.pak": {
+      "bytes": 76254,
+      "sha256": "5af49b71f1bf56d15f1eef689b1386c5ee9ef5e2a889aac819c9f9e3e6cc7251"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ga.pak": {
+      "bytes": 76241,
+      "sha256": "6284e58959f782289ed1f2d82ce959ec5ee8797218f59e3232983776651dedf1"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_gd.pak": {
+      "bytes": 78049,
+      "sha256": "e5a31a483a024b3e0463673652adc645287cbea6423429524813024455b739e1"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_gl.pak": {
+      "bytes": 67942,
+      "sha256": "21bdfce394916dfc146b8e1902f8f97be3f10778ff29631539cb2c347bd46402"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_gu.pak": {
+      "bytes": 143617,
+      "sha256": "412fd43b128dab5b96827f0234d16e75aa31ee6ded922f4ee88d5781015cd3ae"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_he.pak": {
+      "bytes": 82452,
+      "sha256": "adb1a1aac4613a4e4f1d37eabce6bb075dd3a6a573820588f51b2f1da2530791"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_hi.pak": {
+      "bytes": 140509,
+      "sha256": "63e14c79d7cfa3eb44aa5440308675a970a966afdd676659b1c266b431bf2a9f"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_hr.pak": {
+      "bytes": 68307,
+      "sha256": "11077be0cf28906b9b19ba51d97971f3509be7e6ba9552280208fa45066d609d"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_hu.pak": {
+      "bytes": 73209,
+      "sha256": "e0e141338d6bf6fef2941315ee148028e474393fd99aa88f85dc3e5c2dcea95a"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_id.pak": {
+      "bytes": 64794,
+      "sha256": "db3394d4235d09370969224e0f5baac8c61264dac34facb7cff08af8f479fc9c"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_is.pak": {
+      "bytes": 68834,
+      "sha256": "f389ee934eba9770bd276a233da8cee4e4be80cd61289bbc9268a8d1b4f70103"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_it.pak": {
+      "bytes": 69334,
+      "sha256": "7688ae95543e12e198d7f39d2e3bbf2f033634f59da88638e03871e2076e6bf0"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ja.pak": {
+      "bytes": 83922,
+      "sha256": "65a530941d7091eb1eee75d76b1da27e2756ee61dda3fdd3766cec677c54c7a9"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ka.pak": {
+      "bytes": 151395,
+      "sha256": "6495229440714197788258fda6dd590bf704807ab15b1d296c3545e80ff56800"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_kk.pak": {
+      "bytes": 111364,
+      "sha256": "ccbefa124a7ae89255c0e384c9a1f59335d6f8e688f954a74e69a6a65fc0d9a5"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_km.pak": {
+      "bytes": 152458,
+      "sha256": "dbb9c6c298d812f27842a77d40483873659773612a4266c8747c704040f0a548"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_kn.pak": {
+      "bytes": 154694,
+      "sha256": "d3acc875dfa5f971ccc9c5489d50ccb690e6b38eee83f55e8c5d6333adab767c"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ko.pak": {
+      "bytes": 72391,
+      "sha256": "aa1429dd546bf476a449dfa6c2324c600fe97524ed6c1876b3924f56444e1d32"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_kok.pak": {
+      "bytes": 134068,
+      "sha256": "f4b88c4b43f8582ed447a17ae6daeed4175117c2961054223379e202b0896638"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_lb.pak": {
+      "bytes": 70062,
+      "sha256": "f3105d9bb32b037138465b75dc5a8508f0fef48cd0d479a0b2331c7eee5b8836"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_lo.pak": {
+      "bytes": 138001,
+      "sha256": "9b03d665e55c1e673e159122bebadfb83f40279140c4f65bcf5aa2da708fb627"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_lt.pak": {
+      "bytes": 72376,
+      "sha256": "3269e858be9dd8366b365fadaec8fa6194756f8ef558b82976e9e05ba9e84e4a"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_lv.pak": {
+      "bytes": 69766,
+      "sha256": "d5650f462538780be553322aee42722117f2f21eee706d2642edbdd46b48f087"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_mi.pak": {
+      "bytes": 70655,
+      "sha256": "cd4a133c7d65ee4fd1cd284348b3dbb0469e34fff3a352b5e7c6becc919a3d37"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_mk.pak": {
+      "bytes": 109574,
+      "sha256": "57bdc2d3b8a52b7dd6148fb6bcfce3e40015cf82909887b504d2d3a03309b712"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ml.pak": {
+      "bytes": 171695,
+      "sha256": "4954710bdae95fc489064f5b1f17afa2daa6db046cf9b20a7d9e59274472bb65"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_mr.pak": {
+      "bytes": 144167,
+      "sha256": "c69a3032d77e8aa56c6843c660339fb2bf7347f1bc7d9bab16ad569a34e62bdb"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ms.pak": {
+      "bytes": 67133,
+      "sha256": "9111db2c70427762884809e3dde4902827f4c6727a396f5f1414f0efd9a76b2c"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_mt.pak": {
+      "bytes": 72750,
+      "sha256": "ef1be16b41af6dfe5a48353a07c8c7fb71bc51ce53eb683d9d255e350dcedc16"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_nb.pak": {
+      "bytes": 63046,
+      "sha256": "26dd342c322d345faf278fea840de25c7195185423a63fb6a4d214b9708593ab"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ne.pak": {
+      "bytes": 148077,
+      "sha256": "c6d6d616c153f63535b7d672ee1d4a2f8e90c791220e63978b8f4b03b2d40824"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_nl.pak": {
+      "bytes": 67852,
+      "sha256": "ad3098f1c90a24233746d33cba068a3a0a0e29895e884384e1712f5b8f85ce66"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_nn.pak": {
+      "bytes": 62910,
+      "sha256": "d428c63f748d1b40d346b348995e6f0614a2a155aeb360bf581cd584064e820e"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_or.pak": {
+      "bytes": 154625,
+      "sha256": "1d35fbd17c9a11479e6e14ccba26094abfc382c984fa11624f2ec94770f6fb08"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_pa.pak": {
+      "bytes": 147300,
+      "sha256": "9d6121762ea784b81d372d3bf4dfeb5e2ac2d9adcf8f271af4f023cdebd38418"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_pl.pak": {
+      "bytes": 74745,
+      "sha256": "5392410395daf1d9927c7780cd8eb37568d9f5d285a3bacf5f4f207a59dfcdef"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_pt-BR.pak": {
+      "bytes": 68144,
+      "sha256": "d6e86f1efe82f98b51377471d22829d5fd6954fe08891a34d22ab68e5060c3cd"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_pt-PT.pak": {
+      "bytes": 70393,
+      "sha256": "606c4d17756fd0e6117506884af60d7e9939a703e520c19d7824b937424b2817"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_qu.pak": {
+      "bytes": 70343,
+      "sha256": "dd483a4a7063013095be24874d167377327fbda97d991b08308dda9eba0b0330"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ro.pak": {
+      "bytes": 71308,
+      "sha256": "533aa30390bcf83b3b8dfae8b5a4882f414a9278c00ab4eaebb20168ee0f7c72"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ru.pak": {
+      "bytes": 109668,
+      "sha256": "8b5a6483cf8d03cdb7260ed69c69bba6a8abefe4aaaa4c8c33974e9cedd22d5c"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sk.pak": {
+      "bytes": 70851,
+      "sha256": "121a535469cb54db6522f5fbffdcb482ff50feda969c08b98ef52d08da3a8735"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sl.pak": {
+      "bytes": 68529,
+      "sha256": "a16741e456004f2f7006e9c26e6d5b1ecf3af7cf109faa5b085d6ac6e6283efe"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sq.pak": {
+      "bytes": 70422,
+      "sha256": "3d656a1ee55da81aca5b736c9c9b4ca1cad978d45895fe80ce8d6e581972cda8"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sr-Cyrl-BA.pak": {
+      "bytes": 105506,
+      "sha256": "aa1f8ff81534fb8f75c33369ceeef9cb9c5fce5a7ce605905fbe4e891e484cc1"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sr-Latn-RS.pak": {
+      "bytes": 68509,
+      "sha256": "77c52431383b994434327942bd30f91484499f53bac854ca5232374abcf28f76"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sr.pak": {
+      "bytes": 107122,
+      "sha256": "fd894de3046462f91dff6e4f48cbe4087d095020c51c1bc83b9d5b74e35a8c54"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_sv.pak": {
+      "bytes": 64169,
+      "sha256": "b26b7b5b8d1a21c5cfa5e978ad165c8b97427d42c97781491a177fe8e54f5fc3"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ta.pak": {
+      "bytes": 166804,
+      "sha256": "a3bc7525812d3fd9514cb3faf9c10745dc08924a9a9dbdfe7f9072bac2da2b68"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_te.pak": {
+      "bytes": 153625,
+      "sha256": "c19edb87ab7a7962716dc85a9b1f5804cdf010f47f243669df88596a2c43bd6f"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_th.pak": {
+      "bytes": 135615,
+      "sha256": "60030eb94f782ac8be65ddeb4d0d4791a5984c7190036ad8e5cf12801b8b0ff9"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_tr.pak": {
+      "bytes": 69912,
+      "sha256": "ad92610e45220de4f15b70fd2d3cf2d006c70b3c28fd635dbc30ac6405ff055d"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_tt.pak": {
+      "bytes": 106543,
+      "sha256": "1fb5893820b06bc768ec8ad4c794c5328e6835b8bb73109422c19323f739d32e"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ug.pak": {
+      "bytes": 107750,
+      "sha256": "c503f2bb78ca65bc7be4b05aa19f0c34c2c14988e2968719e3b04732a7bd5217"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_uk.pak": {
+      "bytes": 105962,
+      "sha256": "d10f18931fb197bde829fc423b98328feea6d8566f7133abccfcc68350dca363"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_ur.pak": {
+      "bytes": 103928,
+      "sha256": "b772f59d40c5f2b2aa67479fa5604979152c6841b342e4cd77ae1eb398dca204"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_vi.pak": {
+      "bytes": 80039,
+      "sha256": "86bb8764a7d41b4aeaabae254a4ba65a9943dba90e524651d2d1b5a953b8915b"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_zh-CN.pak": {
+      "bytes": 55950,
+      "sha256": "32a4f7586e9cb96766bbbb2ff541a1460c7bbdf19f47f4726ac8a00e6bc156af"
+    },
+    ".packaging/assets/webview2/Locales/copilot_overlay_strings_zh-TW.pak": {
+      "bytes": 58162,
+      "sha256": "495bdbf02ccc419379ed4680f9be1ecc260353cda7a87aec96a81d29692bd7d6"
+    },
+    ".packaging/assets/webview2/Locales/cs.pak": {
+      "bytes": 1245878,
+      "sha256": "cf140735efe8d25fc851ccd26a1fe30ebd861e7c34a0d504a0668015dc6682e6"
+    },
+    ".packaging/assets/webview2/Locales/cy.pak": {
+      "bytes": 1233238,
+      "sha256": "9b209a32bd4c17ba58af7b29cedeff7454731ac2e428bba8f88236e9345ffb8e"
+    },
+    ".packaging/assets/webview2/Locales/da.pak": {
+      "bytes": 1118575,
+      "sha256": "10f1180a351b7fddd1dcd576d40f85693c661becec81c3c42ad7c36b3f57c20b"
+    },
+    ".packaging/assets/webview2/Locales/de.pak": {
+      "bytes": 1247658,
+      "sha256": "5534e370a1087147f82d3b2f6d20a6e8ce69088769a97bfb751c61f0b7220f89"
+    },
+    ".packaging/assets/webview2/Locales/el.pak": {
+      "bytes": 2125515,
+      "sha256": "a9606b501eb7a866a3822b472265c88f175cf9325660e87739e1e4583312779f"
+    },
+    ".packaging/assets/webview2/Locales/en-GB.pak": {
+      "bytes": 1016989,
+      "sha256": "4b9cc921378fc9bbe4757a3eaac830060706b4d90e60c8527c38bfc90b2fc032"
+    },
+    ".packaging/assets/webview2/Locales/en-US.pak": {
+      "bytes": 997659,
+      "sha256": "d26a80c5db0b5d26c935c82169e3b15835a5d471d727b199a44d18a1c6cbc2d5"
+    },
+    ".packaging/assets/webview2/Locales/es-419.pak": {
+      "bytes": 1237760,
+      "sha256": "6acb94467bbaa75a778838685a8d9b00998479796c187f759772424df5d985c4"
+    },
+    ".packaging/assets/webview2/Locales/es.pak": {
+      "bytes": 1238459,
+      "sha256": "88a20d8f92e512966fe762406c76d3f07a5ac0d90bf38bf2374c32c24e6bd14a"
+    },
+    ".packaging/assets/webview2/Locales/et.pak": {
+      "bytes": 1106696,
+      "sha256": "3c50a5c448812ab828015426b69f74e4f19abc915d1170136fa557af2dd726ac"
+    },
+    ".packaging/assets/webview2/Locales/eu.pak": {
+      "bytes": 1150155,
+      "sha256": "17e744915092322b5fc2b13bca67656b3be713dfb513d8937a15d3184a21a947"
+    },
+    ".packaging/assets/webview2/Locales/fa.pak": {
+      "bytes": 1733348,
+      "sha256": "f4987b57791aeb9fc8926b9441553835709830c1aca0696a5e43c0d33843362c"
+    },
+    ".packaging/assets/webview2/Locales/fi.pak": {
+      "bytes": 1155441,
+      "sha256": "ea1affea5e4af552684212bc2061abc213203cd2cefda4c45bf25c53e38a1e3f"
+    },
+    ".packaging/assets/webview2/Locales/fil.pak": {
+      "bytes": 1247245,
+      "sha256": "2bd624fc19d0a789f27fdd972df5320b19248b4be42bb22ce10b454402dba5a9"
+    },
+    ".packaging/assets/webview2/Locales/fr-CA.pak": {
+      "bytes": 1331228,
+      "sha256": "2793b6230d79760097f1cf6a141578c8d25a18437f55e183ce2c34a8bb8751d5"
+    },
+    ".packaging/assets/webview2/Locales/fr.pak": {
+      "bytes": 1319311,
+      "sha256": "b4150632782330b44b3f20e0a1b304a673531084f248aeed440a7f4f100311a9"
+    },
+    ".packaging/assets/webview2/Locales/ga.pak": {
+      "bytes": 1326042,
+      "sha256": "569e1cdddd9823e3352a06307405052c3962c0af34d9ede118c4cffcec25982b"
+    },
+    ".packaging/assets/webview2/Locales/gd.pak": {
+      "bytes": 1401043,
+      "sha256": "cfcdfe5d75374668b40e3d5490ab9ca859b148352bce4be7f502e5f11f96366c"
+    },
+    ".packaging/assets/webview2/Locales/gl.pak": {
+      "bytes": 1186049,
+      "sha256": "4075ad3c75a7329f202c831cab02f48ad8f497f313b5f7c94af6f01f5fe40736"
+    },
+    ".packaging/assets/webview2/Locales/gu.pak": {
+      "bytes": 2387888,
+      "sha256": "8d3d3a4501c8256fa870319d16851ba98c8796b264128d99564b5a6901a57344"
+    },
+    ".packaging/assets/webview2/Locales/he.pak": {
+      "bytes": 1439305,
+      "sha256": "db19785921fc12275b737b29e514e3337b70d84ffe6c2a4fbe338172229a92ee"
+    },
+    ".packaging/assets/webview2/Locales/hi.pak": {
+      "bytes": 2380050,
+      "sha256": "29d1f0590794b1e3552b779499dbb00447e65c84c8250d5c38645941c69fc710"
+    },
+    ".packaging/assets/webview2/Locales/hr.pak": {
+      "bytes": 1208937,
+      "sha256": "cf6d4714631b30d5ef06a480f32cd0697661c6001bc629b422c76416592b2c49"
+    },
+    ".packaging/assets/webview2/Locales/hu.pak": {
+      "bytes": 1278171,
+      "sha256": "18c78982b12d8e04c57db731cadb5ab9ff0e188689bb4b7e2b094f5d284194ac"
+    },
+    ".packaging/assets/webview2/Locales/id.pak": {
+      "bytes": 1092385,
+      "sha256": "5ab674273e4db463767b9542726048bc063863d968b63081acc279c38b89d7f5"
+    },
+    ".packaging/assets/webview2/Locales/is.pak": {
+      "bytes": 1173308,
+      "sha256": "c5e356137950de2dba2655de1baff36b67d44fb994771b0850ad47cc0e55e3a6"
+    },
+    ".packaging/assets/webview2/Locales/it.pak": {
+      "bytes": 1220160,
+      "sha256": "40d0af1f8f7e0e28b24be2b569b931abff73e5b8dc2861d057331b2d9d77f83d"
+    },
+    ".packaging/assets/webview2/Locales/ja.pak": {
+      "bytes": 1425282,
+      "sha256": "de56189468c37be502e3f280a37f9215359ae1728d4b6cd28b5d6666610734c7"
+    },
+    ".packaging/assets/webview2/Locales/ka.pak": {
+      "bytes": 2663768,
+      "sha256": "7c3f0ff6287ce18a044aea08e64bcb3f9004cdda873b8ad0891ffc96d1bb7aef"
+    },
+    ".packaging/assets/webview2/Locales/kk.pak": {
+      "bytes": 1884296,
+      "sha256": "0f8f02a237df9de6ab641653aa8a4bd32b8abf5e123b81e1cbbf4b4933f464b8"
+    },
+    ".packaging/assets/webview2/Locales/km.pak": {
+      "bytes": 2566025,
+      "sha256": "e4f1dfd3c093d5c28cd7ef17aba19656277a2ecc72d6864fa6e03eb36d3c5a7a"
+    },
+    ".packaging/assets/webview2/Locales/kn.pak": {
+      "bytes": 2671386,
+      "sha256": "f15afe7e9d6600a785f6340e10a794113750820f5e682e71adf08dba5927ee9f"
+    },
+    ".packaging/assets/webview2/Locales/ko.pak": {
+      "bytes": 1199637,
+      "sha256": "3f74a547324545759abd8f747fa34da706b9778333b14b6d057a4ed0c00bd518"
+    },
+    ".packaging/assets/webview2/Locales/kok.pak": {
+      "bytes": 2301514,
+      "sha256": "f9ef63b1137f2cde37b885b4804d7980c612ece003589214a0d8d00739ca5cff"
+    },
+    ".packaging/assets/webview2/Locales/lb.pak": {
+      "bytes": 1204696,
+      "sha256": "612b340f18c7983f61fe87dc967c4e54f0c53db11e896b13aab490df92fed0e0"
+    },
+    ".packaging/assets/webview2/Locales/lo.pak": {
+      "bytes": 2330006,
+      "sha256": "2d76f7e6762eb02c0a5f8e8d9f14d818ba55cff05908064c19e5c127c91d5f66"
+    },
+    ".packaging/assets/webview2/Locales/lt.pak": {
+      "bytes": 1263973,
+      "sha256": "edc4bfd1235049bfa308a079c7c3db90f0a188e1ac916eb1eb1137379ef3051a"
+    },
+    ".packaging/assets/webview2/Locales/lv.pak": {
+      "bytes": 1230895,
+      "sha256": "664442b6b7f518f1bda5a6cf6163d0661d1d60a1d4884c7ee01018ce898350dd"
+    },
+    ".packaging/assets/webview2/Locales/mi.pak": {
+      "bytes": 1204395,
+      "sha256": "c02cee28a1d87d0ca4f723eea7c2bef541073c13428f89b431ffa714c5b91283"
+    },
+    ".packaging/assets/webview2/Locales/mk.pak": {
+      "bytes": 1919426,
+      "sha256": "a90d1c14e222d5876761c5e51a1d813a867d96de86f865fe4a1012cb6dd2a665"
+    },
+    ".packaging/assets/webview2/Locales/ml.pak": {
+      "bytes": 2926798,
+      "sha256": "6561d67329cc5b87e35ba3f413ff009b74484be15b4dfeedc52af7fecdf6a162"
+    },
+    ".packaging/assets/webview2/Locales/mr.pak": {
+      "bytes": 2407248,
+      "sha256": "5fa60e9d3df1ec68eb8ffd54e3fb3857cc81520ec44d2fd16eb54b6696c33d6a"
+    },
+    ".packaging/assets/webview2/Locales/ms.pak": {
+      "bytes": 1127529,
+      "sha256": "d5fc9365fd0b5173b742b92d79a80382c1fc6a4b7a33e770e3096f0d24a9de3b"
+    },
+    ".packaging/assets/webview2/Locales/mt.pak": {
+      "bytes": 1283740,
+      "sha256": "221375d8872589422a455eacce4ce61410e2a04765a09df317d432f0a9da8ef7"
+    },
+    ".packaging/assets/webview2/Locales/nb.pak": {
+      "bytes": 1087208,
+      "sha256": "c1f4d55073e7021943f725f2b4da0d6d4299a15249b0ad72b58657977ff8690d"
+    },
+    ".packaging/assets/webview2/Locales/ne.pak": {
+      "bytes": 2553467,
+      "sha256": "292a4e1149989f8f2d299a986e24630bf661bfce97c35c22758c4e92a3b8f405"
+    },
+    ".packaging/assets/webview2/Locales/nl.pak": {
+      "bytes": 1165120,
+      "sha256": "a6fdaafd1e33616bfb9ead5d49bde76016c7ae4cfb20e8df2b2744a3247d243e"
+    },
+    ".packaging/assets/webview2/Locales/nn.pak": {
+      "bytes": 1091776,
+      "sha256": "0962e528b319870325ca5ac7aeefd41a3bd70dc8298a8caa2ca0824dd06919db"
+    },
+    ".packaging/assets/webview2/Locales/or.pak": {
+      "bytes": 2654085,
+      "sha256": "094982193959ce01adeb39b29e7925d1d460578680f4b30425c7d6c307355ea6"
+    },
+    ".packaging/assets/webview2/Locales/pa.pak": {
+      "bytes": 2427351,
+      "sha256": "904f04b31ca120e890e174cd8a45d84b2800c387a92bf0709b0f12902683a359"
+    },
+    ".packaging/assets/webview2/Locales/pl.pak": {
+      "bytes": 1294003,
+      "sha256": "dfca3f4ef3b6e1f5a1e799890878985e052f19dd4be7ec513f252ac2001bdbd0"
+    },
+    ".packaging/assets/webview2/Locales/pt-BR.pak": {
+      "bytes": 1196667,
+      "sha256": "f09dfd6496471710ac58f3dbb5b8d252921bcf00052d26989fb3e4fd0193c689"
+    },
+    ".packaging/assets/webview2/Locales/pt-PT.pak": {
+      "bytes": 1235306,
+      "sha256": "8ff8bb8f436b8e114d7f149d8609ff5e1083e19fba5af7019af050bd50a107f2"
+    },
+    ".packaging/assets/webview2/Locales/qu.pak": {
+      "bytes": 1238225,
+      "sha256": "b78b4990ec0278028bf3b947d713784cef77eb63497c4e82a7ceb8d5c1784efd"
+    },
+    ".packaging/assets/webview2/Locales/ro.pak": {
+      "bytes": 1249028,
+      "sha256": "8b82a01e7ffc895e90df530654659c13b452d5c54f3fe6b1825c975e7a4d9795"
+    },
+    ".packaging/assets/webview2/Locales/ru.pak": {
+      "bytes": 1962609,
+      "sha256": "e70e17ddfefcfbb52958d8e77ce3e03fb9f16bc0a7c6e1bc33c617318e755306"
+    },
+    ".packaging/assets/webview2/Locales/sk.pak": {
+      "bytes": 1269892,
+      "sha256": "c33362fc6a93942f6ac46f9ffc05a00735fa651ba0718330bcf7b439728af94e"
+    },
+    ".packaging/assets/webview2/Locales/sl.pak": {
+      "bytes": 1203951,
+      "sha256": "155af72e42a56d8e95c0abfff8030719211b4a0c1d0c4b05dcacf32bafcb0098"
+    },
+    ".packaging/assets/webview2/Locales/sq.pak": {
+      "bytes": 1225667,
+      "sha256": "9d4d382ce30c7d079a5aa82a4d94655554c7b12a68d0a81b9ab6161565951e7b"
+    },
+    ".packaging/assets/webview2/Locales/sr-Cyrl-BA.pak": {
+      "bytes": 1857563,
+      "sha256": "40d08ae8709f3a0c3a5838de730fe001680135f521c931c2dd7de337f29c35cd"
+    },
+    ".packaging/assets/webview2/Locales/sr-Latn-RS.pak": {
+      "bytes": 1198453,
+      "sha256": "f3bcd540a81603943e488df3c07bd282603871e76265ea923b2b170ed54fd299"
+    },
+    ".packaging/assets/webview2/Locales/sr.pak": {
+      "bytes": 1875951,
+      "sha256": "e90b26738441fdfe51282b9035b4fa04a0ccc44b16b85bdb8052931721a1864c"
+    },
+    ".packaging/assets/webview2/Locales/sv.pak": {
+      "bytes": 1118893,
+      "sha256": "384323c25d583a62081844769c5fe2b8314794ee58be2346769f9bf8bc9c7100"
+    },
+    ".packaging/assets/webview2/Locales/ta.pak": {
+      "bytes": 2912258,
+      "sha256": "dca3d28e9019cc751454d9a3cf9eb7c31842a0723fd0f8410574ded37cb94e1f"
+    },
+    ".packaging/assets/webview2/Locales/te.pak": {
+      "bytes": 2631592,
+      "sha256": "200b401e0eeae9a4a02122b83002a230eefd075f17c5cc5febead203337867e1"
+    },
+    ".packaging/assets/webview2/Locales/th.pak": {
+      "bytes": 2304619,
+      "sha256": "0226ef879aee407d798bed42208ed12cd3ecfa180e736258038ec1ef40c6300c"
+    },
+    ".packaging/assets/webview2/Locales/tr.pak": {
+      "bytes": 1200246,
+      "sha256": "3ccd380a8d6148d4c7aba1204cc56d239e4c29bfd8b35f27069cb562f36bd42e"
+    },
+    ".packaging/assets/webview2/Locales/tt.pak": {
+      "bytes": 1891227,
+      "sha256": "89b076e55a9af36418ac5bb8820fcb98fddca6a50f1550ab8140861c79593f5f"
+    },
+    ".packaging/assets/webview2/Locales/ug.pak": {
+      "bytes": 1831430,
+      "sha256": "a4ce9738603323ace9bcb7db78099e51bf8da21f10ad110b86e8de77f877ec44"
+    },
+    ".packaging/assets/webview2/Locales/uk.pak": {
+      "bytes": 1926169,
+      "sha256": "4b7ed15ca1b0bfff4aaa82393b4b3a861dea64c45947c646335b15fb4b8106ae"
+    },
+    ".packaging/assets/webview2/Locales/ur.pak": {
+      "bytes": 1752054,
+      "sha256": "9031a69b8430aa72b8ece19b6c943b99a3bcc7b34b0c271e15cd5648c4c8d5f7"
+    },
+    ".packaging/assets/webview2/Locales/vi.pak": {
+      "bytes": 1373111,
+      "sha256": "c73b53828be56e750071e8ae584669e46636f989d9ece04e08d4a4d3839449dd"
+    },
+    ".packaging/assets/webview2/Locales/zh-CN.pak": {
+      "bytes": 956172,
+      "sha256": "f5eaebbfa0405a84efadc55622892967dbcdbaff716cd7534ba106365f0ef5b5"
+    },
+    ".packaging/assets/webview2/Locales/zh-TW.pak": {
+      "bytes": 989424,
+      "sha256": "5b5b14392cec9f881c440f402d0e8655f3d4825780fcd9b2d96b9715998ec681"
+    },
+    ".packaging/assets/webview2/MEIPreload/manifest.json": {
+      "bytes": 238,
+      "sha256": "44844cf3dde6e80087ae0e6bf0d9326d7ef7d23326d24ac83af0850be26923d2"
+    },
+    ".packaging/assets/webview2/MEIPreload/preloaded_data.pb": {
+      "bytes": 8254,
+      "sha256": "c6070a157b4e28d16fbccbd233e93846ddb070c85e1a1bc64469b7a5f1424fad"
+    },
+    ".packaging/assets/webview2/microsoft_shell_integration.dll": {
+      "bytes": 463688,
+      "sha256": "36deac5ff3bb7eb00c281126a54e546cef37914631b0a7a79661bd916de26903"
+    },
+    ".packaging/assets/webview2/mip_core_gn.dll": {
+      "bytes": 8604488,
+      "sha256": "8fa9a11b71c9c95320f852ee2fba7c821722907c6eeee34919079c0d37b9443b"
+    },
+    ".packaging/assets/webview2/mscopilot.exe": {
+      "bytes": 4628296,
+      "sha256": "4f0886cd4063de2463ec4aa2bd3d3f77714501eb0c94bd7dee4eb1ca47676ef6"
+    },
+    ".packaging/assets/webview2/msedge.dll": {
+      "bytes": 358210376,
+      "sha256": "e4c51cda4e2bc9f3896f23b14bc35166941d6c4e799428c76d64a7d55163d09d"
+    },
+    ".packaging/assets/webview2/msedge.dll.sig": {
+      "bytes": 1389,
+      "sha256": "100c0a738791afa0f73d71ccadf24d3d53f356e2508496db7d31b306efa01a5d"
+    },
+    ".packaging/assets/webview2/msedge_100_percent.pak": {
+      "bytes": 1175016,
+      "sha256": "d5d2f4b71e68312ff27dc3d326ecafa16999f57094853b545cf7be703032fc4a"
+    },
+    ".packaging/assets/webview2/msedge_200_percent.pak": {
+      "bytes": 1865133,
+      "sha256": "6f6fa7345c18f1e1fcd9aee06b6fe4cbc933f74f81d009c28718d8fe14b872fe"
+    },
+    ".packaging/assets/webview2/msedge_elf.dll": {
+      "bytes": 4070216,
+      "sha256": "51262fd0d67582016d16111581590bc5acd9295311ef5ea7442428c6c3063cf7"
+    },
+    ".packaging/assets/webview2/msedge_wer.dll": {
+      "bytes": 125768,
+      "sha256": "8ef4c727e76ed6290022bfa06fb1f262c05e1f0e7f00ec478c14c3019787e0dd"
+    },
+    ".packaging/assets/webview2/msedgewebview2.exe": {
+      "bytes": 4531520,
+      "sha256": "c40a84d4cbd25e4c14ef69a9f39418028239d7dadb08159d1228ab805367ced2"
+    },
+    ".packaging/assets/webview2/msedgewebview2.exe.sig": {
+      "bytes": 1389,
+      "sha256": "35043a9b23155e36379fb3714edf6405f9c0e632b73523944d18909f28d610b2"
+    },
+    ".packaging/assets/webview2/mspdf.dll": {
+      "bytes": 18895688,
+      "sha256": "fd2401cc4651c55864c3304594a8e4fb25eaf86ca9c7b90d6284d63f5860fb66"
+    },
+    ".packaging/assets/webview2/msvcp140.dll": {
+      "bytes": 653576,
+      "sha256": "dfef9b501bf69d9f35c88c881669d0917191d33da6204a8ca268110ae428775f"
+    },
+    ".packaging/assets/webview2/msvcp140_codecvt_ids.dll": {
+      "bytes": 41216,
+      "sha256": "5b94093cbd6047e68d8df034e82b9309147b46e97f5883cb988ee3b004c8be9e"
+    },
+    ".packaging/assets/webview2/notification_helper.exe": {
+      "bytes": 2903368,
+      "sha256": "d6c8e145bd86346bd1aba583c974db41aa00dedaf3eaf36fc78fa128d8d52589"
+    },
+    ".packaging/assets/webview2/oneauth.dll": {
+      "bytes": 6673224,
+      "sha256": "7e29c7c7d6b9aad5783bcf08b4cf99e264901b37704b6b9d8cd05fa6f10acc4e"
+    },
+    ".packaging/assets/webview2/oneds.dll": {
+      "bytes": 3552584,
+      "sha256": "6ff35633c2ec99bc4e63701b9a376c6b7acf32182c673a27521a6e3dbbc79eb7"
+    },
+    ".packaging/assets/webview2/onnxruntime.dll": {
+      "bytes": 11260744,
+      "sha256": "3b3845f15b0958d52538d1a1aadd24aab1f3b931568cf3b8a56a431aab27d92f"
+    },
+    ".packaging/assets/webview2/onramp.dll": {
+      "bytes": 474440,
+      "sha256": "278e0003b559a18721bb9b2c311b23cadcd0e51f644c770b464accdb9a1b35ed"
+    },
+    ".packaging/assets/webview2/PdfPreview/PdfPreviewHandler.dll": {
+      "bytes": 261448,
+      "sha256": "e587ae8c17f194538397ea748b549a7caef3567c14be3168374bf1338a68565d"
+    },
+    ".packaging/assets/webview2/platform_experiences_helper.exe": {
+      "bytes": 3222344,
+      "sha256": "a59b3d14b47c04cb5fa2e4730c073330e8da3516389c8ccfc2ca4e0115e8eaa4"
+    },
+    ".packaging/assets/webview2/prefs_enclave_x64.dll": {
+      "bytes": 116456,
+      "sha256": "06b1fea1a38565b116fa7e525e02ff2f7d4a80cd8e16ce0bfc3f7fc5655fb997"
+    },
+    ".packaging/assets/webview2/resources.pak": {
+      "bytes": 34064025,
+      "sha256": "94fa62e37534cb4d1cec9e66b3cdda0e3498f6ea225fac67478fb5422ab4350a"
+    },
+    ".packaging/assets/webview2/show_third_party_software_licenses.bat": {
+      "bytes": 270,
+      "sha256": "3e867e263b64592b2dad5c334b6aa46d0bb46a20aa0db01c5ff08c707c3e148d"
+    },
+    ".packaging/assets/webview2/telclient.dll": {
+      "bytes": 4119368,
+      "sha256": "c3043ea13ff7955399ca89b6c23f97461ff8dac6fe9f276e6a8582dca5ce2adc"
+    },
+    ".packaging/assets/webview2/textInputMethod.sccd": {
+      "bytes": 18615,
+      "sha256": "f88664c021237bbc0299b5ae3f5686b915e3007bf2902be8186ad847476447bf"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/manifest.json": {
+      "bytes": 132,
+      "sha256": "de864bf0ab8abacfba536d4e9764eca658f903bd2457f955e128c4ee181c7e58"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Advertising": {
+      "bytes": 19889,
+      "sha256": "231be4e0be45f588b161634c816b9a5a49f530c0dcb55461d37715a94482dca1"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Analytics": {
+      "bytes": 4036,
+      "sha256": "bba2063d20d70f4ab06dc2ae04c2564cc2b8c631b6dab68248957dbdf107fdd2"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/CompatExceptions": {
+      "bytes": 689,
+      "sha256": "5b462316a51c918d0bae95959bf827cb9c72bbd84ffb0e43b750aa91fbf3ba53"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Content": {
+      "bytes": 4486,
+      "sha256": "9a63f38e22b8573cbd47a4ef7b67ccb0934b87239e075c5cfafc7a1014e340c6"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Cryptomining": {
+      "bytes": 552,
+      "sha256": "bdee796bf07922c152d770cd5928955f1b12c12515c4db6fc0ab8d2ad0c44c4e"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Entities": {
+      "bytes": 69999,
+      "sha256": "f6e93c83d9e3cfdff064535647cee76fc85aa1c86fd22a93dcf3d2c377346d94"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Fingerprinting": {
+      "bytes": 1113,
+      "sha256": "05b29240a28bb75b4535d558edc510eb92df0ac27e9502498b99cdbc576b8298"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/LICENSE": {
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Other": {
+      "bytes": 34,
+      "sha256": "2b4a47b82cbe70e34407c7df126a24007aff8b45d5716db384d27cc1f3b30707"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/Social": {
+      "bytes": 754,
+      "sha256": "4955c3e7f56641a4ae0ce9c79b4ceee4b21733b0f6dedc980bf8d822a792eba2"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Mu/TransparentAdvertisers": {
+      "bytes": 105,
+      "sha256": "d2cd0bef5f45daf490c53e705d6f67dfe12390c72a00efa6f5117432bd8edb8c"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Advertising": {
+      "bytes": 21511,
+      "sha256": "5c62ee354070033dba1bad40dcde115a81db45943b2274fae7059a5aa5c61d33"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Analytics": {
+      "bytes": 3349,
+      "sha256": "d303be86132f8d7131941d41736694c2e29647ebaeccb38c0976fe66616ec8af"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Content": {
+      "bytes": 5938,
+      "sha256": "70c295600066e9d3feeacd6bfc735bbcac6243694e4259477822d3db252729e1"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Cryptomining": {
+      "bytes": 32,
+      "sha256": "696e930706b5d391eb8778f73b0627ffc2be7f6c9a3e7659170d9d37fc4a97b5"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Entities": {
+      "bytes": 131834,
+      "sha256": "a5409d2c6a8cbd9339a95a5e09fcaedd4546a49d47fc4ebeda2d8749cfc66987"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Fingerprinting": {
+      "bytes": 2307,
+      "sha256": "5306139881e81eebffd97de016130fdbb04e3ae976d94ad7a74e5dee63fbafcd"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/LICENSE": {
+      "bytes": 66,
+      "sha256": "44071e0fcffb9a9a32e8fa7010bb18dbc41afd0b176f81bf700b15b638a88a51"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Other": {
+      "bytes": 34,
+      "sha256": "2b4a47b82cbe70e34407c7df126a24007aff8b45d5716db384d27cc1f3b30707"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Social": {
+      "bytes": 3434,
+      "sha256": "28ac79097cf67587a228fdfe4746a1a9b31dae94d5a63bb3fcaa82443d69e7af"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/Sigma/Staging": {
+      "bytes": 1361,
+      "sha256": "f90f4cb0976a046e93978971b58fba24bc93b0129e8612fdd0e5646a1bebed22"
+    },
+    ".packaging/assets/webview2/Trust Protection Lists/trust_protection_lists.bin": {
+      "bytes": 241960,
+      "sha256": "bfceac1ea10e376b91e2e158d4cd90b4f25882567a2dfb774c3350b0d44496ed"
+    },
+    ".packaging/assets/webview2/unified_copilot_telemetry.dll": {
+      "bytes": 1789768,
+      "sha256": "93b0e25d5892ea6e6d2affc10457df003c237765b8c4af11381c431432d1c74c"
+    },
+    ".packaging/assets/webview2/v8_context_snapshot.bin": {
+      "bytes": 770440,
+      "sha256": "17df545cb0f78b673686875db67173dfce2f110f0e9f819acd2027995de0ea6b"
+    },
+    ".packaging/assets/webview2/vccorlib140.dll": {
+      "bytes": 360712,
+      "sha256": "1e28ceb432470b31bda05fd970b71b0f048fa823f89b349eeba1133209a07838"
+    },
+    ".packaging/assets/webview2/vcruntime140.dll": {
+      "bytes": 188680,
+      "sha256": "f6283ed9f3164a9fab6957d0c2b18883e0fe971306ef6260c2edff4b110aede5"
+    },
+    ".packaging/assets/webview2/vcruntime140_1.dll": {
+      "bytes": 60168,
+      "sha256": "bca554fed272694eac647e9311fe1914b008f420d54af727c0080580d10f291b"
+    },
+    ".packaging/assets/webview2/vk_swiftshader.dll": {
+      "bytes": 4562760,
+      "sha256": "4612073cf2edbee81e886db93aeea8086027dc857e8a7351319ffb95a45cc6fa"
+    },
+    ".packaging/assets/webview2/vk_swiftshader_icd.json": {
+      "bytes": 106,
+      "sha256": "32d83ff113fef532a9f97e0d2831f8656628ab1c99e9060f0332b1532839afd9"
+    },
+    ".packaging/assets/webview2/vulkan-1.dll": {
+      "bytes": 975176,
+      "sha256": "6a200baf7a9ae507f792cfe1010b018019f1b5b7a9f4644480e7d6984f847a80"
+    },
+    ".packaging/assets/webview2/wdag.dll": {
+      "bytes": 251208,
+      "sha256": "14eaa4d9de4f4159d66c971bccf36eef0686fd1c79e2fb4970fb430029137005"
+    },
+    ".packaging/assets/webview2/webview2_integration.dll": {
+      "bytes": 31560,
+      "sha256": "e542b683b509eaeda15f690114c38ae583a91bdca742d493018065b8946767c3"
+    },
+    ".packaging/assets/webview2/WidevineCdm/_platform_specific/win_x64/widevinecdm.dll": {
+      "bytes": 22716072,
+      "sha256": "b4cbd2aaf638667e078b746b8b6437ee5d9b1f13d0661395441eda5a97f381ce"
+    },
+    ".packaging/assets/webview2/WidevineCdm/_platform_specific/win_x64/widevinecdm.dll.sig": {
+      "bytes": 1389,
+      "sha256": "87d9552d35f0fb4ddc6b600d059562ae81e7499b0544a151fede2bbb2f8536b7"
+    },
+    ".packaging/assets/webview2/WidevineCdm/LICENSE": {
+      "bytes": 473,
+      "sha256": "20de375707692099b3132084695377ce5fec0aec05813dedcce094b8eda44386"
+    },
+    ".packaging/assets/webview2/WidevineCdm/manifest.json": {
+      "bytes": 1002,
+      "sha256": "dca3cd7a673d0776a085c0b8958a85bdd8392923db21a0b55f4d37210f752322"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "serialization": "cas12a-cnn-posthoc-provenance-v1",
+  "issue": 117,
+  "run_id": "20261102-cnn-manifest",
+  "recorded_utc": "2026-11-02T12:20:06+00:00",
+  "capture_kind": "retrospective",
+  "training_time_capture": false,
+  "source_revision": "65019e799d3c0410eaa3b2e23c96730eea4560a0",
+  "source_revision_basis": "Current HEAD is the completed #116 revision. All 11 local source modules match its Git blobs after CRLF normalization; their observed modification times precede the original run completion. Fresh-process inference with these modules reproduces the saved validation predictions.",
+  "limitation": "This snapshot was reconstructed after training. Git equality, observed modification times and replay support the revision association, but no contemporaneous source attestation exists; they cannot prove the exact bytes executed during the historical fit or absence of other historical fits.",
+  "user_accepted_resolution": "Preserve the retrospective evidence and its limitation, without rerunning training, then comment on and close #117.",
+  "original_run_recorded_utc": "2026-11-02T11:52:48+00:00",
+  "original_artifacts_preserved_byte_for_byte": true,
+  "original_artifact_sha256": {
+    "configuration.json": "a5d72ba0fcc623c685c4a93a6e38fe24bda66a8dcd46538e14c54ac63e96c8e4",
+    "history.json": "bdb51c512042c275c87fb701de2db7decc380db697248ee50476dab97991854f",
+    "checkpoint.json": "eb7cdc6a819ae5e570f96e6be502bdd4a738cdb82b85d6f89843141023eca403",
+    "status.json": "e22af578f81bcfa1001fb74338b9b2c4672fdd2e39df796f8fe78118860c1243",
+    "validation_predictions.csv": "b365517c7523e13f48bdd6abbb364825f8e15c69ad89ab207206f1455fce2340",
+    "cas12a_cnn_manifest.keras": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f"
+  },
+  "source_files": {
+    "cas12a/__init__.py": {
+      "sha256": "69f8699628bb0ecd9f4c78e8dc1ef6f66a2dca5ec1f90630ff6019f9ba2068ce",
+      "git_blob_oid": "234abb827292a040354a10f74036e868b385bbb4",
+      "git_blob_sha256": "69f8699628bb0ecd9f4c78e8dc1ef6f66a2dca5ec1f90630ff6019f9ba2068ce",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-11-02T11:34:04.152931+00:00"
+    },
+    "cas12a/cnn_single.py": {
+      "sha256": "e59072ac903595096c237c6d480d96dc80207f70b194abea486acafe7ef63fb7",
+      "git_blob_oid": "a4a7dbcee58d73a460a62df3de54510bce27599f",
+      "git_blob_sha256": "b6fc8f1f8a0f8904b622b20084ebf66fcd08c214e8692b5feee1559a9984f771",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-11-02T11:35:26.028738+00:00"
+    },
+    "cas12a/cnn_manifest.py": {
+      "sha256": "28f2de9a9e2884d57eb7d73c7a1ca0bc81278be1b0c9ef40f2910a5587b3388c",
+      "git_blob_oid": "9870a6e91fccbab33786b8ed1007cd17e60f065f",
+      "git_blob_sha256": "28f2de9a9e2884d57eb7d73c7a1ca0bc81278be1b0c9ef40f2910a5587b3388c",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-11-02T11:27:28.283098+00:00"
+    },
+    "cas12a/train.py": {
+      "sha256": "63ca9fe96b3ec37437f5815eb50befe710164c70ac896c45261c7919d7ae8f36",
+      "git_blob_oid": "029cebc4bb514e3e7bbab01c6bba9afdef71570a",
+      "git_blob_sha256": "63ca9fe96b3ec37437f5815eb50befe710164c70ac896c45261c7919d7ae8f36",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-29T05:56:41.239107+00:00"
+    },
+    "cas12a/model.py": {
+      "sha256": "a888482a3d283b27b7440d473ba19870f03035df2d72430ea569632d221b7835",
+      "git_blob_oid": "571774ad1b70509e39ce1659ce5a9cbafd5d411f",
+      "git_blob_sha256": "a888482a3d283b27b7440d473ba19870f03035df2d72430ea569632d221b7835",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-29T01:03:43.026752+00:00"
+    },
+    "cas12a/nt_data.py": {
+      "sha256": "bcd7ecfca1cb409c3a9960ec3ee872483eaa1fc1de62aac7c03f23d890ad9620",
+      "git_blob_oid": "f895a97496586659a5cbb8304481dbb335897047",
+      "git_blob_sha256": "bcd7ecfca1cb409c3a9960ec3ee872483eaa1fc1de62aac7c03f23d890ad9620",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-31T05:21:57.540268+00:00"
+    },
+    "cas12a/nt_storage.py": {
+      "sha256": "54152e5ee6b5a06bc1a5960f7ff35f926c4012bbd0fd936b60401787291fa546",
+      "git_blob_oid": "3a5d6d2683903795cd14063409e22ba34760848e",
+      "git_blob_sha256": "a8291392acf5f8b3b77c3cc63f5c6153f26c97903b86f2dc443e754844358d4f",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-11-01T03:32:18.191191+00:00"
+    },
+    "cas12a/data.py": {
+      "sha256": "d9baec497202ac040802ae5a1c3a4e084ed54cdda89288878c06ef749e66b665",
+      "git_blob_oid": "09aa68d439f7f04415c23a8a247c03fc9750a863",
+      "git_blob_sha256": "d9baec497202ac040802ae5a1c3a4e084ed54cdda89288878c06ef749e66b665",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-28T08:58:31.127339+00:00"
+    },
+    "cas12a/features.py": {
+      "sha256": "e2fe038ed210edf346e70b04ecf5dc978f1ba15677a613cdc1f68feca2897bfa",
+      "git_blob_oid": "60318a3dd55fd721085f9b7086d6748c7d022d06",
+      "git_blob_sha256": "e2fe038ed210edf346e70b04ecf5dc978f1ba15677a613cdc1f68feca2897bfa",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-28T08:58:17.637532+00:00"
+    },
+    "cas12a/metrics.py": {
+      "sha256": "ef2778aa8cf754e0664a7d16d8e23f36dad19094436050744f0574f0766b73d4",
+      "git_blob_oid": "0a0f98842657f84b37e4dc111637f1ca4b526002",
+      "git_blob_sha256": "ef2778aa8cf754e0664a7d16d8e23f36dad19094436050744f0574f0766b73d4",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-29T05:45:33.729552+00:00"
+    },
+    "cas12a/units.py": {
+      "sha256": "e22f1062f352ec5f8b5866f3e27fcdbd3fcc69663d92c6e894b8959b75f72ce0",
+      "git_blob_oid": "6c0731cadb457ec741c43f12e53afe3778aa73a6",
+      "git_blob_sha256": "e22f1062f352ec5f8b5866f3e27fcdbd3fcc69663d92c6e894b8959b75f72ce0",
+      "matches_revision_after_crlf_normalization": true,
+      "observed_last_modified_utc": "2026-10-28T08:57:22.444530+00:00"
+    }
+  },
+  "supplement_sha256": {
+    "source_snapshot.zip": "376a42838d9f118a4f7cf952fb95a00901134c3dbf65d07e9eba456ecb44c046",
+    "posthoc_validation.json": "c7c2ef3600ebc30039e8f710707be3cb6035ef3d83c0e50e4f67b73b113dcfa0"
+  }
+}

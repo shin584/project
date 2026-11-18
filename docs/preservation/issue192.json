@@ -1,0 +1,6 @@
+{
+  "body": "## Parent\r\n\r\nhttps://github.com/shin584/project/issues/191\r\n\r\n## What to build\r\n\r\n기존 프로그램을 계속 실행할 수 있는 상태로 보존하고, 별도 dashboard_v3 작업 공간에서 채택 모델과 오프라인 리소스를 복구·사용할 수 있게 한다. 기존 배포본 백업과 채택 checkpoint의 durable 보관을 각각 검증한다.\r\n\r\n## Acceptance criteria\r\n\r\n- [ ] 어떤 대용량 복사나 빌드보다 먼저 백업, 모델 승격, 독립 사본, 환경·캐시, 임시 빌드와 새 배포본의 최대 동시 디스크 점유량을 산정한다. 여유 공간, 작업·백업 매체, 위치와 복구 절차를 기록하고 이후 런타임 결정으로 요구량이 바뀌면 실행 전에 갱신한다.\r\n- [ ] 기존 작업 폴더와 배포 폴더 전체를 보존한다. 소스 기준 9d680575212ad343f060570ea0490ff53ebc2473과 기존 배포 manifest의 빌드 기준 54b77ee207891a8b90b21e818542ae9f9ed7911b를 구별하고, 미추적 작업 지침·순서 문서, NT 가중치·토크나이저·WebView2와 실행 증거도 보존한다.\r\n- [ ] 지정 소스 기준에서 별도 dashboard_v3 브랜치·워크트리를 준비하고 필요한 리소스를 독립 복사한다. 기존 dashboard_core_v2와 실행본 및 학습·평가 원본을 덮어쓰지 않는다.\r\n- [ ] 부모 이슈가 지정한 두 non-NT checkpoint를 저장소의 정식 모델 보관 영역 및 복구 가능한 버전 고정 보관소에 승격한다. 크기, SHA-256, 취득 경로, manifest 및 SpCas9 학습 원본→export SHA/parity 연결을 보존하고 모델 취득 레지스트리에 등록한다.\r\n- [ ] 로컬 staging에서 네트워크 없이 모델·manifest를 복구하고 checksum을 확인한다. 기존 실행본 백업의 실행 가능성도 확인하며, 실제 확인하지 못한 복구·실행 항목은 완료 처리하지 않는다.\r\n\r\n## Blocked by\r\n\r\nNone (can start immediately).\r\n",
+  "number": 192,
+  "title": "[Dashboard v3] 기존 프로그램 보존과 v3 자산 복구 기반 확보",
+  "url": "https://github.com/shin584/project/issues/192"
+}

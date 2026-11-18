@@ -1,0 +1,65 @@
+{
+  "issue": 117,
+  "recorded_utc": "2026-11-02T12:20:06+00:00",
+  "verification": "Independent fresh-process reload and validation inference; no training.",
+  "additional_training_fits": 0,
+  "validation_rows": 1500,
+  "membership_source_identity_and_csv_targets_verified": true,
+  "original_artifact_sha256": {
+    "configuration.json": "a5d72ba0fcc623c685c4a93a6e38fe24bda66a8dcd46538e14c54ac63e96c8e4",
+    "history.json": "bdb51c512042c275c87fb701de2db7decc380db697248ee50476dab97991854f",
+    "checkpoint.json": "eb7cdc6a819ae5e570f96e6be502bdd4a738cdb82b85d6f89843141023eca403",
+    "status.json": "e22af578f81bcfa1001fb74338b9b2c4672fdd2e39df796f8fe78118860c1243",
+    "validation_predictions.csv": "b365517c7523e13f48bdd6abbb364825f8e15c69ad89ab207206f1455fce2340",
+    "cas12a_cnn_manifest.keras": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f"
+  },
+  "source_revision_used_for_verification": "65019e799d3c0410eaa3b2e23c96730eea4560a0",
+  "source_sha256_used_for_verification": {
+    "cas12a/__init__.py": "69f8699628bb0ecd9f4c78e8dc1ef6f66a2dca5ec1f90630ff6019f9ba2068ce",
+    "cas12a/cnn_single.py": "e59072ac903595096c237c6d480d96dc80207f70b194abea486acafe7ef63fb7",
+    "cas12a/cnn_manifest.py": "28f2de9a9e2884d57eb7d73c7a1ca0bc81278be1b0c9ef40f2910a5587b3388c",
+    "cas12a/train.py": "63ca9fe96b3ec37437f5815eb50befe710164c70ac896c45261c7919d7ae8f36",
+    "cas12a/model.py": "a888482a3d283b27b7440d473ba19870f03035df2d72430ea569632d221b7835",
+    "cas12a/nt_data.py": "bcd7ecfca1cb409c3a9960ec3ee872483eaa1fc1de62aac7c03f23d890ad9620",
+    "cas12a/nt_storage.py": "54152e5ee6b5a06bc1a5960f7ff35f926c4012bbd0fd936b60401787291fa546",
+    "cas12a/data.py": "d9baec497202ac040802ae5a1c3a4e084ed54cdda89288878c06ef749e66b665",
+    "cas12a/features.py": "e2fe038ed210edf346e70b04ecf5dc978f1ba15677a613cdc1f68feca2897bfa",
+    "cas12a/metrics.py": "ef2778aa8cf754e0664a7d16d8e23f36dad19094436050744f0574f0766b73d4",
+    "cas12a/units.py": "e22f1062f352ec5f8b5866f3e27fcdbd3fcc69663d92c6e894b8959b75f72ce0"
+  },
+  "weight_tensors_verified": 30,
+  "forward_reproducibility": {
+    "comparison": "posthoc_reload_vs_recorded_validation",
+    "tolerance": {
+      "precision": "float32",
+      "unit_roundoff": 5.960464477539063e-08,
+      "ulp_budget": 128,
+      "rtol": 7.62939453125e-06,
+      "atol": 7.62939453125e-07,
+      "basis": "rtol = ulp_budget * FP32 unit roundoff; atol anchors near-zero predictions at one tenth of rtol. A deliberate margin against reduction-order drift, not a measured error bound. It bounds forward reproducibility only: loading correctness rests on exact weight identity, which is checked separately."
+    },
+    "deviation": {
+      "comparable": true,
+      "count": 1500,
+      "zero_reference_count": 0,
+      "max_absolute_difference": 0.0,
+      "max_relative_difference": 0.0
+    }
+  },
+  "recomputed_validation_mse": 0.04456236663019189,
+  "recorded_best_val_loss": 0.04456237331032753,
+  "best_epoch": 5,
+  "epochs_ran": 15,
+  "saved_optimizer_iterations": 5625,
+  "verification_runtime": {
+    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "numpy": "2.3.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.14.1"
+  },
+  "related_tests": {
+    "result": "144 passed, 340 dependency deprecation warnings",
+    "evidence_origin": "Observed in the preceding review in this conversation; not rerun for this documentation-only supplement.",
+    "scope": "cas12a/test with the eight NT execution test files excluded as required by CLAUDE.md"
+  }
+}
