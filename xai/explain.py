@@ -99,6 +99,9 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     계산 전에 사전계산 저장소(xai/shap_cache.py)를 먼저 조회한다. 적중하면 추론 없이
     바로 돌려준다. 키 재료(model_key, head)는 handle에 실려 온다. 사전계산은 seed=0으로
     만들므로 다른 seed는 조회하지 않는다.
+
+    seed는 배경 서열과 shap의 부분집합 표본추출을 **함께** 정한다. 둘 다 고정해야
+    같은 화면을 두 번 열었을 때 같은 기여도가 나온다.
     """
     model_key = getattr(handle, "model_key", None)
     head = getattr(handle, "head", None)
@@ -138,7 +141,17 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
         return np.asarray(y).reshape(n, n_background).mean(axis=1)
 
     explainer = shap.KernelExplainer(f, np.zeros((1, length)))
-    values = explainer.shap_values(np.ones((1, length)), nsamples=nsamples, l1_reg=0, silent=True)
+    # shap은 부분집합을 numpy **전역** RNG로 표본추출한다. nsamples가 2^length보다
+    # 훨씬 작으므로(기본 64 vs 2^30) 표본추출 결과가 값에 그대로 남는다. seed를
+    # 걸지 않으면 같은 입력·같은 설정으로도 호출마다 다른 기여도가 나온다 (#193에서
+    # 실측: 같은 seed 재호출로 최대 1.0 차이). 호출자의 RNG 상태는 되돌려 준다.
+    rng_state = np.random.get_state()
+    np.random.seed(seed)
+    try:
+        values = explainer.shap_values(np.ones((1, length)), nsamples=nsamples,
+                                       l1_reg=0, silent=True)
+    finally:
+        np.random.set_state(rng_state)
     values = np.asarray(values, dtype=np.float64).reshape(-1)[:length]
     base = float(np.asarray(explainer.expected_value).reshape(-1)[0])
     pred = float(handle.raw_fn(onehot[None])[0])

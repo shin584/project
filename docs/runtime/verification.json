@@ -1,0 +1,3183 @@
+{
+  "schema_version": 1,
+  "issue": 193,
+  "measured_at": "2026-11-18T16:58:00+0900",
+  "contract_sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+  "machine": "development PC, Windows 11, CPU only, torch threads 4",
+  "runtime": {
+    "keras": "3.14.1",
+    "torch": "2.12.0+cpu",
+    "numpy": "2.3.2",
+    "backend": "torch",
+    "torch_threads": "4"
+  },
+  "reference_runtime": {
+    "keras": "3.14.1",
+    "tensorflow": "2.21.0",
+    "backend": "tensorflow"
+  },
+  "status": {
+    "core": "fail",
+    "core_checks": 159,
+    "core_failed": 39,
+    "diagnostics": "fail",
+    "diagnostic_checks": 48,
+    "diagnostic_failed": 3,
+    "offline_staged_run": "pass"
+  },
+  "adoption_claims_verified": {
+    "forward_parity_vs_tensorflow_backend": "pass",
+    "layerwise_parity_including_lstm_and_bilstm": "pass",
+    "weight_placement_bitwise": "pass",
+    "ig_path_function_match": "pass",
+    "cross_runtime_gradient_parity": "pass",
+    "finiteness": "pass",
+    "offline_tensorflow_free_run": "pass"
+  },
+  "open_failures": {
+    "shap_default_settings_stability": "fail",
+    "ig_completeness_at_32_steps": "fail",
+    "ig_resolution_one_case": "fail",
+    "coordinate_finite_difference_gradient_check": "fail (explained by the registered diagnostics; see addendum_1)"
+  },
+  "core": {
+    "failed": [
+      {
+        "check": "spcas9/S1/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.033071636201741465,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.17339176288719682,
+          "0-2": 0.34034380876192655,
+          "1-2": -0.08162013450304802
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.12175176790345248,
+          "bound": 0.0179963939749245
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.8190336439583888,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/x/cosine",
+        "passed": false,
+        "measured": 0.9978389615324252,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.06641045052490406,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/alpha0.5/cosine",
+        "passed": false,
+        "measured": 0.995587120109997,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/alpha0.5/rel_l2",
+        "passed": false,
+        "measured": 0.10669687389946064,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_resolution/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.0010811271486090845,
+          "bound": 0.001075264176151336
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.44469974769665643,
+          "0-2": 0.6048419807705964,
+          "1-2": 0.531985339299824
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.04881022193101528,
+          "bound": 0.017263760361852988
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.7409568361020195,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.02970123405204693,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_completeness/default",
+        "passed": false,
+        "measured": 0.04103378111739975,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": -0.11245685738115474,
+          "0-2": 0.23491197106784314,
+          "1-2": 0.22452579629273306
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.18334151995210524,
+          "bound": 0.022825512977651216
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.5001931380700002,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.03368158838236785,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/alpha0.5/cosine",
+        "passed": false,
+        "measured": 0.9687733948956935,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/alpha0.5/rel_l2",
+        "passed": false,
+        "measured": 0.2642643969155287,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_completeness/default",
+        "passed": false,
+        "measured": 0.013922555079517451,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.18363569045315897,
+          "0-2": 0.17762724938493346,
+          "1-2": 0.5651216674340708
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.1481277902764047,
+          "bound": 0.020788800492359438
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.642889971358652,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.4028025017796522,
+          "0-2": 0.4893216518578316,
+          "1-2": 0.5868061590765773
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.17477980020500095,
+          "bound": 0.03934759215229927
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.5442026554235296,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_completeness/default",
+        "passed": false,
+        "measured": 0.004434472542024337,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.49514214273159846,
+          "0-2": 0.39221599519897116,
+          "1-2": 0.4407394155645679
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.3109895475208856,
+          "bound": 0.05933310441820752
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.7413989108758116,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_completeness/default",
+        "passed": false,
+        "measured": 0.0027656176584969216,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.5084860238309286,
+          "0-2": 0.5576398581653711,
+          "1-2": 0.682725623341159
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.14906921737938597,
+          "bound": 0.035040181865544015
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.47613507785598147,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_completeness/default",
+        "passed": false,
+        "measured": 0.0012105723405042568,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.19353951878218062,
+          "0-2": -0.12653155952408796,
+          "1-2": 0.0012305286555324266
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.28061746954917927,
+          "bound": 0.06973341593710039
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.22337626784725587,
+        "criterion": 0.9,
+        "detail": ""
+      }
+    ],
+    "checks": [
+      {
+        "check": "version/keras",
+        "passed": true,
+        "measured": "3.14.1",
+        "criterion": "3.14.1",
+        "detail": ""
+      },
+      {
+        "check": "version/torch",
+        "passed": true,
+        "measured": "2.12.0+cpu",
+        "criterion": "2.12.0+cpu",
+        "detail": ""
+      },
+      {
+        "check": "version/numpy",
+        "passed": true,
+        "measured": "2.3.2",
+        "criterion": "2.3.2",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/weight_placement/variable_set",
+        "passed": true,
+        "measured": 47,
+        "criterion": "identical variable set, identical shapes and dtypes, bitwise identical weight bytes",
+        "detail": "only_here=[] only_reference=[]"
+      },
+      {
+        "check": "spcas9/weight_placement/bitwise",
+        "passed": true,
+        "measured": {
+          "n_variables": 47,
+          "mismatched": []
+        },
+        "criterion": "identical variable set, identical shapes and dtypes, bitwise identical weight bytes",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.999472055966336,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.033071636201741465,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9998586232155992,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.016828740946466345,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/ig_completeness/default",
+        "passed": true,
+        "measured": 0.004924306329399997,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.00045048630140342993,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9999066579776467,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 0.0027660677988023963,
+          "bound": 0.0029517954733819353
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_additivity",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.17339176288719682,
+          "0-2": 0.34034380876192655,
+          "1-2": -0.08162013450304802
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.12175176790345248,
+          "bound": 0.0179963939749245
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.8190336439583888,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/x/cosine",
+        "passed": false,
+        "measured": 0.9978389615324252,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.06641045052490406,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/alpha0.5/cosine",
+        "passed": false,
+        "measured": 0.995587120109997,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/gradient_check/alpha0.5/rel_l2",
+        "passed": false,
+        "measured": 0.10669687389946064,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_completeness/default",
+        "passed": true,
+        "measured": 0.0011756435881125071,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.0008275912186990197,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.999187420705407,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_resolution/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.0010811271486090845,
+          "bound": 0.001075264176151336
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_additivity",
+        "passed": true,
+        "measured": 5.551115123125783e-17,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.44469974769665643,
+          "0-2": 0.6048419807705964,
+          "1-2": 0.531985339299824
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.04881022193101528,
+          "bound": 0.017263760361852988
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.7409568361020195,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9997254518761968,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.02970123405204693,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999704437423,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.00025503591474721366,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_completeness/default",
+        "passed": false,
+        "measured": 0.04103378111739975,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.00027694829502245,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9994040280796449,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 0.002437013149574341,
+          "bound": 0.004313322666530439
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_additivity",
+        "passed": true,
+        "measured": 2.2351741790771484e-08,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": -0.11245685738115474,
+          "0-2": 0.23491197106784314,
+          "1-2": 0.22452579629273306
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.18334151995210524,
+          "bound": 0.022825512977651216
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.5001931380700002,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9996620559016081,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/x/rel_l2",
+        "passed": false,
+        "measured": 0.03368158838236785,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/alpha0.5/cosine",
+        "passed": false,
+        "measured": 0.9687733948956935,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/gradient_check/alpha0.5/rel_l2",
+        "passed": false,
+        "measured": 0.2642643969155287,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_completeness/default",
+        "passed": false,
+        "measured": 0.013922555079517451,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.0012962454300793347,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9992558246532932,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 0.0025242018257358723,
+          "bound": 0.0028785864074620804
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_additivity",
+        "passed": true,
+        "measured": 2.7755575615628914e-17,
+        "criterion": 0.005,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.18363569045315897,
+          "0-2": 0.17762724938493346,
+          "1-2": 0.5651216674340708
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.1481277902764047,
+          "bound": 0.020788800492359438
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.642889971358652,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/forward_parity/max_abs_diff",
+        "passed": true,
+        "measured": 5.960464477539063e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/forward_parity/max_rel_diff",
+        "passed": true,
+        "measured": 5.426328546105705e-05,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/layerwise_parity/abs_scaled",
+        "passed": true,
+        "measured": {
+          "layer": "lstm",
+          "abs": 1.0691583156585693e-06,
+          "rel": 6.869946082588285e-05,
+          "scaled_bound": 0.0001
+        },
+        "criterion": "1e-4 * max(1, max|reference activation|)",
+        "detail": ""
+      },
+      {
+        "check": "spcas9/layerwise_parity/rel",
+        "passed": true,
+        "measured": 6.869946082588285e-05,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/weight_placement/variable_set",
+        "passed": true,
+        "measured": 30,
+        "criterion": "identical variable set, identical shapes and dtypes, bitwise identical weight bytes",
+        "detail": "only_here=[] only_reference=[]"
+      },
+      {
+        "check": "cas12a/weight_placement/bitwise",
+        "passed": true,
+        "measured": {
+          "n_variables": 30,
+          "mismatched": []
+        },
+        "criterion": "identical variable set, identical shapes and dtypes, bitwise identical weight bytes",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9999122390369757,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/x/rel_l2",
+        "passed": true,
+        "measured": 0.015354509616936508,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999325356055582,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.011819657602403725,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/ig_completeness/default",
+        "passed": true,
+        "measured": 0.00010785334576400574,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/ig_completeness/finer",
+        "passed": true,
+        "measured": 1.6279508042137125e-05,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9999928829939142,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 4.188890670775436e-05,
+          "bound": 0.00042356652338639835
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_additivity",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.4028025017796522,
+          "0-2": 0.4893216518578316,
+          "1-2": 0.5868061590765773
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.17477980020500095,
+          "bound": 0.03934759215229927
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.5442026554235296,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9999681419143546,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/x/rel_l2",
+        "passed": true,
+        "measured": 0.008053046707545437,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999956744893119,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.002941259238948251,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_completeness/default",
+        "passed": false,
+        "measured": 0.004434472542024337,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.000515743664634527,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9999961953535478,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 0.001672180331297568,
+          "bound": 0.009072538045711554
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_additivity",
+        "passed": true,
+        "measured": 5.960464477539063e-08,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.49514214273159846,
+          "0-2": 0.39221599519897116,
+          "1-2": 0.4407394155645679
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.3109895475208856,
+          "bound": 0.05933310441820752
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.7413989108758116,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9999987892847603,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/x/rel_l2",
+        "passed": true,
+        "measured": 0.001556123279506632,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999997053872013,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.0007676148694201472,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_completeness/default",
+        "passed": false,
+        "measured": 0.0027656176584969216,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.0001286413101126982,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9999591411835151,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 6.109563901190995e-05,
+          "bound": 0.00018407609932182825
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_additivity",
+        "passed": true,
+        "measured": 1.1102230246251565e-16,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.5084860238309286,
+          "0-2": 0.5576398581653711,
+          "1-2": 0.682725623341159
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.14906921737938597,
+          "bound": 0.035040181865544015
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.47613507785598147,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/function_match",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-06,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/x/cosine",
+        "passed": true,
+        "measured": 0.9999937631606532,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/x/rel_l2",
+        "passed": true,
+        "measured": 0.0035318042915589163,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999975902177192,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/rel_l2",
+        "passed": true,
+        "measured": 0.0022065149430011565,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_completeness/default",
+        "passed": false,
+        "measured": 0.0012105723405042568,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/finiteness/ig_default",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_completeness/finer",
+        "passed": true,
+        "measured": 0.0006161119285432726,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/finiteness/ig_finer",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_resolution/pearson",
+        "passed": true,
+        "measured": 0.9999626836698965,
+        "criterion": 0.99,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_resolution/max_abs_diff",
+        "passed": true,
+        "measured": {
+          "max_abs_diff": 0.00013079124300929834,
+          "bound": 0.0010056553399408585
+        },
+        "criterion": "0.05 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/ig_resolution/sign_agreement",
+        "passed": true,
+        "measured": 1.0,
+        "criterion": "100% on positions whose |attribution at 256 steps| is at least 0.1 * max|attribution at 256 steps|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_additivity",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/finiteness/shap",
+        "passed": true,
+        "measured": true,
+        "criterion": "all finite",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_same_seed_determinism",
+        "passed": true,
+        "measured": 0.0,
+        "criterion": 1e-09,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_cross_seed/pearson",
+        "passed": false,
+        "measured": {
+          "0-1": 0.19353951878218062,
+          "0-2": -0.12653155952408796,
+          "1-2": 0.0012305286555324266
+        },
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_cross_seed/max_abs_diff",
+        "passed": false,
+        "measured": {
+          "max_abs_diff": 0.28061746954917927,
+          "bound": 0.06973341593710039
+        },
+        "criterion": "0.25 * max|values at seed 0|",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/shap_default_vs_finer",
+        "passed": false,
+        "measured": 0.22337626784725587,
+        "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/forward_parity/max_abs_diff",
+        "passed": true,
+        "measured": 2.9802322387695312e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/forward_parity/max_rel_diff",
+        "passed": true,
+        "measured": 7.156031396658392e-08,
+        "criterion": 0.001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/layerwise_parity/abs_scaled",
+        "passed": true,
+        "measured": {
+          "layer": "bidirectional",
+          "abs": 1.3709068298339844e-06,
+          "rel": 0.00024314374604728073,
+          "scaled_bound": 0.0001
+        },
+        "criterion": "1e-4 * max(1, max|reference activation|)",
+        "detail": ""
+      },
+      {
+        "check": "cas12a/layerwise_parity/rel",
+        "passed": true,
+        "measured": 0.00024314374604728073,
+        "criterion": 0.001,
+        "detail": ""
+      }
+    ],
+    "measurements": {
+      "spcas9": {
+        "n_weights": 47,
+        "ops_present": [
+          "BatchNormalization",
+          "Conv1D",
+          "Dense",
+          "Dropout",
+          "InputLayer",
+          "LSTM"
+        ],
+        "layer_names": [
+          "In_Seq",
+          "conv1d",
+          "batch_normalization",
+          "lstm",
+          "dropout",
+          "dense",
+          "Dense_SpCas9",
+          "Dense_SpCas9_NG",
+          "Dense_VRQR_variant",
+          "Dense_xCas",
+          "Dense_Sniper_Cas9",
+          "Dense_SpCas9_HF_1",
+          "Dense_eSpCas9_1_1_",
+          "Dense_HypaCas9",
+          "Dense_evoCas9",
+          "Output_SpCas9",
+          "Output_SpCas9_NG",
+          "Output_VRQR_variant",
+          "Output_xCas",
+          "Output_Sniper_Cas9",
+          "Output_SpCas9_HF_1",
+          "Output_eSpCas9_1_1_",
+          "Output_HypaCas9",
+          "Output_evoCas9"
+        ],
+        "input_names": [
+          "In_Seq"
+        ],
+        "head_names": [
+          "Output_SpCas9",
+          "Output_SpCas9_NG",
+          "Output_VRQR_variant",
+          "Output_xCas",
+          "Output_Sniper_Cas9",
+          "Output_SpCas9_HF_1",
+          "Output_eSpCas9_1_1_",
+          "Output_HypaCas9",
+          "Output_evoCas9"
+        ],
+        "cases": {
+          "S1": {
+            "window": "CCGGTCGCTTTAAGAATAAATAAAAGCGCC",
+            "raw_outputs": [
+              0.03095497004687786,
+              0.38719987869262695,
+              0.3203543424606323,
+              0.08952932804822922,
+              0.02693251520395279,
+              0.004841029644012451,
+              0.0074497610330581665,
+              0.004106082022190094,
+              0.0016249362379312515
+            ],
+            "reference_outputs": [
+              0.030954957008361816,
+              0.38719987869262695,
+              0.3203543424606323,
+              0.08952932804822922,
+              0.026932507753372192,
+              0.004841059446334839,
+              0.007449768483638763,
+              0.004106104373931885,
+              0.0016249343752861023
+            ],
+            "forward_max_abs_diff": 2.9802322387695312e-08,
+            "forward_max_rel_diff": 6.1561570805040665e-06,
+            "layerwise_worst": {
+              "layer": "batch_normalization",
+              "abs": 9.5367431640625e-07,
+              "rel": 5.411255551734939e-05,
+              "scaled_bound": 0.0004844101428985596
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.999472055966336,
+                "rel_l2_error": 0.033071636201741465,
+                "autograd_norm": 0.19512715715093956,
+                "fd_norm": 0.1940315576540926
+              },
+              "alpha0.5": {
+                "cosine": 0.9998586232155992,
+                "rel_l2_error": 0.016828740946466345,
+                "autograd_norm": 0.13187055737664416,
+                "fd_norm": 0.1317985518914578
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.38719987869262695,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.004924306329399997,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": 0.08317563837400144
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.38719987869262695,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.00045048630140342993,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": 0.07870181834600487
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9999066579776467,
+                "max_abs_diff": 0.0027660677988023963,
+                "max_abs_diff_bound": 0.0029517954733819353,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 8
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.2306818664073944,
+                "pred": 0.38719987869262695,
+                "additivity_error": 0.0,
+                "additivity_bound": 0.005,
+                "max_abs_value": 0.071985575899698
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.17339176288719682,
+                "0-2": 0.34034380876192655,
+                "1-2": -0.08162013450304802
+              },
+              "cross_seed_max_abs_diff": 0.12175176790345248,
+              "cross_seed_bound": 0.0179963939749245,
+              "default_vs_finer_pearson": 0.8190336439583888,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 0.0
+              }
+            },
+            "layerwise_layers_compared": 23
+          },
+          "S2": {
+            "window": "TCCGCATCGAGCCAACCTTCTGTAAGAGGG",
+            "raw_outputs": [
+              0.24374400079250336,
+              0.3952695429325104,
+              0.5082306861877441,
+              0.17050902545452118,
+              0.22125160694122314,
+              0.07264953851699829,
+              0.10608045011758804,
+              0.08605322986841202,
+              0.006994281895458698
+            ],
+            "reference_outputs": [
+              0.24374400079250336,
+              0.395269513130188,
+              0.5082306861877441,
+              0.17050901055335999,
+              0.22125160694122314,
+              0.07264953851699829,
+              0.10608045011758804,
+              0.08605321496725082,
+              0.006994282826781273
+            ],
+            "forward_max_abs_diff": 2.9802322387695312e-08,
+            "forward_max_rel_diff": 1.7316216714876458e-07,
+            "layerwise_worst": {
+              "layer": "batch_normalization",
+              "abs": 9.5367431640625e-07,
+              "rel": 1.8529210137785412e-05,
+              "scaled_bound": 0.0004913733005523682
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9978389615324252,
+                "rel_l2_error": 0.06641045052490406,
+                "autograd_norm": 0.18432099246863673,
+                "fd_norm": 0.1829525880624696
+              },
+              "alpha0.5": {
+                "cosine": 0.995587120109997,
+                "rel_l2_error": 0.10669687389946064,
+                "autograd_norm": 0.0759831135600573,
+                "fd_norm": 0.07261657257301432
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.3952695429325104,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.0011756435881125071,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": 0.08749663987259737
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.3952695429325104,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.0008275912186990197,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": 0.08549340506578584
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.999187420705407,
+                "max_abs_diff": 0.0010811271486090845,
+                "max_abs_diff_bound": 0.001075264176151336,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 18
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.2306818664073944,
+                "pred": 0.3952695429325104,
+                "additivity_error": 5.551115123125783e-17,
+                "additivity_bound": 0.005,
+                "max_abs_value": 0.06905504144741195
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.44469974769665643,
+                "0-2": 0.6048419807705964,
+                "1-2": 0.531985339299824
+              },
+              "cross_seed_max_abs_diff": 0.04881022193101528,
+              "cross_seed_bound": 0.017263760361852988,
+              "default_vs_finer_pearson": 0.7409568361020195,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 2.9802322387695312e-08
+              }
+            },
+            "layerwise_layers_compared": 23
+          },
+          "S3": {
+            "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "raw_outputs": [
+              0.02969224937260151,
+              0.07184886187314987,
+              0.09732059389352798,
+              0.0237727053463459,
+              0.021978676319122314,
+              0.002454608678817749,
+              0.00880885124206543,
+              0.00041193515062332153,
+              0.0022963397204875946
+            ],
+            "reference_outputs": [
+              0.029692212119698524,
+              0.0718488022685051,
+              0.0973205417394638,
+              0.023772671818733215,
+              0.021978646516799927,
+              0.002454601228237152,
+              0.008808836340904236,
+              0.00041191279888153076,
+              0.0022963322699069977
+            ],
+            "forward_max_abs_diff": 5.960464477539063e-08,
+            "forward_max_rel_diff": 5.426328546105705e-05,
+            "layerwise_worst": {
+              "layer": "lstm",
+              "abs": 1.0691583156585693e-06,
+              "rel": 6.869946082588285e-05,
+              "scaled_bound": 0.0001
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9997254518761968,
+                "rel_l2_error": 0.02970123405204693,
+                "autograd_norm": 0.2460537587475409,
+                "fd_norm": 0.2417084115297383
+              },
+              "alpha0.5": {
+                "cosine": 0.9999999704437423,
+                "rel_l2_error": 0.00025503591474721366,
+                "autograd_norm": 0.20813274588653324,
+                "fd_norm": 0.20814878193200767
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.07184886187314987,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.04103378111739975,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": -0.1960659036574759
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.07184886187314987,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.00027694829502245,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": -0.2368227364798532
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9994040280796449,
+                "max_abs_diff": 0.002437013149574341,
+                "max_abs_diff_bound": 0.004313322666530439,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 5
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.2306818664073944,
+                "pred": 0.07184886187314987,
+                "additivity_error": 2.2351741790771484e-08,
+                "additivity_bound": 0.005,
+                "max_abs_value": 0.09130205191060486
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": -0.11245685738115474,
+                "0-2": 0.23491197106784314,
+                "1-2": 0.22452579629273306
+              },
+              "cross_seed_max_abs_diff": 0.18334151995210524,
+              "cross_seed_bound": 0.022825512977651216,
+              "default_vs_finer_pearson": 0.5001931380700002,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 2.2351741790771484e-08
+              }
+            },
+            "layerwise_layers_compared": 23
+          },
+          "S4": {
+            "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGC",
+            "raw_outputs": [
+              0.044008832424879074,
+              0.24365532398223877,
+              0.1518421471118927,
+              0.08280603587627411,
+              0.024381324648857117,
+              0.006964817643165588,
+              0.009725987911224365,
+              0.005286075174808502,
+              -2.7922913432121277e-05
+            ],
+            "reference_outputs": [
+              0.044008832424879074,
+              0.24365532398223877,
+              0.1518421173095703,
+              0.08280600607395172,
+              0.024381335824728012,
+              0.006964795291423798,
+              0.009725987911224365,
+              0.005286063998937607,
+              -2.7923844754695892e-05
+            ],
+            "forward_max_abs_diff": 2.9802322387695312e-08,
+            "forward_max_rel_diff": 3.33522329319948e-05,
+            "layerwise_worst": {
+              "layer": "batch_normalization",
+              "abs": 7.152557373046875e-07,
+              "rel": 7.311936769838212e-06,
+              "scaled_bound": 0.0004205283164978028
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9996620559016081,
+                "rel_l2_error": 0.03368158838236785,
+                "autograd_norm": 0.4177372528956696,
+                "fd_norm": 0.4270270786662366
+              },
+              "alpha0.5": {
+                "cosine": 0.9687733948956935,
+                "rel_l2_error": 0.2642643969155287,
+                "autograd_norm": 0.09150399423627827,
+                "fd_norm": 0.08630880016088006
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.24365532398223877,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.013922555079517451,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": -0.05137066758626929
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.24365532398223877,
+                "baseline_pred": 0.3089485466480255,
+                "completeness_error": 0.0012962454300793347,
+                "completeness_bound": 0.005,
+                "input_totals": {
+                  "In_Seq": -0.06658946809586608
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9992558246532932,
+                "max_abs_diff": 0.0025242018257358723,
+                "max_abs_diff_bound": 0.0028785864074620804,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 10
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.2306818664073944,
+                "pred": 0.24365532398223877,
+                "additivity_error": 2.7755575615628914e-17,
+                "additivity_bound": 0.005,
+                "max_abs_value": 0.08315520196943775
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.18363569045315897,
+                "0-2": 0.17762724938493346,
+                "1-2": 0.5651216674340708
+              },
+              "cross_seed_max_abs_diff": 0.1481277902764047,
+              "cross_seed_bound": 0.020788800492359438,
+              "default_vs_finer_pearson": 0.642889971358652,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 0.0
+              }
+            },
+            "layerwise_layers_compared": 23
+          }
+        }
+      },
+      "cas12a": {
+        "n_weights": 30,
+        "ops_present": [
+          "BatchNormalization",
+          "Bidirectional",
+          "Concatenate",
+          "Conv1D",
+          "Dense",
+          "Dropout",
+          "GlobalAveragePooling1D",
+          "InputLayer",
+          "LeakyReLU"
+        ],
+        "layer_names": [
+          "Input_Seq",
+          "conv1d",
+          "conv1d_1",
+          "conv1d_2",
+          "batch_normalization",
+          "batch_normalization_1",
+          "batch_normalization_2",
+          "leaky_re_lu",
+          "leaky_re_lu_1",
+          "leaky_re_lu_2",
+          "concatenate",
+          "dropout",
+          "bidirectional",
+          "Input_Feat",
+          "dropout_1",
+          "dense",
+          "global_average_pooling1d",
+          "dropout_2",
+          "concatenate_1",
+          "dense_1",
+          "dense_2"
+        ],
+        "input_names": [
+          "Input_Seq",
+          "Input_Feat"
+        ],
+        "head_names": [
+          "dense_2"
+        ],
+        "cases": {
+          "C1": {
+            "window": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT",
+            "raw_outputs": [
+              0.7837454676628113
+            ],
+            "reference_outputs": [
+              0.7837454676628113
+            ],
+            "forward_max_abs_diff": 0.0,
+            "forward_max_rel_diff": 0.0,
+            "layerwise_worst": {
+              "layer": "bidirectional",
+              "abs": 1.3709068298339844e-06,
+              "rel": 0.00024314374604728073,
+              "scaled_bound": 0.0001
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9999122390369757,
+                "rel_l2_error": 0.015354509616936508,
+                "autograd_norm": 0.30522334863477224,
+                "fd_norm": 0.302898867442905
+              },
+              "alpha0.5": {
+                "cosine": 0.9999325356055582,
+                "rel_l2_error": 0.011819657602403725,
+                "autograd_norm": 0.28366623866639057,
+                "fd_norm": 0.2843070101321157
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.7837454676628113,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.00010785334576400574,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": 0.014774766259961325,
+                  "Input_Feat": 0.04096055485182472
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.7837454676628113,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 1.6279508042137125e-05,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": 0.014798250606858687,
+                  "Input_Feat": 0.041028644342649224
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9999928829939142,
+                "max_abs_diff": 4.188890670775436e-05,
+                "max_abs_diff_bound": 0.00042356652338639835,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 34
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.6295222640037537,
+                "pred": 0.7837454676628113,
+                "additivity_error": 0.0,
+                "additivity_bound": 0.001,
+                "max_abs_value": 0.15739036860919708
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.4028025017796522,
+                "0-2": 0.4893216518578316,
+                "1-2": 0.5868061590765773
+              },
+              "cross_seed_max_abs_diff": 0.17477980020500095,
+              "cross_seed_bound": 0.03934759215229927,
+              "default_vs_finer_pearson": 0.5442026554235296,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 0.0
+              }
+            },
+            "layerwise_layers_compared": 19
+          },
+          "C2": {
+            "window": "TTTATAAAGTTTTGGCTCCTTACCTGGTTCCCCT",
+            "raw_outputs": [
+              0.4164644181728363
+            ],
+            "reference_outputs": [
+              0.4164643883705139
+            ],
+            "forward_max_abs_diff": 2.9802322387695312e-08,
+            "forward_max_rel_diff": 7.156031396658392e-08,
+            "layerwise_worst": {
+              "layer": "batch_normalization_2",
+              "abs": 9.5367431640625e-07,
+              "rel": 5.054324719822034e-05,
+              "scaled_bound": 0.00040709943771362306
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9999681419143546,
+                "rel_l2_error": 0.008053046707545437,
+                "autograd_norm": 1.2479359442177018,
+                "fd_norm": 1.2466467060014723
+              },
+              "alpha0.5": {
+                "cosine": 0.9999956744893119,
+                "rel_l2_error": 0.002941259238948251,
+                "autograd_norm": 0.2943745762167076,
+                "fd_norm": 0.2943753193262071
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.4164644181728363,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.004434472542024337,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": -0.4074087826829782,
+                  "Input_Feat": 0.10040538019257762
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.4164644181728363,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.000515743664634527,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": -0.4120783124527634,
+                  "Input_Feat": 0.10012469375570392
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9999961953535478,
+                "max_abs_diff": 0.001672180331297568,
+                "max_abs_diff_bound": 0.009072538045711554,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 10
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.6295222640037537,
+                "pred": 0.4164644181728363,
+                "additivity_error": 5.960464477539063e-08,
+                "additivity_bound": 0.001,
+                "max_abs_value": 0.2373324176728301
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.49514214273159846,
+                "0-2": 0.39221599519897116,
+                "1-2": 0.4407394155645679
+              },
+              "cross_seed_max_abs_diff": 0.3109895475208856,
+              "cross_seed_bound": 0.05933310441820752,
+              "default_vs_finer_pearson": 0.7413989108758116,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 5.960464483090178e-08
+              }
+            },
+            "layerwise_layers_compared": 19
+          },
+          "C3": {
+            "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "raw_outputs": [
+              0.6199269890785217
+            ],
+            "reference_outputs": [
+              0.6199269890785217
+            ],
+            "forward_max_abs_diff": 0.0,
+            "forward_max_rel_diff": 0.0,
+            "layerwise_worst": {
+              "layer": "batch_normalization_2",
+              "abs": 7.152557373046875e-07,
+              "rel": 4.172229819232598e-05,
+              "scaled_bound": 0.00036459105014801025
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9999987892847603,
+                "rel_l2_error": 0.001556123279506632,
+                "autograd_norm": 0.5270441078200296,
+                "fd_norm": 0.5270397280230886
+              },
+              "alpha0.5": {
+                "cosine": 0.9999997053872013,
+                "rel_l2_error": 0.0007676148694201472,
+                "autograd_norm": 0.449052013764706,
+                "fd_norm": 0.44905095148032653
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.6199269890785217,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.0027656176584969216,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": 0.06095510769227985,
+                  "Input_Feat": -0.17169602947751628
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.6199269890785217,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.0001286413101126982,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": 0.06233854104038983,
+                  "Input_Feat": -0.17044248647724203
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9999591411835151,
+                "max_abs_diff": 6.109563901190995e-05,
+                "max_abs_diff_bound": 0.00018407609932182825,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 33
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.6295222640037537,
+                "pred": 0.6199269890785217,
+                "additivity_error": 1.1102230246251565e-16,
+                "additivity_bound": 0.001,
+                "max_abs_value": 0.14016072746217606
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.5084860238309286,
+                "0-2": 0.5576398581653711,
+                "1-2": 0.682725623341159
+              },
+              "cross_seed_max_abs_diff": 0.14906921737938597,
+              "cross_seed_bound": 0.035040181865544015,
+              "default_vs_finer_pearson": 0.47613507785598147,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 0.0
+              }
+            },
+            "layerwise_layers_compared": 19
+          },
+          "C4": {
+            "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC",
+            "raw_outputs": [
+              0.06784103810787201
+            ],
+            "reference_outputs": [
+              0.06784103810787201
+            ],
+            "forward_max_abs_diff": 0.0,
+            "forward_max_rel_diff": 0.0,
+            "layerwise_worst": {
+              "layer": "batch_normalization",
+              "abs": 7.152557373046875e-07,
+              "rel": 4.4883304326504e-06,
+              "scaled_bound": 0.000293183970451355
+            },
+            "function_match_abs_diff": 0.0,
+            "all_finite_gradients": true,
+            "gradient_check": {
+              "x": {
+                "cosine": 0.9999937631606532,
+                "rel_l2_error": 0.0035318042915589163,
+                "autograd_norm": 0.12974456879304958,
+                "fd_norm": 0.12974520591663696
+              },
+              "alpha0.5": {
+                "cosine": 0.9999975902177192,
+                "rel_l2_error": 0.0022065149430011565,
+                "autograd_norm": 0.5239448719084892,
+                "fd_norm": 0.5238300028274735
+              }
+            },
+            "ig": {
+              "default": {
+                "steps": 32,
+                "pred": 0.06784103810787201,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.0012105723405042568,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": -0.3896680791531253,
+                  "Input_Feat": -0.2716037482847682
+                },
+                "all_finite": true
+              },
+              "finer": {
+                "steps": 256,
+                "pred": 0.06784103810787201,
+                "baseline_pred": 0.7279022932052612,
+                "completeness_error": 0.0006161119285432726,
+                "completeness_bound": 0.001,
+                "input_totals": {
+                  "Input_Seq": -0.3869657879006354,
+                  "Input_Feat": -0.27247935526821054
+                },
+                "all_finite": true
+              },
+              "resolution": {
+                "pearson_r": 0.9999626836698965,
+                "max_abs_diff": 0.00013079124300929834,
+                "max_abs_diff_bound": 0.0010056553399408585,
+                "sign_agreement": 1.0,
+                "n_strong_positions": 34
+              }
+            },
+            "shap": {
+              "default": {
+                "base_value": 0.6295222640037537,
+                "pred": 0.06784103810787201,
+                "additivity_error": 0.0,
+                "additivity_bound": 0.001,
+                "max_abs_value": 0.27893366374840156
+              },
+              "same_seed_max_abs_diff": 0.0,
+              "cross_seed_pearson": {
+                "0-1": 0.19353951878218062,
+                "0-2": -0.12653155952408796,
+                "1-2": 0.0012305286555324266
+              },
+              "cross_seed_max_abs_diff": 0.28061746954917927,
+              "cross_seed_bound": 0.06973341593710039,
+              "default_vs_finer_pearson": 0.22337626784725587,
+              "finer": {
+                "nsamples": 512,
+                "n_background": 32,
+                "additivity_error": 7.45058070794613e-09
+              }
+            },
+            "layerwise_layers_compared": 19
+          }
+        }
+      }
+    }
+  },
+  "diagnostics": {
+    "failed": [
+      {
+        "check": "spcas9/S2/directional_fd/max",
+        "passed": false,
+        "measured": 0.2860368640770539,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/directional_fd/max",
+        "passed": false,
+        "measured": 0.10417972721974365,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/directional_fd/max",
+        "passed": false,
+        "measured": 0.12246829313722153,
+        "criterion": 0.1,
+        "detail": ""
+      }
+    ],
+    "checks": [
+      {
+        "check": "spcas9/S1/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 2.7939677238464355e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999999143,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 2.3283064365386963e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999374,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/directional_fd/median",
+        "passed": true,
+        "measured": 0.0010884864314668037,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S1/directional_fd/max",
+        "passed": true,
+        "measured": 0.044215893362015216,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 4.0978193283081055e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999998044,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 2.2351741790771484e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.999999999999921,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/directional_fd/median",
+        "passed": true,
+        "measured": 0.001301866421647389,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S2/directional_fd/max",
+        "passed": false,
+        "measured": 0.2860368640770539,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 1.1920928955078125e-07,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999991713,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 2.60770320892334e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999761,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/directional_fd/median",
+        "passed": true,
+        "measured": 0.0003191564639405186,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S3/directional_fd/max",
+        "passed": false,
+        "measured": 0.10417972721974365,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 1.341104507446289e-07,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999996044,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 1.862645149230957e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999208,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/directional_fd/median",
+        "passed": true,
+        "measured": 0.0016407909805454177,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "spcas9/S4/directional_fd/max",
+        "passed": true,
+        "measured": 0.04632729048660076,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 7.450580596923828e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999999943,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 4.6566128730773926e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999957,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/directional_fd/median",
+        "passed": true,
+        "measured": 0.0017461299290453649,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/directional_fd/max",
+        "passed": true,
+        "measured": 0.07574164535064887,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 2.384185791015625e-07,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999999316,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 2.421438694000244e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.999999999999987,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/directional_fd/median",
+        "passed": true,
+        "measured": 0.002408516255395965,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/directional_fd/max",
+        "passed": true,
+        "measured": 0.07132927091860862,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 7.450580596923828e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999999942,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 1.4901161193847656e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999959,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/directional_fd/median",
+        "passed": true,
+        "measured": 0.0016049126469110122,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/directional_fd/max",
+        "passed": false,
+        "measured": 0.12246829313722153,
+        "criterion": 0.1,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/x/max_abs_diff",
+        "passed": true,
+        "measured": 5.587935447692871e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/x/cosine",
+        "passed": true,
+        "measured": 0.9999999999999856,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "passed": true,
+        "measured": 1.4901161193847656e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/cosine",
+        "passed": true,
+        "measured": 0.9999999999999917,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/directional_fd/median",
+        "passed": true,
+        "measured": 0.000989920918474052,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/directional_fd/max",
+        "passed": true,
+        "measured": 0.016638283446857114,
+        "criterion": 0.1,
+        "detail": ""
+      }
+    ],
+    "measurements": {
+      "spcas9": {
+        "S1": {
+          "cross_runtime_x": {
+            "max_abs_diff": 2.7939677238464355e-08,
+            "cosine": 0.9999999999999143,
+            "torch_norm": 0.19512715715093956,
+            "tensorflow_norm": 0.19512712276321986
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 2.3283064365386963e-08,
+            "cosine": 0.9999999999999374,
+            "torch_norm": 0.13187055737664416,
+            "tensorflow_norm": 0.13187053463782478
+          },
+          "directional_fd": {
+            "median_rel_error": 0.0010884864314668037,
+            "max_rel_error": 0.044215893362015216,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 267,
+            "activation_units_probed": 503040,
+            "fd_step": 0.01
+          }
+        },
+        "S2": {
+          "cross_runtime_x": {
+            "max_abs_diff": 4.0978193283081055e-08,
+            "cosine": 0.9999999999998044,
+            "torch_norm": 0.18432099246863673,
+            "tensorflow_norm": 0.18432093162976482
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 2.2351741790771484e-08,
+            "cosine": 0.999999999999921,
+            "torch_norm": 0.0759831135600573,
+            "tensorflow_norm": 0.07598309998341045
+          },
+          "directional_fd": {
+            "median_rel_error": 0.001301866421647389,
+            "max_rel_error": 0.2860368640770539,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 206,
+            "activation_units_probed": 503040,
+            "fd_step": 0.01
+          }
+        },
+        "S3": {
+          "cross_runtime_x": {
+            "max_abs_diff": 1.1920928955078125e-07,
+            "cosine": 0.9999999999991713,
+            "torch_norm": 0.2460537587475409,
+            "tensorflow_norm": 0.24605381359058573
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 2.60770320892334e-08,
+            "cosine": 0.9999999999999761,
+            "torch_norm": 0.20813274588653324,
+            "tensorflow_norm": 0.20813276020698462
+          },
+          "directional_fd": {
+            "median_rel_error": 0.0003191564639405186,
+            "max_rel_error": 0.10417972721974365,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 909,
+            "activation_units_probed": 503040,
+            "fd_step": 0.01
+          }
+        },
+        "S4": {
+          "cross_runtime_x": {
+            "max_abs_diff": 1.341104507446289e-07,
+            "cosine": 0.9999999999996044,
+            "torch_norm": 0.4177372528956696,
+            "tensorflow_norm": 0.4177372505276772
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 1.862645149230957e-08,
+            "cosine": 0.9999999999999208,
+            "torch_norm": 0.09150399423627827,
+            "tensorflow_norm": 0.09150398997341873
+          },
+          "directional_fd": {
+            "median_rel_error": 0.0016407909805454177,
+            "max_rel_error": 0.04632729048660076,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 733,
+            "activation_units_probed": 503040,
+            "fd_step": 0.01
+          }
+        }
+      },
+      "cas12a": {
+        "C1": {
+          "cross_runtime_x": {
+            "max_abs_diff": 7.450580596923828e-09,
+            "cosine": 0.9999999999999943,
+            "torch_norm": 0.30522334863477224,
+            "tensorflow_norm": 0.3052233527740517
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 4.6566128730773926e-09,
+            "cosine": 0.9999999999999957,
+            "torch_norm": 0.28366623866639057,
+            "tensorflow_norm": 0.2836662351766162
+          },
+          "directional_fd": {
+            "median_rel_error": 0.0017461299290453649,
+            "max_rel_error": 0.07574164535064887,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 756,
+            "activation_units_probed": 3261440,
+            "fd_step": 0.01
+          }
+        },
+        "C2": {
+          "cross_runtime_x": {
+            "max_abs_diff": 2.384185791015625e-07,
+            "cosine": 0.9999999999999316,
+            "torch_norm": 1.2479359442177018,
+            "tensorflow_norm": 1.2479358935375708
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 2.421438694000244e-08,
+            "cosine": 0.999999999999987,
+            "torch_norm": 0.2943745762167076,
+            "tensorflow_norm": 0.2943745784371359
+          },
+          "directional_fd": {
+            "median_rel_error": 0.002408516255395965,
+            "max_rel_error": 0.07132927091860862,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 438,
+            "activation_units_probed": 3261440,
+            "fd_step": 0.01
+          }
+        },
+        "C3": {
+          "cross_runtime_x": {
+            "max_abs_diff": 7.450580596923828e-09,
+            "cosine": 0.9999999999999942,
+            "torch_norm": 0.5270441078200296,
+            "tensorflow_norm": 0.5270441324897794
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 1.4901161193847656e-08,
+            "cosine": 0.9999999999999959,
+            "torch_norm": 0.449052013764706,
+            "tensorflow_norm": 0.4490520696817339
+          },
+          "directional_fd": {
+            "median_rel_error": 0.0016049126469110122,
+            "max_rel_error": 0.12246829313722153,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 629,
+            "activation_units_probed": 3261440,
+            "fd_step": 0.01
+          }
+        },
+        "C4": {
+          "cross_runtime_x": {
+            "max_abs_diff": 5.587935447692871e-09,
+            "cosine": 0.9999999999999856,
+            "torch_norm": 0.12974456879304958,
+            "tensorflow_norm": 0.12974456670867332
+          },
+          "cross_runtime_alpha0.5": {
+            "max_abs_diff": 1.4901161193847656e-08,
+            "cosine": 0.9999999999999917,
+            "torch_norm": 0.5239448719084892,
+            "tensorflow_norm": 0.5239448950804375
+          },
+          "directional_fd": {
+            "median_rel_error": 0.000989920918474052,
+            "max_rel_error": 0.016638283446857114,
+            "n_directions": 32,
+            "step": 0.001
+          },
+          "kink_sign_flips": {
+            "flips": 418,
+            "activation_units_probed": 3261440,
+            "fd_step": 0.01
+          }
+        }
+      }
+    }
+  },
+  "ram": {
+    "development_pc_with_tensorflow_installed": {
+      "spcas9": {
+        "interpreter": 18698240,
+        "runtime_import": 422641664,
+        "model_loaded": 430899200,
+        "after_forward": 432537600,
+        "after_ig": 441360384,
+        "peak_working_set": 441430016,
+        "tensorflow_importable": true,
+        "tensorflow_imported": false,
+        "elapsed_seconds": 10.5
+      },
+      "cas12a": {
+        "interpreter": 18595840,
+        "runtime_import": 423669760,
+        "model_loaded": 584376320,
+        "after_forward": 586149888,
+        "after_ig": 598450176,
+        "peak_working_set": 601333760,
+        "tensorflow_importable": true,
+        "tensorflow_imported": true,
+        "elapsed_seconds": 14.4
+      }
+    },
+    "offline_staging_without_tensorflow": {
+      "interpreter": 20856832,
+      "runtime_import": 298774528,
+      "spcas9_model_loaded": 306638848,
+      "spcas9_after_gradients": 309882880,
+      "cas12a_model_loaded": 312381440,
+      "cas12a_after_gradients": 313626624,
+      "peak_working_set": 313626624,
+      "note": "one process, both models loaded in sequence and both kept alive; the shipped design loads only the selected family"
+    },
+    "reading": "With TensorFlow absent - the shipped configuration - one process holding both models peaks at 313,626,624 bytes. On this machine TensorFlow is installed, so the Bidirectional deserialization probe imports it and the same Cas12a path reports 601,333,760 bytes. The difference is the probe, not the adopted runtime. Full UI + computation + WebView2 tree RAM is #194."
+  },
+  "offline_staging": {
+    "staging": {
+      "staged": [
+        "keras",
+        "torch",
+        "numpy",
+        "h5py",
+        "ml_dtypes",
+        "namex",
+        "optree",
+        "typing_extensions.py",
+        "sympy",
+        "mpmath",
+        "networkx",
+        "filelock",
+        "fsspec",
+        "jinja2",
+        "markupsafe",
+        "packaging",
+        "rich",
+        "pygments",
+        "markdown_it",
+        "mdurl",
+        "colorama",
+        "six.py",
+        "setuptools",
+        "pkg_resources",
+        "numpy.libs",
+        "torchgen",
+        "yaml",
+        "_yaml",
+        "absl",
+        "google",
+        "psutil"
+      ],
+      "missing_from_site_packages": [],
+      "files": 19168,
+      "bytes": 625898908,
+      "seconds": 1.4,
+      "source": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
+      "staging": "C:\\Users\\cmino\\AppData\\Local\\Temp\\claude\\8555db45aa178b93\\a4524f68-b665-43ad-a56d-083e0c769096\\scratchpad\\issue193-staging\\site",
+      "network_used": false
+    },
+    "run": {
+      "site_packages_on_path": false,
+      "tensorflow_importable": false,
+      "keras_importable": true,
+      "tensorflow_import_attempt": "ModuleNotFoundError: No module named 'tensorflow'",
+      "network_probes": [
+        "blocked: network is disabled for this offline verification run",
+        "blocked: network is disabled for this offline verification run",
+        "blocked: network is disabled for this offline verification run"
+      ],
+      "network_blocked": true,
+      "versions": {
+        "keras": "3.14.1",
+        "torch": "2.12.0+cpu",
+        "numpy": "2.3.2",
+        "backend": "torch",
+        "torch_threads": "4"
+      },
+      "models": {
+        "spcas9": {
+          "raw_output": 0.38719987869262695,
+          "n_outputs": 9,
+          "gradient_abs_sum": [
+            1.4824836254119873
+          ],
+          "all_finite": true,
+          "ops": [
+            "BatchNormalization",
+            "Conv1D",
+            "Dense",
+            "Dropout",
+            "InputLayer",
+            "LSTM"
+          ]
+        },
+        "cas12a": {
+          "raw_output": 0.7837454676628113,
+          "n_outputs": 1,
+          "gradient_abs_sum": [
+            0.4517872929573059,
+            4.448165416717529
+          ],
+          "all_finite": true,
+          "ops": [
+            "BatchNormalization",
+            "Bidirectional",
+            "Concatenate",
+            "Conv1D",
+            "Dense",
+            "Dropout",
+            "GlobalAveragePooling1D",
+            "InputLayer",
+            "LeakyReLU"
+          ]
+        }
+      },
+      "tensorflow_in_sys_modules_after_load": false,
+      "status": "pass"
+    },
+    "method": "Dependencies copied from local site-packages with no network, then run with python -S so site-packages is off sys.path, sockets blocked, and TensorFlow not importable at all."
+  },
+  "evidence_files": {
+    "full_core_report": ".packaging/issue193/verification-core.json",
+    "full_diagnostics": ".packaging/issue193/diagnose.json",
+    "reference_backend_values": ".packaging/issue193/reference.npz + reference.json",
+    "note": ".packaging is Git-excluded; regenerate with docs/runtime/verify_contract.py"
+  }
+}

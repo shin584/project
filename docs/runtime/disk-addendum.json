@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "issue": 193,
+  "recorded_at": "2026-11-18",
+  "updates": "docs/preservation/disk-plan.json",
+  "why": "#192's disk plan requires an update before any operation whose footprint the runtime decision changes. This records that update, before the staging copy runs.",
+  "runtime_decision_effect": {
+    "new_runtime_installed": false,
+    "detail": "The adopted runtime reuses torch, already installed and already shipped. The only added dependency is Keras, a pure-Python package.",
+    "added_dependency_site_packages_bytes": 14365000,
+    "added_dependency_site_packages_mb": 13.7,
+    "tensorflow_avoided_mb": 1408.4,
+    "torch_already_present_mb": 492.0,
+    "measurement": "Get-ChildItem -Recurse -File over each site-packages package directory, uncompressed"
+  },
+  "transient_footprint": {
+    "offline_staging_copy_mb_estimate": 560,
+    "contents": "keras, torch and their import closure copied out of local site-packages, plus the two .keras checkpoints already in the worktree",
+    "location": "session scratchpad, outside the repository and outside the backup media",
+    "durability": "transient by design; reproducible from the recorded command, so it is not a recovery dependency",
+    "reference_npz_and_reports_mb_estimate": 60,
+    "location_reports": ".packaging/issue193 (Git-excluded)"
+  },
+  "free_space_before_operations": {
+    "C": {"free_gb": 45.5, "used_gb": 186.4},
+    "D": {"free_gb": 5.0, "used_gb": 0.0}
+  },
+  "conclusion": "Peak additional occupancy stays near 0.6 GB against 45.5 GB free on C:, so #192's recorded budget still holds and needs no revision beyond this addendum. The distribution-size delta from shipping Keras is measured when #204 builds.",
+  "not_established_here": "The built distribution's size delta. PyInstaller collects a subset of a package, so the site-packages figures above are an upper bound on what the bundle gains, not the bundle delta itself."
+}
