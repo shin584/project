@@ -1,0 +1,62 @@
+{
+  "location": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\backup-executable-validation",
+  "working_directory": "C:/Windows/Temp",
+  "files": {
+    "01-best-candidates.html": {
+      "bytes": 108046,
+      "sha256": "68c04087a7e0c94a19273310d2b8b8799f973209ae2791039b1c072a3b819b44"
+    },
+    "02-variant-heatmap.html": {
+      "bytes": 108046,
+      "sha256": "b197c5a1b8e597090c2da3831a8d034f1ccf9e2626f1af37852e6b68a3354af6"
+    },
+    "03-detail.html": {
+      "bytes": 108093,
+      "sha256": "6c844716ef1536d3699aba64b0af35a297374eb3e2e5f328e2b3a19a2c3fc175"
+    },
+    "04-xai-Cas12a.html": {
+      "bytes": 114159,
+      "sha256": "71ea965440d59cd446f56fa8eecfa49e73a8fecd9ede4afc3a513aa7a08d20f6"
+    },
+    "04-xai.html": {
+      "bytes": 108101,
+      "sha256": "366ef800d62cdaf05e2fa118be70985715c961bc506f953294e66dc90b18fca6"
+    },
+    "05-xai-ig-Cas12a.html": {
+      "bytes": 103286,
+      "sha256": "71ffc6312332488ec8a2ecd84d19c4f1776fb74b056dbd06cf205e9abdefee55"
+    },
+    "05-xai-ig.html": {
+      "bytes": 103444,
+      "sha256": "180aac25063f9eb5cecfdcf0b0b921d13f811ced3af5c0ea1f39f417b5ea1bb0"
+    },
+    "06-xai-shap-Cas12a.html": {
+      "bytes": 149814,
+      "sha256": "bb63e034dcfb1b08e8fc8fc2e5fac29f3e88ac3ab5f20a05f48da6b85257cc55"
+    },
+    "06-xai-shap.html": {
+      "bytes": 153905,
+      "sha256": "2939a3fd27a7165fdcb142a0f401f3691d011c0fa62082d7ca2a05dd6b594b1b"
+    },
+    "candidates.json": {
+      "bytes": 27628,
+      "sha256": "6bda945ffa09887ed767bc9d76c96d99c04a896ed297c8bd6797da8668f5862c"
+    },
+    "crispr_prediction_results.csv": {
+      "bytes": 2716,
+      "sha256": "70fcb9ded916e76f072717b23995a46db3089f73c5522aedbc459c9eabd2eb23"
+    },
+    "validation.json": {
+      "bytes": 1287,
+      "sha256": "791fa906e06280d0e30d44d11f45eadebd8b82292bcc5c9422ae6886b756dc7b"
+    },
+    "xai-Cas12a-Cas12a.npz": {
+      "bytes": 3644,
+      "sha256": "e96372f6843595e987ba53c9829b01cc6fffde2df59f051709f8ec7c37e77bfc"
+    },
+    "xai-SpCas9-SpCas9-NG.npz": {
+      "bytes": 2908,
+      "sha256": "ae4f076a93c96ddd8205b2f18d1769f0a9e2f8a4c0b10aa3a2b8aaa1982ce2aa"
+    }
+  }
+}

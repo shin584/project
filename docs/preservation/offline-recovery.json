@@ -12,5 +12,9 @@
   ],
   "source_bundle_restore_commit": "9d680575212ad343f060570ea0490ff53ebc2473",
   "source_bundle_checkout": "dashboard_core_v2",
-  "scope": "Model byte recovery and source Git recovery. No new inference/runtime conversion or performance evaluation."
+  "scope": "Model byte recovery and source Git recovery. No new inference/runtime conversion or performance evaluation.",
+  "tracked_provenance_git_blob_hashes_verified": 14,
+  "pinned_manifest_git_blob_verified": true,
+  "existing_destination_restore": "Refused with FileExistsError; preserved existing recovered directory.",
+  "corrupt_archive_restore": "Refused with checksum mismatch before destination creation; disposable corrupt fixture, vault unchanged."
 }

@@ -1,0 +1,37 @@
+{
+  "issue": 192,
+  "recorded_at": "2026-11-18T06:58:44.650810+00:00",
+  "status": "completed_local_acceptance",
+  "source_commit": "9d680575212ad343f060570ea0490ff53ebc2473",
+  "release_build_commit": "54b77ee207891a8b90b21e818542ae9f9ed7911b",
+  "worktree": "C:\\project\\MC_project\\dashboard_v3",
+  "branch": "dashboard_v3",
+  "original_worktree_preserved": true,
+  "original_status": "Only pre-existing untracked AGENTS.md and order.md; no tracked changes.",
+  "acceptance": {
+    "precopy_disk_plan": "recorded before bulk copies, with provenance allowance revision before promotion",
+    "entire_original_folder_backup": "7489 files / 10100655311 bytes; every source/backup SHA-256 matched",
+    "distribution_manifest": "6862 file checksums matched existing release manifest",
+    "independent_nt_resources": "263 regular files / 4554741829 bytes; byte equality and distinct file identity verified",
+    "non_nt_canonical_storage": "models/non_nt; exact adopted source digests registered in model_source.py",
+    "version_pinned_recovery_archives": "14452045-byte SHA-256-pinned archive verified at both C: and D: locations",
+    "offline_checkpoint_recovery": "22 files / 14441300 bytes restored from D: with Python socket/DNS/bind blocked; recovered adopted checkpoints resolve successfully",
+    "source_git_recovery": "Complete-history bundle verified and cloned, dashboard_core_v2 checked out at source_commit",
+    "backup_executable": "pass; launched backup exe from C:/Windows/Temp, empty HF cache, real predictions and all three XAI methods, numerical comparison exit 0"
+  },
+  "validation": {
+    "single_file_command": "python -X utf8 -m pytest tests/test_integrated_layout.py -q",
+    "single_file_result": "4 passed",
+    "subtree_command": "python -X utf8 -m pytest test tests -q",
+    "subtree_result": "206 passed, 1 SHAP singular-regression warning, 153.14 seconds",
+    "standards_review_material_findings": 0,
+    "spec_review_material_findings": 0
+  },
+  "free_bytes_after_operations": 43078270976,
+  "limitations": [
+    "All execution evidence is from this developer PC. Clean offline Windows/other-PC/visual gates remain unverified (#204); backup execution is a developer smoke pass.",
+    "Python networking was blocked during model recovery and executable validation; native WebView2 networking was not disabled at OS level.",
+    "C: and D: version-pinned local vaults are recoverable; independent physical/off-host durability is not established.",
+    "Runtime choice/conversion, new model predictions/XAI, new build and held-out Cas12a test evaluation belong to subsequent tickets. Existing source/export parity evidence was preserved, not rerun."
+  ]
+}

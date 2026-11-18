@@ -1,2 +1,2 @@
 # Provenance is verified byte-for-byte against the offline recovery manifest.
-models/non_nt/** -text
+models/non_nt/** -text whitespace=cr-at-eol

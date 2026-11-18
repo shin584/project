@@ -1,0 +1,63 @@
+{
+  "issue": 188,
+  "smoke_status": "pass",
+  "frozen": true,
+  "host": "SJun",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.7",
+  "executable": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\XaiDashboard.exe",
+  "gate_status": "not_passed",
+  "decision": "Streamlit 시연",
+  "visual_review": "pending",
+  "other_pc_validation": "pending",
+  "empty_hf_cache": true,
+  "controls": {
+    "graph": [
+      "40",
+      "100",
+      "5",
+      "80"
+    ],
+    "settings": [
+      [
+        "8",
+        "256",
+        "8",
+        "32"
+      ],
+      [
+        "16",
+        "1024",
+        "16",
+        "64"
+      ],
+      [
+        "2",
+        "32",
+        "2",
+        "4"
+      ]
+    ],
+    "selected_site": "SpCas9|+|32"
+  },
+  "display_changes_no_requests_or_compute": true,
+  "resize": {
+    "label": "40%",
+    "widths": [
+      "40%",
+      "40%"
+    ]
+  },
+  "method_return_uses_cache": true,
+  "compute_calls": {
+    "prediction": 2,
+    "ig": 2,
+    "shap": 2,
+    "rollout": 2
+  },
+  "blocked_python_network_attempts": [],
+  "tcp_listeners_at_completion": [],
+  "http_server_created": false,
+  "numeric_comparison_exit": 0,
+  "elapsed_seconds": 131.505
+}
