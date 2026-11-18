@@ -42,7 +42,8 @@ def calls(monkeypatch):
         recorded.append(("ig", handle, window_seq, steps, on_batch))
         return {"kind": "ig", "n": len(recorded)}
 
-    def fake_shap(handle, window_seq, nsamples=512, n_background=16, seed=0, on_batch=None):
+    def fake_shap(handle, window_seq, nsamples=512, n_background=16, seed=0, on_batch=None,
+                  *, use_disk_cache=True):
         recorded.append(("shap", handle, window_seq, nsamples, n_background, on_batch))
         return {"kind": "shap", "n": len(recorded)}
 

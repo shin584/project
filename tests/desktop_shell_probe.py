@@ -317,6 +317,24 @@ runpy.run_module('desktop', run_name='__main__')
               document.getElementById('tab-xai').dispatchEvent(new KeyboardEvent('keydown', {key:'Home'}));
               return document.querySelector('[role="tab"][aria-selected="true"]').textContent;
             })()""")
+            report["stale_generation_ignored"] = window.evaluate_js("""(() => {
+              const before = document.getElementById('model-status').innerHTML +
+                document.getElementById('notice').innerHTML + document.querySelector('[data-slot=xai]').innerHTML;
+              for (const type of ['ready', 'progress', 'result', 'error']) {
+                window.xaiDesktop.onEvent({type, generation: 0, request_id: -1,
+                  done: 1, total: 2, html: 'STALE', fragments: {xai: 'STALE'}});
+              }
+              return before === document.getElementById('model-status').innerHTML +
+                document.getElementById('notice').innerHTML + document.querySelector('[data-slot=xai]').innerHTML;
+            })()""")
+            window.evaluate_js("""
+              window.xaiDesktop.onEvent({type: 'error', generation: 1, request_id: -1,
+                html: '<p class="error">temporary preparation failure</p>'});
+            """)
+            report["retry_visible_on_error"] = window.evaluate_js("!document.getElementById('retry-prepare').hidden")
+            window.evaluate_js("document.getElementById('retry-prepare').click()")
+            wait_for("!document.getElementById('analyze').disabled && document.getElementById('retry-prepare').hidden")
+            report["retry_ready"] = window.evaluate_js("document.getElementById('model-status').textContent")
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port
@@ -341,8 +359,8 @@ runpy.run_module('desktop', run_name='__main__')
     return window
 
 
-webview.create_window = observe_window
+if __name__ == "__main__":
+    webview.create_window = observe_window
+    from desktop.app import main
 
-from desktop.app import main
-
-raise SystemExit(main(preview=True))
+    raise SystemExit(main(preview=True))

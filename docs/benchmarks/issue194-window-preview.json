@@ -1,0 +1,33 @@
+{
+  "issue": 194,
+  "smoke_status": "pass",
+  "preview": true,
+  "frozen": false,
+  "host": "SJun",
+  "python": "3.13.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "gate_status": "pending_clean_environment_and_remaining_v3_tickets",
+  "xai_quality": "pending #201; execution/display only",
+  "prediction_tolerance": {
+    "rtol": 1e-05,
+    "atol": 1e-08,
+    "csv": "byte equality"
+  },
+  "other_pc_validation": "pending",
+  "visual_review": "pending",
+  "ui_has_no_computation_imports": true,
+  "http_server_created": false,
+  "method_return_uses_cache": "not_checked_for_fake",
+  "display_changes_no_requests_or_compute": true,
+  "counts": {
+    "events": 209,
+    "progress": 190,
+    "requests": 19
+  },
+  "process_tree_peak_rss_bytes": 590106624,
+  "computation_child_pids": [
+    576
+  ],
+  "computation_children_exited": true,
+  "elapsed_seconds": 19.784
+}

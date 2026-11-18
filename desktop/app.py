@@ -1,4 +1,4 @@
-"""Desktop shell composition. Computation stays behind the #178 boundary."""
+"""Dashboard v3 window composition; computation lives in a spawned child."""
 
 from __future__ import annotations
 
@@ -19,17 +19,9 @@ def main(*, preview: bool = False) -> int:
         import webview
         from bundle_runtime import is_packaged, resource_root
 
-        from desktop.api import DesktopApi, Dispatcher, webview_emitter
+        from desktop.api import DesktopApi, webview_emitter
+        from desktop.computation import ProcessDispatcher
         from desktop.screen import SCREEN_HTML
-
-        if preview:
-            from desktop.fake import FakeRenderer
-
-            renderer = FakeRenderer(step_delay=0.15)
-        else:
-            from desktop.renderer import PredictionRenderer
-
-            renderer = PredictionRenderer()
 
         if is_packaged():
             webview.settings["WEBVIEW2_RUNTIME_PATH"] = str(
@@ -61,8 +53,8 @@ def main(*, preview: bool = False) -> int:
                 return None
             return chosen if isinstance(chosen, str) else chosen[0]
 
-        dispatcher = Dispatcher(webview_emitter(window))
-        api = DesktopApi(renderer, dispatcher, ask_save_path=ask_save_path)
+        dispatcher = ProcessDispatcher(webview_emitter(window), preview=preview)
+        api = DesktopApi(dispatcher.renderer, dispatcher, ask_save_path=ask_save_path)
         window.expose(
             api.prepare,
             api.scan_sites,

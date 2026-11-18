@@ -175,6 +175,7 @@ def _rows_html(rows: Sequence[VariantResult]) -> str:
         body.append(
             f'<tr data-site-key="{_esc(row.site_key)}" data-head="{_esc(row.cas_name)}"'
             f' data-cas-name="{_esc(row.cas_name)}"'
+            f' data-raw="{_esc(row.raw_score)}"'
             f' data-eff="{_esc(row.efficiency_pct)}" data-dist="{_esc(row.distance)}">'
             + "".join(f"<td>{_esc(cell)}</td>" for cell in display)
             + score_cell(cells[7], 2)

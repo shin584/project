@@ -19,7 +19,8 @@ datas = [(str(assets / 'tokenizer'), 'tokenizer'),
          (str(root / 'docs' / 'equivalence-baseline'), 'equivalence-baseline')]
 hiddenimports = (collect_submodules('transformers.models.esm') +
                  collect_submodules('transformers.models.auto') +
-                 collect_submodules('shap') + ['matplotlib.backends.backend_agg'])
+                 collect_submodules('shap') + ['matplotlib.backends.backend_agg',
+                 'desktop.worker_renderer', 'desktop.fake'])
 a = Analysis([str(root / 'desktop_entry.py')], pathex=[str(root)],
              datas=datas, hiddenimports=hiddenimports,
              runtime_hooks=[str(root / 'packaging' / 'runtime_hook.py')],

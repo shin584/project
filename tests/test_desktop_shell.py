@@ -135,6 +135,9 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
         "count": f"검색 결과: 0개 / 전체 {len(full)}개",
     }
     assert report["keyboard_view"] == "Best Candidates"
+    assert report["stale_generation_ignored"]
+    assert report["retry_visible_on_error"]
+    assert report["retry_ready"] == "모델 준비 완료"
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []

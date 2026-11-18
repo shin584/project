@@ -86,7 +86,7 @@ def _random_backgrounds(length: int, n: int, seed: int) -> np.ndarray:
 
 def kernel_shap(handle, window_seq: str, nsamples: int = 512,
                 n_background: int = 16, seed: int = 0,
-                on_batch=None) -> SHAPResult:
+                on_batch=None, *, use_disk_cache: bool = True) -> SHAPResult:
     """염기 위치를 특징으로 하는 KernelSHAP.
 
     '꺼진' 위치는 무작위 배경 서열의 염기로 바꿔 모델에 넣고, 배경 n개의 평균을 쓴다.
@@ -102,7 +102,7 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     """
     model_key = getattr(handle, "model_key", None)
     head = getattr(handle, "head", None)
-    if model_key is not None and head is not None and seed == 0:
+    if use_disk_cache and model_key is not None and head is not None and seed == 0:
         from xai import shap_cache
         hit = shap_cache.load(shap_cache.shap_cache_key(
             model_key, head, window_seq, nsamples, n_background))

@@ -78,12 +78,15 @@ def explanation_fragment(
     params: dict[str, Any],
     size: int,
     on_batch: OnBatch,
+    *,
+    model_key: str | None = None,
+    cache=None,
 ) -> str:
     """Only computation parameters reach the shared XAI memory cache."""
     window = site.model_input_seq
     layout = core.WINDOW_LAYOUT[site.cas_type]
-    model_key = f"A/{site.cas_type}"
-    cache = core.EXPLAIN_CACHE
+    model_key = model_key or f"A/{site.cas_type}"
+    cache = core.EXPLAIN_CACHE if cache is None else cache
     import numpy as np
 
     def position(index: int) -> str:
