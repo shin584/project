@@ -66,8 +66,8 @@ records commands, child exits, held model state and finite minimum/IG results.
 
 Before `init`, register an `investigation_command` argv list in a separately
 registered additive protocol (passed with `--protocol`), starting with
-`["{python}", "<frozen-producer.py>", ...]`. `{python}` and `{work}`
-are substituted at execution. Freeze the producer script and any extra imported
+`["{python}", "<frozen-producer.py>", ...]`. `{python}`, `{work}`
+and `{root}` (the worktree root, #210) are substituted at execution. Freeze the producer script and any extra imported
 code with repeated `--extra-code <file>` options. The command must identify a
 frozen source file; it runs only inside the journaled investigation stage.
 It writes `investigations.json` and `investigation-raw.npz` into `{work}` and

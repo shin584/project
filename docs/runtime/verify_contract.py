@@ -790,7 +790,8 @@ def run_diagnose(work: Path) -> int:
 def run_investigation(work: Path) -> int:
     """Execute a preregistered producer, or explicitly retain unverified work.
 
-    Candidate/float64 measurement producers are implemented in #210/#211.
+    The #210 candidate producer is registered in protocol-210.json; #211
+    adds the float32/float64 producer.
     They write investigations.json and investigation-raw.npz in this bundle.
     A command must be registered in the additive protocol before init; its
     script(s) must be among --extra-code or the snapshotted runtime code.
@@ -799,7 +800,7 @@ def run_investigation(work: Path) -> int:
     command = protocol.get("investigation_command")
     if command:
         argv = [part.replace("{python}", sys.executable).replace("{work}", str(work))
-                for part in command]
+                .replace("{root}", str(ROOT)) for part in command]
         manifest = load_manifest(work, live=True)
         frozen_sources = {v["source"] for v in manifest["sources"].values()}
         if (len(argv) < 2 or Path(argv[0]).resolve() != Path(sys.executable).resolve()

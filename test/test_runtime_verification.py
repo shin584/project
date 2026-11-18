@@ -63,13 +63,18 @@ def refresh_receipt(work, stage):
 
 @pytest.fixture(scope="module")
 def complete_fixture(tmp_path_factory):
+    return build_complete_bundle(tmp_path_factory.mktemp("runtime-fixture"))
+
+
+def build_complete_bundle(base, protocol_path=None, run_id="fixture-206"):
     """Synthetic complete evidence with independently assigned passing values.
 
     init exercises the public premeasurement freeze against pinned assets, but
     every measurement below is a fixture, not official model validation.
     """
-    work = tmp_path_factory.mktemp("runtime-fixture") / "bundle"
-    result = cli("verify_contract.py", "init", "--work", work, "--run-id", "fixture-206")
+    work = base / "bundle"
+    extra = ["--protocol", protocol_path] if protocol_path else []
+    result = cli("verify_contract.py", "init", "--work", work, "--run-id", run_id, *extra)
     assert result.returncode == 0, result.stdout + result.stderr
     manifest = load(work / "manifest.json")
     contract = load(work / "snapshot/contract.json")
@@ -118,7 +123,7 @@ def complete_fixture(tmp_path_factory):
         docs[stage]["identity"] = identity
         if stage == "offline":
             # Synthetic recovery provenance for assembler regressions only.
-            restored = tmp_path_factory.getbasetemp() / "synthetic-restored"
+            restored = base / "synthetic-restored"
             from_files = {}
             for name, item in manifest["sources"].items():
                 relative = ("payload/" + name.split("/", 1)[1] if name.startswith(("code/", "assets/"))

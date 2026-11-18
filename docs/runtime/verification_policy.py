@@ -155,8 +155,12 @@ def investigation_outcome(data, protocol):
         name, state = row["id"], row["state"]
         definition = expected[name]
         planned, completed = row["planned"], row["completed"]
+        # A confirmation reusing more identical screen calls plans fewer new ones;
+        # the assembler re-derives the candidate that selects this count.
+        registered = definition.get("planned_by_candidate", {}).get(
+            (row.get("candidate") or {}).get("setting"), definition["planned"])
         if (type(planned) is not int or type(completed) is not int
-                or not 0 <= completed <= planned or planned != definition["planned"]):
+                or not 0 <= completed <= planned or planned != registered):
             raise ValueError(f"Invalid investigation counts: {name}")
         counts[name] = {"completed": completed, "incomplete": planned - completed}
         if state == "not_applicable":

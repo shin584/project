@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+import candidate_policy
 from offline_policy import recovery_failures
 
 from verification_bundle import (STAGES, digest, identity, load_manifest,
@@ -66,6 +67,38 @@ def classify(checks: list[dict]) -> dict[str, dict]:
         row["status"] = "pass" if row["failed"] == 0 else "fail"
     return groups
 
+
+
+def candidate_evidence_errors(investigation, raw, protocol, contract) -> list[str]:
+    """Re-derive #210 candidate rows from raw arrays and the call log (#210).
+
+    A row that differs from its re-derivation (state, counts, candidate, checks)
+    or a call log that deviates from the registered plan/budget is a failure.
+    """
+    try:
+        rows, summary = candidate_policy.evaluate(
+            protocol, contract, raw, investigation["candidate_calls"],
+            investigation["candidate_budget"])
+    except EVIDENCE_ERRORS as error:
+        return [f"Candidate evidence invalid: {error}"]
+    errors = []
+    produced = {row["id"]: row for row in investigation["investigations"]}
+    for name, row in rows.items():
+        if produced.get(name) != json.loads(json.dumps(row)):
+            errors.append(f"Candidate row does not match raw evidence: {name}")
+    for name, expected in reused_copies(rows):
+        if name not in raw or expected not in raw or not np.array_equal(raw[name], raw[expected]):
+            errors.append(f"Reused confirmation array is not the identical screen call: {name}")
+    if investigation.get("candidate_summary") != json.loads(json.dumps(summary)):
+        errors.append("Candidate summary does not match raw evidence")
+    return errors
+
+
+def reused_copies(rows):
+    for model in candidate_policy.MODEL_ORDER:
+        for target, source in rows[f"shap_confirmation_{model}"].get("reused_from", {}).items():
+            for field in ("values", "terms"):
+                yield f"{target}/{field}", f"{source}/{field}"
 
 
 def assemble(work: Path) -> dict:
@@ -256,6 +289,9 @@ def assemble(work: Path) -> dict:
             outcome, counts = investigation_outcome(investigation, protocol)
             report["investigation_counts"] = counts
             report["investigations"] = investigation["investigations"]
+            if "selection" in protocol.get("candidate_protocol", {}):
+                errors += candidate_evidence_errors(investigation, raw.get("investigation", {}),
+                                                    protocol, contract)
             for row in investigation["investigations"]:
                 for name in row.get("raw_arrays", []):
                     if name not in raw.get("investigation", {}):
