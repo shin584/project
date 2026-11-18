@@ -20,6 +20,8 @@ import zipfile
 
 import numpy as np
 
+from verification_policy import MODELS, expected_checks, expected_arrays, require_planned_termination
+
 ROOT = Path(__file__).resolve().parents[2]
 STAGES = {
     "reference": ("reference.json", "reference.npz"),
@@ -142,7 +144,7 @@ def initialize(work: Path, run_id: str, contract_path: Path,
             if field in spec:
                 retain(ROOT / spec[field], "assets/" + spec[field])
     topology = {}
-    for key, model_key in (("spcas9", "spcas9_non_nt"), ("cas12a", "cas12a_non_nt")):
+    for key, model_key in MODELS.items():
         spec = contract["models"][model_key]
         path = ROOT / spec["path"]
         if digest(path) != spec["sha256"]:
@@ -165,7 +167,6 @@ def initialize(work: Path, run_id: str, contract_path: Path,
             for index, value in enumerate(values):
                 arrays[f"{key}/{case['id']}/input/{index}"] = value
     np.savez_compressed(snapshot / "inputs.npz", **arrays)
-    from verification_policy import expected_checks, expected_arrays
     frozen = {
         "schema_version": 1, "issue": 206, "run_id": run_id,
         "created_at": now(), "environment": environment(),
@@ -219,6 +220,8 @@ def verify_receipt(work: Path, stage: str) -> dict:
             raise ValueError(f"Mixed dependency: {stage}/{dependency}")
     if not receipt.get("command") or not receipt.get("environment") or "exit_code" not in receipt:
         raise ValueError(f"Missing execution metadata: {stage}")
+    if stage == "investigation":
+        require_planned_termination(read_json(work / STAGES[stage][0]))
     return receipt
 
 
@@ -247,8 +250,13 @@ def stage_execution(work: Path, stage: str):
     for dependency in DEPENDENCIES.get(stage, ()):
         verify_receipt(work, dependency)
         dependencies[dependency] = digest(work / f"{dependency}.receipt.json")
-    for completed in journal["completed"]:
-        verify_receipt(work, completed)
+    try:
+        for completed in journal["completed"]:
+            verify_receipt(work, completed)
+    except (OSError, ValueError, KeyError):
+        journal.update(state="invalidated", active=stage)
+        update_journal(work, journal)
+        raise
     # Exclusive marker also prevents concurrent writers from mixing stages.
     with (work / "active-stage.json").open("x", encoding="utf-8") as stream:
         json.dump({"stage": stage, "started_at": now()}, stream)
@@ -265,6 +273,8 @@ def stage_execution(work: Path, stage: str):
             raise ValueError("Stage did not finish with a valid numerical result")
         document_path = work / STAGES[stage][0]
         document = read_json(document_path)
+        if stage == "investigation":
+            require_planned_termination(document)
         if "identity" in document and document["identity"] != identity(work, stage):
             raise ValueError(f"Result identity mismatch; cannot restamp existing evidence: {stage}")
         document["identity"] = identity(work, stage)

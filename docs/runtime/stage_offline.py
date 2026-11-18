@@ -27,7 +27,8 @@ import sysconfig
 import time
 from pathlib import Path
 
-from verification_bundle import stage_execution
+from verification_bundle import stage_execution, read_json
+from verification_policy import runtime_version_failures
 
 SITE = Path(sysconfig.get_paths()["purelib"])
 STAGE = None
@@ -196,6 +197,10 @@ def run(work: Path) -> int:
     else:
         out["run"] = {"status": "fail", "stderr": finished.stderr[-4000:],
                       "stdout": finished.stdout[-2000:]}
+    version_errors = runtime_version_failures(out["run"].get("versions", {}),
+                                              read_json(work / "snapshot/contract.json"))
+    if version_errors:
+        out["run"].update(status="fail", version_errors=version_errors)
     (work / "staged.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     if not (work / "offline-raw.npz").exists():
         # Preserve a completed failure report; missing arrays fail required inventory.

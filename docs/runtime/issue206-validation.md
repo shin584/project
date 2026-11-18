@@ -34,3 +34,51 @@ precedes live-source checking. Subsequent relevant runs above passed.
 have no changes. Current source hashes are never attached to those old results.
 Official measurements, archive-copy verification and independent recovery remain
 unperformed and belong to the follow-up execution tickets.
+
+## Standards
+
+Initial review: no documented-standard breaches; two heuristic duplication
+findings (model registry and layer arithmetic). Both were resolved by sharing
+`MODELS` and `layer_parity` between freezing, measurement and replay. Recheck:
+**0 hard violations, 0 remaining findings from the original review**.
+
+## Spec
+
+Initial review found two issues: offline target version mismatches could pass
+(P1), and explicit unexpected termination could bypass Q8 under states other
+than time_limited (P2). Collection and replay now share all six exact version
+checks, and every investigation state checks termination before early returns.
+A producer that declares unexpected interruption aborts the journal and cannot
+resume. Read-only assembly rejects that evidence without modifying the bundle.
+The Spec recheck reported no remaining findings and ran the public CLI/report
+regressions for offline versions, termination states and the registered producer:
+`python -m pytest test/test_runtime_verification.py::test_offline_target_must_report_all_six_frozen_versions test/test_runtime_verification.py::test_unexpected_termination_cannot_be_hidden_by_investigation_state test/test_runtime_verification.py::test_registered_producer_cannot_restamp_another_runs_result -q`
+— **18 passed, 0 failed, 0 skipped** in 52.97 seconds.
+
+The review repairs were verified with:
+
+| Actual command | Pass | Fail | Skip |
+| --- | ---: | ---: | ---: |
+| `python -m pytest test/test_runtime_verification.py::test_nonrepresentative_layer_violation_cannot_hide test/test_runtime_verification.py::test_measurement_cli_records_failures_and_keeps_collecting -q` | 6 | 0 | 0 |
+| `python -m pytest 'test/test_runtime_verification.py::test_offline_target_must_report_all_six_frozen_versions[python]' 'test/test_runtime_verification.py::test_unexpected_termination_cannot_be_hidden_by_investigation_state[pass]' -q` (red, before parametrization expansion) | 0 | 2 | 0 |
+| `python -m pytest test/test_runtime_verification.py::test_offline_target_must_report_all_six_frozen_versions test/test_runtime_verification.py::test_unexpected_termination_cannot_be_hidden_by_investigation_state -q` (green, before mismatch parametrization expansion) | 10 | 0 | 0 |
+| `python -m pytest test/test_runtime_verification.py::test_completed_candidate_raw_output_shape_must_match_preregistered_case -q` (red) | 0 | 3 | 0 |
+| `python -m pytest test/test_runtime_verification.py::test_completed_candidate_raw_output_shape_must_match_preregistered_case test/test_runtime_verification.py::test_complete_bundle_can_be_reassembled_without_measurement test/test_runtime_verification.py::test_registered_producer_cannot_restamp_another_runs_result -q` (green) | 6 | 0 | 0 |
+
+The contract bytes also match the Git blob and additive protocol registration
+(`8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252`).
+`.gitattributes` preserves the registered contract/protocol bytes when checking
+out on Windows with `core.autocrlf=true`; neither numerical contract nor
+historical report was edited.
+
+Final selected regression:
+`python -m pytest test/test_runtime_verification.py test/test_non_nt_runtime.py -q`
+— **101 passed, 0 failed, 0 skipped** in 239.87 seconds. The additional cases
+include every missing/mismatched offline version, all declared interruption
+states, producer abort, and preregistered candidate output shapes.
+After making `Checks.record` return its finite-aware stored decision consistently,
+`python -m pytest 'test/test_runtime_verification.py::test_measurement_cli_records_failures_and_keeps_collecting[seed2_nonfinite]' -q`
+also passed: **1 passed, 0 failed, 0 skipped** in 6.62 seconds.
+
+Final review: Standards **0 remaining findings**; Spec **0 remaining findings**.
+Official numerical/recovery/backup-copy execution remains with #212/#213.

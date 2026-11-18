@@ -75,7 +75,8 @@ Each `investigations` row has `id`, `state`, `planned`, `completed`, `raw_arrays
 and, where relevant, `reason` and `termination`. IDs and planned counts come from
 the frozen protocol. `raw_arrays` names NPZ arrays. Completed investigations must
 include every registered `required_arrays` entry; all retained arrays and all
-numeric report fields must be finite. Candidate array names enumerate all cases,
+numeric report fields must be finite. Registered `raw_shapes` also fixes each
+candidate contribution vector and prediction/error term shape. Candidate array names enumerate all cases,
 settings and independent seeds before measurement. Confirmation arrays include
 reused intersection measurements from this same bundle; planned 28 calls/model
 counts the six new seed combinations and one fresh call on each of four cases.

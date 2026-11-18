@@ -15,9 +15,9 @@ import numpy as np
 
 from verification_bundle import (STAGES, digest, identity, load_manifest,
                                  read_json, verify_receipt)
-from verification_policy import (MODELS, VERSIONS, RAM_STAGES, all_finite, expected_arrays,
+from verification_policy import (MODELS, RAM_STAGES, all_finite, expected_arrays,
                                  expected_checks, inventory_failures,
-                                 investigation_outcome)
+                                 investigation_outcome, layer_parity, runtime_version_failures)
 
 EVIDENCE_ERRORS = (OSError, ValueError, KeyError, TypeError, IndexError,
                    AttributeError, EOFError, zipfile.BadZipFile)
@@ -156,13 +156,7 @@ def assemble(work: Path) -> dict:
                 errors.append("Core/frozen contract identity mismatch")
             versions = core.get("runtime", {})
             report["runtime"] = versions
-            for name in VERSIONS:
-                if versions.get(name) != contract["runtime"]["versions"][name]:
-                    errors.append(f"Runtime version missing/mismatch: {name}")
-            if versions.get("backend") != "torch":
-                errors.append("Target backend must be torch")
-            if versions.get("torch_threads") != str(contract["runtime"]["threads"]["torch_num_threads"]):
-                errors.append("Target thread configuration mismatch")
+            errors.extend(runtime_version_failures(versions, contract))
             measurements = core.get("measurements", {})
             if set(measurements) != set(MODELS):
                 errors.append("Model inventory mismatch")
@@ -209,11 +203,8 @@ def assemble(work: Path) -> dict:
                         if got.shape != want.shape:
                             errors.append(f"Layer shape mismatch: {name}")
                             continue
-                        absolute = float(np.max(np.abs(got - want)))
-                        relative = float(np.max(np.abs(got - want) / np.maximum(np.abs(want), 1e-6)))
-                        if (not all_finite([absolute, relative])
-                                or absolute > 1e-4 * max(1.0, float(np.max(np.abs(want))))
-                                or relative > contract["criteria"]["layerwise_parity"]["max_rel_diff"]):
+                        row = layer_parity(got, want, contract["criteria"]["layerwise_parity"])
+                        if not row["abs_passed"] or not row["rel_passed"]:
                             errors.append(f"Layer parity violation: {name}")
 
         if "offline" in documents:
@@ -226,6 +217,9 @@ def assemble(work: Path) -> dict:
                           and offline.get("network_blocked") is True
                           and offline.get("tensorflow_importable") is False
                           and offline.get("tensorflow_in_sys_modules_after_load") is False)
+            version_errors = runtime_version_failures(offline.get("versions", {}), contract)
+            errors.extend(f"Offline {error}" for error in version_errors)
+            offline_ok = offline_ok and not version_errors
             if set(offline.get("models", {})) != set(MODELS):
                 offline_ok = False
             for key, model_key in MODELS.items():
@@ -261,6 +255,11 @@ def assemble(work: Path) -> dict:
                 for name in row.get("raw_arrays", []):
                     if name not in raw.get("investigation", {}):
                         errors.append(f"Missing investigation raw array: {name}")
+                    else:
+                        shapes = protocol["investigations"][row["id"]].get("raw_shapes", {})
+                        shape = shapes.get(name.rsplit("/", 1)[-1])
+                        if shape is not None and list(raw["investigation"][name].shape) != shape:
+                            errors.append(f"Wrong investigation raw output shape: {name}")
         report["claims"] = classify(checks)
         report["verified_claims"] = sorted(name for name, row in report["claims"].items()
                                             if row["status"] == "pass")

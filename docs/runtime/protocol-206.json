@@ -119,7 +119,15 @@
         "ig/spcas9/S4/steps128/terms",
         "ig/spcas9/S4/steps256/attribution",
         "ig/spcas9/S4/steps256/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "attribution": [
+          30
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "ig_cas12a": {
       "planned": 16,
@@ -157,7 +165,15 @@
         "ig/cas12a/C4/steps128/terms",
         "ig/cas12a/C4/steps256/attribution",
         "ig/cas12a/C4/steps256/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "attribution": [
+          34
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "shap_screen_spcas9": {
       "planned": 92,
@@ -347,7 +363,15 @@
         "shap/spcas9/S4/ns512/bg32/background1/subset0/terms",
         "shap/spcas9/S4/ns512/bg32/background2/subset0/values",
         "shap/spcas9/S4/ns512/bg32/background2/subset0/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "values": [
+          30
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "shap_screen_cas12a": {
       "planned": 92,
@@ -537,7 +561,15 @@
         "shap/cas12a/C4/ns512/bg32/background1/subset0/terms",
         "shap/cas12a/C4/ns512/bg32/background2/subset0/values",
         "shap/cas12a/C4/ns512/bg32/background2/subset0/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "values": [
+          34
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "shap_confirmation_spcas9": {
       "planned": 28,
@@ -623,7 +655,15 @@
         "confirmation/spcas9/S4/background2/subset2/terms",
         "confirmation/spcas9/S4/fresh00/values",
         "confirmation/spcas9/S4/fresh00/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "values": [
+          30
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "shap_confirmation_cas12a": {
       "planned": 28,
@@ -709,7 +749,15 @@
         "confirmation/cas12a/C4/background2/subset2/terms",
         "confirmation/cas12a/C4/fresh00/values",
         "confirmation/cas12a/C4/fresh00/terms"
-      ]
+      ],
+      "raw_shapes": {
+        "values": [
+          34
+        ],
+        "terms": [
+          3
+        ]
+      }
     },
     "float32_spcas9": {
       "planned": 1,

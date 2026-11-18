@@ -32,14 +32,14 @@ import numpy as np
 
 from verification_bundle import (RawEvidence, initialize, load_manifest, read_json,
                                  stage_execution)
-from verification_policy import all_finite, VERSIONS
+from verification_policy import all_finite, layer_parity, MODELS, VERSIONS
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCS = ROOT / "docs" / "runtime"
 CONTRACT = json.loads((DOCS / "contract.json").read_text(encoding="utf-8"))
 FROZEN_INPUTS = None
 
-MODEL_KEYS = {"spcas9": "spcas9_non_nt", "cas12a": "cas12a_non_nt"}
+MODEL_KEYS = MODELS
 
 
 # ════════════════════════════════════════════════
@@ -153,11 +153,12 @@ class Checks:
         self.items: list[dict] = []
 
     def record(self, name: str, passed: bool, measured, criterion, detail: str = "") -> bool:
+        passed = bool(passed) and all_finite(measured)
         self.items.append({
-            "check": name, "passed": bool(passed) and all_finite(measured),
+            "check": name, "passed": passed,
             "measured": measured, "criterion": criterion, "detail": detail,
         })
-        return bool(passed)
+        return passed
 
     @property
     def failed(self) -> list[dict]:
@@ -286,24 +287,18 @@ def run_verify(work: Path) -> int:
                 if layer_name not in expected_layers:
                     continue
                 want = reference[f"{key}/{case_id}/layer/{layer_name}"]
-                abs_diff = float(np.max(np.abs(got - want)))
-                scale = float(max(1.0, np.max(np.abs(want))))
-                layer_rows[layer_name] = {
-                    "max_abs_diff": abs_diff, "max_rel_diff": _rel(got, want),
-                    "scaled_bound": 1e-4 * scale,
-                }
+                row = layer_parity(got, want, criteria["layerwise_parity"])
+                layer_rows[layer_name] = row
+                abs_diff = row["max_abs_diff"]
                 checks.record(f"{key}/{case_id}/layerwise/{layer_name}/abs_scaled",
-                              got.shape == want.shape and all_finite([got, want])
-                              and abs_diff <= 1e-4 * scale,
-                              abs_diff, 1e-4 * scale)
+                              row["abs_passed"], abs_diff, row["scaled_bound"])
                 checks.record(f"{key}/{case_id}/layerwise/{layer_name}/rel",
-                              got.shape == want.shape and all_finite([got, want])
-                              and _rel(got, want) <= criteria["layerwise_parity"]["max_rel_diff"],
-                              _rel(got, want), criteria["layerwise_parity"]["max_rel_diff"])
+                              row["rel_passed"], row["max_rel_diff"],
+                              criteria["layerwise_parity"]["max_rel_diff"])
                 if abs_diff > worst["abs"]:
                     worst = {"layer": layer_name, "abs": abs_diff,
                              "rel": layer_rows[layer_name]["max_rel_diff"],
-                             "scaled_bound": 1e-4 * scale}
+                             "scaled_bound": row["scaled_bound"]}
             layer_worst.append(worst)
             case["layerwise_worst"] = worst
             case["layerwise"] = layer_rows

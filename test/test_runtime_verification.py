@@ -82,6 +82,7 @@ def complete_fixture(tmp_path_factory):
             "all_finite": True, "exit_code": 0, "held_models": [key], "command": ["fixture-ram", key]}
             for key in ("spcas9", "cas12a")},
         "offline": {"run": {"status": "pass", "network_blocked": True,
+                              "versions": {**contract["runtime"]["versions"], "backend": "torch", "torch_threads": "4"},
                               "tensorflow_importable": False, "tensorflow_in_sys_modules_after_load": False,
                               "models": {"spcas9": {"n_outputs": 9, "all_finite": True, "gradient_abs_sum": [1.0]},
                                          "cas12a": {"n_outputs": 1, "all_finite": True, "gradient_abs_sum": [1.0, 1.0]}}}},
@@ -120,7 +121,9 @@ def complete_fixture(tmp_path_factory):
             arrays = {name: np.ones(shape or [1], dtype=np.float64)
                       for name, shape in manifest["expected_arrays"].get(stage, {}).items()}
             if stage == "investigation":
-                arrays = {name: np.array([0.125]) for row in docs[stage]["investigations"] for name in row["raw_arrays"]}
+                arrays = {name: np.full(protocol["investigations"][row["id"]].get("raw_shapes", {}).get(
+                    name.rsplit("/", 1)[-1], [1]), 0.125)
+                    for row in docs[stage]["investigations"] for name in row["raw_arrays"]}
             np.savez_compressed(work / files[1], **arrays)
         write(work / f"{stage}.receipt.json", {
             "identity": identity, "command": ["fixture-producer", stage],
@@ -560,13 +563,16 @@ def test_missing_required_stage_measurements_cannot_pass(bundle, tmp_path, stage
     assert report["status"]["overall"] == "fail"
 
 
-def test_registered_producer_cannot_restamp_another_runs_result(tmp_path):
+@pytest.mark.parametrize("fault", ["identity", "termination"])
+def test_registered_producer_cannot_restamp_another_runs_result(tmp_path, fault):
     work = tmp_path / "producer-run"
     producer = tmp_path / "producer.py"
+    payload = ({"identity": {"run_id": "old-run"}} if fault == "identity" else {
+        "investigations": [{"state": "unverified", "termination": "unexpected"}]})
     producer.write_text(
         "import json, sys\nfrom pathlib import Path\nimport numpy as np\n"
         "work = Path(sys.argv[1])\n"
-        "(work / 'investigations.json').write_text(json.dumps({'identity': {'run_id': 'old-run'}}))\n"
+        f"(work / 'investigations.json').write_text(json.dumps({payload!r}))\n"
         "np.savez_compressed(work / 'investigation-raw.npz')\n", encoding="utf-8")
     protocol = load(ROOT / "docs/runtime/protocol-206.json")
     protocol["investigation_command"] = ["{python}", str(producer), "{work}"]
@@ -577,6 +583,59 @@ def test_registered_producer_cannot_restamp_another_runs_result(tmp_path):
     assert initialized.returncode == 0, initialized.stdout
     result = cli("verify_contract.py", "investigation", "--work", work)
     assert result.returncode == 1
-    assert "identity mismatch" in result.stdout.lower()
-    assert load(work / "investigations.json")["identity"]["run_id"] == "old-run"
+    if fault == "identity":
+        assert "identity mismatch" in result.stdout.lower()
+        assert load(work / "investigations.json")["identity"]["run_id"] == "old-run"
+    else:
+        assert "unexpected interruption" in result.stdout.lower()
     assert load(work / "journal.json")["state"] == "aborted"
+
+
+@pytest.mark.parametrize("key", ["python", "keras", "torch", "numpy", "shap", "h5py"])
+@pytest.mark.parametrize("fault", ["missing", "mismatch"])
+def test_offline_target_must_report_all_six_frozen_versions(bundle, tmp_path, key, fault):
+    path = bundle / "staged.json"
+    doc = load(path)
+    versions = {**load(bundle / "snapshot/contract.json")["runtime"]["versions"],
+                "backend": "torch", "torch_threads": "4"}
+    if fault == "missing":
+        versions.pop(key)
+    else:
+        versions[key] = "0"
+    doc["run"]["versions"] = versions
+    write(path, doc)
+    refresh_receipt(bundle, "offline")
+    result, report = assemble(bundle, tmp_path)
+    assert result.returncode == 1
+    assert report["status"]["overall"] == "fail"
+    assert any(key in error for error in report["evidence_errors"])
+
+
+@pytest.mark.parametrize("state", ["pass", "unverified", "unresolved", "not_applicable"])
+def test_unexpected_termination_cannot_be_hidden_by_investigation_state(bundle, tmp_path, state):
+    path = bundle / "investigations.json"
+    doc = load(path)
+    row = next(r for r in doc["investigations"] if r["id"] == "float64_spcas9")
+    row.update(state=state, termination="unexpected", reason="unexpected producer interruption")
+    if state in ("unverified", "not_applicable"):
+        row.update(completed=0, raw_arrays=[])
+    write(path, doc)
+    refresh_receipt(bundle, "investigation")
+    result, report = assemble(bundle, tmp_path)
+    assert result.returncode == 1
+    assert report["status"]["overall"] == "fail"
+
+
+@pytest.mark.parametrize("name", ["ig/spcas9/S1/steps32/attribution",
+                                 "shap/spcas9/S1/ns64/bg4/background0/subset1/values",
+                                 "confirmation/cas12a/C1/background2/subset2/terms"])
+def test_completed_candidate_raw_output_shape_must_match_preregistered_case(bundle, tmp_path, name):
+    path = bundle / "investigation-raw.npz"
+    with np.load(path) as source:
+        arrays = dict(source)
+    arrays[name] = np.ones(99)
+    np.savez_compressed(path, **arrays)
+    refresh_receipt(bundle, "investigation")
+    result, report = assemble(bundle, tmp_path)
+    assert result.returncode == 1
+    assert report["status"]["overall"] == "fail"

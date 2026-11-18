@@ -12,6 +12,39 @@ RAM_STAGES = ("interpreter", "runtime_import", "model_loaded", "after_forward",
               "after_ig", "peak_working_set")
 
 
+def layer_parity(got, want, criteria):
+    """The frozen #193 absolute-scaled AND relative gate, used in collection/replay."""
+    got, want = np.asarray(got), np.asarray(want)
+    if got.shape != want.shape or not got.size:
+        raise ValueError("Layer shape mismatch/empty activation")
+    absolute = float(np.max(np.abs(got - want)))
+    relative = float(np.max(np.abs(got - want) / np.maximum(np.abs(want), 1e-6)))
+    bound = 1e-4 * max(1.0, float(np.max(np.abs(want))))
+    finite = all_finite([got, want, absolute, relative, bound])
+    return {"max_abs_diff": absolute, "max_rel_diff": relative, "scaled_bound": bound,
+            "abs_passed": finite and absolute <= bound,
+            "rel_passed": finite and relative <= criteria["max_rel_diff"]}
+
+
+def runtime_version_failures(versions, contract):
+    expected = contract["runtime"]
+    errors = [f"Runtime version missing/mismatch: {name}" for name in VERSIONS
+              if versions.get(name) != expected["versions"][name]]
+    if versions.get("backend") != expected["backend_env"]["KERAS_BACKEND"]:
+        errors.append("Target backend must be torch")
+    if versions.get("torch_threads") != str(expected["threads"]["torch_num_threads"]):
+        errors.append("Target thread configuration mismatch")
+    return errors
+
+
+def require_planned_termination(data):
+    """Q8 overrides every state, including inapplicable/unverified declarations."""
+    for record in [data, *data.get("investigations", [])]:
+        if (record.get("termination") not in (None, "planned_budget")
+                or record.get("state") in ("interrupted", "aborted")):
+            raise ValueError("Unexpected interruption requires a new bundle/full remeasurement")
+
+
 def expected_checks(contract, topology):
     core = [f"version/{name}" for name in VERSIONS] + [
         "runtime/backend", "runtime/torch_threads", "finiteness/raw"]
@@ -108,6 +141,7 @@ def inventory_failures(checks, expected):
 
 def investigation_outcome(data, protocol):
     """Validate a finite registered investigation inventory before applying Q17."""
+    require_planned_termination(data)
     rows = data["investigations"]
     expected = protocol["investigations"]
     counts_by_id = Counter(r["id"] for r in rows)
