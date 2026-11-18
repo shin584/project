@@ -90,13 +90,9 @@ def prepare(work, wheelhouse, output):
         target = wheel_dir / source.name
         shutil.copyfile(source, target)
         files["wheels/" + source.name] = digest(target)
-    requirements = output / "payload/recovery/offline-requirements.txt"
-    for line in requirements.read_text(encoding="utf-8").splitlines():
-        if not line.strip() or line.startswith("#"):
-            continue
-        name, version = line.split("==")
+    for name, version in manifest["offline_dependencies"].items():
         if wheels.get(name, {}).get("version", "").split("+")[0] != version:
-            raise ValueError(f"Missing/mismatched declared wheel: {line}")
+            raise ValueError(f"Missing/mismatched declared wheel: {name}=={version}")
     data = {"schema_version": 1, "bundle_manifest_sha256": digest(work / "manifest.json"),
             "files": files, "wheels": wheels, "command": [sys.executable, *sys.argv],
             "original_roots": [str(ROOT), str(work), str(output), sysconfig.get_path("purelib")],

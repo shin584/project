@@ -63,7 +63,7 @@ original code, model, bundle, preparation and personal site-packages paths, and
 deny child-process creation. Every original frozen source/model path is probed;
 unexpected denied accesses fail even if an importing library catches the error.
 Imported module origins must belong to the restored tree or the external Python
-standard library. TCP, DNS and UDP probes must be denied; TensorFlow discovery
+standard library. TCP, forward/reverse DNS and UDP probes must be denied; TensorFlow discovery
 and an actual import attempt must establish its absence before loading, and it
 must remain absent after both models load.
 
@@ -92,7 +92,9 @@ A minimum recovery-only bundle intentionally fails overall assembly because the
 reference/core/diagnosis/RAM/investigation stages are absent. The offline claim
 still reports its actual independent result. Missing provenance, original path
 access, missing models/arrays, nonfinite values and nonzero stage exits all
-prevent a passing offline claim. Historical staging reports without independent
+prevent a passing aggregate result and return a nonzero exit. Raw evidence
+integrity errors may leave a passing individual claim while failing the aggregate.
+Historical staging reports without independent
 recovery evidence cannot pass the new assembler.
 
 #212 must generate a fresh official bundle at the final integration snapshot;

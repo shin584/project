@@ -76,7 +76,9 @@ def recovery_failures(document, manifest, manifest_sha256, contract):
         "interpreter", "runtime_import", "spcas9_model_loaded", "spcas9_after_gradients",
         "cas12a_model_loaded", "cas12a_after_gradients", "peak_working_set")):
         errors.append("minimum-run RSS missing/invalid")
-    if not run.get("network_probes") or any(p.get("blocked") is not True for p in run["network_probes"]):
+    network = run.get("network_probes", [])
+    if (len(network) != 4 or {p.get("kind") for p in network} != {"tcp", "dns", "reverse_dns", "udp"}
+            or any(p.get("blocked") is not True for p in network)):
         errors.append("network block probes missing/failed")
     if not run.get("network_scope"):
         errors.append("network scope missing")

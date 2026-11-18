@@ -38,7 +38,7 @@ def main():
         if event.startswith(("subprocess.", "os.exec", "os.spawn", "os.posix_spawn")) or event == "os.system":
             raise PermissionError("child process disabled in recovery target")
         if event in ("socket.connect", "socket.connect_ex", "socket.getaddrinfo", "socket.gethostbyname",
-                     "socket.gethostbyaddr", "socket.bind", "socket.sendto", "socket.sendmsg"):
+                     "socket.gethostbyaddr", "socket.getnameinfo", "socket.bind", "socket.sendto", "socket.sendmsg"):
             raise PermissionError("network disabled in recovery target")
 
     sys.addaudithook(audit)
@@ -67,6 +67,7 @@ def main():
             with socket.socket(type=socket.SOCK_DGRAM) as connection:
                 connection.sendto(b"probe", ("127.0.0.1", 9))
         for name, attempt in (("tcp", connect), ("dns", lambda: socket.getaddrinfo("example.com", 443)),
+                              ("reverse_dns", lambda: socket.getnameinfo(("127.0.0.1", 9), 0)),
                               ("udp", udp)):
             try:
                 attempt()

@@ -137,7 +137,7 @@ def complete_fixture(tmp_path_factory):
                 "install": {"command": ["fixture-install"], "exit_code": 0}})
             docs[stage]["run"].update(
                 tensorflow_import_attempt="ModuleNotFoundError", external_prerequisites={"python": "fixture"},
-                network_probes=[{"kind": "tcp", "blocked": True}],
+                network_probes=[{"kind": kind, "blocked": True} for kind in ("tcp", "dns", "reverse_dns", "udp")],
                 network_scope="synthetic fixture",
                 held_models=["spcas9", "cas12a"], unexpected_module_origins={},
                 rss={stage: 1000000 for stage in ("interpreter", "runtime_import", "spcas9_model_loaded",
@@ -215,7 +215,7 @@ def test_offline_rejects_original_worktree_staging(bundle, tmp_path):
 
 @pytest.mark.parametrize("fault", ["mixed_preparation", "checksum", "module_origin", "model_origin",
     "held_model", "original_access", "missing_probe", "unblocked_probe", "dependencies",
-    "install_exit", "runner_exit", "network_probe", "tf_import", "rss", "model_checksum", "wheel_missing", "head"])
+    "install_exit", "runner_exit", "network_probe", "tf_import", "rss", "model_checksum", "wheel_missing", "head", "reverse_dns"])
 def test_offline_provenance_failures_reach_aggregate_exit(bundle, tmp_path, fault):
     path = bundle / "staged.json"
     document = load(path)
@@ -254,6 +254,8 @@ def test_offline_provenance_failures_reach_aggregate_exit(bundle, tmp_path, faul
         recovery["wheels"].pop("h5py")
     elif fault == "head":
         run["models"]["spcas9"]["head"]["index"] = 0
+    elif fault == "reverse_dns":
+        run["network_probes"] = [{"kind": kind, "blocked": True} for kind in ("tcp", "dns", "udp")]
     write(path, document)
     refresh_receipt(bundle, "offline")
     result, report = assemble(bundle, tmp_path)
