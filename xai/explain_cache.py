@@ -30,7 +30,8 @@ from __future__ import annotations
 
 import threading
 from collections import OrderedDict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from xai import explain
 
@@ -49,10 +50,11 @@ class ExplainCache:
     값이 같으므로 결과는 같고, 낭비는 드물다 — 잠금을 들고 계산하는 쪽이 나쁘다.
     """
 
-    def __init__(self, max_entries: int = DEFAULT_MAX_ENTRIES) -> None:
+    def __init__(self, max_entries: int = DEFAULT_MAX_ENTRIES, *, use_disk_cache: bool = True) -> None:
         self._entries: OrderedDict[tuple, Any] = OrderedDict()
         self._max_entries = max(1, int(max_entries))
         self._lock = threading.Lock()
+        self._use_disk_cache = use_disk_cache
 
     # ── 기법별 입구 ──────────────────────────────────────────────────
     def integrated_gradients(self, predictor, model_key: str, head: str, window_seq: str,
@@ -71,7 +73,8 @@ class ExplainCache:
             ("shap", str(model_key), str(head), window_seq.upper(),
              int(nsamples), int(n_background)),
             lambda handle: explain.kernel_shap(handle, window_seq, int(nsamples),
-                                               int(n_background), on_batch=on_batch),
+                                               int(n_background), on_batch=on_batch,
+                                               use_disk_cache=self._use_disk_cache),
             predictor, head,
         )
 

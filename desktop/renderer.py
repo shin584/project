@@ -34,8 +34,12 @@ def _table(headers: list[str], rows: list[list[Any]], attrs: list[dict]) -> str:
 
 
 class PredictionRenderer:
-    def __init__(self, predictors: dict | None = None):
+    def __init__(self, predictors: dict | None = None, *, explanation_cache=None):
         self._predictors = predictors
+        self._explanation_cache = explanation_cache
+
+    def _model_key(self, cas: str) -> str:
+        return f"A/{cas}"
 
     def warm_up(self, on_batch: OnBatch) -> str:
         if self._predictors is None:
@@ -146,7 +150,8 @@ class PredictionRenderer:
         if head not in self._explain_heads(site):
             raise LookupError(f"이 사이트에 없는 헤드입니다: {head}")
         return explanation_fragment(
-            self._predictors[("A", site.cas_type)], site, head, method, params, size, on_batch
+            self._predictors[("A", site.cas_type)], site, head, method, params, size, on_batch,
+            model_key=self._model_key(site.cas_type), cache=self._explanation_cache,
         )
 
     def csv_table(

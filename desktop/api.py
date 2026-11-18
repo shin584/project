@@ -1,4 +1,4 @@
-"""데스크톱 화면 ↔ 파이썬 호출 경계 (#178).
+"""Dashboard v3 화면 ↔ 파이썬 호출 경계 (#194).
 
 전체 명세(함수 목록, 조각 슬롯, 이벤트 모양, 요청 ID·단일 작업자 규칙, 변경 절차)는
 `docs/desktop-boundary.md`에 있다. 이 파일은 그 명세의 실행 가능한 형태다.
@@ -6,8 +6,8 @@
     JS ──(pywebview js_api)──▶ DesktopApi ──▶ Dispatcher(작업자 1개) ──▶ Renderer
     JS ◀──(evaluate_js)────── window.xaiDesktop.onEvent(event)
 
-경계를 바꾸려면 #177 작성자의 승인이 필요하다. 팀원들이 이 경계 위에서 각자
-화면을 만들고 있으므로, 말없이 바꾸면 서로의 작업이 깨진다.
+v3는 독립 호출 경계이며 기존 #177 프로그램을 변경하지 않는다.
+실제 창은 ProcessDispatcher를 사용하고 Dispatcher는 인프로세스 검증에도 쓴다.
 """
 
 from __future__ import annotations

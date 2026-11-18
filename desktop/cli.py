@@ -5,6 +5,9 @@ from pathlib import Path
 
 
 def main() -> int:
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--preview", action="store_true", help="모델 가중치 없이 화면 미리보기")

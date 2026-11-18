@@ -1,0 +1,108 @@
+{
+  "issue": 194,
+  "baseline": "docs/equivalence-baseline/capture.json",
+  "prediction_tolerance": "CSV byte equality; baseline already rounds raw to 4 and score to 2 decimals",
+  "xai_quality": "Execution/PNG/cache only; units and numerical quality are #201",
+  "operations": [
+    {
+      "stage": "startup",
+      "seconds": 81.691,
+      "progress_events": 1
+    },
+    {
+      "stage": "scan",
+      "seconds": 0.013,
+      "progress_events": 0
+    },
+    {
+      "stage": "prediction",
+      "seconds": 41.688,
+      "progress_events": 3
+    },
+    {
+      "stage": "csv",
+      "seconds": 0.036,
+      "progress_events": 0
+    },
+    {
+      "stage": "SpCas9/ig",
+      "seconds": 31.725,
+      "progress_events": 4
+    },
+    {
+      "stage": "SpCas9/ig/resize",
+      "seconds": 0.005,
+      "progress_events": 0
+    },
+    {
+      "stage": "SpCas9/shap",
+      "seconds": 38.435,
+      "progress_events": 34
+    },
+    {
+      "stage": "SpCas9/shap/resize",
+      "seconds": 0.005,
+      "progress_events": 0
+    },
+    {
+      "stage": "SpCas9/rollout",
+      "seconds": 1.182,
+      "progress_events": 0
+    },
+    {
+      "stage": "SpCas9/rollout/resize",
+      "seconds": 0.002,
+      "progress_events": 0
+    },
+    {
+      "stage": "Cas12a/ig",
+      "seconds": 38.596,
+      "progress_events": 4
+    },
+    {
+      "stage": "Cas12a/ig/resize",
+      "seconds": 0.005,
+      "progress_events": 0
+    },
+    {
+      "stage": "Cas12a/shap",
+      "seconds": 69.415,
+      "progress_events": 34
+    },
+    {
+      "stage": "Cas12a/shap/resize",
+      "seconds": 0.007,
+      "progress_events": 0
+    },
+    {
+      "stage": "Cas12a/rollout",
+      "seconds": 1.689,
+      "progress_events": 0
+    },
+    {
+      "stage": "Cas12a/rollout/resize",
+      "seconds": 0.002,
+      "progress_events": 0
+    }
+  ],
+  "status": "pass",
+  "child_pid": 18092,
+  "generation": 1,
+  "csv_bytes": 2716,
+  "csv_byte_equal": true,
+  "ui_has_no_computation_imports": true,
+  "process_tree_peak_rss_bytes": {
+    "startup": 1881858048,
+    "prediction": 2911825920,
+    "csv": 2790789120,
+    "SpCas9/ig": 2817785856,
+    "SpCas9/shap": 2148265984,
+    "SpCas9/rollout": 2030923776,
+    "Cas12a/ig": 2629120000,
+    "Cas12a/shap": 2011791360,
+    "Cas12a/rollout": 1994964992,
+    "Cas12a/rollout/resize": 1996836864
+  },
+  "after_close_ui_rss_bytes": 10133504,
+  "child_exited": true
+}

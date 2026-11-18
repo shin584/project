@@ -88,6 +88,7 @@ SCREEN_HTML = r"""<!doctype html>
       <button id="analyze" type="submit" disabled>분석 시작</button>
     </form>
     <div id="model-status" role="status" aria-live="polite">모델 준비 중</div>
+    <button id="retry-prepare" type="button" hidden>모델 준비 다시 시도</button>
     <hr>
     <label for="graph-size">XAI 그래프 크기</label>
     <input id="graph-size" type="range" min="40" max="100" value="80" step="5"
@@ -183,6 +184,7 @@ SCREEN_HTML = r"""<!doctype html>
       const slot = (name) => document.querySelector(`[data-slot="${name}"]`);
       const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
       let ready = false;
+      let generation = 0;
       let started = false;
       let busy = false;
       let analysisDna = "";
@@ -207,6 +209,7 @@ SCREEN_HTML = r"""<!doctype html>
       const showError = (error) => {
         byId("notice").textContent = `오류: ${error.message || error}`;
         if (!ready) byId("model-status").textContent = "모델 준비 실패";
+        byId("retry-prepare").hidden = false;
         finish();
       };
       const request = (name, ...args) => {
@@ -243,6 +246,13 @@ SCREEN_HTML = r"""<!doctype html>
         byId("xai-single-head").hidden = heads.length !== 1;
         byId("xai-single-head").textContent = `설명 대상: ${heads[0] || ""}`;
       }
+
+      byId("retry-prepare").addEventListener("click", () => {
+        byId("retry-prepare").hidden = true;
+        byId("notice").textContent = "";
+        byId("model-status").textContent = "모델 준비 중";
+        request("prepare");
+      });
 
       function explain() {
         if (!byId("xai-controls").reportValidity()) return;
@@ -470,8 +480,13 @@ SCREEN_HTML = r"""<!doctype html>
           setTimeout(prepare, 250);
         },
         onEvent(event) {
+          if (event.generation !== undefined) {
+            if (event.generation < generation) return;
+            generation = event.generation;
+          }
           if (event.type === "ready") {
             ready = true;
+            byId("retry-prepare").hidden = true;
             byId("model-status").innerHTML = event.html;
             if (operation === "prepare") finish();
             else updateButton();
@@ -498,6 +513,7 @@ SCREEN_HTML = r"""<!doctype html>
           if (event.type === "error") {
             byId("notice").innerHTML = event.html;
             if (!ready) byId("model-status").textContent = "모델 준비 실패";
+            byId("retry-prepare").hidden = false;
             finish();
             return;
           }

@@ -1,5 +1,13 @@
 # #179: disposable offline packaging gate
 
+In the independent `dashboard_v3` worktree, #194 changes computation to a spawned
+child and updates `--validate` to observe the public window/events. It checks NT
+prediction CSV parity and actual PNG display/reuse without importing model
+runtimes in the UI. Legacy XAI array/unit equivalence is not a v3 quality gate;
+that validation belongs to #201. The spec includes the dynamic child renderer
+and the entry calls `multiprocessing.freeze_support()`. A new frozen build and
+clean offline Windows validation remain the later v3 packaging ticket's scope.
+
 For the **production desktop / gate 2 (#188)**, use
 [`docs/gate2/README.md`](../docs/gate2/README.md) and
 `python packaging/build_desktop.py`. The final folder is `dist/XaiDashboard`;
