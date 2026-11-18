@@ -13,6 +13,8 @@ from pathlib import Path
 
 import numpy as np
 
+from offline_policy import recovery_failures
+
 from verification_bundle import (STAGES, digest, identity, load_manifest,
                                  read_json, verify_receipt)
 from verification_policy import (MODELS, RAM_STAGES, all_finite, expected_arrays,
@@ -220,6 +222,9 @@ def assemble(work: Path) -> dict:
             version_errors = runtime_version_failures(offline.get("versions", {}), contract)
             errors.extend(f"Offline {error}" for error in version_errors)
             offline_ok = offline_ok and not version_errors
+            recovery_errors = recovery_failures(documents["offline"], manifest, digest(work / "manifest.json"), contract)
+            errors.extend(f"Offline {error}" for error in recovery_errors)
+            offline_ok = offline_ok and not recovery_errors
             if set(offline.get("models", {})) != set(MODELS):
                 offline_ok = False
             for key, model_key in MODELS.items():

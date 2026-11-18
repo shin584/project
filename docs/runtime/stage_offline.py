@@ -1,231 +1,227 @@
-"""#193: TensorFlow 없는 로컬 스테이징을 만들고, 네트워크를 막은 채 최소 실행한다.
+"""Prepare frozen inputs, then independently restore and run both real models.
 
-채택 런타임이 **배포되는 모습**(TensorFlow 없음)에서 실제로 도는지 보는 유일한
-근거다. 이 PC에는 TensorFlow가 설치돼 있어서 `Bidirectional` 역직렬화가 그것을
-끌어온다 - 개발 환경에서 잰 값은 배포 구성을 대표하지 못한다.
-
-site-packages에서 필요한 패키지만 복사한다 (네트워크 사용 안 함). 실행은 `-S`로
-site-packages를 경로에서 제외하므로 TensorFlow는 import 자체가 불가능하다.
-`WANTED` 목록은 추측이 아니라 실패하는 import를 따라가며 확정한 것이다.
-
-실행:
-
-    python docs/runtime/stage_offline.py <스테이징 경로>
-
-스테이징 트리는 일회용이다. 복구 의존 대상이 아니며 이 명령으로 다시 만든다.
-네트워크 차단은 이 프로세스 안에서 socket을 막는 방식이다. OS 수준 차단이나
-깨끗한 오프라인 PC는 #204의 몫이며 여기서 입증하지 않는다.
+prepare --work <bundle> --wheelhouse <wheels> --output <new-preparation>
+<new-restored-root> --prepared <preparation> --work <bundle> --output <bundle>/staged.json
+Python/stdlib/OS and pip are external prerequisites; see recovery-209.md.
 """
 
 import argparse
 import json
 import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
 import sysconfig
-import time
-from pathlib import Path
+import zipfile
+import csv
+import base64
+from email.parser import BytesParser
+from concurrent.futures import ThreadPoolExecutor
 
-from verification_bundle import stage_execution, read_json
+from offline_policy import recovery_failures, restored_name
+from verification_bundle import ROOT, digest, load_manifest, read_json, stage_execution, write_json
 from verification_policy import runtime_version_failures
 
-SITE = Path(sysconfig.get_paths()["purelib"])
-STAGE = None
-REPO = Path(__file__).resolve().parents[2]
 
-# 채택 런타임이 실제로 쓰는 것만. TensorFlow와 그 전용 의존성은 일부러 제외한다.
-WANTED = [
-    "keras", "torch", "numpy", "h5py", "shap", "ml_dtypes", "namex", "optree",
-    "typing_extensions.py", "sympy", "mpmath", "networkx", "filelock",
-    "fsspec", "jinja2", "markupsafe", "packaging", "rich", "pygments",
-    "markdown_it", "mdurl", "colorama", "six.py", "setuptools", "pkg_resources",
-    # 확장 모듈이 의존하는 재배포 DLL 묶음. 빠지면 numpy C 확장이 로드되지 않는다.
-    "numpy.libs", "torchgen", "yaml", "_yaml", "absl", "google", "psutil",
-]
-# runtime_versions reads SHAP distribution metadata without importing its optional
-# plotting/scientific dependencies during the minimum forward/gradient run.
-WANTED += [path.name for path in SITE.glob("shap-*.dist-info")]
-
-RUNNER = r'''
-import json, os, sys
-
-staging, repo, raw_output = sys.argv[1:4]
-# 표준 라이브러리는 남기고 site-packages만 경로에서 뺀다. -S로 이미 추가되지 않지만
-# 혹시 섞여 들어와도 스테이징만 보도록 명시한다.
-sys.path[:] = [staging, repo] + [
-    p for p in sys.path if "site-packages" not in p.replace("\\", "/")
-]
-
-# 네트워크 차단: 준비와 실행 모두 네트워크 없이 된다는 것을 실제로 보장한다.
-import socket
-# socket.socket은 ssl이 상속하므로 클래스로 남겨 두고, 실제 연결만 막는다.
-def _blocked(*args, **kwargs):
-    raise OSError("network is disabled for this offline verification run")
-class _BlockedSocket(socket.socket):
-    connect = _blocked
-    connect_ex = _blocked
-    sendto = _blocked
-socket.socket = _BlockedSocket
-socket.create_connection = _blocked
-socket.getaddrinfo = _blocked
-socket.gethostbyname = _blocked
-
-import importlib.util
-report = {
-    "site_packages_on_path": any("site-packages" in p for p in sys.path),
-    "tensorflow_importable": importlib.util.find_spec("tensorflow") is not None,
-    "keras_importable": importlib.util.find_spec("keras") is not None,
-}
-try:
-    import tensorflow  # noqa: F401
-    report["tensorflow_import_attempt"] = "succeeded"
-except Exception as error:
-    report["tensorflow_import_attempt"] = f"{type(error).__name__}: {error}"
-
-probes = []
-for attempt in (lambda: socket.socket().connect(("1.1.1.1", 80)),
-                lambda: socket.getaddrinfo("huggingface.co", 443),
-                lambda: socket.create_connection(("1.1.1.1", 80))):
-    try:
-        attempt()
-        probes.append("reached network")
-    except OSError as error:
-        probes.append(f"blocked: {error}")
-report["network_probes"] = probes
-report["network_blocked"] = all(p.startswith("blocked") for p in probes)
-
-import psutil
-process = psutil.Process()
-def rss():
-    return int(process.memory_info().rss)
-
-report["rss"] = {"interpreter": rss()}
-import numpy as np
-import non_nt_runtime as rt
-
-rt.import_keras()
-report["rss"]["runtime_import"] = rss()
-report["versions"] = rt.runtime_versions()
-report["models"] = {}
-raw = {}
-held_models = {}
-for key, head, window in (
-    ("spcas9", 1, "CCGGTCGCTTTAAGAATAAATAAAAGCGCC"),
-    ("cas12a", 0, "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT"),
-):
-    runtime = rt.NonNTRuntime.load(key)
-    held_models[key] = runtime
-    report["rss"][f"{key}_model_loaded"] = rss()
-    inputs = [rt.one_hot(window)[None]]
-    if key == "cas12a":
-        inputs.append(rt.cas12a_derive(window)[None])
-    value = runtime.forward(inputs, head=head)
-    output, grads = runtime.gradients(inputs, head=head)
-    raw[f"{key}/output"] = value
-    for index, grad in enumerate(grads):
-        raw[f"{key}/gradient/{index}"] = grad
-    report["models"][key] = {
-        "raw_output": float(value[0]),
-        "n_outputs": runtime.n_outputs,
-        "gradient_abs_sum": [float(np.abs(g).sum()) for g in grads],
-        "all_finite": bool(np.isfinite(value).all()
-                           and all(np.isfinite(g).all() for g in grads)),
-        "ops": sorted({type(layer).__name__ for layer in runtime._model.layers}),
-        "held_models": list(held_models),
-    }
-    report["rss"][f"{key}_after_gradients"] = rss()
-report["tensorflow_in_sys_modules_after_load"] = "tensorflow" in sys.modules
-report["rss"]["peak_working_set"] = int(process.memory_info().peak_wset)
-report["rss"]["note"] = ("one process, both models loaded in sequence and both kept "
-                         "alive; the shipped design loads only the selected family")
-report["status"] = "pass" if (
-    report["network_blocked"]
-    and not report["tensorflow_importable"]
-    and not report["tensorflow_in_sys_modules_after_load"]
-    and all(m["all_finite"] and all(s > 0 for s in m["gradient_abs_sum"])
-            for m in report["models"].values())
-) else "fail"
-print("STAGEDJSON" + json.dumps(report))
-np.savez_compressed(raw_output, **raw)
-'''
+def safe_file(root, relative):
+    path = root / relative
+    if not path.resolve().is_relative_to(root.resolve()) or path.is_symlink():
+        raise ValueError(f"Prepared path escapes root: {relative}")
+    return path
 
 
-def stage() -> dict:
-    STAGE.mkdir(parents=True, exist_ok=True)
-    copied, missing, total_bytes, total_files = [], [], 0, 0
-    started = time.time()
-    for name in WANTED:
-        source = SITE / name
-        if not source.exists():
-            missing.append(name)
+def dependency_checksums(root):
+    # Wheel hashes cover the full distributions. Check installation manifests
+    # and native executable files here; imported Python files are checked below
+    # against their wheel RECORD hashes. Avoid reading unused development headers.
+    paths = [p for p in (root / "dependencies").rglob("*")
+             if p.is_file() and (p.name == "RECORD" or p.suffix.lower() in (".dll", ".pyd"))]
+    with ThreadPoolExecutor(max_workers=16) as workers:
+        checksums = workers.map(digest, paths)
+        return {p.relative_to(root).as_posix(): checksum for p, checksum in zip(paths, checksums)}
+
+
+def verify_imported_dependencies(root, origins):
+    expected = {}
+    for record in (root / "dependencies").glob("*.dist-info/RECORD"):
+        with record.open(encoding="utf-8", newline="") as stream:
+            for name, checksum, _ in csv.reader(stream):
+                if checksum.startswith("sha256="):
+                    expected[(record.parent.parent / name).resolve()] = base64.urlsafe_b64decode(
+                        checksum[7:] + "=" * (-len(checksum[7:]) % 4)).hex()
+    checked = {}
+    for value in set(origins.values()):
+        path = Path(value)
+        if path.is_relative_to(root / "dependencies"):
+            checksum = digest(path)
+            if expected.get(path) != checksum:
+                raise ValueError(f"Imported dependency disagrees with wheel RECORD: {path}")
+            checked[path.relative_to(root).as_posix()] = checksum
+    return checked
+
+
+def prepare(work, wheelhouse, output):
+    manifest = load_manifest(work, live=True)
+    output.mkdir(parents=True, exist_ok=False)
+    files = {}
+    for name, item in manifest["sources"].items():
+        target = safe_file(output, restored_name(name))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(work / "snapshot" / name, target)
+        files[target.relative_to(output).as_posix()] = item["sha256"]
+    shutil.copyfile(work / "snapshot/inputs.npz", output / "payload/recovery/inputs.npz")
+    files["payload/recovery/inputs.npz"] = manifest["inputs_sha256"]
+    wheels = {}
+    wheel_dir = output / "wheels"
+    wheel_dir.mkdir()
+    for source in sorted(wheelhouse.glob("*.whl")):
+        if source.is_symlink():
+            raise ValueError("Wheel symlinks are not preparation inputs")
+        with zipfile.ZipFile(source) as archive:
+            metadata = [n for n in archive.namelist() if n.endswith(".dist-info/METADATA") and n.count("/") == 1]
+            if len(metadata) != 1:
+                raise ValueError(f"Invalid wheel metadata: {source.name}")
+            info = BytesParser().parsebytes(archive.read(metadata[0]))
+            name = info["Name"].lower().replace("_", "-")
+            if name.startswith("tensorflow") or name in wheels:
+                raise ValueError(f"Unexpected/duplicate target wheel: {name}")
+            wheels[name] = {"version": info["Version"], "file": "wheels/" + source.name}
+        target = wheel_dir / source.name
+        shutil.copyfile(source, target)
+        files["wheels/" + source.name] = digest(target)
+    requirements = output / "payload/recovery/offline-requirements.txt"
+    for line in requirements.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.startswith("#"):
             continue
-        target = STAGE / name
-        if source.is_dir():
-            if not target.exists():
-                shutil.copytree(source, target, dirs_exist_ok=True,
-                                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        else:
-            if not target.exists():
-                shutil.copy2(source, target)
-        for path in ([target] if target.is_file() else target.rglob("*")):
-            if path.is_file():
-                total_files += 1
-                total_bytes += path.stat().st_size
-        copied.append(name)
-    return {"staged": copied, "missing_from_site_packages": missing,
-            "files": total_files, "bytes": total_bytes,
-            "seconds": round(time.time() - started, 1),
-            "source": str(SITE), "staging": str(STAGE), "network_used": False}
+        name, version = line.split("==")
+        if wheels.get(name, {}).get("version", "").split("+")[0] != version:
+            raise ValueError(f"Missing/mismatched declared wheel: {line}")
+    data = {"schema_version": 1, "bundle_manifest_sha256": digest(work / "manifest.json"),
+            "files": files, "wheels": wheels, "command": [sys.executable, *sys.argv],
+            "original_roots": [str(ROOT), str(work), str(output), sysconfig.get_path("purelib")],
+            "original_files": sorted({item["source"] for item in manifest["sources"].values()})}
+    for name, checksum in files.items():
+        if digest(safe_file(output, name)) != checksum:
+            raise ValueError(f"Preparation checksum mismatch: {name}")
+    write_json(output / "preparation.json", data)
+    print(json.dumps({"status": "prepared", "files": len(files), "wheels": len(wheels),
+                      "manifest_sha256": digest(output / "preparation.json"), "output": str(output)}))
 
 
-def run(work: Path) -> int:
-    info = stage()
-    runner = STAGE.parent / "staged_runner.py"
-    runner.write_text(RUNNER, encoding="utf-8")
-    finished = subprocess.run(
-        [sys.executable, "-S", str(runner), str(STAGE), str(REPO), str(work / "offline-raw.npz")],
-        capture_output=True, text=True, cwd=str(REPO),
-        env={k: v for k, v in os.environ.items()
-             if k not in ("PYTHONPATH", "KERAS_BACKEND")},
-    )
-    lines = [l for l in finished.stdout.splitlines() if l.startswith("STAGEDJSON")]
-    out = {"staging": info, "command": finished.args, "exit_code": finished.returncode,
-           "executable": sys.executable}
-    if lines:
-        out["run"] = json.loads(lines[0][len("STAGEDJSON"):])
-    else:
-        out["run"] = {"status": "fail", "stderr": finished.stderr[-4000:],
-                      "stdout": finished.stdout[-2000:]}
-    version_errors = runtime_version_failures(out["run"].get("versions", {}),
-                                              read_json(work / "snapshot/contract.json"))
-    if version_errors:
-        out["run"].update(status="fail", version_errors=version_errors)
-    (work / "staged.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+def run(work, prepared, restored):
+    data = read_json(prepared / "preparation.json")
+    manifest = load_manifest(work)
+    if data["bundle_manifest_sha256"] != digest(work / "manifest.json"):
+        raise ValueError("Prepared inputs belong to a different bundle")
+    for name, item in manifest["sources"].items():
+        if data["files"].get(restored_name(name)) != item["sha256"]:
+            raise ValueError(f"Prepared source disagrees with frozen bundle: {name}")
+    if data["files"].get("payload/recovery/inputs.npz") != manifest["inputs_sha256"]:
+        raise ValueError("Prepared canonical inputs disagree with frozen bundle")
+    originals = [Path(p).resolve() for p in data["original_roots"]] + [prepared, work, ROOT]
+    if any(restored.is_relative_to(p) or p.is_relative_to(restored) for p in originals):
+        raise ValueError("Restored root must be independent of original/prepared/bundle paths")
+    for name, checksum in data["files"].items():
+        if digest(safe_file(prepared, name)) != checksum:
+            raise ValueError(f"Prepared input checksum mismatch: {name}")
+    restored.mkdir(parents=True, exist_ok=False)
+    for name in data["files"]:
+        target = safe_file(restored, name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(safe_file(prepared, name), target)
+    verified = {name: digest(safe_file(restored, name)) for name in data["files"]}
+    if verified != data["files"]:
+        raise ValueError("Restored input checksum mismatch")
+    env = {k: v for k, v in os.environ.items() if not k.upper().startswith(("PYTHON", "PIP_"))
+           and k not in ("KERAS_BACKEND", "TORCH_HOME")}
+    command = [sys.executable, "-I", "-m", "pip", "--isolated", "install", "--no-index",
+               "--no-cache-dir", "--disable-pip-version-check", "--only-binary=:all:", "--no-compile",
+               "--find-links", str(restored / "wheels"), "--target", str(restored / "dependencies"),
+               "-r", str(restored / "payload/recovery/offline-requirements.txt")]
+    install = subprocess.run(command, capture_output=True, text=True, cwd=restored, env=env)
+    (work / "offline-install-stdout.txt").write_text(install.stdout, encoding="utf-8")
+    (work / "offline-install-stderr.txt").write_text(install.stderr, encoding="utf-8")
+    recovery = {**data, "restored_root": str(restored), "verified_files": verified,
+                "preparation_sha256": digest(prepared / "preparation.json"),
+                "install": {"command": command, "exit_code": install.returncode},
+                "installed_files": dependency_checksums(restored)}
+    recovery["dependency_checksum_scope"] = "full wheel archives, installed RECORD/native files before and after, imported modules against RECORD"
+    result = {"recovery": recovery, "run": {"status": "fail"}, "exit_code": install.returncode}
+    if install.returncode == 0:
+        config = {"original_roots": sorted({*data["original_roots"], str(prepared), str(work), str(ROOT),
+                                            sysconfig.get_path("purelib"),
+                                            *(item["source"] for item in manifest["sources"].values())}),
+                  "original_files": sorted({item["source"] for item in manifest["sources"].values()})}
+        write_json(restored / "runner-config.json", config)
+        command = [sys.executable, "-I", "-S", str(restored / "payload/docs/runtime/offline_runner.py"), str(restored)]
+        finished = subprocess.run(command, capture_output=True, text=True, cwd=restored, env=env)
+        result.update(command=command, executable=sys.executable, exit_code=finished.returncode)
+        (work / "offline-run-stdout.txt").write_text(finished.stdout, encoding="utf-8")
+        (work / "offline-run-stderr.txt").write_text(finished.stderr, encoding="utf-8")
+        if (restored / "runner-report.json").exists():
+            result["run"] = read_json(restored / "runner-report.json")
+        if (restored / "offline-raw.npz").exists():
+            shutil.copyfile(restored / "offline-raw.npz", work / "offline-raw.npz")
+    contract = read_json(work / "snapshot/contract.json")
+    errors = runtime_version_failures(result["run"].get("versions", {}), contract)
+    if dependency_checksums(restored) != recovery["installed_files"]:
+        errors.append("Restored dependencies changed during execution")
+    try:
+        recovery["imported_dependency_files"] = verify_imported_dependencies(
+            restored, result["run"].get("module_origins", {}))
+    except (OSError, ValueError) as error:
+        errors.append(str(error))
+    errors += recovery_failures(result, load_manifest(work), digest(work / "manifest.json"), contract)
+    for name, checksum in verified.items():
+        if digest(safe_file(restored, name)) != checksum:
+            errors.append(f"Restored input changed during execution: {name}")
+    result["run"]["validation_errors"] = errors
+    if errors:
+        result["run"]["status"] = "fail"
+    write_json(work / "staged.json", result)
     if not (work / "offline-raw.npz").exists():
-        # Preserve a completed failure report; missing arrays fail required inventory.
-        import numpy as np
-        np.savez_compressed(work / "offline-raw.npz")
-    print(json.dumps(out, indent=2))
-    return 0 if finished.returncode == 0 and out["run"].get("status") == "pass" else 1
+        with zipfile.ZipFile(work / "offline-raw.npz", "w"):
+            pass
+    print(json.dumps({"status": result["run"]["status"], "errors": errors, "output": str(work / "staged.json")}))
+    return 0 if result["run"]["status"] == "pass" and result["exit_code"] == 0 else 1
 
 
-def main() -> int:
-    global STAGE
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("staging", type=Path)
+    parser.add_argument("staging", help="new independent restored directory, or 'prepare'")
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--wheelhouse", type=Path)
+    parser.add_argument("--prepared", type=Path)
+    parser.add_argument("--snapshot-only", action="store_true",
+                        help="run transported frozen recovery without consulting original sources")
     args = parser.parse_args()
     work = args.work.resolve()
-    STAGE = args.staging.resolve()
-    if args.output.resolve() != work / "staged.json":
-        parser.error("--output must be <work>/staged.json to retain stage provenance")
     try:
-        with stage_execution(work, "offline") as result:
-            result["exit_code"] = run(work)
+        if args.staging == "prepare":
+            if not args.wheelhouse:
+                parser.error("prepare requires --wheelhouse")
+            prepare(work, args.wheelhouse.resolve(), args.output.resolve())
+            return 0
+        if not args.prepared:
+            parser.error("recovery requires --prepared; developer site-packages staging is forbidden")
+        if args.output.resolve() != work / "staged.json":
+            parser.error("--output must be <work>/staged.json")
+        if args.snapshot_only:
+            manifest = load_manifest(work)
+            if digest(Path(__file__)) != manifest["sources"]["code/docs/runtime/stage_offline.py"]["sha256"]:
+                raise ValueError("Recovery controller differs from frozen code")
+        with stage_execution(work, "offline", snapshot_only=args.snapshot_only) as result:
+            try:
+                result["exit_code"] = run(work, args.prepared.resolve(), Path(args.staging).resolve())
+            except (OSError, ValueError, KeyError, zipfile.BadZipFile) as error:
+                write_json(work / "staged.json", {"run": {"status": "fail", "error": str(error)}, "exit_code": 1})
+                with zipfile.ZipFile(work / "offline-raw.npz", "w"):
+                    pass
+                result["exit_code"] = 1
         return result["exit_code"]
-    except (OSError, ValueError, RuntimeError) as error:
+    except (OSError, ValueError, RuntimeError, KeyError, zipfile.BadZipFile) as error:
         print(json.dumps({"status": "fail", "error": str(error)}))
         return 1
 

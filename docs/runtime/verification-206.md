@@ -26,7 +26,8 @@ python docs/runtime/verify_contract.py reference --work $bundle
 python docs/runtime/verify_contract.py verify --work $bundle
 python docs/runtime/verify_contract.py diagnose --work $bundle
 python docs/runtime/verify_contract.py ram --work $bundle
-python docs/runtime/stage_offline.py <separate-staging-path> --work $bundle --output "$bundle/staged.json"
+python docs/runtime/stage_offline.py prepare --work $bundle --wheelhouse <declared-wheelhouse> --output <new-preparation>
+python -S <new-preparation>/payload/docs/runtime/stage_offline.py <new-independent-restored-root> --prepared <new-preparation> --work $bundle --output "$bundle/staged.json" --snapshot-only
 python docs/runtime/verify_contract.py investigation --work $bundle
 python docs/runtime/assemble_verification.py --work $bundle --output <new-summary.json>
 ```
@@ -37,9 +38,12 @@ Do not use a success-only command chain. A stage exception or killed process
 leaves an aborted/running marker: keep that directory for diagnosis and start a
 **new bundle with all required measurements**. There is no partial resume.
 Detected input changes permanently invalidate the journal even if the original
-bytes are subsequently restored. Restaging an existing dependency tree is not
-independent recovery evidence; that implementation and its official execution
-belong to #209/#212.
+bytes are subsequently restored. #209 adds declared wheel preparation and
+independent restoration; see [recovery-209.md](recovery-209.md) for prerequisites,
+the complete empty-directory procedure and isolation scope. Its transported
+offline controller validates frozen inputs without needing original source
+paths. Restaging an existing dependency tree is refused. #212 regenerates the
+official recovery evidence at the final integration snapshot.
 
 `init` snapshots the contract, additive protocol, relevant local import closure,
 checkpoints and manifests, and canonical input arrays. Layer names come from the

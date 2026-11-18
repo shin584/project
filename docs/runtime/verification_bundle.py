@@ -18,8 +18,6 @@ import shutil
 import sys
 import zipfile
 
-import numpy as np
-
 from verification_policy import MODELS, expected_checks, expected_arrays, require_planned_termination
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -107,6 +105,7 @@ def local_sources(entries: list[Path]) -> list[Path]:
 def initialize(work: Path, run_id: str, contract_path: Path,
                protocol_path: Path, extra_code: list[Path] = ()) -> dict:
     """Freeze inputs before ANY stage, refusing old or partially populated dirs."""
+    import numpy as np
     if work.exists() and any(work.iterdir()):
         raise ValueError("A new empty bundle is required; partial resume is forbidden")
     if not run_id.strip():
@@ -127,6 +126,7 @@ def initialize(work: Path, run_id: str, contract_path: Path,
 
     retain(contract_path, "contract.json")
     retain(protocol_path, "protocol.json")
+    retain(ROOT / "docs/runtime/offline-requirements.txt", "offline-requirements.txt")
     # Include the local import closure, not the unrelated UI or NT model bytes.
     code = [ROOT / name for name in (
         "non_nt_runtime.py", "model_source.py", "predict.py", "pam_scanner.py",
@@ -171,6 +171,9 @@ def initialize(work: Path, run_id: str, contract_path: Path,
         "schema_version": 1, "issue": 206, "run_id": run_id,
         "created_at": now(), "environment": environment(),
         "sources": sources, "inputs_sha256": digest(snapshot / "inputs.npz"),
+        "offline_dependencies": dict(line.split("==") for line in
+            (snapshot / "offline-requirements.txt").read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.startswith("#")),
         "topology": topology,
         "expected_checks": expected_checks(contract, topology),
         "expected_arrays": expected_arrays(contract, topology),
@@ -232,13 +235,15 @@ def update_journal(work: Path, journal: dict) -> None:
 
 
 @contextmanager
-def stage_execution(work: Path, stage: str):
+def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
     """A recorded numerical failure may continue; interrupted stages may not."""
+    if snapshot_only and stage != "offline":
+        raise ValueError("Only independent recovery may execute from transported snapshots")
     journal = read_json(work / "journal.json")
     if journal["state"] != "ready" or stage in journal["completed"]:
         raise ValueError("Interrupted/finished stage cannot resume; use a new bundle")
     try:
-        load_manifest(work, live=True)
+        load_manifest(work, live=not snapshot_only)
     except (OSError, ValueError, KeyError):
         journal.update(state="invalidated", active=stage)
         update_journal(work, journal)
@@ -264,11 +269,11 @@ def stage_execution(work: Path, stage: str):
     update_journal(work, journal)
     receipt = {"identity": identity(work, stage), "started_at": now(),
                "command": [sys.executable, *sys.argv], "environment": environment(),
-               "dependencies": dependencies}
+               "dependencies": dependencies, "input_mode": "snapshot" if snapshot_only else "live"}
     result = {"exit_code": None}
     try:
         yield result
-        load_manifest(work, live=True)
+        load_manifest(work, live=not snapshot_only)
         if result["exit_code"] not in (0, 1):
             raise ValueError("Stage did not finish with a valid numerical result")
         document_path = work / STAGES[stage][0]
@@ -282,8 +287,10 @@ def stage_execution(work: Path, stage: str):
         receipt.update(ended_at=now(), exit_code=result["exit_code"],
                        final_environment=environment(),
                        auxiliary_artifacts={name: digest(work / name) for name in (
-                           "investigation-stdout.txt", "investigation-stderr.txt")
-                           if stage == "investigation" and (work / name).exists()},
+                           ("investigation-stdout.txt", "investigation-stderr.txt") if stage == "investigation" else
+                           ("offline-install-stdout.txt", "offline-install-stderr.txt",
+                            "offline-run-stdout.txt", "offline-run-stderr.txt") if stage == "offline" else ())
+                           if (work / name).exists()},
                        artifacts={name: digest(work / name) for name in STAGES[stage]})
         write_json(work / f"{stage}.receipt.json", receipt)
         journal["completed"].append(stage)
@@ -303,6 +310,7 @@ class RawEvidence:
         self.arrays = {}
 
     def add(self, name: str, value):
+        import numpy as np
         if name in self.arrays:
             raise ValueError(f"Duplicate raw measurement: {name}")
         self.arrays[name] = np.array(value, copy=True)
@@ -330,6 +338,7 @@ class RawEvidence:
             setattr(runtime, method, recorded)
 
     def save(self, path):
+        import numpy as np
         if path.exists():
             raise ValueError(f"Refusing to overwrite raw evidence: {path}")
         np.savez_compressed(path, **self.arrays)

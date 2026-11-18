@@ -116,6 +116,41 @@ def complete_fixture(tmp_path_factory):
         identity = {"run_id": manifest["run_id"], "manifest_sha256": sha(work / "manifest.json"),
                     "stage": stage, "backend": "tensorflow" if stage == "reference" else "torch"}
         docs[stage]["identity"] = identity
+        if stage == "offline":
+            # Synthetic recovery provenance for assembler regressions only.
+            restored = tmp_path_factory.getbasetemp() / "synthetic-restored"
+            from_files = {}
+            for name, item in manifest["sources"].items():
+                relative = ("payload/" + name.split("/", 1)[1] if name.startswith(("code/", "assets/"))
+                            else "payload/recovery/" + name)
+                from_files[relative] = item["sha256"]
+            from_files["payload/recovery/inputs.npz"] = manifest["inputs_sha256"]
+            wheels = {name: {"version": version, "file": f"wheels/{name}.whl"}
+                      for name, version in manifest["offline_dependencies"].items()}
+            from_files.update({wheel["file"]: "0" * 64 for wheel in wheels.values()})
+            docs[stage].update(command=["fixture-runner"], exit_code=0, recovery={
+                "bundle_manifest_sha256": sha(work / "manifest.json"),
+                "restored_root": str(restored), "files": from_files, "verified_files": from_files,
+                "wheels": wheels, "installed_files": {"dependencies/fixture.py": "0" * 64},
+                "imported_dependency_files": {"dependencies/fixture.py": "0" * 64},
+                "dependency_checksum_scope": "synthetic fixture",
+                "install": {"command": ["fixture-install"], "exit_code": 0}})
+            docs[stage]["run"].update(
+                tensorflow_import_attempt="ModuleNotFoundError", external_prerequisites={"python": "fixture"},
+                network_probes=[{"kind": "tcp", "blocked": True}],
+                network_scope="synthetic fixture",
+                held_models=["spcas9", "cas12a"], unexpected_module_origins={},
+                rss={stage: 1000000 for stage in ("interpreter", "runtime_import", "spcas9_model_loaded",
+                     "spcas9_after_gradients", "cas12a_model_loaded", "cas12a_after_gradients", "peak_working_set")},
+                module_origins={name: str(restored / (name + ".py")) for name in (
+                    "non_nt_runtime", "model_source", "predict", "numpy", "keras", "torch", "h5py", "psutil")},
+                path_guard={"original_roots": [str(ROOT)], "violations": [], "scope": "synthetic fixture",
+                            "probes": [{"path": item["source"], "blocked": True}
+                                       for item in manifest["sources"].values()]})
+            for key in ("spcas9", "cas12a"):
+                spec = contract["models"][key + "_non_nt"]
+                docs[stage]["run"]["models"][key].update(checkpoint=str(restored / "payload" / spec["path"]),
+                    sha256=spec["sha256"], head=spec["verified_head"], window=contract["cases"][key][0]["window"])
         write(work / files[0], docs[stage])
         if len(files) > 1:
             arrays = {name: np.ones(shape or [1], dtype=np.float64)
@@ -163,6 +198,68 @@ def test_complete_bundle_can_be_reassembled_without_measurement(bundle, tmp_path
     assert again.returncode == 0
     assert duplicate == report
     assert {p.relative_to(bundle).as_posix(): sha(p) for p in bundle.rglob("*") if p.is_file()} == before
+
+
+def test_offline_rejects_original_worktree_staging(bundle, tmp_path):
+    """A finite run with TF absent is insufficient independent recovery evidence."""
+    path = bundle / "staged.json"
+    document = load(path)
+    document.pop("recovery", None)
+    write(path, document)
+    refresh_receipt(bundle, "offline")
+    result, report = assemble(bundle, tmp_path)
+    assert result.returncode == 1
+    assert report["status"]["overall"] == "fail"
+    assert report["claims"]["offline_tensorflow_free_run"]["status"] == "fail"
+
+
+@pytest.mark.parametrize("fault", ["mixed_preparation", "checksum", "module_origin", "model_origin",
+    "held_model", "original_access", "missing_probe", "unblocked_probe", "dependencies",
+    "install_exit", "runner_exit", "network_probe", "tf_import", "rss", "model_checksum", "wheel_missing", "head"])
+def test_offline_provenance_failures_reach_aggregate_exit(bundle, tmp_path, fault):
+    path = bundle / "staged.json"
+    document = load(path)
+    recovery, run = document["recovery"], document["run"]
+    if fault == "mixed_preparation":
+        recovery["bundle_manifest_sha256"] = "0" * 64
+    elif fault == "checksum":
+        recovery["files"]["payload/non_nt_runtime.py"] = "0" * 64
+    elif fault == "module_origin":
+        run["module_origins"]["non_nt_runtime"] = str(ROOT / "non_nt_runtime.py")
+    elif fault == "model_origin":
+        run["models"]["cas12a"]["checkpoint"] = str(ROOT / "models/non_nt/model.keras")
+    elif fault == "held_model":
+        run["held_models"] = ["cas12a"]
+    elif fault == "original_access":
+        run["path_guard"]["violations"] = [{"event": "open", "path": str(ROOT / "predict.py")}]
+    elif fault == "missing_probe":
+        run["path_guard"]["probes"].pop()
+    elif fault == "unblocked_probe":
+        run["path_guard"]["probes"][0]["blocked"] = False
+    elif fault == "dependencies":
+        recovery["installed_files"] = {}
+    elif fault == "install_exit":
+        recovery["install"]["exit_code"] = 1
+    elif fault == "runner_exit":
+        document["exit_code"] = 1
+    elif fault == "network_probe":
+        run["network_probes"] = []
+    elif fault == "tf_import":
+        run["tensorflow_import_attempt"] = "succeeded"
+    elif fault == "rss":
+        run.pop("rss", None)
+    elif fault == "model_checksum":
+        run["models"]["cas12a"]["sha256"] = "0" * 64
+    elif fault == "wheel_missing":
+        recovery["wheels"].pop("h5py")
+    elif fault == "head":
+        run["models"]["spcas9"]["head"]["index"] = 0
+    write(path, document)
+    refresh_receipt(bundle, "offline")
+    result, report = assemble(bundle, tmp_path)
+    assert result.returncode == 1, report
+    assert report["status"]["overall"] == "fail"
+    assert report["claims"]["offline_tensorflow_free_run"]["status"] == "fail"
 
 
 @pytest.mark.parametrize("state,expected,code", [
@@ -281,6 +378,9 @@ def test_nonrepresentative_layer_violation_cannot_hide(bundle, tmp_path, kind):
 
 
 @pytest.mark.parametrize("stage,name", [
+    ("offline", "spcas9/output"),
+    ("offline", "cas12a/gradient/1"),
+    ("offline", "cas12a/gradient_output"),
     ("verify", "spcas9/S1/shap/seed1/values"),
     ("verify", "spcas9/S1/shap/seed2/terms"),
     ("verify", "cas12a/C2/shap/repeat/values"),

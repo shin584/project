@@ -3,8 +3,6 @@
 from collections import Counter
 import math
 
-import numpy as np
-
 MODELS = {"spcas9": "spcas9_non_nt", "cas12a": "cas12a_non_nt"}
 VERSIONS = ("python", "keras", "torch", "numpy", "shap", "h5py")
 SHAP_RUNS = ("seed0", "seed1", "seed2", "repeat", "finer")
@@ -14,6 +12,7 @@ RAM_STAGES = ("interpreter", "runtime_import", "model_loaded", "after_forward",
 
 def layer_parity(got, want, criteria):
     """The frozen #193 absolute-scaled AND relative gate, used in collection/replay."""
+    import numpy as np
     got, want = np.asarray(got), np.asarray(want)
     if got.shape != want.shape or not got.size:
         raise ValueError("Layer shape mismatch/empty activation")
@@ -87,6 +86,7 @@ def expected_arrays(contract, topology):
     for key, model_key in MODELS.items():
         spec = contract["models"][model_key]
         result["offline"][f"{key}/output"] = [1]
+        result["offline"][f"{key}/gradient_output"] = [1]
         for index, input_spec in enumerate(spec["inputs"]):
             result["offline"][f"{key}/gradient/{index}"] = [1, *input_spec["shape"]]
         for case in contract["cases"][key]:
@@ -117,6 +117,7 @@ def expected_arrays(contract, topology):
 
 
 def all_finite(value):
+    import numpy as np
     if isinstance(value, dict):
         return all(all_finite(v) for v in value.values())
     if isinstance(value, (list, tuple)):
