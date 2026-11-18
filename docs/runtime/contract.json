@@ -133,6 +133,27 @@
       "rationale": "Same-seed determinism is a correctness gate. The cross-seed and finer-run bounds test whether 4 backgrounds and 64 samples are a stable enough estimate of the same quantity; they are pre-registered precisely because this is the user's current default and #191 lists it as subject to verification."
     }
   },
+  "addendum_1": {
+    "registered_at": "2026-11-18",
+    "why": "The first verification run failed `gradient_check` on 9 of 32 case/point combinations (worst: relative L2 0.264, cosine 0.969). That failure stands as recorded. These two diagnostics are registered BEFORE they run, to decide between the two explanations - a wrong autograd gradient, or central finite differences being the wrong instrument at ReLU/LeakyReLU kinks and at one-hot zeros. They do not replace or relax `gradient_check`.",
+    "cross_runtime_gradient_parity": {
+      "what": "Input gradient from torch autograd under the torch backend vs tf.GradientTape under the tensorflow backend, same .keras bytes, same inputs, both at x and at the interior point alpha = 0.5, every fixed case.",
+      "max_abs_diff": 1e-4,
+      "min_cosine": 0.9999,
+      "rationale": "Two independent autograd implementations of the same graph. Agreement here means the gradient is right and the finite-difference comparison is the weak instrument; disagreement means the runtime choice has a real gradient problem. Bound matches forward_parity for the same float32-reordering reason."
+    },
+    "directional_finite_difference": {
+      "what": "Directional derivative g . u vs central finite difference along the same unit direction u, 32 seeded random directions per case (numpy default_rng(193)), step 1e-3, at the interior point alpha = 0.5.",
+      "max_median_rel_error": 2e-2,
+      "max_rel_error": 1e-1,
+      "rationale": "A random direction averages over many coordinates, so a single kink contributes a small share of the total change, unlike a coordinate step that lands directly on one. Median plus max is reported so one kinked direction cannot hide behind the median."
+    },
+    "kink_evidence": {
+      "what": "Count of ReLU/LeakyReLU pre-activation sign changes between x - h and x + h over the coordinate perturbations used by the failed gradient_check, per case.",
+      "requirement": "reported, not gated",
+      "purpose": "Shows directly whether the failing cases are the kinked ones."
+    }
+  },
   "out_of_scope": {
     "cas12a_ig_path_choice": "#195",
     "process_split_and_full_tree_ram": "#194",
