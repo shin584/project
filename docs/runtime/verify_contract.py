@@ -212,11 +212,7 @@ def run_verify(work: Path) -> int:
 
         # ── 가중치 배치: 같은 변수 집합, 같은 모양, 비트 동일 ──
         ref_weights = ref_meta["models"][key]["weights"]
-        mine = {}
-        for variable in runtime._model.weights:
-            value = np.asarray(variable.numpy())
-            mine[variable.path] = {"shape": list(value.shape), "dtype": str(value.dtype),
-                                   "sha256": weight_digest(value)}
+        mine = runtime.weight_digests()
         checks.record(f"{key}/weight_placement/variable_set",
                       set(mine) == set(ref_weights), len(mine),
                       criteria["weight_placement"]["requirement"],
@@ -247,28 +243,19 @@ def run_verify(work: Path) -> int:
             case["forward_max_abs_diff"] = forward_abs[-1]
             case["forward_max_rel_diff"] = forward_rel[-1]
 
-            keras = rt.import_keras()
-            inner = [layer for layer in runtime._model.layers
-                     if not isinstance(layer, keras.layers.InputLayer)]
-            probe = keras.Model(runtime._model.inputs,
-                                [layer.output for layer in inner])
-            argument = inputs[0] if len(inputs) == 1 else inputs
-            acts = probe(argument, training=False)
-            acts = acts if isinstance(acts, (list, tuple)) else [acts]
             worst = {"layer": None, "abs": 0.0, "rel": 0.0, "scaled_bound": 0.0}
             layer_rows = {}
-            for layer, value in zip(inner, acts):
-                got = np.asarray(value.detach().numpy() if hasattr(value, "detach") else value)
-                want = reference[f"{key}/{case_id}/layer/{layer.name}"]
+            for layer_name, got in runtime.layer_activations(inputs).items():
+                want = reference[f"{key}/{case_id}/layer/{layer_name}"]
                 abs_diff = float(np.max(np.abs(got - want)))
                 scale = float(max(1.0, np.max(np.abs(want))))
-                layer_rows[layer.name] = {
+                layer_rows[layer_name] = {
                     "max_abs_diff": abs_diff, "max_rel_diff": _rel(got, want),
                     "scaled_bound": 1e-4 * scale,
                 }
                 if abs_diff > worst["abs"]:
-                    worst = {"layer": layer.name, "abs": abs_diff,
-                             "rel": layer_rows[layer.name]["max_rel_diff"],
+                    worst = {"layer": layer_name, "abs": abs_diff,
+                             "rel": layer_rows[layer_name]["max_rel_diff"],
                              "scaled_bound": 1e-4 * scale}
             layer_worst.append(worst)
             case["layerwise_worst"] = worst
@@ -290,19 +277,34 @@ def run_verify(work: Path) -> int:
                 autograd = runtime.gradients(point, head=head)[1]
                 numeric = finite_difference(runtime, point, head,
                                             criteria["gradient_check"]["fd_step"])
+                # 기준은 "every model input"이다. 두 입력을 이어 붙여 하나로 재면
+                # 화면이 염기별로 그리는 서열 gradient가 크기가 열 배인 특징
+                # gradient 뒤에 숨는다. 입력별로 따로 판정하고, 합친 값도 함께 남긴다.
+                names = runtime.input_names()
+                per_input = {}
+                for name, mine, theirs in zip(names, autograd, numeric):
+                    a = np.asarray(mine, dtype=np.float64).reshape(-1)
+                    b = np.asarray(theirs, dtype=np.float64).reshape(-1)
+                    cosine = float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
+                    rel_l2 = float(np.linalg.norm(a - b) / np.linalg.norm(b))
+                    per_input[name] = {"cosine": cosine, "rel_l2_error": rel_l2,
+                                       "autograd_norm": float(np.linalg.norm(a)),
+                                       "fd_norm": float(np.linalg.norm(b))}
+                    checks.record(
+                        f"{key}/{case_id}/gradient_check/{label}/{name}/cosine",
+                        cosine >= criteria["gradient_check"]["min_cosine"],
+                        cosine, criteria["gradient_check"]["min_cosine"])
+                    checks.record(
+                        f"{key}/{case_id}/gradient_check/{label}/{name}/rel_l2",
+                        rel_l2 <= criteria["gradient_check"]["max_rel_l2_error"],
+                        rel_l2, criteria["gradient_check"]["max_rel_l2_error"])
                 a = np.concatenate([g.reshape(-1) for g in autograd]).astype(np.float64)
                 b = np.concatenate([g.reshape(-1) for g in numeric]).astype(np.float64)
-                cosine = float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
-                rel_l2 = float(np.linalg.norm(a - b) / np.linalg.norm(b))
-                fd_rows[label] = {"cosine": cosine, "rel_l2_error": rel_l2,
-                                  "autograd_norm": float(np.linalg.norm(a)),
-                                  "fd_norm": float(np.linalg.norm(b))}
-                checks.record(f"{key}/{case_id}/gradient_check/{label}/cosine",
-                              cosine >= criteria["gradient_check"]["min_cosine"],
-                              cosine, criteria["gradient_check"]["min_cosine"])
-                checks.record(f"{key}/{case_id}/gradient_check/{label}/rel_l2",
-                              rel_l2 <= criteria["gradient_check"]["max_rel_l2_error"],
-                              rel_l2, criteria["gradient_check"]["max_rel_l2_error"])
+                fd_rows[label] = {
+                    "per_input": per_input,
+                    "pooled_cosine": float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b))),
+                    "pooled_rel_l2_error": float(np.linalg.norm(a - b) / np.linalg.norm(b)),
+                }
             case["gradient_check"] = fd_rows
 
             # ── IG: 사용자 기본 32단계와 정밀 256단계 ──
@@ -435,8 +437,7 @@ def run_verify(work: Path) -> int:
                           for w in layer_worst),
                       max(w["rel"] for w in layer_worst),
                       criteria["layerwise_parity"]["max_rel_diff"])
-        per_model["ops_present"] = sorted({
-            type(layer).__name__ for layer in runtime._model.layers})
+        per_model["ops_present"] = runtime.ops_present()
         per_model["layer_names"] = runtime.layer_names()
         per_model["input_names"] = runtime.input_names()
         per_model["head_names"] = runtime.head_names
@@ -588,17 +589,12 @@ def run_diagnose(work: Path) -> int:
     checks = Checks()
     out: dict = {}
 
-    keras = rt.import_keras()
     for key in ("spcas9", "cas12a"):
         spec = CONTRACT["models"][MODEL_KEYS[key]]
         head = spec["verified_head"]["index"]
         runtime = rt.NonNTRuntime.load(key)
         rows: dict = {}
-        kink_layers = [layer for layer in runtime._model.layers
-                       if type(layer).__name__ in ("ReLU", "LeakyReLU")
-                       or getattr(getattr(layer, "activation", None), "__name__", "") == "relu"]
-        probe = keras.Model(runtime._model.inputs,
-                            [layer.output for layer in kink_layers]) if kink_layers else None
+        kink_layers = runtime.nonsmooth_layer_names()
 
         for case_id, window in case_windows(key):
             case: dict = {}
@@ -608,21 +604,27 @@ def run_diagnose(work: Path) -> int:
                 mine = runtime.gradients(point, head=head)[1]
                 theirs = [reference[f"{key}/{case_id}/grad/{label}/{i}"]
                           for i in range(len(mine))]
-                a = np.concatenate([g.reshape(-1) for g in mine]).astype(np.float64)
-                b = np.concatenate([g.reshape(-1) for g in theirs]).astype(np.float64)
-                max_abs = float(np.max(np.abs(a - b)))
-                cosine = float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
-                checks.record(f"{key}/{case_id}/cross_runtime_gradient/{label}/max_abs_diff",
-                              max_abs <= parity_criteria["max_abs_diff"], max_abs,
-                              parity_criteria["max_abs_diff"])
-                checks.record(f"{key}/{case_id}/cross_runtime_gradient/{label}/cosine",
-                              cosine >= parity_criteria["min_cosine"], cosine,
-                              parity_criteria["min_cosine"])
-                case[f"cross_runtime_{label}"] = {
-                    "max_abs_diff": max_abs, "cosine": cosine,
-                    "torch_norm": float(np.linalg.norm(a)),
-                    "tensorflow_norm": float(np.linalg.norm(b)),
-                }
+                # `gradient_check`과 같은 이유로 입력별로 판정한다.
+                per_input = {}
+                for name, torch_grad, tf_grad in zip(runtime.input_names(), mine, theirs):
+                    a = np.asarray(torch_grad, dtype=np.float64).reshape(-1)
+                    b = np.asarray(tf_grad, dtype=np.float64).reshape(-1)
+                    max_abs = float(np.max(np.abs(a - b)))
+                    cosine = float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
+                    per_input[name] = {
+                        "max_abs_diff": max_abs, "cosine": cosine,
+                        "torch_norm": float(np.linalg.norm(a)),
+                        "tensorflow_norm": float(np.linalg.norm(b)),
+                    }
+                    checks.record(
+                        f"{key}/{case_id}/cross_runtime_gradient/{label}/{name}/max_abs_diff",
+                        max_abs <= parity_criteria["max_abs_diff"], max_abs,
+                        parity_criteria["max_abs_diff"])
+                    checks.record(
+                        f"{key}/{case_id}/cross_runtime_gradient/{label}/{name}/cosine",
+                        cosine >= parity_criteria["min_cosine"], cosine,
+                        parity_criteria["min_cosine"])
+                case[f"cross_runtime_{label}"] = per_input
 
             # 방향 미분 vs 방향 차분 (내부 보간점)
             point = [np.asarray(a, dtype=np.float32) * 0.5
@@ -655,30 +657,31 @@ def run_diagnose(work: Path) -> int:
                                       "n_directions": len(errors), "step": step}
 
             # 꺾임 증거: 좌표 ±h 섭동이 ReLU/LeakyReLU 부호를 넘는 횟수
-            if probe is not None:
+            if kink_layers:
                 flips = 0
                 total = 0
                 base_inputs = case_inputs(key, window)
                 flat_sizes = [np.asarray(x).size for x in base_inputs]
                 h = CONTRACT["criteria"]["gradient_check"]["fd_step"]
+
+                def kink_signs(arrays, runtime=runtime, kink_layers=kink_layers):
+                    acts = runtime.layer_activations(arrays)
+                    return np.concatenate([acts[name].reshape(-1) > 0
+                                           for name in kink_layers])
+
                 for which, size in enumerate(flat_sizes):
                     for index in range(size):
                         signs = []
                         for sign in (+1, -1):
                             perturbed = [np.array(x, dtype=np.float32, copy=True)
                                          for x in base_inputs]
-                            flat = perturbed[which].reshape(-1)
-                            flat[index] += sign * h
-                            argument = perturbed[0] if len(perturbed) == 1 else perturbed
-                            acts = probe(argument, training=False)
-                            acts = acts if isinstance(acts, (list, tuple)) else [acts]
-                            signs.append(np.concatenate([
-                                np.asarray(v.detach().numpy() if hasattr(v, "detach") else v
-                                           ).reshape(-1) > 0 for v in acts]))
+                            perturbed[which].reshape(-1)[index] += sign * h
+                            signs.append(kink_signs(perturbed))
                         flips += int(np.sum(signs[0] != signs[1]))
                         total += signs[0].size
                 case["kink_sign_flips"] = {"flips": flips, "activation_units_probed": total,
-                                           "fd_step": h}
+                                           "fd_step": h,
+                                           "layers_probed": list(kink_layers)}
             rows[case_id] = case
         out[key] = rows
 

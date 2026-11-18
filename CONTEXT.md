@@ -77,6 +77,20 @@ _Avoid_: "변종"과 섞어 쓰기 — 헤드가 변종에 **대응**하지만, 
 2종이고, 둘 다 Nucleotide Transformer(ESM) 기반 safetensors다.
 `MODEL_REGISTRY`의 모든 항목이 모델 A다.
 
+**계열**:
+같은 Cas를 예측하는 **서로 다른 모델 묶음**. #191이 두 계열을 둔다.
+- **NT 계열** — 위 모델 A. 두 Cas 모두 NT(ESM) 기반 safetensors다.
+- **non-NT 계열** — #191이 채택한 Keras 3 checkpoint 2종
+  (`models/non_nt/`). SpCas9은 CNN+LSTM 9-head, Cas12a는 CNN+BiLSTM이며
+  서열과 파생 특징 354개를 함께 받는다. 런타임은 Keras 3을 torch backend로
+  돌린다 (`non_nt_runtime.py`, `docs/runtime/README.md`).
+
+한 Cas에는 선택한 계열의 예측기 **하나만** 쓴다. 계열을 바꾸면 계산 프로세스를
+교체하므로 두 계열의 가중치를 동시에 들고 있지 않는다.
+_Avoid_: "모델 A"를 "실시간 추론하는 모든 예측기"라는 뜻으로 쓰기 — non-NT
+계열도 실시간으로 추론하지만 NT가 아니고 `MODEL_REGISTRY` 항목도 아니다.
+"변종"과 섞어 쓰는 것도 피한다 (계열은 모델 묶음, 변종은 단백질이다).
+
 **모델 B**:
 이 저장소에서 **두 가지 다른 뜻으로 쓰여 혼동을 일으킨다.** 둘을 구별해 쓴다.
 - `ModelSpec.model == 'B'` — 비어 있는 슬롯. 등록된 항목이 없다.
@@ -109,7 +123,13 @@ _Avoid_: 수식어 없이 "앱"이라고만 쓰기 — 어느 화면인지 밝�
   있고 프로세스가 사는 동안만 남는다. 두 화면이 같은 것을 쓴다.
 - **사전계산 SHAP 캐시** — 디스크에 미리 만들어 둔 SHAP 결과
   (`xai/shap_cache.py`, `data/precomputed_shap/*.npz`). 앱을 꺼도 남는다.
+  현재 담긴 4개는 seed를 걸지 않던 시절의 SHAP이라 지금 다시 계산한 값과
+  일치하지 않는다 (#193). 설정을 정할 때 함께 다시 만든다.
 _Avoid_: 수식어 없이 "캐시" — 특히 뒤의 두 개는 둘 다 SHAP을 담는다.
+
+non-NT 런타임(`non_nt_runtime.py`)은 **네 번째 캐시를 두지 않는다.** 적재한
+모델의 수명은 그 계산 프로세스를 가진 쪽이 정한다 — 프로세스 교체로 메모리를
+되찾는 것이 #191의 설계이고, 모듈 수준 캐시는 그것과 어긋난다.
 
 **대시보드**:
 이 저장소의 `xai_dashboard`를 가리킨다. `xai_test`의 `visualization/`도

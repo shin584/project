@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "issue": 193,
-  "measured_at": "2026-11-18T16:58:00+0900",
+  "measured_at": "2026-11-18T17:29:10+0900",
   "contract_sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
   "machine": "development PC, Windows 11, CPU only, torch threads 4",
   "runtime": {
@@ -18,32 +18,281 @@
   },
   "status": {
     "core": "fail",
-    "core_checks": 159,
-    "core_failed": 39,
+    "core_checks": 175,
+    "core_failed": 40,
     "diagnostics": "fail",
-    "diagnostic_checks": 48,
+    "diagnostic_checks": 64,
     "diagnostic_failed": 3,
-    "offline_staged_run": "pass"
+    "offline_staged_run": "pass",
+    "overall": "fail"
   },
-  "adoption_claims_verified": {
-    "forward_parity_vs_tensorflow_backend": "pass",
-    "layerwise_parity_including_lstm_and_bilstm": "pass",
-    "weight_placement_bitwise": "pass",
-    "ig_path_function_match": "pass",
-    "cross_runtime_gradient_parity": "pass",
-    "finiteness": "pass",
-    "offline_tensorflow_free_run": "pass"
+  "claims": {
+    "runtime_versions_match_contract": {
+      "checks": 3,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "weight_placement_bitwise": {
+      "checks": 4,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "ig_path_function_match": {
+      "checks": 8,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "coordinate_finite_difference_gradient_check": {
+      "checks": 48,
+      "failed": 10,
+      "failed_names": [
+        "spcas9/S1/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S2/gradient_check/x/In_Seq/cosine",
+        "spcas9/S2/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S2/gradient_check/alpha0.5/In_Seq/cosine",
+        "spcas9/S2/gradient_check/alpha0.5/In_Seq/rel_l2",
+        "spcas9/S3/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S4/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S4/gradient_check/alpha0.5/In_Seq/cosine",
+        "spcas9/S4/gradient_check/alpha0.5/In_Seq/rel_l2",
+        "cas12a/C3/gradient_check/x/Input_Seq/rel_l2"
+      ],
+      "status": "fail"
+    },
+    "ig_completeness_at_user_default_steps": {
+      "checks": 16,
+      "failed": 5,
+      "failed_names": [
+        "spcas9/S3/ig_completeness/default",
+        "spcas9/S4/ig_completeness/default",
+        "cas12a/C2/ig_completeness/default",
+        "cas12a/C3/ig_completeness/default",
+        "cas12a/C4/ig_completeness/default"
+      ],
+      "status": "fail"
+    },
+    "finiteness": {
+      "checks": 24,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "ig_resolution_stability": {
+      "checks": 24,
+      "failed": 1,
+      "failed_names": [
+        "spcas9/S2/ig_resolution/max_abs_diff"
+      ],
+      "status": "fail"
+    },
+    "shap_additivity": {
+      "checks": 8,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "shap_same_seed_determinism": {
+      "checks": 8,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "shap_cross_seed_stability": {
+      "checks": 16,
+      "failed": 16,
+      "failed_names": [
+        "spcas9/S1/shap_cross_seed/pearson",
+        "spcas9/S1/shap_cross_seed/max_abs_diff",
+        "spcas9/S2/shap_cross_seed/pearson",
+        "spcas9/S2/shap_cross_seed/max_abs_diff",
+        "spcas9/S3/shap_cross_seed/pearson",
+        "spcas9/S3/shap_cross_seed/max_abs_diff",
+        "spcas9/S4/shap_cross_seed/pearson",
+        "spcas9/S4/shap_cross_seed/max_abs_diff",
+        "cas12a/C1/shap_cross_seed/pearson",
+        "cas12a/C1/shap_cross_seed/max_abs_diff",
+        "cas12a/C2/shap_cross_seed/pearson",
+        "cas12a/C2/shap_cross_seed/max_abs_diff",
+        "cas12a/C3/shap_cross_seed/pearson",
+        "cas12a/C3/shap_cross_seed/max_abs_diff",
+        "cas12a/C4/shap_cross_seed/pearson",
+        "cas12a/C4/shap_cross_seed/max_abs_diff"
+      ],
+      "status": "fail"
+    },
+    "shap_default_vs_finer_agreement": {
+      "checks": 8,
+      "failed": 8,
+      "failed_names": [
+        "spcas9/S1/shap_default_vs_finer",
+        "spcas9/S2/shap_default_vs_finer",
+        "spcas9/S3/shap_default_vs_finer",
+        "spcas9/S4/shap_default_vs_finer",
+        "cas12a/C1/shap_default_vs_finer",
+        "cas12a/C2/shap_default_vs_finer",
+        "cas12a/C3/shap_default_vs_finer",
+        "cas12a/C4/shap_default_vs_finer"
+      ],
+      "status": "fail"
+    },
+    "forward_parity_vs_tensorflow_backend": {
+      "checks": 4,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "layerwise_parity_including_lstm_and_bilstm": {
+      "checks": 4,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "cross_runtime_gradient_parity": {
+      "checks": 48,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    },
+    "directional_finite_difference": {
+      "checks": 16,
+      "failed": 3,
+      "failed_names": [
+        "spcas9/S2/directional_fd/max",
+        "spcas9/S3/directional_fd/max",
+        "cas12a/C3/directional_fd/max"
+      ],
+      "status": "fail"
+    },
+    "offline_tensorflow_free_run": {
+      "checks": 1,
+      "failed": 0,
+      "failed_names": [],
+      "status": "pass"
+    }
   },
+  "verified_claims": [
+    "cross_runtime_gradient_parity",
+    "finiteness",
+    "forward_parity_vs_tensorflow_backend",
+    "ig_path_function_match",
+    "layerwise_parity_including_lstm_and_bilstm",
+    "offline_tensorflow_free_run",
+    "runtime_versions_match_contract",
+    "shap_additivity",
+    "shap_same_seed_determinism",
+    "weight_placement_bitwise"
+  ],
   "open_failures": {
-    "shap_default_settings_stability": "fail",
-    "ig_completeness_at_32_steps": "fail",
-    "ig_resolution_one_case": "fail",
-    "coordinate_finite_difference_gradient_check": "fail (explained by the registered diagnostics; see addendum_1)"
+    "coordinate_finite_difference_gradient_check": {
+      "checks": 48,
+      "failed": 10,
+      "failed_names": [
+        "spcas9/S1/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S2/gradient_check/x/In_Seq/cosine",
+        "spcas9/S2/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S2/gradient_check/alpha0.5/In_Seq/cosine",
+        "spcas9/S2/gradient_check/alpha0.5/In_Seq/rel_l2",
+        "spcas9/S3/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S4/gradient_check/x/In_Seq/rel_l2",
+        "spcas9/S4/gradient_check/alpha0.5/In_Seq/cosine",
+        "spcas9/S4/gradient_check/alpha0.5/In_Seq/rel_l2",
+        "cas12a/C3/gradient_check/x/Input_Seq/rel_l2"
+      ],
+      "status": "fail"
+    },
+    "ig_completeness_at_user_default_steps": {
+      "checks": 16,
+      "failed": 5,
+      "failed_names": [
+        "spcas9/S3/ig_completeness/default",
+        "spcas9/S4/ig_completeness/default",
+        "cas12a/C2/ig_completeness/default",
+        "cas12a/C3/ig_completeness/default",
+        "cas12a/C4/ig_completeness/default"
+      ],
+      "status": "fail"
+    },
+    "ig_resolution_stability": {
+      "checks": 24,
+      "failed": 1,
+      "failed_names": [
+        "spcas9/S2/ig_resolution/max_abs_diff"
+      ],
+      "status": "fail"
+    },
+    "shap_cross_seed_stability": {
+      "checks": 16,
+      "failed": 16,
+      "failed_names": [
+        "spcas9/S1/shap_cross_seed/pearson",
+        "spcas9/S1/shap_cross_seed/max_abs_diff",
+        "spcas9/S2/shap_cross_seed/pearson",
+        "spcas9/S2/shap_cross_seed/max_abs_diff",
+        "spcas9/S3/shap_cross_seed/pearson",
+        "spcas9/S3/shap_cross_seed/max_abs_diff",
+        "spcas9/S4/shap_cross_seed/pearson",
+        "spcas9/S4/shap_cross_seed/max_abs_diff",
+        "cas12a/C1/shap_cross_seed/pearson",
+        "cas12a/C1/shap_cross_seed/max_abs_diff",
+        "cas12a/C2/shap_cross_seed/pearson",
+        "cas12a/C2/shap_cross_seed/max_abs_diff",
+        "cas12a/C3/shap_cross_seed/pearson",
+        "cas12a/C3/shap_cross_seed/max_abs_diff",
+        "cas12a/C4/shap_cross_seed/pearson",
+        "cas12a/C4/shap_cross_seed/max_abs_diff"
+      ],
+      "status": "fail"
+    },
+    "shap_default_vs_finer_agreement": {
+      "checks": 8,
+      "failed": 8,
+      "failed_names": [
+        "spcas9/S1/shap_default_vs_finer",
+        "spcas9/S2/shap_default_vs_finer",
+        "spcas9/S3/shap_default_vs_finer",
+        "spcas9/S4/shap_default_vs_finer",
+        "cas12a/C1/shap_default_vs_finer",
+        "cas12a/C2/shap_default_vs_finer",
+        "cas12a/C3/shap_default_vs_finer",
+        "cas12a/C4/shap_default_vs_finer"
+      ],
+      "status": "fail"
+    },
+    "directional_finite_difference": {
+      "checks": 16,
+      "failed": 3,
+      "failed_names": [
+        "spcas9/S2/directional_fd/max",
+        "spcas9/S3/directional_fd/max",
+        "cas12a/C3/directional_fd/max"
+      ],
+      "status": "fail"
+    }
   },
+  "corrections": [
+    {
+      "where": "contract.json addendum_1.why, and the first draft of this report",
+      "said": "failed gradient_check on 9 of 32 case/point combinations",
+      "actually": "9 of 32 individual checks, which is 6 of 16 case/point combinations - each combination contributes a cosine and a rel_l2 check. The frozen text is left as written; this records the miscount rather than editing the frozen record."
+    },
+    {
+      "where": "the first draft of this report's summary",
+      "said": "the gradient diagnostics passed",
+      "actually": "cross_runtime_gradient_parity passed, but directional_finite_difference failed its max bound in 3 of 16 cases. The summary is now derived from the check list, so a registered failure cannot be left out by hand."
+    },
+    {
+      "where": "the first verification run's gradient_check",
+      "said": "one cosine and one rel_l2 per case/point",
+      "actually": "the two Cas12a inputs were pooled into a single vector, so the sequence gradient the screen renders per base could hide behind the ten-times-larger feature gradient. The criterion says 'every model input', so each input is now gated separately and the pooled value is kept alongside."
+    }
+  ],
   "core": {
     "failed": [
       {
-        "check": "spcas9/S1/gradient_check/x/rel_l2",
+        "check": "spcas9/S1/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.033071636201741465,
         "criterion": 0.02,
@@ -78,28 +327,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/x/cosine",
+        "check": "spcas9/S2/gradient_check/x/In_Seq/cosine",
         "passed": false,
         "measured": 0.9978389615324252,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/x/rel_l2",
+        "check": "spcas9/S2/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.06641045052490406,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S2/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": false,
         "measured": 0.995587120109997,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S2/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.10669687389946064,
         "criterion": 0.02,
@@ -144,7 +393,7 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S3/gradient_check/x/rel_l2",
+        "check": "spcas9/S3/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.02970123405204693,
         "criterion": 0.02,
@@ -186,21 +435,21 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/x/rel_l2",
+        "check": "spcas9/S4/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.03368158838236785,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S4/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": false,
         "measured": 0.9687733948956935,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S4/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.2642643969155287,
         "criterion": 0.02,
@@ -302,6 +551,13 @@
         "passed": false,
         "measured": 0.7413989108758116,
         "criterion": 0.9,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/x/Input_Seq/rel_l2",
+        "passed": false,
+        "measured": 0.02225866089087975,
+        "criterion": 0.02,
         "detail": ""
       },
       {
@@ -422,28 +678,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S1/gradient_check/x/cosine",
+        "check": "spcas9/S1/gradient_check/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.999472055966336,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/gradient_check/x/rel_l2",
+        "check": "spcas9/S1/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.033071636201741465,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S1/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.9998586232155992,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S1/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": true,
         "measured": 0.016828740946466345,
         "criterion": 0.02,
@@ -558,28 +814,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/x/cosine",
+        "check": "spcas9/S2/gradient_check/x/In_Seq/cosine",
         "passed": false,
         "measured": 0.9978389615324252,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/x/rel_l2",
+        "check": "spcas9/S2/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.06641045052490406,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S2/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": false,
         "measured": 0.995587120109997,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S2/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.10669687389946064,
         "criterion": 0.02,
@@ -694,28 +950,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S3/gradient_check/x/cosine",
+        "check": "spcas9/S3/gradient_check/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9997254518761968,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/gradient_check/x/rel_l2",
+        "check": "spcas9/S3/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.02970123405204693,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S3/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999704437423,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S3/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": true,
         "measured": 0.00025503591474721366,
         "criterion": 0.02,
@@ -830,28 +1086,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/x/cosine",
+        "check": "spcas9/S4/gradient_check/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9996620559016081,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/x/rel_l2",
+        "check": "spcas9/S4/gradient_check/x/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.03368158838236785,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/alpha0.5/cosine",
+        "check": "spcas9/S4/gradient_check/alpha0.5/In_Seq/cosine",
         "passed": false,
         "measured": 0.9687733948956935,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/gradient_check/alpha0.5/rel_l2",
+        "check": "spcas9/S4/gradient_check/alpha0.5/In_Seq/rel_l2",
         "passed": false,
         "measured": 0.2642643969155287,
         "criterion": 0.02,
@@ -1016,30 +1272,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C1/gradient_check/x/cosine",
+        "check": "cas12a/C1/gradient_check/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999122390369757,
+        "measured": 0.9998727033401047,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/gradient_check/x/rel_l2",
+        "check": "cas12a/C1/gradient_check/x/Input_Seq/rel_l2",
         "passed": true,
-        "measured": 0.015354509616936508,
+        "measured": 0.015956080693537957,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/gradient_check/alpha0.5/cosine",
+        "check": "cas12a/C1/gradient_check/x/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999325356055582,
+        "measured": 0.9999144037403814,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/gradient_check/alpha0.5/rel_l2",
+        "check": "cas12a/C1/gradient_check/x/Input_Feat/rel_l2",
         "passed": true,
-        "measured": 0.011819657602403725,
+        "measured": 0.015335847636507815,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9998959200827584,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/Input_Seq/rel_l2",
+        "passed": true,
+        "measured": 0.014430660205843267,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.999933386135376,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/gradient_check/alpha0.5/Input_Feat/rel_l2",
+        "passed": true,
+        "measured": 0.01175754471452226,
         "criterion": 0.02,
         "detail": ""
       },
@@ -1152,30 +1436,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C2/gradient_check/x/cosine",
+        "check": "cas12a/C2/gradient_check/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999681419143546,
+        "measured": 0.9999611799466399,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/gradient_check/x/rel_l2",
+        "check": "cas12a/C2/gradient_check/x/Input_Seq/rel_l2",
         "passed": true,
-        "measured": 0.008053046707545437,
+        "measured": 0.008907254668644112,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/gradient_check/alpha0.5/cosine",
+        "check": "cas12a/C2/gradient_check/x/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999956744893119,
+        "measured": 0.999999998369491,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/gradient_check/alpha0.5/rel_l2",
+        "check": "cas12a/C2/gradient_check/x/Input_Feat/rel_l2",
         "passed": true,
-        "measured": 0.002941259238948251,
+        "measured": 5.711135980773124e-05,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9999653018684199,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/Input_Seq/rel_l2",
+        "passed": true,
+        "measured": 0.008330373665793176,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999908165518,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/gradient_check/alpha0.5/Input_Feat/rel_l2",
+        "passed": true,
+        "measured": 0.00013556261439473508,
         "criterion": 0.02,
         "detail": ""
       },
@@ -1288,30 +1600,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C3/gradient_check/x/cosine",
+        "check": "cas12a/C3/gradient_check/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999987892847603,
+        "measured": 0.9997548535561704,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/gradient_check/x/rel_l2",
-        "passed": true,
-        "measured": 0.001556123279506632,
+        "check": "cas12a/C3/gradient_check/x/Input_Seq/rel_l2",
+        "passed": false,
+        "measured": 0.02225866089087975,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/gradient_check/alpha0.5/cosine",
+        "check": "cas12a/C3/gradient_check/x/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999997053872013,
+        "measured": 0.9999999967399463,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/gradient_check/alpha0.5/rel_l2",
+        "check": "cas12a/C3/gradient_check/x/Input_Feat/rel_l2",
         "passed": true,
-        "measured": 0.0007676148694201472,
+        "measured": 8.076386334388141e-05,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9999670479099438,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/Input_Seq/rel_l2",
+        "passed": true,
+        "measured": 0.008125958750053659,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999955200884,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/gradient_check/alpha0.5/Input_Feat/rel_l2",
+        "passed": true,
+        "measured": 9.465761378834832e-05,
         "criterion": 0.02,
         "detail": ""
       },
@@ -1424,30 +1764,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C4/gradient_check/x/cosine",
+        "check": "cas12a/C4/gradient_check/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999937631606532,
+        "measured": 0.9999377311228217,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/gradient_check/x/rel_l2",
+        "check": "cas12a/C4/gradient_check/x/Input_Seq/rel_l2",
         "passed": true,
-        "measured": 0.0035318042915589163,
+        "measured": 0.011159597713146811,
         "criterion": 0.02,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/gradient_check/alpha0.5/cosine",
+        "check": "cas12a/C4/gradient_check/x/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999975902177192,
+        "measured": 0.9999999936112773,
         "criterion": 0.999,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/gradient_check/alpha0.5/rel_l2",
+        "check": "cas12a/C4/gradient_check/x/Input_Feat/rel_l2",
         "passed": true,
-        "measured": 0.0022065149430011565,
+        "measured": 0.00011312107714824622,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9999820390982648,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/Input_Seq/rel_l2",
+        "passed": true,
+        "measured": 0.006240307021623462,
+        "criterion": 0.02,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999985140784,
+        "criterion": 0.999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/gradient_check/alpha0.5/Input_Feat/rel_l2",
+        "passed": true,
+        "measured": 5.472729809340834e-05,
         "criterion": 0.02,
         "detail": ""
       },
@@ -1674,16 +2042,28 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.999472055966336,
-                "rel_l2_error": 0.033071636201741465,
-                "autograd_norm": 0.19512715715093956,
-                "fd_norm": 0.1940315576540926
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.999472055966336,
+                    "rel_l2_error": 0.033071636201741465,
+                    "autograd_norm": 0.19512715715093956,
+                    "fd_norm": 0.1940315576540926
+                  }
+                },
+                "pooled_cosine": 0.999472055966336,
+                "pooled_rel_l2_error": 0.033071636201741465
               },
               "alpha0.5": {
-                "cosine": 0.9998586232155992,
-                "rel_l2_error": 0.016828740946466345,
-                "autograd_norm": 0.13187055737664416,
-                "fd_norm": 0.1317985518914578
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9998586232155992,
+                    "rel_l2_error": 0.016828740946466345,
+                    "autograd_norm": 0.13187055737664416,
+                    "fd_norm": 0.1317985518914578
+                  }
+                },
+                "pooled_cosine": 0.9998586232155992,
+                "pooled_rel_l2_error": 0.016828740946466345
               }
             },
             "ig": {
@@ -1778,16 +2158,28 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9978389615324252,
-                "rel_l2_error": 0.06641045052490406,
-                "autograd_norm": 0.18432099246863673,
-                "fd_norm": 0.1829525880624696
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9978389615324252,
+                    "rel_l2_error": 0.06641045052490406,
+                    "autograd_norm": 0.18432099246863673,
+                    "fd_norm": 0.1829525880624696
+                  }
+                },
+                "pooled_cosine": 0.9978389615324252,
+                "pooled_rel_l2_error": 0.06641045052490406
               },
               "alpha0.5": {
-                "cosine": 0.995587120109997,
-                "rel_l2_error": 0.10669687389946064,
-                "autograd_norm": 0.0759831135600573,
-                "fd_norm": 0.07261657257301432
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.995587120109997,
+                    "rel_l2_error": 0.10669687389946064,
+                    "autograd_norm": 0.0759831135600573,
+                    "fd_norm": 0.07261657257301432
+                  }
+                },
+                "pooled_cosine": 0.995587120109997,
+                "pooled_rel_l2_error": 0.10669687389946064
               }
             },
             "ig": {
@@ -1882,16 +2274,28 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9997254518761968,
-                "rel_l2_error": 0.02970123405204693,
-                "autograd_norm": 0.2460537587475409,
-                "fd_norm": 0.2417084115297383
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9997254518761968,
+                    "rel_l2_error": 0.02970123405204693,
+                    "autograd_norm": 0.2460537587475409,
+                    "fd_norm": 0.2417084115297383
+                  }
+                },
+                "pooled_cosine": 0.9997254518761968,
+                "pooled_rel_l2_error": 0.02970123405204693
               },
               "alpha0.5": {
-                "cosine": 0.9999999704437423,
-                "rel_l2_error": 0.00025503591474721366,
-                "autograd_norm": 0.20813274588653324,
-                "fd_norm": 0.20814878193200767
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9999999704437423,
+                    "rel_l2_error": 0.00025503591474721366,
+                    "autograd_norm": 0.20813274588653324,
+                    "fd_norm": 0.20814878193200767
+                  }
+                },
+                "pooled_cosine": 0.9999999704437423,
+                "pooled_rel_l2_error": 0.00025503591474721366
               }
             },
             "ig": {
@@ -1986,16 +2390,28 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9996620559016081,
-                "rel_l2_error": 0.03368158838236785,
-                "autograd_norm": 0.4177372528956696,
-                "fd_norm": 0.4270270786662366
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9996620559016081,
+                    "rel_l2_error": 0.03368158838236785,
+                    "autograd_norm": 0.4177372528956696,
+                    "fd_norm": 0.4270270786662366
+                  }
+                },
+                "pooled_cosine": 0.9996620559016081,
+                "pooled_rel_l2_error": 0.03368158838236785
               },
               "alpha0.5": {
-                "cosine": 0.9687733948956935,
-                "rel_l2_error": 0.2642643969155287,
-                "autograd_norm": 0.09150399423627827,
-                "fd_norm": 0.08630880016088006
+                "per_input": {
+                  "In_Seq": {
+                    "cosine": 0.9687733948956935,
+                    "rel_l2_error": 0.2642643969155287,
+                    "autograd_norm": 0.09150399423627827,
+                    "fd_norm": 0.08630880016088006
+                  }
+                },
+                "pooled_cosine": 0.9687733948956935,
+                "pooled_rel_l2_error": 0.2642643969155287
               }
             },
             "ig": {
@@ -2120,16 +2536,40 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9999122390369757,
-                "rel_l2_error": 0.015354509616936508,
-                "autograd_norm": 0.30522334863477224,
-                "fd_norm": 0.302898867442905
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9998727033401047,
+                    "rel_l2_error": 0.015956080693537957,
+                    "autograd_norm": 0.05201972893379977,
+                    "fd_norm": 0.05203359928451462
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999144037403814,
+                    "rel_l2_error": 0.015335847636507815,
+                    "autograd_norm": 0.3007577768794645,
+                    "fd_norm": 0.29839609321117644
+                  }
+                },
+                "pooled_cosine": 0.9999122390369757,
+                "pooled_rel_l2_error": 0.015354509616936508
               },
               "alpha0.5": {
-                "cosine": 0.9999325356055582,
-                "rel_l2_error": 0.011819657602403725,
-                "autograd_norm": 0.28366623866639057,
-                "fd_norm": 0.2843070101321157
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9998959200827584,
+                    "rel_l2_error": 0.014430660205843267,
+                    "autograd_norm": 0.0411293126788957,
+                    "fd_norm": 0.04112092141598784
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.999933386135376,
+                    "rel_l2_error": 0.01175754471452226,
+                    "autograd_norm": 0.280668691872997,
+                    "fd_norm": 0.28131751781956826
+                  }
+                },
+                "pooled_cosine": 0.9999325356055582,
+                "pooled_rel_l2_error": 0.011819657602403725
               }
             },
             "ig": {
@@ -2210,16 +2650,40 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9999681419143546,
-                "rel_l2_error": 0.008053046707545437,
-                "autograd_norm": 1.2479359442177018,
-                "fd_norm": 1.2466467060014723
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9999611799466399,
+                    "rel_l2_error": 0.008907254668644112,
+                    "autograd_norm": 1.1285138401048778,
+                    "fd_norm": 1.1270877977550453
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.999999998369491,
+                    "rel_l2_error": 5.711135980773124e-05,
+                    "autograd_norm": 0.5327294187129795,
+                    "fd_norm": 0.5327298618774843
+                  }
+                },
+                "pooled_cosine": 0.9999681419143546,
+                "pooled_rel_l2_error": 0.008053046707545437
               },
               "alpha0.5": {
-                "cosine": 0.9999956744893119,
-                "rel_l2_error": 0.002941259238948251,
-                "autograd_norm": 0.2943745762167076,
-                "fd_norm": 0.2943753193262071
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9999653018684199,
+                    "rel_l2_error": 0.008330373665793176,
+                    "autograd_norm": 0.1038358572625142,
+                    "fd_norm": 0.10384030528288062
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999999908165518,
+                    "rel_l2_error": 0.00013556261439473508,
+                    "autograd_norm": 0.275453273477236,
+                    "fd_norm": 0.2754523908539633
+                  }
+                },
+                "pooled_cosine": 0.9999956744893119,
+                "pooled_rel_l2_error": 0.002941259238948251
               }
             },
             "ig": {
@@ -2300,16 +2764,40 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9999987892847603,
-                "rel_l2_error": 0.001556123279506632,
-                "autograd_norm": 0.5270441078200296,
-                "fd_norm": 0.5270397280230886
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9997548535561704,
+                    "rel_l2_error": 0.02225866089087975,
+                    "autograd_norm": 0.03687142198689359,
+                    "fd_norm": 0.03679641127233976
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999999967399463,
+                    "rel_l2_error": 8.076386334388141e-05,
+                    "autograd_norm": 0.5257527839474323,
+                    "fd_norm": 0.5257536486151362
+                  }
+                },
+                "pooled_cosine": 0.9999987892847603,
+                "pooled_rel_l2_error": 0.001556123279506632
               },
               "alpha0.5": {
-                "cosine": 0.9999997053872013,
-                "rel_l2_error": 0.0007676148694201472,
-                "autograd_norm": 0.449052013764706,
-                "fd_norm": 0.44905095148032653
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9999670479099438,
+                    "rel_l2_error": 0.008125958750053659,
+                    "autograd_norm": 0.042112167053660374,
+                    "fd_norm": 0.042098486125544905
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999999955200884,
+                    "rel_l2_error": 9.465761378834832e-05,
+                    "autograd_norm": 0.44707301020323553,
+                    "fd_norm": 0.4470732316872974
+                  }
+                },
+                "pooled_cosine": 0.9999997053872013,
+                "pooled_rel_l2_error": 0.0007676148694201472
               }
             },
             "ig": {
@@ -2390,16 +2878,40 @@
             "all_finite_gradients": true,
             "gradient_check": {
               "x": {
-                "cosine": 0.9999937631606532,
-                "rel_l2_error": 0.0035318042915589163,
-                "autograd_norm": 0.12974456879304958,
-                "fd_norm": 0.12974520591663696
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9999377311228217,
+                    "rel_l2_error": 0.011159597713146811,
+                    "autograd_norm": 0.04104257035138128,
+                    "fd_norm": 0.04104297602015319
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999999936112773,
+                    "rel_l2_error": 0.00011312107714824622,
+                    "autograd_norm": 0.12308192617214879,
+                    "fd_norm": 0.12308246251095098
+                  }
+                },
+                "pooled_cosine": 0.9999937631606532,
+                "pooled_rel_l2_error": 0.0035318042915589163
               },
               "alpha0.5": {
-                "cosine": 0.9999975902177192,
-                "rel_l2_error": 0.0022065149430011565,
-                "autograd_norm": 0.5239448719084892,
-                "fd_norm": 0.5238300028274735
+                "per_input": {
+                  "Input_Seq": {
+                    "cosine": 0.9999820390982648,
+                    "rel_l2_error": 0.006240307021623462,
+                    "autograd_norm": 0.18549005881005945,
+                    "fd_norm": 0.18517159335693834
+                  },
+                  "Input_Feat": {
+                    "cosine": 0.9999999985140784,
+                    "rel_l2_error": 5.472729809340834e-05,
+                    "autograd_norm": 0.4900119048368557,
+                    "fd_norm": 0.49000954365796134
+                  }
+                },
+                "pooled_cosine": 0.9999975902177192,
+                "pooled_rel_l2_error": 0.0022065149430011565
               }
             },
             "ig": {
@@ -2490,28 +3002,28 @@
     ],
     "checks": [
       {
-        "check": "spcas9/S1/cross_runtime_gradient/x/max_abs_diff",
+        "check": "spcas9/S1/cross_runtime_gradient/x/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.7939677238464355e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/cross_runtime_gradient/x/cosine",
+        "check": "spcas9/S1/cross_runtime_gradient/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999999143,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.3283064365386963e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "spcas9/S1/cross_runtime_gradient/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999999374,
         "criterion": 0.9999,
@@ -2532,28 +3044,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S2/cross_runtime_gradient/x/max_abs_diff",
+        "check": "spcas9/S2/cross_runtime_gradient/x/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 4.0978193283081055e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/cross_runtime_gradient/x/cosine",
+        "check": "spcas9/S2/cross_runtime_gradient/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999998044,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.2351741790771484e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "spcas9/S2/cross_runtime_gradient/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.999999999999921,
         "criterion": 0.9999,
@@ -2574,28 +3086,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S3/cross_runtime_gradient/x/max_abs_diff",
+        "check": "spcas9/S3/cross_runtime_gradient/x/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 1.1920928955078125e-07,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/cross_runtime_gradient/x/cosine",
+        "check": "spcas9/S3/cross_runtime_gradient/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999991713,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.60770320892334e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "spcas9/S3/cross_runtime_gradient/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999999761,
         "criterion": 0.9999,
@@ -2616,28 +3128,28 @@
         "detail": ""
       },
       {
-        "check": "spcas9/S4/cross_runtime_gradient/x/max_abs_diff",
+        "check": "spcas9/S4/cross_runtime_gradient/x/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 1.341104507446289e-07,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/cross_runtime_gradient/x/cosine",
+        "check": "spcas9/S4/cross_runtime_gradient/x/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999996044,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/In_Seq/max_abs_diff",
         "passed": true,
         "measured": 1.862645149230957e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "spcas9/S4/cross_runtime_gradient/alpha0.5/In_Seq/cosine",
         "passed": true,
         "measured": 0.9999999999999208,
         "criterion": 0.9999,
@@ -2658,30 +3170,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C1/cross_runtime_gradient/x/max_abs_diff",
+        "check": "cas12a/C1/cross_runtime_gradient/x/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 7.450580596923828e-09,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/cross_runtime_gradient/x/cosine",
+        "check": "cas12a/C1/cross_runtime_gradient/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999999999999943,
+        "measured": 0.9999999999999014,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "cas12a/C1/cross_runtime_gradient/x/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 7.450580596923828e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/x/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999999999972,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 4.6566128730773926e-09,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999999999999957,
+        "measured": 0.9999999999999296,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 3.725290298461914e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C1/cross_runtime_gradient/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999999999972,
         "criterion": 0.9999,
         "detail": ""
       },
@@ -2700,30 +3240,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C2/cross_runtime_gradient/x/max_abs_diff",
+        "check": "cas12a/C2/cross_runtime_gradient/x/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.384185791015625e-07,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/cross_runtime_gradient/x/cosine",
+        "check": "cas12a/C2/cross_runtime_gradient/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999999999999316,
+        "measured": 0.9999999999999174,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "cas12a/C2/cross_runtime_gradient/x/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 7.450580596923828e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/x/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999999999972,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 2.421438694000244e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.999999999999987,
+        "measured": 0.9999999999999105,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 3.725290298461914e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C2/cross_runtime_gradient/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.999999999999998,
         "criterion": 0.9999,
         "detail": ""
       },
@@ -2742,30 +3310,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C3/cross_runtime_gradient/x/max_abs_diff",
+        "check": "cas12a/C3/cross_runtime_gradient/x/Input_Seq/max_abs_diff",
+        "passed": true,
+        "measured": 7.2177499532699585e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/x/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9999999999995862,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/x/Input_Feat/max_abs_diff",
         "passed": true,
         "measured": 7.450580596923828e-09,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/cross_runtime_gradient/x/cosine",
+        "check": "cas12a/C3/cross_runtime_gradient/x/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999999999999942,
+        "measured": 0.9999999999999968,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/Input_Seq/max_abs_diff",
+        "passed": true,
+        "measured": 5.587935447692871e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/Input_Seq/cosine",
+        "passed": true,
+        "measured": 0.9999999999998627,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/Input_Feat/max_abs_diff",
         "passed": true,
         "measured": 1.4901161193847656e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "cas12a/C3/cross_runtime_gradient/alpha0.5/Input_Feat/cosine",
         "passed": true,
-        "measured": 0.9999999999999959,
+        "measured": 0.9999999999999969,
         "criterion": 0.9999,
         "detail": ""
       },
@@ -2784,30 +3380,58 @@
         "detail": ""
       },
       {
-        "check": "cas12a/C4/cross_runtime_gradient/x/max_abs_diff",
+        "check": "cas12a/C4/cross_runtime_gradient/x/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 5.587935447692871e-09,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/cross_runtime_gradient/x/cosine",
+        "check": "cas12a/C4/cross_runtime_gradient/x/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999999999999856,
+        "measured": 0.9999999999999296,
         "criterion": 0.9999,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/max_abs_diff",
+        "check": "cas12a/C4/cross_runtime_gradient/x/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 1.862645149230957e-09,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/x/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999999999974,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/Input_Seq/max_abs_diff",
         "passed": true,
         "measured": 1.4901161193847656e-08,
         "criterion": 0.0001,
         "detail": ""
       },
       {
-        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/cosine",
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/Input_Seq/cosine",
         "passed": true,
-        "measured": 0.9999999999999917,
+        "measured": 0.9999999999999573,
+        "criterion": 0.9999,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/Input_Feat/max_abs_diff",
+        "passed": true,
+        "measured": 1.1175870895385742e-08,
+        "criterion": 0.0001,
+        "detail": ""
+      },
+      {
+        "check": "cas12a/C4/cross_runtime_gradient/alpha0.5/Input_Feat/cosine",
+        "passed": true,
+        "measured": 0.9999999999999974,
         "criterion": 0.9999,
         "detail": ""
       },
@@ -2830,16 +3454,20 @@
       "spcas9": {
         "S1": {
           "cross_runtime_x": {
-            "max_abs_diff": 2.7939677238464355e-08,
-            "cosine": 0.9999999999999143,
-            "torch_norm": 0.19512715715093956,
-            "tensorflow_norm": 0.19512712276321986
+            "In_Seq": {
+              "max_abs_diff": 2.7939677238464355e-08,
+              "cosine": 0.9999999999999143,
+              "torch_norm": 0.19512715715093956,
+              "tensorflow_norm": 0.19512712276321986
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 2.3283064365386963e-08,
-            "cosine": 0.9999999999999374,
-            "torch_norm": 0.13187055737664416,
-            "tensorflow_norm": 0.13187053463782478
+            "In_Seq": {
+              "max_abs_diff": 2.3283064365386963e-08,
+              "cosine": 0.9999999999999374,
+              "torch_norm": 0.13187055737664416,
+              "tensorflow_norm": 0.13187053463782478
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.0010884864314668037,
@@ -2850,21 +3478,38 @@
           "kink_sign_flips": {
             "flips": 267,
             "activation_units_probed": 503040,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "conv1d",
+              "dense",
+              "Dense_SpCas9",
+              "Dense_SpCas9_NG",
+              "Dense_VRQR_variant",
+              "Dense_xCas",
+              "Dense_Sniper_Cas9",
+              "Dense_SpCas9_HF_1",
+              "Dense_eSpCas9_1_1_",
+              "Dense_HypaCas9",
+              "Dense_evoCas9"
+            ]
           }
         },
         "S2": {
           "cross_runtime_x": {
-            "max_abs_diff": 4.0978193283081055e-08,
-            "cosine": 0.9999999999998044,
-            "torch_norm": 0.18432099246863673,
-            "tensorflow_norm": 0.18432093162976482
+            "In_Seq": {
+              "max_abs_diff": 4.0978193283081055e-08,
+              "cosine": 0.9999999999998044,
+              "torch_norm": 0.18432099246863673,
+              "tensorflow_norm": 0.18432093162976482
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 2.2351741790771484e-08,
-            "cosine": 0.999999999999921,
-            "torch_norm": 0.0759831135600573,
-            "tensorflow_norm": 0.07598309998341045
+            "In_Seq": {
+              "max_abs_diff": 2.2351741790771484e-08,
+              "cosine": 0.999999999999921,
+              "torch_norm": 0.0759831135600573,
+              "tensorflow_norm": 0.07598309998341045
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.001301866421647389,
@@ -2875,21 +3520,38 @@
           "kink_sign_flips": {
             "flips": 206,
             "activation_units_probed": 503040,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "conv1d",
+              "dense",
+              "Dense_SpCas9",
+              "Dense_SpCas9_NG",
+              "Dense_VRQR_variant",
+              "Dense_xCas",
+              "Dense_Sniper_Cas9",
+              "Dense_SpCas9_HF_1",
+              "Dense_eSpCas9_1_1_",
+              "Dense_HypaCas9",
+              "Dense_evoCas9"
+            ]
           }
         },
         "S3": {
           "cross_runtime_x": {
-            "max_abs_diff": 1.1920928955078125e-07,
-            "cosine": 0.9999999999991713,
-            "torch_norm": 0.2460537587475409,
-            "tensorflow_norm": 0.24605381359058573
+            "In_Seq": {
+              "max_abs_diff": 1.1920928955078125e-07,
+              "cosine": 0.9999999999991713,
+              "torch_norm": 0.2460537587475409,
+              "tensorflow_norm": 0.24605381359058573
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 2.60770320892334e-08,
-            "cosine": 0.9999999999999761,
-            "torch_norm": 0.20813274588653324,
-            "tensorflow_norm": 0.20813276020698462
+            "In_Seq": {
+              "max_abs_diff": 2.60770320892334e-08,
+              "cosine": 0.9999999999999761,
+              "torch_norm": 0.20813274588653324,
+              "tensorflow_norm": 0.20813276020698462
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.0003191564639405186,
@@ -2900,21 +3562,38 @@
           "kink_sign_flips": {
             "flips": 909,
             "activation_units_probed": 503040,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "conv1d",
+              "dense",
+              "Dense_SpCas9",
+              "Dense_SpCas9_NG",
+              "Dense_VRQR_variant",
+              "Dense_xCas",
+              "Dense_Sniper_Cas9",
+              "Dense_SpCas9_HF_1",
+              "Dense_eSpCas9_1_1_",
+              "Dense_HypaCas9",
+              "Dense_evoCas9"
+            ]
           }
         },
         "S4": {
           "cross_runtime_x": {
-            "max_abs_diff": 1.341104507446289e-07,
-            "cosine": 0.9999999999996044,
-            "torch_norm": 0.4177372528956696,
-            "tensorflow_norm": 0.4177372505276772
+            "In_Seq": {
+              "max_abs_diff": 1.341104507446289e-07,
+              "cosine": 0.9999999999996044,
+              "torch_norm": 0.4177372528956696,
+              "tensorflow_norm": 0.4177372505276772
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 1.862645149230957e-08,
-            "cosine": 0.9999999999999208,
-            "torch_norm": 0.09150399423627827,
-            "tensorflow_norm": 0.09150398997341873
+            "In_Seq": {
+              "max_abs_diff": 1.862645149230957e-08,
+              "cosine": 0.9999999999999208,
+              "torch_norm": 0.09150399423627827,
+              "tensorflow_norm": 0.09150398997341873
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.0016407909805454177,
@@ -2925,23 +3604,52 @@
           "kink_sign_flips": {
             "flips": 733,
             "activation_units_probed": 503040,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "conv1d",
+              "dense",
+              "Dense_SpCas9",
+              "Dense_SpCas9_NG",
+              "Dense_VRQR_variant",
+              "Dense_xCas",
+              "Dense_Sniper_Cas9",
+              "Dense_SpCas9_HF_1",
+              "Dense_eSpCas9_1_1_",
+              "Dense_HypaCas9",
+              "Dense_evoCas9"
+            ]
           }
         }
       },
       "cas12a": {
         "C1": {
           "cross_runtime_x": {
-            "max_abs_diff": 7.450580596923828e-09,
-            "cosine": 0.9999999999999943,
-            "torch_norm": 0.30522334863477224,
-            "tensorflow_norm": 0.3052233527740517
+            "Input_Seq": {
+              "max_abs_diff": 7.450580596923828e-09,
+              "cosine": 0.9999999999999014,
+              "torch_norm": 0.05201972893379977,
+              "tensorflow_norm": 0.052019727387561596
+            },
+            "Input_Feat": {
+              "max_abs_diff": 7.450580596923828e-09,
+              "cosine": 0.9999999999999972,
+              "torch_norm": 0.3007577768794645,
+              "tensorflow_norm": 0.3007577813476436
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 4.6566128730773926e-09,
-            "cosine": 0.9999999999999957,
-            "torch_norm": 0.28366623866639057,
-            "tensorflow_norm": 0.2836662351766162
+            "Input_Seq": {
+              "max_abs_diff": 4.6566128730773926e-09,
+              "cosine": 0.9999999999999296,
+              "torch_norm": 0.0411293126788957,
+              "tensorflow_norm": 0.04112931384681659
+            },
+            "Input_Feat": {
+              "max_abs_diff": 3.725290298461914e-09,
+              "cosine": 0.9999999999999972,
+              "torch_norm": 0.280668691872997,
+              "tensorflow_norm": 0.280668688174804
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.0017461299290453649,
@@ -2952,21 +3660,44 @@
           "kink_sign_flips": {
             "flips": 756,
             "activation_units_probed": 3261440,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "leaky_re_lu",
+              "leaky_re_lu_1",
+              "leaky_re_lu_2",
+              "dense",
+              "dense_1"
+            ]
           }
         },
         "C2": {
           "cross_runtime_x": {
-            "max_abs_diff": 2.384185791015625e-07,
-            "cosine": 0.9999999999999316,
-            "torch_norm": 1.2479359442177018,
-            "tensorflow_norm": 1.2479358935375708
+            "Input_Seq": {
+              "max_abs_diff": 2.384185791015625e-07,
+              "cosine": 0.9999999999999174,
+              "torch_norm": 1.1285138401048778,
+              "tensorflow_norm": 1.128513785711963
+            },
+            "Input_Feat": {
+              "max_abs_diff": 7.450580596923828e-09,
+              "cosine": 0.9999999999999972,
+              "torch_norm": 0.5327294187129795,
+              "tensorflow_norm": 0.5327294152170216
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 2.421438694000244e-08,
-            "cosine": 0.999999999999987,
-            "torch_norm": 0.2943745762167076,
-            "tensorflow_norm": 0.2943745784371359
+            "Input_Seq": {
+              "max_abs_diff": 2.421438694000244e-08,
+              "cosine": 0.9999999999999105,
+              "torch_norm": 0.1038358572625142,
+              "tensorflow_norm": 0.10383585771842894
+            },
+            "Input_Feat": {
+              "max_abs_diff": 3.725290298461914e-09,
+              "cosine": 0.999999999999998,
+              "torch_norm": 0.275453273477236,
+              "tensorflow_norm": 0.27545327567832556
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.002408516255395965,
@@ -2977,21 +3708,44 @@
           "kink_sign_flips": {
             "flips": 438,
             "activation_units_probed": 3261440,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "leaky_re_lu",
+              "leaky_re_lu_1",
+              "leaky_re_lu_2",
+              "dense",
+              "dense_1"
+            ]
           }
         },
         "C3": {
           "cross_runtime_x": {
-            "max_abs_diff": 7.450580596923828e-09,
-            "cosine": 0.9999999999999942,
-            "torch_norm": 0.5270441078200296,
-            "tensorflow_norm": 0.5270441324897794
+            "Input_Seq": {
+              "max_abs_diff": 7.2177499532699585e-09,
+              "cosine": 0.9999999999995862,
+              "torch_norm": 0.03687142198689359,
+              "tensorflow_norm": 0.036871434012733885
+            },
+            "Input_Feat": {
+              "max_abs_diff": 7.450580596923828e-09,
+              "cosine": 0.9999999999999968,
+              "torch_norm": 0.5257527839474323,
+              "tensorflow_norm": 0.5257528078343935
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 1.4901161193847656e-08,
-            "cosine": 0.9999999999999959,
-            "torch_norm": 0.449052013764706,
-            "tensorflow_norm": 0.4490520696817339
+            "Input_Seq": {
+              "max_abs_diff": 5.587935447692871e-09,
+              "cosine": 0.9999999999998627,
+              "torch_norm": 0.042112167053660374,
+              "tensorflow_norm": 0.042112163665877694
+            },
+            "Input_Feat": {
+              "max_abs_diff": 1.4901161193847656e-08,
+              "cosine": 0.9999999999999969,
+              "torch_norm": 0.44707301020323553,
+              "tensorflow_norm": 0.44707306668689756
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.0016049126469110122,
@@ -3002,21 +3756,44 @@
           "kink_sign_flips": {
             "flips": 629,
             "activation_units_probed": 3261440,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "leaky_re_lu",
+              "leaky_re_lu_1",
+              "leaky_re_lu_2",
+              "dense",
+              "dense_1"
+            ]
           }
         },
         "C4": {
           "cross_runtime_x": {
-            "max_abs_diff": 5.587935447692871e-09,
-            "cosine": 0.9999999999999856,
-            "torch_norm": 0.12974456879304958,
-            "tensorflow_norm": 0.12974456670867332
+            "Input_Seq": {
+              "max_abs_diff": 5.587935447692871e-09,
+              "cosine": 0.9999999999999296,
+              "torch_norm": 0.04104257035138128,
+              "tensorflow_norm": 0.04104255717499187
+            },
+            "Input_Feat": {
+              "max_abs_diff": 1.862645149230957e-09,
+              "cosine": 0.9999999999999974,
+              "torch_norm": 0.12308192617214879,
+              "tensorflow_norm": 0.12308192836870449
+            }
           },
           "cross_runtime_alpha0.5": {
-            "max_abs_diff": 1.4901161193847656e-08,
-            "cosine": 0.9999999999999917,
-            "torch_norm": 0.5239448719084892,
-            "tensorflow_norm": 0.5239448950804375
+            "Input_Seq": {
+              "max_abs_diff": 1.4901161193847656e-08,
+              "cosine": 0.9999999999999573,
+              "torch_norm": 0.18549005881005945,
+              "tensorflow_norm": 0.18549005652412137
+            },
+            "Input_Feat": {
+              "max_abs_diff": 1.1175870895385742e-08,
+              "cosine": 0.9999999999999974,
+              "torch_norm": 0.4900119048368557,
+              "tensorflow_norm": 0.49001193047876784
+            }
           },
           "directional_fd": {
             "median_rel_error": 0.000989920918474052,
@@ -3027,7 +3804,14 @@
           "kink_sign_flips": {
             "flips": 418,
             "activation_units_probed": 3261440,
-            "fd_step": 0.01
+            "fd_step": 0.01,
+            "layers_probed": [
+              "leaky_re_lu",
+              "leaky_re_lu_1",
+              "leaky_re_lu_2",
+              "dense",
+              "dense_1"
+            ]
           }
         }
       }
@@ -3036,41 +3820,42 @@
   "ram": {
     "development_pc_with_tensorflow_installed": {
       "spcas9": {
-        "interpreter": 18698240,
-        "runtime_import": 422641664,
-        "model_loaded": 430899200,
-        "after_forward": 432537600,
-        "after_ig": 441360384,
-        "peak_working_set": 441430016,
+        "interpreter": 18690048,
+        "runtime_import": 422780928,
+        "model_loaded": 431054848,
+        "after_forward": 432672768,
+        "after_ig": 441155584,
+        "peak_working_set": 441835520,
         "tensorflow_importable": true,
         "tensorflow_imported": false,
-        "elapsed_seconds": 10.5
+        "elapsed_seconds": 10.1
       },
       "cas12a": {
-        "interpreter": 18595840,
-        "runtime_import": 423669760,
-        "model_loaded": 584376320,
-        "after_forward": 586149888,
-        "after_ig": 598450176,
-        "peak_working_set": 601333760,
+        "interpreter": 18710528,
+        "runtime_import": 424071168,
+        "model_loaded": 583991296,
+        "after_forward": 585773056,
+        "after_ig": 600948736,
+        "peak_working_set": 601505792,
         "tensorflow_importable": true,
         "tensorflow_imported": true,
-        "elapsed_seconds": 14.4
+        "elapsed_seconds": 13.4
       }
     },
     "offline_staging_without_tensorflow": {
-      "interpreter": 20856832,
-      "runtime_import": 298774528,
-      "spcas9_model_loaded": 306638848,
-      "spcas9_after_gradients": 309882880,
-      "cas12a_model_loaded": 312381440,
-      "cas12a_after_gradients": 313626624,
-      "peak_working_set": 313626624,
+      "interpreter": 20889600,
+      "runtime_import": 330203136,
+      "spcas9_model_loaded": 335585280,
+      "spcas9_after_gradients": 338636800,
+      "cas12a_model_loaded": 340021248,
+      "cas12a_after_gradients": 341008384,
+      "peak_working_set": 341266432,
       "note": "one process, both models loaded in sequence and both kept alive; the shipped design loads only the selected family"
     },
-    "reading": "With TensorFlow absent - the shipped configuration - one process holding both models peaks at 313,626,624 bytes. On this machine TensorFlow is installed, so the Bidirectional deserialization probe imports it and the same Cas12a path reports 601,333,760 bytes. The difference is the probe, not the adopted runtime. Full UI + computation + WebView2 tree RAM is #194."
+    "reading": "With TensorFlow absent - the shipped configuration - one process holding both models peaks at 341266432 bytes. On this machine TensorFlow is installed, so the Bidirectional deserialization probe imports it and the same Cas12a path reports 601505792 bytes. The difference is the probe, not the adopted runtime. Full UI + computation + WebView2 tree RAM is #194."
   },
   "offline_staging": {
+    "command": "python docs/runtime/stage_offline.py <staging path>",
     "staging": {
       "staged": [
         "keras",
@@ -3106,9 +3891,9 @@
         "psutil"
       ],
       "missing_from_site_packages": [],
-      "files": 19168,
-      "bytes": 625898908,
-      "seconds": 1.4,
+      "files": 17030,
+      "bytes": 579400198,
+      "seconds": 50.8,
       "source": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages",
       "staging": "C:\\Users\\cmino\\AppData\\Local\\Temp\\claude\\8555db45aa178b93\\a4524f68-b665-43ad-a56d-083e0c769096\\scratchpad\\issue193-staging\\site",
       "network_used": false
@@ -3172,12 +3957,13 @@
       "tensorflow_in_sys_modules_after_load": false,
       "status": "pass"
     },
-    "method": "Dependencies copied from local site-packages with no network, then run with python -S so site-packages is off sys.path, sockets blocked, and TensorFlow not importable at all."
+    "method": "Dependencies copied from the local site-packages with no network, then run with python -S so site-packages is off sys.path and TensorFlow is not importable at all. The network_probes strings are this script's own in-process socket blocker reporting back; the independent evidence next to them is the real ModuleNotFoundError for tensorflow. OS-level blocking and a clean offline PC are #204."
   },
   "evidence_files": {
     "full_core_report": ".packaging/issue193/verification-core.json",
     "full_diagnostics": ".packaging/issue193/diagnose.json",
     "reference_backend_values": ".packaging/issue193/reference.npz + reference.json",
-    "note": ".packaging is Git-excluded; regenerate with docs/runtime/verify_contract.py"
+    "staged_run": ".packaging/issue193/staged.json",
+    "note": ".packaging is Git-excluded. Regenerate with docs/runtime/verify_contract.py (reference, verify, diagnose, ram), docs/runtime/stage_offline.py, then this script."
   }
 }

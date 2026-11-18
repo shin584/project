@@ -18,10 +18,11 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import model_source
 import numpy as np
+from predict import ExplainHandle
 
 #: 이 모듈이 강제하는 Keras backend.
 BACKEND = "torch"
@@ -39,7 +40,6 @@ CHECKPOINTS: dict[str, str] = {
 }
 
 _keras = None
-_loaded: dict[str, NonNTRuntime] = {}
 
 
 def import_keras():
@@ -110,25 +110,28 @@ class NonNTRuntime:
     def __init__(self, key: str, model) -> None:
         self.key = key
         self._model = model
+        self._probe = None
+        self._probe_names: list[str] = []
 
     @classmethod
-    def load(cls, key: str, *, cached: bool = True) -> NonNTRuntime:
+    def load(cls, key: str) -> NonNTRuntime:
         """checksum이 고정된 경로에서 모델을 적재한다.
 
         `model_source.resolve`가 크기·SHA-256을 확인하므로, 바뀐 파일로는
         추론하지 않는다 (#192의 보관 계약).
+
+        **캐시하지 않는다.** 적재한 모델의 수명은 그 프로세스를 가진 쪽이 정한다
+        (#194의 계산 프로세스 교체). 여기서 모듈 수준 캐시를 두면 교체로 메모리를
+        되찾는다는 설계와 어긋나고, CONTEXT.md가 세는 캐시 목록에도 없는 네 번째
+        캐시가 생긴다.
         """
         if key not in CHECKPOINTS:
-            raise KeyError(f"알 수 없는 non-NT checkpoint: {key!r}. {sorted(CHECKPOINTS)} 중 하나여야 한다.")
-        if cached and key in _loaded:
-            return _loaded[key]
+            raise KeyError(
+                f"알 수 없는 non-NT checkpoint: {key!r}. {sorted(CHECKPOINTS)} 중 하나여야 한다."
+            )
         keras = import_keras()
         path = model_source.resolve(CHECKPOINTS[key])
-        model = keras.saving.load_model(path, compile=False)
-        runtime = cls(key, model)
-        if cached:
-            _loaded[key] = runtime
-        return runtime
+        return cls(key, keras.saving.load_model(path, compile=False))
 
     # ── 구조 ──────────────────────────────────────────────
 
@@ -143,18 +146,96 @@ class NonNTRuntime:
 
     @property
     def head_names(self) -> list[str]:
-        return [t._keras_history.operation.name for t in self._model.outputs]
+        """설명 대상이 되는 출력 이름. SpCas9은 9개, Cas12a는 1개다."""
+        return list(self._model.output_names)
+
+    def input_names(self) -> list[str]:
+        return [tensor.name for tensor in self._model.inputs]
 
     def layer_names(self) -> list[str]:
         return [layer.name for layer in self._model.layers]
 
+    def ops_present(self) -> list[str]:
+        """이 모델이 실제로 쓰는 연산 종류. parity 근거에 무엇이 포함됐는지 적는다."""
+        return sorted({type(layer).__name__ for layer in self._model.layers})
+
+    def weight_digests(self) -> dict[str, dict]:
+        """변수별 모양·dtype·float32 바이트의 SHA-256.
+
+        backend를 바꿔 적재했을 때 가중치가 재해석·전치되지 않았는지 대조하는
+        용도다 (#193의 weight_placement 기준). 적재에는 산술이 없으므로 비트
+        동일성이 맞는 기준이다.
+        """
+        import hashlib
+
+        digests = {}
+        for variable in self._model.weights:
+            value = np.ascontiguousarray(np.asarray(variable.numpy(), dtype=np.float32))
+            digests[variable.path] = {
+                "shape": list(value.shape),
+                "dtype": str(value.dtype),
+                "sha256": hashlib.sha256(value.tobytes()).hexdigest(),
+            }
+        return digests
+
+    def nonsmooth_layer_names(self) -> list[str]:
+        """0에서 꺾이는 활성(ReLU·LeakyReLU)을 내보내는 층 이름.
+
+        좌표 차분으로 gradient를 검증할 때, 섭동이 이 꺾임을 넘으면 차분 몫이
+        한쪽 기울기도 다른 쪽 기울기도 아닌 값이 된다. 실패를 설명하려면 몇 번
+        넘었는지 세야 하고, 그러려면 어느 층을 봐야 하는지 알아야 한다.
+
+        이름으로 찾으므로, 다른 이름을 쓰는 꺾인 활성이 들어오면 빈 목록을
+        돌려준다. **진단용으로만** 쓴다 — 어떤 판정도 이 목록에 기대지 않는다.
+        """
+        names = []
+        for layer in self._model.layers:
+            activation = getattr(layer, "activation", None)
+            if (type(layer).__name__ in ("ReLU", "LeakyReLU")
+                    or getattr(activation, "__name__", "") == "relu"):
+                names.append(layer.name)
+        return names
+
+    def _activation_probe(self):
+        """모든 층의 출력을 한 번에 내보내는 모델. 한 번만 만들어 재사용한다.
+
+        호출마다 다시 만들면 꺾임 세기처럼 수백 번 부르는 검증에서 그 비용이
+        전부 그래프 재구성에 들어간다. 적재한 모델에서 파생된 그래프일 뿐이고
+        모델 캐시가 아니므로, `load`가 캐시하지 않는다는 규칙과 무관하다.
+        """
+        if self._probe is None:
+            keras = import_keras()
+            inner = [layer for layer in self._model.layers
+                     if not isinstance(layer, keras.layers.InputLayer)]
+            self._probe_names = [layer.name for layer in inner]
+            self._probe = keras.Model(self._model.inputs,
+                                       [layer.output for layer in inner])
+        return self._probe, self._probe_names
+
+    def layer_activations(self, arrays) -> dict[str, np.ndarray]:
+        """층 이름 → 그 층의 추론 모드 출력.
+
+        최종 스칼라만 비교하면 전치된 커널이나 뒤바뀐 LSTM gate 순서가 숨을 수
+        있다. 층별로 비교해야 '같은 연산'이라는 주장에 근거가 생긴다.
+        """
+        probe, names = self._activation_probe()
+        outputs = probe(self._as_argument(self._check(arrays)), training=False)
+        outputs = outputs if isinstance(outputs, (list, tuple)) else [outputs]
+        return {name: self._to_numpy(value) for name, value in zip(names, outputs)}
+
+    @staticmethod
+    def _to_numpy(value) -> np.ndarray:
+        return np.asarray(value.detach().numpy() if hasattr(value, "detach") else value)
+
     # ── 전방 ──────────────────────────────────────────────
 
-    def _call(self, tensors, *, torch):
+    def _as_argument(self, tensors):
+        """Keras는 입력이 하나면 목록이 아니라 그 자체를 받는다."""
+        return tensors[0] if len(tensors) == 1 else list(tensors)
+
+    def _call(self, tensors):
         """추론 모드 호출. dropout은 꺼지고 BatchNormalization은 이동통계를 쓴다."""
-        inputs = tensors[0] if len(tensors) == 1 else list(tensors)
-        out = self._model(inputs, training=False)
-        return out
+        return self._model(self._as_argument(tensors), training=False)
 
     def _head(self, out, head: int):
         if isinstance(out, (list, tuple)):
@@ -185,7 +266,7 @@ class NonNTRuntime:
             stop = min(start + step, total)
             with torch.no_grad():
                 tensors = [torch.from_numpy(a[start:stop]) for a in arrays]
-                y = self._head(self._call(tensors, torch=torch), head)
+                y = self._head(self._call(tensors), head)
             out[start:stop] = y.detach().numpy()
             if on_batch is not None:
                 on_batch(stop, total)
@@ -203,7 +284,7 @@ class NonNTRuntime:
 
         arrays = [np.asarray(a, dtype=np.float32) for a in self._check(arrays)]
         tensors = [torch.from_numpy(a.copy()).requires_grad_(True) for a in arrays]
-        y = self._head(self._call(tensors, torch=torch), head)
+        y = self._head(self._call(tensors), head)
         y.sum().backward()
         grads = []
         for name, tensor in zip(self.input_names(), tensors):
@@ -211,9 +292,6 @@ class NonNTRuntime:
                 raise RuntimeError(f"입력 {name}에 기울기가 흐르지 않았다")
             grads.append(tensor.grad.detach().numpy().copy())
         return y.detach().numpy().copy(), grads
-
-    def input_names(self) -> list[str]:
-        return [t._keras_history.operation.name for t in self._model.inputs]
 
     def _check(self, arrays):
         arrays = list(arrays)
@@ -249,8 +327,12 @@ def one_hot(seq: str) -> np.ndarray:
 
 
 @dataclass
-class RuntimeHandle:
-    """`xai.explain`이 요구하는 handle 표면을 런타임 위에 올린 것.
+class RuntimeHandle(ExplainHandle):
+    """`ExplainHandle`에 입력별 기여도 합계만 더한 것.
+
+    표면을 다시 선언하지 않고 상속한다. handle 표면이 바뀔 때 두 곳을 고쳐야 하는
+    상태를 만들지 않기 위해서다. `head`는 상위 계약대로 **출력 이름**이고,
+    `NonNTRuntime`의 메서드가 받는 `head`는 그 출력의 인덱스다.
 
     `project`는 **서열 입력**의 위치별 기여도만 돌려준다. 파생 특징 입력이 있는
     Cas12a에서 그 기여도를 염기에 임의 배분하지 않기 위해서다. 대신 입력별 signed
@@ -259,15 +341,9 @@ class RuntimeHandle:
     채택할지는 #195가 정한다. 이 handle은 그 결정을 대신하지 않는다.
     """
 
-    raw_fn: Callable
-    ig_inputs: Callable
-    ig_grad_fn: Callable
-    project: Callable
-    attention_fn: Callable | None = None
-    model_key: str | None = None
-    head: str | None = None
-    #: 마지막 `project` 호출에서 본 입력별 기여도 합계 (입력 이름 → signed 합).
-    input_totals: dict[str, float] | None = None
+    #: 입력 이름 → 마지막 `project` 호출에서 본 signed 기여도 합. `project`가
+    #: 제자리에서 갱신하므로, 호출자가 들고 있는 것과 같은 사전이다.
+    input_totals: dict[str, float] = field(default_factory=dict)
 
 
 def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
@@ -299,11 +375,14 @@ def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
     def ig_grad_fn(batch):
         return runtime.gradients(list(batch), head=head)
 
+    input_totals: dict[str, float] = {}
+
     def project(attrs):
         attrs = [np.asarray(a, dtype=np.float64) for a in attrs]
-        handle.input_totals = {
-            name: float(a.sum()) for name, a in zip(runtime.input_names(), attrs)
-        }
+        input_totals.clear()
+        input_totals.update(
+            {name: float(a.sum()) for name, a in zip(runtime.input_names(), attrs)}
+        )
         positions = attrs[0].sum(axis=-1)
         if positions.shape[0] != window_length:
             raise ValueError(
@@ -311,11 +390,11 @@ def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
             )
         return positions
 
-    handle = RuntimeHandle(
+    return RuntimeHandle(
         raw_fn=raw_fn, ig_inputs=ig_inputs, ig_grad_fn=ig_grad_fn, project=project,
         attention_fn=None, model_key=model_key, head=handle_head_name,
+        input_totals=input_totals,
     )
-    return handle
 
 
 def cas12a_derive(seq: str) -> np.ndarray:

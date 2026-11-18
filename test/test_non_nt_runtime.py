@@ -17,12 +17,8 @@ SPCAS9_WINDOW = "CCGGTCGCTTTAAGAATAAATAAAAGCGCC"
 CAS12A_WINDOW = "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT"
 
 
-def _onehot(seq: str) -> np.ndarray:
-    idx = {"A": 0, "C": 1, "G": 2, "T": 3}
-    out = np.zeros((len(seq), 4), dtype=np.float32)
-    for i, base in enumerate(seq):
-        out[i, idx[base]] = 1.0
-    return out
+#: 테스트도 런타임과 같은 원핫 규약을 쓴다 (사본을 늘리지 않는다).
+_onehot = rt.one_hot
 
 
 @pytest.fixture(scope="module")
@@ -80,7 +76,7 @@ def test_tampered_checkpoint_is_rejected(tmp_path, monkeypatch):
 
     monkeypatch.setattr(model_source, "resolve", fake_resolve)
     with pytest.raises(ValueError, match="checksum mismatch"):
-        rt.NonNTRuntime.load("spcas9", cached=False)
+        rt.NonNTRuntime.load("spcas9")
 
 
 # ── 추론 모드 ─────────────────────────────────────────────────
