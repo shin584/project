@@ -1,4 +1,10 @@
-# #179: disposable offline packaging gate
+# Windows packaging
+
+Dashboard v3 builds as `XaiDashboardV3` using the [v3 offline release
+procedure](v3-offline.md). The gate-1 experiment below and gate 2 on
+`dashboard_core_v2` record the earlier NT release.
+
+## #179: disposable offline packaging gate
 
 In the independent `dashboard_v3` worktree, #194 changes computation to a spawned
 child and updates `--validate` to observe the public window/events. It checks NT

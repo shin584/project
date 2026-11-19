@@ -122,12 +122,21 @@ def test_name_resolved_predictors_are_declared_to_the_packaging_spec():
     import가 없으므로 `packaging/desktop.spec`의 `hiddenimports`에 적지 않으면
     frozen 빌드에서만, 그 계열을 고른 순간에만 터진다. 두 곳이 어긋나면 여기서 드러난다.
     """
+    import ast
     from pathlib import Path
 
     import predict
 
     spec = (Path(__file__).resolve().parent.parent / "packaging/desktop.spec").read_text(
         encoding="utf-8")
+    hidden_imports = next(
+        statement.value for statement in ast.parse(spec).body
+        if isinstance(statement, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "hiddenimports"
+                for target in statement.targets)
+    )
+    declared = {node.value for node in ast.walk(hidden_imports)
+                if isinstance(node, ast.Constant) and isinstance(node.value, str)}
     named = {entry.split(":")[0]
              for table in predict.FAMILY_PREDICTOR_CLASSES.values()
              for entry in table.values() if isinstance(entry, str)}
@@ -139,4 +148,4 @@ def test_name_resolved_predictors_are_declared_to_the_packaging_spec():
                  for entry in table.values()
                  if isinstance(entry, str) and entry.startswith(module + ":")))
         # 배포 spec이 그 이름을 알고 있어야 한다.
-        assert f"'{module}'" in spec, f"{module}이 desktop.spec의 hiddenimports에 없다"
+        assert module in declared, f"{module}이 desktop.spec의 hiddenimports에 없다"
