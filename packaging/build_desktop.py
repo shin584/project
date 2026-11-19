@@ -16,7 +16,6 @@ sys.path.insert(0, str(ROOT))
 from model_assets import MANIFEST, restore, sha256
 
 APP = "XaiDashboardV3"
-BASELINE = ("capture.json", "candidates.json", "crispr_prediction_results.csv")
 
 
 def read_json(path: Path) -> dict:

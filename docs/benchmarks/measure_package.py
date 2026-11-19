@@ -20,7 +20,7 @@ from urllib.error import URLError
 from urllib.request import ProxyHandler, build_opener
 
 import psutil
-from measure_ram import ROOT, digest, sample_tree, save, summarize
+from measure_ram import ROOT, digest, sample_tree, save, source_identity, summarize
 from playwright.sync_api import sync_playwright
 
 BASELINE = ROOT / "docs/equivalence-baseline"
@@ -151,20 +151,25 @@ def stress(page, process, case, wait_idle, record):
     page.evaluate(*request_script(case, "shap", {"shap-n": 128}))
     page.evaluate(*request_script(case, "ig", {"ig-steps": 40, "shap-n": 64}))
     wait_idle(1)
-    old_progress = page.evaluate("""() => window.releaseTrace.findLast(e => e.type === 'progress')""")
     record("consecutive_requests_latest_ig", page.locator(f"{IMAGES}[alt*='IG']").count() == 1)
 
     page.evaluate(*request_script(case, "shap", {"shap-n": 1024, "shap-bg": 32}))
     page.wait_for_function("document.querySelector('#task-progress').hasAttribute('value')")
+    cancelled = page.evaluate("""() => window.releaseTrace.findLast(e => e.type === 'progress')""")
+    record("cancellable_shap_started", cancelled is not None and "request_id" in cancelled and "generation" in cancelled)
     page.locator("#cancel-task").click()
-    page.wait_for_function("document.querySelector('#notice').textContent.includes('취소했습니다')")
+    page.wait_for_function("""document.querySelector('#notice').textContent.includes('취소했습니다') &&
+        window.releaseTrace.some(e => e.label === 'cancel')""")
     # Replay an actual old request identity via the same browser event entry point.
     # A sentinel makes an incorrectly accepted terminal event observable.
     page.evaluate("""old => window.xaiDesktop.onEvent({...old, type: 'result',
-      fragments: {xai: '<b id="stale-release-event">stale</b>'}})""", old_progress)
+      fragments: {xai: '<b id="stale-release-event">stale</b>'}})""", cancelled)
     record("cancel_and_discard_replayed_event", page.locator("#stale-release-event").count() == 0)
     page.evaluate(*request_script(case, "ig", {"ig-steps": 32, "shap-n": 64, "shap-bg": 4}))
     wait_idle(1)
+    record("cancelled_shap_sent_no_result", page.evaluate("""old => window.releaseTrace.filter(
+       e => e.type === 'result' && e.request_id === old.request_id && e.generation === old.generation
+    ).length === 1""", cancelled))  # The one entry is the explicit replay above.
 
     previous = worker(process)
     page.evaluate(*request_script(case, "shap", {"shap-n": 1008, "shap-bg": 32}))
@@ -199,7 +204,7 @@ def drive(page, process, desktop, output, mode, contract, report):
             raise AssertionError(label)
 
     def wait_idle(images=None):
-        predicate = f"({IDLE}) || !document.querySelector('#retry-prepare')?.hidden"
+        predicate = f"({IDLE}) || document.querySelector('#retry-prepare')?.hidden === false"
         page.wait_for_function(predicate, timeout=timeout)
         if page.locator("#notice .error").count():
             raise RuntimeError(page.locator("#notice").inner_text())
@@ -346,8 +351,33 @@ def run(output, mode, automation_site, source_python=None):
         env = {**env, **{name: str(target / "empty-hf") for name in
                          ("HF_HOME", "HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE", "TRANSFORMERS_CACHE")}}
         env.pop("PYTHONPATH", None)
-    save(target / "launch.json", {"command": command, "cwd": str(cwd),
-                                  "contract_sha256": digest(contract_file), "browser_args": browser_args})
+    launch = {"command": command, "cwd": str(cwd), "contract_sha256": digest(contract_file),
+              "browser_args": browser_args}
+    if mode == "source":
+        launch["source"] = source_identity(ROOT)
+        probe = """
+import importlib.metadata as metadata
+import json
+import sys
+from huggingface_hub import try_to_load_from_cache
+from predict import NT_TOKENIZER_REPO
+files = {name: try_to_load_from_cache(NT_TOKENIZER_REPO, name)
+         for name in ('vocab.txt', 'tokenizer_config.json', 'config.json')}
+print(json.dumps({
+    'python': sys.version,
+    'distributions': {d.metadata['Name']: d.version for d in metadata.distributions()},
+    'tokenizer_cache': {name: path for name, path in files.items() if isinstance(path, str)},
+}))
+"""
+        runtime = json.loads(subprocess.check_output(
+            [str(source_python), "-c", probe], cwd=ROOT, env=env, encoding="utf-8"
+        ))
+        runtime["tokenizer_cache"] = {
+            name: {"path": path, "sha256": digest(Path(path))}
+            for name, path in runtime["tokenizer_cache"].items()
+        }
+        launch["runtime"] = runtime
+    save(target / "launch.json", launch)
     report = {"status": "fail", "checks": [], "families": {}}
     with (target / "window.log").open("w", encoding="utf-8") as log, ThreadPoolExecutor(max_workers=1) as executor:
         process = subprocess.Popen(command, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT)
@@ -400,12 +430,13 @@ def compare(output):
     for family in ("non_nt", "nt"):
         old, new = (report["families"][family] for report in (source, frozen))
         matches = []
-        for left, right in zip(old["rows"], new["rows"], strict=True):
+        for left, right in zip(old["rows"], new["rows"]):
             exact = all(left[key] == right[key] for key in ("site", "head", "cells"))
             numeric = all(math.isclose(left[key], right[key], rel_tol=1e-5, abs_tol=1e-8)
                           for key in ("raw", "percent"))
             matches.append(exact and numeric)
-        parity["families"][family] = {"prediction_rows": len(matches), "prediction_parity": all(matches),
+        parity["families"][family] = {"source_rows": len(old["rows"]), "frozen_rows": len(new["rows"]),
+                                      "prediction_parity": len(old["rows"]) == len(new["rows"]) and all(matches),
                                       "xai_cases": len(new["xai"]), "xai_captions_parity": old["xai"] == new["xai"]}
     with (output / "v3/nt.csv").open(encoding="utf-8-sig", newline="") as stream:
         csv_v3 = [row[:-2] for row in csv.reader(stream)]

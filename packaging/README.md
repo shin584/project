@@ -14,10 +14,10 @@ that validation belongs to #201. The spec includes the dynamic child renderer
 and the entry calls `multiprocessing.freeze_support()`. A new frozen build and
 clean offline Windows validation remain the later v3 packaging ticket's scope.
 
-For the **production desktop / gate 2 (#188)**, use
-[`docs/gate2/README.md`](../docs/gate2/README.md) and
-`python packaging/build_desktop.py`. The final folder is `dist/XaiDashboard`;
-the `XaiGate1` harness below remains a separate gate-1 experiment.
+For the **production desktop / gate 2 (#188)**, use the preserved
+`dashboard_core_v2` worktree and its
+[`docs/gate2/README.md`](../docs/gate2/README.md). The legacy release folder is
+`dist/XaiDashboard`. The `XaiGate1` harness below records gate 1.
 
 This is a packaging experiment, independent of the production desktop API (#178).
 The recorded outcome is in [gate1-result.md](gate1-result.md).
