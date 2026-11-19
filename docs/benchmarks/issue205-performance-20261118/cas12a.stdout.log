@@ -1,0 +1,5 @@
+{"model": "cas12a", "method": "ig", "steps": 32, "n_background": 0, "median_wall_seconds": 0.9329323999991175, "median_cpu_seconds": 3.109375, "max_sampled_peak_rss_bytes": 649912320, "median_baseline_rss_bytes": 645754880}
+{"model": "cas12a", "method": "ig", "steps": 256, "n_background": 0, "median_wall_seconds": 4.959782200021436, "median_cpu_seconds": 18.0, "max_sampled_peak_rss_bytes": 650973184, "median_baseline_rss_bytes": 649736192}
+{"model": "cas12a", "method": "shap", "nsamples": 64, "n_background": 4, "median_wall_seconds": 1.1407753999810666, "median_cpu_seconds": 3.453125, "max_sampled_peak_rss_bytes": 671707136, "median_baseline_rss_bytes": 651644928}
+{"model": "cas12a", "method": "shap", "nsamples": 512, "n_background": 32, "median_wall_seconds": 40.05717009998625, "median_cpu_seconds": 119.9375, "max_sampled_peak_rss_bytes": 806621184, "median_baseline_rss_bytes": 704565248}
+{"model": "cas12a", "method": "shap", "nsamples": 512, "n_background": 4, "median_wall_seconds": 4.657849700015504, "median_cpu_seconds": 15.21875, "max_sampled_peak_rss_bytes": 710254592, "median_baseline_rss_bytes": 688848896}

@@ -1,0 +1,27 @@
+{
+  "issue": 205,
+  "url": "https://github.com/shin584/project/issues/205",
+  "approved_decisions": "Q1-Q17",
+  "design_status": "accepted",
+  "final_shared_understanding_confirmed": true,
+  "next_round": null,
+  "next_session": "Separate implementation task using the accepted spec and handoff",
+  "published_at_utc": "2026-11-18T11:42:13.693412+00:00",
+  "remote_updated_at": "2026-11-18T11:41:51Z",
+  "state": "OPEN",
+  "labels": [
+    "ready-for-agent"
+  ],
+  "body_matches_local": true,
+  "normalization": "CRLF to LF; ignore trailing line terminators only",
+  "normalized_remote_body_sha256": "e541f9ebef647c98958f3fc17e59f2a544f71c7c65b3f3351aaec3273c9af17d",
+  "local_spec_sha256": "84b752dd2478f28d4b641c075be69a9718ca995fad28bdbd389a8328c1819255",
+  "supersedes": "publication-before-final-design.json",
+  "previous_remote_snapshot": "before-final-design.json",
+  "previous_local_spec": "before-final-design-spec.md",
+  "verified_remote_snapshot": "after-final-design.json",
+  "source_head": "c7df95b22683fbcefc0e560266bff01ef6190dc2",
+  "branch": "dashboard_v3",
+  "implementation_started": false,
+  "product_model_recovery_tests_run": false
+}

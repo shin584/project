@@ -1,0 +1,354 @@
+{
+  "label": "exploratory performance; numerical quality not revalidated",
+  "run_id": "20261118T092845Z",
+  "model": "cas12a",
+  "pid": 12948,
+  "protocol": "perf-v1: single fresh process per model; sequential; seed0; disk cache off; chunk8; 3 repeats; 10ms RSS sampling; Cas12a reordered to prioritize main comparisons within 180s; all other settings retained",
+  "script_sha256": "92370b0dfbf81a0aba84e2cf37124962ada2b3f0dd45abcaa714ba46a2da362a",
+  "contract_sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+  "model_sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+  "code_sha256": {
+    "non_nt_runtime.py": "df314c81ab2316089185e80e334c8eccf64182674689806292dbac5bb3c77c56",
+    "xai/explain.py": "c88d9ed7c90d85d2ff887ad396c0cd14bf8a52ceb5dcbdbf1f6fe25440552be9",
+    "model_source.py": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba",
+    "predict.py": "f68d4fdbb862cb40847153a98e54a195a51e8eba0162e2518ff044cf490962f0"
+  },
+  "git_head": "c7df95b22683fbcefc0e560266bff01ef6190dc2",
+  "environment": {
+    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 142 Stepping 11, GenuineIntel",
+    "packages": {
+      "keras": "3.14.1",
+      "torch": "2.12.0",
+      "numpy": "2.3.2",
+      "shap": "0.52.0",
+      "h5py": "3.14.0",
+      "psutil": "7.2.2"
+    },
+    "torch_threads": 4,
+    "rss_poll_seconds": 0.01
+  },
+  "case": {
+    "id": "C1",
+    "window": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT",
+    "origin": "demo sequence 1, + strand"
+  },
+  "head": {
+    "index": 0,
+    "name": "dense_2"
+  },
+  "rows": [
+    {
+      "method": "ig",
+      "steps": 32,
+      "n_background": 0,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 1.0337638000200968,
+          "cpu_seconds": 3.421875,
+          "baseline_rss_bytes": 643821568,
+          "sampled_peak_rss_bytes": 648097792,
+          "peak_increase_over_baseline_bytes": 4276224,
+          "after_rss_bytes": 645701632,
+          "process_lifetime_peak_wset_bytes": 648097792,
+          "rss_samples": 66
+        },
+        {
+          "repeat": 2,
+          "wall_seconds": 0.816371099994285,
+          "cpu_seconds": 3.0,
+          "baseline_rss_bytes": 645754880,
+          "sampled_peak_rss_bytes": 649170944,
+          "peak_increase_over_baseline_bytes": 3416064,
+          "after_rss_bytes": 647221248,
+          "process_lifetime_peak_wset_bytes": 649170944,
+          "rss_samples": 53
+        },
+        {
+          "repeat": 3,
+          "wall_seconds": 0.9329323999991175,
+          "cpu_seconds": 3.109375,
+          "baseline_rss_bytes": 647196672,
+          "sampled_peak_rss_bytes": 649912320,
+          "peak_increase_over_baseline_bytes": 2715648,
+          "after_rss_bytes": 646500352,
+          "process_lifetime_peak_wset_bytes": 649912320,
+          "rss_samples": 60
+        }
+      ],
+      "median_wall_seconds": 0.9329323999991175,
+      "median_cpu_seconds": 3.109375,
+      "max_sampled_peak_rss_bytes": 649912320,
+      "median_baseline_rss_bytes": 645754880
+    },
+    {
+      "method": "ig",
+      "steps": 256,
+      "n_background": 0,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 4.959782200021436,
+          "cpu_seconds": 18.0,
+          "baseline_rss_bytes": 646475776,
+          "sampled_peak_rss_bytes": 649760768,
+          "peak_increase_over_baseline_bytes": 3284992,
+          "after_rss_bytes": 649760768,
+          "process_lifetime_peak_wset_bytes": 649912320,
+          "rss_samples": 311
+        },
+        {
+          "repeat": 2,
+          "wall_seconds": 4.868713900010334,
+          "cpu_seconds": 17.546875,
+          "baseline_rss_bytes": 649736192,
+          "sampled_peak_rss_bytes": 650588160,
+          "peak_increase_over_baseline_bytes": 851968,
+          "after_rss_bytes": 649793536,
+          "process_lifetime_peak_wset_bytes": 650588160,
+          "rss_samples": 297
+        },
+        {
+          "repeat": 3,
+          "wall_seconds": 5.987075700017158,
+          "cpu_seconds": 18.046875,
+          "baseline_rss_bytes": 649768960,
+          "sampled_peak_rss_bytes": 650973184,
+          "peak_increase_over_baseline_bytes": 1204224,
+          "after_rss_bytes": 647876608,
+          "process_lifetime_peak_wset_bytes": 650973184,
+          "rss_samples": 381
+        }
+      ],
+      "median_wall_seconds": 4.959782200021436,
+      "median_cpu_seconds": 18.0,
+      "max_sampled_peak_rss_bytes": 650973184,
+      "median_baseline_rss_bytes": 649736192
+    },
+    {
+      "method": "shap",
+      "nsamples": 64,
+      "n_background": 4,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 1.2319214000017382,
+          "cpu_seconds": 3.453125,
+          "baseline_rss_bytes": 647852032,
+          "sampled_peak_rss_bytes": 668258304,
+          "peak_increase_over_baseline_bytes": 20406272,
+          "after_rss_bytes": 651751424,
+          "process_lifetime_peak_wset_bytes": 668258304,
+          "rss_samples": 79
+        },
+        {
+          "repeat": 2,
+          "wall_seconds": 0.9720873999758624,
+          "cpu_seconds": 3.5625,
+          "baseline_rss_bytes": 651726848,
+          "sampled_peak_rss_bytes": 671707136,
+          "peak_increase_over_baseline_bytes": 19980288,
+          "after_rss_bytes": 651661312,
+          "process_lifetime_peak_wset_bytes": 671764480,
+          "rss_samples": 63
+        },
+        {
+          "repeat": 3,
+          "wall_seconds": 1.1407753999810666,
+          "cpu_seconds": 3.421875,
+          "baseline_rss_bytes": 651644928,
+          "sampled_peak_rss_bytes": 667709440,
+          "peak_increase_over_baseline_bytes": 16064512,
+          "after_rss_bytes": 665534464,
+          "process_lifetime_peak_wset_bytes": 671764480,
+          "rss_samples": 70
+        }
+      ],
+      "median_wall_seconds": 1.1407753999810666,
+      "median_cpu_seconds": 3.453125,
+      "max_sampled_peak_rss_bytes": 671707136,
+      "median_baseline_rss_bytes": 651644928
+    },
+    {
+      "method": "shap",
+      "nsamples": 512,
+      "n_background": 32,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 40.05717009998625,
+          "cpu_seconds": 119.9375,
+          "baseline_rss_bytes": 665509888,
+          "sampled_peak_rss_bytes": 722034688,
+          "peak_increase_over_baseline_bytes": 56524800,
+          "after_rss_bytes": 704581632,
+          "process_lifetime_peak_wset_bytes": 722034688,
+          "rss_samples": 2527
+        },
+        {
+          "repeat": 2,
+          "wall_seconds": 41.205043699999806,
+          "cpu_seconds": 125.25,
+          "baseline_rss_bytes": 704565248,
+          "sampled_peak_rss_bytes": 761339904,
+          "peak_increase_over_baseline_bytes": 56774656,
+          "after_rss_bytes": 748961792,
+          "process_lifetime_peak_wset_bytes": 762281984,
+          "rss_samples": 2589
+        },
+        {
+          "repeat": 3,
+          "wall_seconds": 35.69475979998242,
+          "cpu_seconds": 113.140625,
+          "baseline_rss_bytes": 748953600,
+          "sampled_peak_rss_bytes": 806621184,
+          "peak_increase_over_baseline_bytes": 57667584,
+          "after_rss_bytes": 688865280,
+          "process_lifetime_peak_wset_bytes": 807661568,
+          "rss_samples": 2185
+        }
+      ],
+      "median_wall_seconds": 40.05717009998625,
+      "median_cpu_seconds": 119.9375,
+      "max_sampled_peak_rss_bytes": 806621184,
+      "median_baseline_rss_bytes": 704565248
+    },
+    {
+      "method": "shap",
+      "nsamples": 512,
+      "n_background": 4,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 4.531219099997543,
+          "cpu_seconds": 14.578125,
+          "baseline_rss_bytes": 688848896,
+          "sampled_peak_rss_bytes": 710254592,
+          "peak_increase_over_baseline_bytes": 21405696,
+          "after_rss_bytes": 706961408,
+          "process_lifetime_peak_wset_bytes": 807661568,
+          "rss_samples": 285
+        },
+        {
+          "repeat": 2,
+          "wall_seconds": 5.068982600001618,
+          "cpu_seconds": 16.203125,
+          "baseline_rss_bytes": 706936832,
+          "sampled_peak_rss_bytes": 707379200,
+          "peak_increase_over_baseline_bytes": 442368,
+          "after_rss_bytes": 647999488,
+          "process_lifetime_peak_wset_bytes": 807661568,
+          "rss_samples": 317
+        },
+        {
+          "repeat": 3,
+          "wall_seconds": 4.657849700015504,
+          "cpu_seconds": 15.21875,
+          "baseline_rss_bytes": 647974912,
+          "sampled_peak_rss_bytes": 652976128,
+          "peak_increase_over_baseline_bytes": 5001216,
+          "after_rss_bytes": 637337600,
+          "process_lifetime_peak_wset_bytes": 807661568,
+          "rss_samples": 297
+        }
+      ],
+      "median_wall_seconds": 4.657849700015504,
+      "median_cpu_seconds": 15.21875,
+      "max_sampled_peak_rss_bytes": 710254592,
+      "median_baseline_rss_bytes": 688848896
+    },
+    {
+      "method": "shap",
+      "nsamples": 64,
+      "n_background": 32,
+      "repeats": [
+        {
+          "repeat": 1,
+          "wall_seconds": 4.347212699998636,
+          "cpu_seconds": 15.03125,
+          "baseline_rss_bytes": 637313024,
+          "sampled_peak_rss_bytes": 646586368,
+          "peak_increase_over_baseline_bytes": 9273344,
+          "after_rss_bytes": 636424192,
+          "process_lifetime_peak_wset_bytes": 807661568,
+          "rss_samples": 272
+        }
+      ],
+      "median_wall_seconds": 4.347212699998636,
+      "median_cpu_seconds": 15.03125,
+      "max_sampled_peak_rss_bytes": 646586368,
+      "median_baseline_rss_bytes": 637313024
+    }
+  ],
+  "status": "running",
+  "configuration_order": [
+    [
+      "ig",
+      32,
+      0
+    ],
+    [
+      "ig",
+      256,
+      0
+    ],
+    [
+      "shap",
+      64,
+      4
+    ],
+    [
+      "shap",
+      512,
+      32
+    ],
+    [
+      "shap",
+      512,
+      4
+    ],
+    [
+      "shap",
+      64,
+      32
+    ],
+    [
+      "ig",
+      64,
+      0
+    ],
+    [
+      "ig",
+      128,
+      0
+    ],
+    [
+      "shap",
+      128,
+      4
+    ],
+    [
+      "shap",
+      256,
+      4
+    ],
+    [
+      "shap",
+      64,
+      8
+    ],
+    [
+      "shap",
+      64,
+      16
+    ]
+  ],
+  "runtime_import_wall_seconds": 11.302216699987184,
+  "model_load_wall_seconds": 6.813692100025946,
+  "tensorflow_importable": true,
+  "tensorflow_imported": true,
+  "warmup_wall_seconds": 3.270951000013156
+}

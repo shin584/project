@@ -1,0 +1,14 @@
+[
+  {
+    "model": "spcas9",
+    "status": "completed",
+    "returncode": 0,
+    "wall_seconds_including_startup": 131.79617240000516
+  },
+  {
+    "model": "cas12a",
+    "status": "timeout_180_seconds",
+    "returncode": 1,
+    "wall_seconds_including_startup": 180.17801780000445
+  }
+]

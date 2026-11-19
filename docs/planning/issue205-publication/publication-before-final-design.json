@@ -1,0 +1,25 @@
+﻿{
+    "issue":  205,
+    "url":  "https://github.com/shin584/project/issues/205",
+    "approved_decisions":  "Q1-Q16",
+    "design_status":  "in_progress",
+    "next_round":  "Q17",
+    "next_session":  "Continue design rounds and final shared-understanding review; do not start implementation",
+    "correction_reason":  "User clarified that remaining rounds must finish next session; prior implementation handoff was incorrect",
+    "published_at_utc":  "2026-11-18T11:31:24.1875015Z",
+    "remote_updated_at":  "2026-11-18T11:30:50Z",
+    "state":  "OPEN",
+    "labels":  [
+                   "needs-info"
+               ],
+    "body_matches_local":  true,
+    "normalization":  "CRLF to LF; ignore trailing line terminators only",
+    "normalized_remote_body_sha256":  "cedec149bf2b8bc1be9d4f679ac49805476a1ce8ac6ed8021c631161823023af",
+    "local_spec_sha256":  "2ec6f850e91b9c3f1b9fd3983ff6bc8c47e73dc56cff6a763abb2f9cd396fe51",
+    "supersedes":  "publication-initial.json",
+    "prior_correction_snapshot":  "before-design-resume.json",
+    "verified_correction_snapshot":  "after-design-resume.json",
+    "source_head":  "c7df95b22683fbcefc0e560266bff01ef6190dc2",
+    "branch":  "dashboard_v3",
+    "implementation_started":  false
+}

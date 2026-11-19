@@ -1,0 +1,10 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794994321.085255   19892 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794994326.667766   19892 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+C:\Users\cmino\AppData\Local\Programs\Python\Python313\Lib\site-packages\shap\explainers\_kernel.py:765: UserWarning: Linear regression equation is singular, a least squares solutions is used instead.
+To avoid this situation and get a regular matrix do one of the following:
+1) turn up the number of samples,
+2) turn up the L1 regularization with num_features(N) where N is less than the number of samples,
+3) group features together to reduce the number of inputs that need to be explained.
+  warnings.warn(

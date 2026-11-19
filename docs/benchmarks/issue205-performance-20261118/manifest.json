@@ -1,0 +1,52 @@
+﻿{
+    "run_id":  "20261118T092845Z",
+    "kind":  "exploratory-performance",
+    "original_directory":  "C:\\project\\MC_project\\dashboard_v3\\.scratch\\issue205-performance\\20261118T092845Z",
+    "files":  [
+                  {
+                      "path":  "cas12a.json",
+                      "bytes":  11045,
+                      "sha256":  "7f78ec118ce26a380461082fea941464d256bc75388acb1496da5ec489282e6c"
+                  },
+                  {
+                      "path":  "cas12a.stderr.log",
+                      "bytes":  1251,
+                      "sha256":  "b808ede31f40b75595ba996f1b05af856b283d044b234b63908e96b465654be9"
+                  },
+                  {
+                      "path":  "cas12a.stdout.log",
+                      "bytes":  1137,
+                      "sha256":  "d99f02d0eb58a32eae8f186af6a797c42ea3739f6dc05664a2b7a34efb5e48df"
+                  },
+                  {
+                      "path":  "measure.py",
+                      "bytes":  7819,
+                      "sha256":  "92370b0dfbf81a0aba84e2cf37124962ada2b3f0dd45abcaa714ba46a2da362a"
+                  },
+                  {
+                      "path":  "measure-spcas9-original.py",
+                      "bytes":  7390,
+                      "sha256":  "13cfabf6e1916f310dc023e15679ff81494a471143f19900805eb388fa523076"
+                  },
+                  {
+                      "path":  "orchestration.json",
+                      "bytes":  299,
+                      "sha256":  "85ce3bb43e19b6fb0e896a91d5f8e93ec5617e1cfac18a729e1f2008ef0cd636"
+                  },
+                  {
+                      "path":  "spcas9.json",
+                      "bytes":  20269,
+                      "sha256":  "b70fc6d3db72f24b03e7ff9988f9ea4a78b3cbc93d7e61bf8e7c5bbac7f9ea25"
+                  },
+                  {
+                      "path":  "spcas9.stderr.log",
+                      "bytes":  515,
+                      "sha256":  "4a770fc158392650a3d1f3e604853cb6d215f44eda0a42dbcd5f080237b92784"
+                  },
+                  {
+                      "path":  "spcas9.stdout.log",
+                      "bytes":  2734,
+                      "sha256":  "c2043e32510809581f4cf938d89a4245ac72d9b62d74506ef65d12c83f1a79a5"
+                  }
+              ]
+}

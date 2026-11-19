@@ -1,0 +1,21 @@
+﻿{
+    "issue":  205,
+    "url":  "https://github.com/shin584/project/issues/205",
+    "skill":  "to-spec",
+    "approved_decisions":  "Q1-Q16",
+    "published_at_utc":  "2026-11-18T11:24:46.2861403Z",
+    "remote_updated_at":  "2026-11-18T11:23:55Z",
+    "state":  "OPEN",
+    "labels":  [
+                   "ready-for-agent"
+               ],
+    "body_matches_local":  true,
+    "normalization":  "CRLF to LF; ignore trailing line terminators only",
+    "normalized_remote_body_sha256":  "4bf052bb1188d59d861d49c1f2c4804d58e66fd2f928feff9dbb50dbf7254219",
+    "local_spec_sha256":  "167116ffca6fe0e6c47f6e9f99db4298259ab18945f2e90bc55c107ce438956b",
+    "prior_issue_snapshot_sha256":  "1be134bed5540239b41465a4795d209b66ccf29e5bd648542509cd255ef25fe5",
+    "source_head":  "c7df95b22683fbcefc0e560266bff01ef6190dc2",
+    "branch":  "dashboard_v3",
+    "implementation_started":  false,
+    "next_session":  "Implement the published #205 spec; preserve existing work and historical failures"
+}
