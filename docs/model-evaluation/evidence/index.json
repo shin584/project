@@ -1,0 +1,15 @@
+{
+  "issue": 202,
+  "archive": "issue202-run01.zip",
+  "bytes": 11087416,
+  "sha256": "0a2d6ddd5fca904adffedec76870fe9b237e0cc2ef78e45258bef89f8ce0ae73",
+  "root": "issue202-run01",
+  "report_sha256": "4f36979073cf74a7b6399a57226bac649267ea4c5e3ab967a322002472bc665f",
+  "registration_sha256": "4638d0e7e7b968ce3b9a0b2628f0a0f32ae68f8a1f43dec5a1b4e94bada294ed",
+  "execution_sha256": "5c09d3f083585d36009fdbcbee7b46dc74377fe91e7165cb7d034bf0cbbec6ad",
+  "reinference_files": {
+    "reinference.json": "5fd05b1491a6112e605af05217662e55b09297c9eb2dea683fe1231da28298c3",
+    "reinference-report.json": "d69c2a2c188949e69c119990aef635fbd1b1eaab164a5e23f083d9836ea1ce9a",
+    "reinference-registration.json": "e5e245ead8726c910fb55772b61a3bd554938703fbf298c1118cdfe6e19de153"
+  }
+}

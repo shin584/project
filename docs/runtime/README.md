@@ -1,5 +1,10 @@
 # non-NT forward and gradient runtime (#193)
 
+Full-test performance and original-Keras/deployed-torch forward parity are now
+retained in [the #202 test handoff](../model-evaluation/README.md): the inherited
+5,186-row SpCas9 evaluation and a new, separate 1,500-row Cas12a held-out test.
+Those prediction results do not change any XAI quality verdict below.
+
 The #195 [Cas12a IG decision](cas12a-ig-decision.md) selects composite IG for the
 single-sequence screen, with a separate [frozen contract](cas12a-ig-contract.json)
 and retained measurement evidence. Numerical quality still **fails**, including

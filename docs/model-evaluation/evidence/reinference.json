@@ -1,0 +1,85 @@
+{
+  "issue": 202,
+  "kind": "full re-inference from extracted archive using only retained source, checkpoints and inputs",
+  "counts": {
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "checks": {
+    "full_test_comparisons_equal": true,
+    "historical_metrics_equal": true,
+    "runtime_source_files_equal": true
+  },
+  "report_sha256": "d69c2a2c188949e69c119990aef635fbd1b1eaab164a5e23f083d9836ea1ce9a",
+  "execution": [
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference\\runtime\\docs\\model-evaluation\\evaluate.py",
+        "prepare",
+        "--work",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference"
+      ],
+      "exit_code": 0,
+      "seconds": 10.280954900023062
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference\\runtime\\docs\\model-evaluation\\evaluate.py",
+        "reference",
+        "--work",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference"
+      ],
+      "exit_code": 0,
+      "seconds": 47.81401040003402
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference\\runtime\\docs\\model-evaluation\\evaluate.py",
+        "deployed",
+        "--work",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference"
+      ],
+      "exit_code": 0,
+      "seconds": 26.668195500038564
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference\\runtime\\docs\\model-evaluation\\evaluate.py",
+        "report",
+        "--work",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference"
+      ],
+      "exit_code": 0,
+      "seconds": 2.8290036999969743
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference\\runtime\\docs\\model-evaluation\\evaluate.py",
+        "audit",
+        "--work",
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-reinference"
+      ],
+      "exit_code": 0,
+      "seconds": 2.8305376000353135
+    }
+  ],
+  "report_file": "reinference-report.json",
+  "registration_file": "reinference-registration.json",
+  "raw_file_hashes_equal": true
+}

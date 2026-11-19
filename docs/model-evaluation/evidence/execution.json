@@ -1,0 +1,67 @@
+[
+  {
+    "command": [
+      "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01\\runtime\\docs\\model-evaluation\\evaluate.py",
+      "prepare",
+      "--work",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01"
+    ],
+    "exit_code": 0,
+    "seconds": 11.84240950003732
+  },
+  {
+    "command": [
+      "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01\\runtime\\docs\\model-evaluation\\evaluate.py",
+      "reference",
+      "--work",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01"
+    ],
+    "exit_code": 0,
+    "seconds": 60.425895099993795
+  },
+  {
+    "command": [
+      "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01\\runtime\\docs\\model-evaluation\\evaluate.py",
+      "deployed",
+      "--work",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01"
+    ],
+    "exit_code": 0,
+    "seconds": 28.466659300029278
+  },
+  {
+    "command": [
+      "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01\\runtime\\docs\\model-evaluation\\evaluate.py",
+      "report",
+      "--work",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01"
+    ],
+    "exit_code": 0,
+    "seconds": 3.2742167999967933
+  },
+  {
+    "command": [
+      "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01\\runtime\\docs\\model-evaluation\\evaluate.py",
+      "audit",
+      "--work",
+      "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue202-run01"
+    ],
+    "exit_code": 0,
+    "seconds": 3.0817402999964543
+  }
+]

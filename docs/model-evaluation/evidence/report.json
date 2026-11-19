@@ -1,0 +1,3071 @@
+{
+  "issue": 202,
+  "status": "pass",
+  "counts": {
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "contract_sha256": "f24d3c37246cf1382d594ba8de1aa0d31776c7abd4f83771a82114bb336f388a",
+  "registration_sha256": "4638d0e7e7b968ce3b9a0b2628f0a0f32ae68f8a1f43dec5a1b4e94bada294ed",
+  "handoff": {
+    "spcas9": {
+      "source_sha256": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+      "deployed_sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+      "split": {
+        "dir": "published_split",
+        "checksum_file": "split_checksum.json",
+        "checksum_sha256": "49be8031659772166460f07d103a6966550fa6f05e2d30b52102cc90a2d6cc3a",
+        "seed": 42,
+        "dataset_sha256": "0c570ea6e85221654cf9d2130356b4e87f978942e9cbd1184c4efccaac77572e",
+        "rows": {
+          "train": 29134,
+          "val": 3676,
+          "test": 5186,
+          "total": 37996
+        },
+        "files": {
+          "train.csv": "4c1ffc29c4db87cab5e5da1d29abe3a84440050c66b1a6c3b30daaf723812c01",
+          "val.csv": "0757d7c2f7766e13d4c9a4d62fd1b6570ca17076087b711c139ec1ff6b54728d",
+          "test.csv": "1a1305b6e0eeef91625443f1e21f85d233f8e0dac9e8be3cdb3daea5eeaf549b"
+        }
+      },
+      "selection": {
+        "epochs_run": 46,
+        "best_epoch": 41,
+        "best_val_loss": 0.06372389197349548,
+        "early_stopped": true
+      },
+      "historical_execution": {
+        "mode": "manual_v2_post_training_test",
+        "interpreter": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "source": {
+          "revision": "cb9846f7b6333241ff5c8af1919f2105bbe8464f",
+          "dirty": true,
+          "snapshot_sha256": "c4078d7c6e18cb117b26797da508ecb94c2fbae0a07262e28af6ce13d1037292",
+          "files": {
+            "SpCas9/__init__.py": "7980e6fb0afdfa24fb7b13f26e47617aae792dc2445018d07e5b261ed2102522",
+            "SpCas9/spcas9_acceptance.py": "5b1b4b6d7a95f8b4dc1ad16995ad4b486fcd8dcbe709bc208bd8e6c4753ed663",
+            "SpCas9/spcas9_budget.py": "a7eb7044213ad7f12b19075b067fe708277227e4d8da5953e93a4c4ea04a9e7c",
+            "SpCas9/spcas9_compare.py": "a3dea0f903e6401514869f9a99c7072750ae0b497af3785f289e77c2881c5fe0",
+            "SpCas9/spcas9_data.py": "298fa8519770dee2489d778cdcfa80595fefa7d6fc9fb8586e91150ab41494b5",
+            "SpCas9/spcas9_diagnostics.py": "6cd82235e3dfe8bbdcf33c0692b5610d733f75b69e4aae765d2732313ce77dcc",
+            "SpCas9/spcas9_eval.py": "ec673e3d55f9a195cf1559270c6b919a1402b5c4420263517c72aad5c660ab81",
+            "SpCas9/spcas9_execution.py": "e8303c0581f525fcb01167766992f650789a4570b8a75b80db658787b4fde1a2",
+            "SpCas9/spcas9_finalist.py": "6368e354f59d6540640587f34ab08ede5f2b9fd58bbb17bd04cc9410cafb3d06",
+            "SpCas9/spcas9_metrics.py": "5a045fe0880524153f1e88174d613c2e3cde407e87187dc03e08c89961187b0e",
+            "SpCas9/spcas9_ranking.py": "d0a2eaed11d43ec2817297854f3233de3daa6328da38e287de2a6186a9ccba26",
+            "SpCas9/spcas9_ranking_checks.py": "bbdf1249007e1467abd0de1b5a3e105090e3ce30e91424003239fc9ec88cd6af",
+            "SpCas9/spcas9_readiness.py": "c8dac1de40a3e4f8562b1c94d80d8af5c03c479dfdbe3fe128aadee7b8d1927c",
+            "SpCas9/spcas9_research.py": "3b765e66278d431a8f0a14f14fc1e134274136f23d9e75dd736176f198142f40",
+            "SpCas9/spcas9_research_run.py": "4d0f86c724917619891c5f4fc4955b4af2a1318a855aa128846106416a86a2de",
+            "SpCas9/spcas9_retry.py": "3aa64f2eb40ac904045ef347a0a7fe85e05a4d469b6d710a64d9b138fc78e008",
+            "SpCas9/spcas9_selection.py": "e37f74fb1bb05a5290d3f24aacba616172db50db0715cd15f5a746af0d3ead10",
+            "SpCas9/spcas9_split.py": "21a73285bb6f720e26c0c1dd27380b8f326c14a86d580436c892cab31da3b8cc",
+            "SpCas9/spcas9_study.py": "08f1a340b5120e9773cf2acd873dc2479959540307863c0f7ed6ffda8d90ae4f",
+            "SpCas9/spcas9_study_backend.py": "36eedda0660de193990a3207fe6a865a0460b91176be8ed45fb972913d051389",
+            "SpCas9/spcas9_study_inputs.py": "384a0b62dae713b416bb10d9163e0fa4105cd366b3cfde49859e0a63d97cdd83",
+            "SpCas9/spcas9_train.py": "0a3e6a7d3aa74769f20f93c06b668afe8beedb60bcc6a26175e0fe1fcd9b18ad",
+            "SpCas9/spcas9_v1_audit.py": "4aa6cbba66bcf769a727194469a490bc8008851e945aaee5c8396751f1b7ea05",
+            "SpCas9/spcas9_v1_membership.py": "9d0956c7a34aefa315fd29ce1c5988cf453761c538552481d52c346bd637a6c3"
+          }
+        },
+        "training_log_sha256": "cc7340523ae8acd7c53cd54d47b5bdd94fcc884066c03f0a06677583e41a6c11",
+        "checkpoint_selection": {
+          "monitor": "val_loss",
+          "patience": 5,
+          "restore_best_weights": true
+        },
+        "selected_epoch": 41
+      },
+      "head_mapping": [
+        {
+          "index": 0,
+          "protein": "SpCas9(WT)",
+          "layer": "Output_SpCas9"
+        },
+        {
+          "index": 1,
+          "protein": "SpCas9-NG",
+          "layer": "Output_SpCas9_NG"
+        },
+        {
+          "index": 2,
+          "protein": "VRQR",
+          "layer": "Output_VRQR_variant"
+        },
+        {
+          "index": 3,
+          "protein": "xCas9",
+          "layer": "Output_xCas"
+        },
+        {
+          "index": 4,
+          "protein": "Sniper",
+          "layer": "Output_Sniper_Cas9"
+        },
+        {
+          "index": 5,
+          "protein": "SpCas9-HF1",
+          "layer": "Output_SpCas9_HF_1"
+        },
+        {
+          "index": 6,
+          "protein": "eSpCas9(1.1)",
+          "layer": "Output_eSpCas9_1_1_"
+        },
+        {
+          "index": 7,
+          "protein": "HypaCas9",
+          "layer": "Output_HypaCas9"
+        },
+        {
+          "index": 8,
+          "protein": "evoCas9",
+          "layer": "Output_evoCas9"
+        }
+      ]
+    },
+    "cas12a": {
+      "checkpoint": {
+        "best_epoch": 5,
+        "bytes": 1261811,
+        "filename": "cas12a_cnn_manifest.keras",
+        "forward_reproducibility": {
+          "comparison": "reload_vs_fitted_validation_predictions",
+          "deviation": {
+            "comparable": true,
+            "count": 1500,
+            "max_absolute_difference": 0.0,
+            "max_relative_difference": 0.0,
+            "zero_reference_count": 0
+          },
+          "tolerance": {
+            "atol": 7.62939453125e-07,
+            "basis": "rtol = ulp_budget * FP32 unit roundoff; atol anchors near-zero predictions at one tenth of rtol. A deliberate margin against reduction-order drift, not a measured error bound. It bounds forward reproducibility only: loading correctness rests on exact weight identity, which is checked separately.",
+            "precision": "float32",
+            "rtol": 7.62939453125e-06,
+            "ulp_budget": 128,
+            "unit_roundoff": 5.960464477539063e-08
+          }
+        },
+        "selected_by": "lowest validation loss, restored by EarlyStopping",
+        "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+        "weight_identities": [
+          {
+            "dtype": "float32",
+            "index": 0,
+            "name": "conv1d/kernel",
+            "sha256": "7e0ce245d674d561ef3b68343e2fc7629b96931eec29ba1c92898e0340f5e13a",
+            "shape": [
+              4,
+              4,
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 1,
+            "name": "conv1d/bias",
+            "sha256": "353a237dfc813477f3318a291d84e8bf2fe85a0af49b8b4d68a9e0a6b158898d",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 2,
+            "name": "conv1d_1/kernel",
+            "sha256": "dd122d0ba8a62d33ed26db20a42c4e854c38756c5c582b060dfcfbc5faf09204",
+            "shape": [
+              8,
+              4,
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 3,
+            "name": "conv1d_1/bias",
+            "sha256": "1522b0e794a4b04f202146f3d1d482ff348f3b801bab9e48b89214ed97308be7",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 4,
+            "name": "conv1d_2/kernel",
+            "sha256": "b97961afcb4e3c060e7d3efd570634e9fb444e52f9380fa2c9857fa7a7d97ee4",
+            "shape": [
+              15,
+              4,
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 5,
+            "name": "conv1d_2/bias",
+            "sha256": "e9a9a28b56beb2fd3c768e14f98d9d00177fea53b298636354a36676e8bc1652",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 6,
+            "name": "batch_normalization/gamma",
+            "sha256": "ad37cd621cb31315fdee56e895bda983f4eb9cd0e5328716fb6725d05d5ccc6b",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 7,
+            "name": "batch_normalization/beta",
+            "sha256": "895514b855932a9f6278e65fe208842942774944658ca9f096711328482e8c4b",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 8,
+            "name": "batch_normalization/moving_mean",
+            "sha256": "f20c179800433d81216ccb7b3a6fd4b7c93f7eae6c871853c32896332a643559",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 9,
+            "name": "batch_normalization/moving_variance",
+            "sha256": "c6c0255dc61764f9d901fb2ef81f2f83036c9dd29e5a6c8805b815a58e2784ed",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 10,
+            "name": "batch_normalization_1/gamma",
+            "sha256": "fb763dfc44bb4060c6cfde93d6bf2400f125d005dec83207c2714d84419c7d7b",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 11,
+            "name": "batch_normalization_1/beta",
+            "sha256": "38d4bc36a8ae3dad6ecffc4b5ad9077424da085cff8f965da7358398d56c7994",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 12,
+            "name": "batch_normalization_1/moving_mean",
+            "sha256": "b45d39003cfa8c777726aa89f4107d179c928d2ba7b6a09f5c884d76c2834cbf",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 13,
+            "name": "batch_normalization_1/moving_variance",
+            "sha256": "b651f5931756896a0661f0c9de31ee047b74a9ce444b5984e5031df557e2cc78",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 14,
+            "name": "batch_normalization_2/gamma",
+            "sha256": "d856f9a2833eec30edeffff86df411b1490144c827804b867cacdc4e618a0b9a",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 15,
+            "name": "batch_normalization_2/beta",
+            "sha256": "6a73a19391f8e0ae41c1f178e4ac70814dcfea2051f9fbb4883681f072ebff97",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 16,
+            "name": "batch_normalization_2/moving_mean",
+            "sha256": "8803458d6781feb02d1e6d4501dfd9ba9483555502725f0c1d26c336f6c36aa8",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 17,
+            "name": "batch_normalization_2/moving_variance",
+            "sha256": "341f701cbf12fc3e5533400b1601227aa05f6d54fa0abb5c4a500c9da6b2abb0",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 18,
+            "name": "forward_lstm/lstm_cell/kernel",
+            "sha256": "1e3da072121f8c82bffb2bfba38a862ecbe0c97c520289aec7676aaff5be66fc",
+            "shape": [
+              192,
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 19,
+            "name": "forward_lstm/lstm_cell/recurrent_kernel",
+            "sha256": "a0a2490e1e2098c1c6814ee9cafea52bb42b926dbf142fc0a401ad381b4bbbdf",
+            "shape": [
+              32,
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 20,
+            "name": "forward_lstm/lstm_cell/bias",
+            "sha256": "92025e502f6c15651839afc7baa53d20294eeffaf53c8aa66844bc2d052733ec",
+            "shape": [
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 21,
+            "name": "backward_lstm/lstm_cell/kernel",
+            "sha256": "34e11be6cbe780ec776cfaac6e039c8950c5b53b6b61d4441896fb2610c40cb9",
+            "shape": [
+              192,
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 22,
+            "name": "backward_lstm/lstm_cell/recurrent_kernel",
+            "sha256": "f6279a933e6a247daad732b478f9e4760b870038e7d2c21e58d6238c8e31379f",
+            "shape": [
+              32,
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 23,
+            "name": "backward_lstm/lstm_cell/bias",
+            "sha256": "a1ee4399a9243014ebbe3cedcee1cb62996fa6633c4cc9b42ac2a4116c1db739",
+            "shape": [
+              128
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 24,
+            "name": "dense/kernel",
+            "sha256": "953feef90badde0fc574ae493bcc25650891931a005a92f28b1ce99cedd51d2d",
+            "shape": [
+              354,
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 25,
+            "name": "dense/bias",
+            "sha256": "b0bf3de530267de9d1fe0aebb6a8d88125768fd662342c5cd6cdbc209e5a2e1c",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 26,
+            "name": "dense_1/kernel",
+            "sha256": "b11c5e32d7fafa58d00150c4602406690f7a68027fad0df58e34be7f5199ab44",
+            "shape": [
+              128,
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 27,
+            "name": "dense_1/bias",
+            "sha256": "f48b613231ad7a10287497e8469f5b5bdcd84f6538e7f94f36ddca972c99b17a",
+            "shape": [
+              64
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 28,
+            "name": "dense_2/kernel",
+            "sha256": "ec7ad304273acc6d70143292d7423a21097fce34f302035e4fa2da181d4134b9",
+            "shape": [
+              64,
+              1
+            ]
+          },
+          {
+            "dtype": "float32",
+            "index": 29,
+            "name": "dense_2/bias",
+            "sha256": "0face4a3cdeb801ead524fd6ff4ec74f804d7bd57f02744570513991a38e1465",
+            "shape": [
+              1
+            ]
+          }
+        ],
+        "weight_identity_verified": true,
+        "weight_tensors": 30
+      },
+      "validation_evidence_kind": "checkpoint selection only, not independent test",
+      "new_evaluation_kind": "held-out test membership fixed before checkpoint selection"
+    }
+  },
+  "historical_spcas9": {
+    "SpCas9": {
+      "recorded": {
+        "n": 5021,
+        "pearson": 0.941453125329113,
+        "spearman": 0.9218741508682023,
+        "mae": 0.05114970229758603,
+        "mse": 0.005821584478246365
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5021,
+        "missing": 165,
+        "pearson": 0.9414531253291127,
+        "spearman": 0.9218741508682023,
+        "mae": 0.05114970229758603,
+        "mse": 0.005821584478246365,
+        "unavailable_reasons": {}
+      }
+    },
+    "SpCas9-NG": {
+      "recorded": {
+        "n": 3982,
+        "pearson": 0.8678524457138482,
+        "spearman": 0.8409641930110089,
+        "mae": 0.06420729862845996,
+        "mse": 0.006834575456787241
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 3982,
+        "missing": 1204,
+        "pearson": 0.8678524457138482,
+        "spearman": 0.8409641930110089,
+        "mae": 0.06420729862845995,
+        "mse": 0.00683457545678724,
+        "unavailable_reasons": {}
+      }
+    },
+    "VRQR variant": {
+      "recorded": {
+        "n": 3979,
+        "pearson": 0.8711949076337969,
+        "spearman": 0.8806122809372273,
+        "mae": 0.05837905484033616,
+        "mse": 0.006751522778373336
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 3979,
+        "missing": 1207,
+        "pearson": 0.8711949076337969,
+        "spearman": 0.8806122809372273,
+        "mae": 0.05837905484033615,
+        "mse": 0.006751522778373335,
+        "unavailable_reasons": {}
+      }
+    },
+    "xCas": {
+      "recorded": {
+        "n": 5170,
+        "pearson": 0.8698199417402269,
+        "spearman": 0.8809650892999338,
+        "mae": 0.06027285480571917,
+        "mse": 0.007191281897796531
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5170,
+        "missing": 16,
+        "pearson": 0.869819941740227,
+        "spearman": 0.8809650892999338,
+        "mae": 0.06027285480571915,
+        "mse": 0.007191281897796531,
+        "unavailable_reasons": {}
+      }
+    },
+    "Sniper-Cas9": {
+      "recorded": {
+        "n": 5170,
+        "pearson": 0.9402190190522396,
+        "spearman": 0.922102258145456,
+        "mae": 0.04967695051961217,
+        "mse": 0.005690357921690269
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5170,
+        "missing": 16,
+        "pearson": 0.9402190190522397,
+        "spearman": 0.922102258145456,
+        "mae": 0.049676950519612156,
+        "mse": 0.00569035792169027,
+        "unavailable_reasons": {}
+      }
+    },
+    "SpCas9-HF.1": {
+      "recorded": {
+        "n": 5177,
+        "pearson": 0.7811608874399792,
+        "spearman": 0.789503636419693,
+        "mae": 0.07090622353883884,
+        "mse": 0.014546741367263262
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5177,
+        "missing": 9,
+        "pearson": 0.7811608874399794,
+        "spearman": 0.789503636419693,
+        "mae": 0.07090622353883883,
+        "mse": 0.014546741367263265,
+        "unavailable_reasons": {}
+      }
+    },
+    "eSpCas9(1.1)": {
+      "recorded": {
+        "n": 5176,
+        "pearson": 0.8611874111013841,
+        "spearman": 0.847474000773496,
+        "mae": 0.06273257092872721,
+        "mse": 0.010585945253339656
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5176,
+        "missing": 10,
+        "pearson": 0.8611874111013841,
+        "spearman": 0.847474000773496,
+        "mae": 0.06273257092872721,
+        "mse": 0.010585945253339656,
+        "unavailable_reasons": {}
+      }
+    },
+    "HypaCas9": {
+      "recorded": {
+        "n": 5177,
+        "pearson": 0.838629180451558,
+        "spearman": 0.8336651206228907,
+        "mae": 0.059923169511363526,
+        "mse": 0.010094955809865884
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5177,
+        "missing": 9,
+        "pearson": 0.8386291804515579,
+        "spearman": 0.8336651206228907,
+        "mae": 0.059923169511363526,
+        "mse": 0.010094955809865884,
+        "unavailable_reasons": {}
+      }
+    },
+    "evoCas9": {
+      "recorded": {
+        "n": 5161,
+        "pearson": 0.6700665674419266,
+        "spearman": 0.633845758917318,
+        "mae": 0.0447892274543018,
+        "mse": 0.008373869831569994
+      },
+      "recomputed_from_preserved_csv": {
+        "n": 5161,
+        "missing": 25,
+        "pearson": 0.6700665674419266,
+        "spearman": 0.633845758917318,
+        "mae": 0.044789227454301785,
+        "mse": 0.008373869831569994,
+        "unavailable_reasons": {}
+      }
+    }
+  },
+  "new_full_test_comparisons": {
+    "spcas9": {
+      "original_vs_deployed": {
+        "SpCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.4901161193847656e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531251924142,
+                "spearman": 0.9218737350702019,
+                "mae": 0.05114970241481285,
+                "mse": 0.0058215844909354185,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531225136432,
+                "spearman": 0.9218736285913256,
+                "mae": 0.05114970298202744,
+                "mse": 0.005821584759460644,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.6787709828113293e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.0647887627168728e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.672145877988477e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.6852522549275504e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588313791858,
+                "spearman": 0.9219127946826912,
+                "mae": 0.05114852209465919,
+                "mse": 0.005821424798395923,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588286854639,
+                "spearman": 0.921912688195354,
+                "mae": 0.051148522719745244,
+                "mse": 0.005821425068402637,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.6937219121947464e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.0648733717033565e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 6.250860523637769e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.7000671403570875e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-NG": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.341104507446289e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524509494974,
+                "spearman": 0.8409637690149077,
+                "mae": 0.0642072976817011,
+                "mse": 0.006834575265561145,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 5.246710510498076e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.402915156851648e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 9.860512267811927e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.9243044917932606e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524509494974,
+                "spearman": 0.8409637690149077,
+                "mae": 0.0642072976817011,
+                "mse": 0.006834575265561145,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 5.246710510498076e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.402915156851648e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 9.860512267811927e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.9243044917932606e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "VRQR variant": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.4901161193847656e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949074183303,
+                "spearman": 0.8806119862023958,
+                "mae": 0.05837905491149024,
+                "mse": 0.00675152278824957,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949118148966,
+                "spearman": 0.8806120947208501,
+                "mae": 0.05837905471862524,
+                "mse": 0.0067515225958986215,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 4.396566333220164e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.0851845433368368e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.9286499480797303e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.9235094853714552e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967481305583,
+                "spearman": 0.8806120289535172,
+                "mae": 0.05837612767788457,
+                "mse": 0.006751460074847523,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967525278351,
+                "spearman": 0.8806121374719725,
+                "mae": 0.05837612749999938,
+                "mse": 0.006751459882388996,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 4.3972768759559244e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.085184553328844e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.7788518574812784e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.9245852741350822e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "xCas": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.4901161193847656e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698199414426929,
+                "spearman": 0.8809640760097378,
+                "mae": 0.06027285484318825,
+                "mse": 0.007191281912988543,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698199427474744,
+                "spearman": 0.8809625492305795,
+                "mae": 0.0602728545131722,
+                "mse": 0.007191281843141813,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.3047815050626355e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.5267791583228885e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.3001604921034655e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 6.984672996229735e-11,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265371380834,
+                "spearman": 0.880966939020412,
+                "mae": 0.06026014314069175,
+                "mse": 0.007191110238344056,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265384452623,
+                "spearman": 0.8809654122365289,
+                "mae": 0.06026014281644018,
+                "mse": 0.007191110168497207,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.3071788096397086e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.5267838830990144e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.242515700385695e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 6.984684879085545e-11,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "Sniper-Cas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190191220348,
+                "spearman": 0.9221024644280362,
+                "mae": 0.04967695050159819,
+                "mse": 0.005690357914965244,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190176508197,
+                "spearman": 0.9221020663209414,
+                "mae": 0.04967695093681586,
+                "mse": 0.005690358056657387,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.4712150386841927e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 3.9810709484555673e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 4.3521766746046353e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.416921423941231e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145267346269,
+                "spearman": 0.9221002724832342,
+                "mae": 0.04969299163978778,
+                "mse": 0.005690636395784838,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145252610872,
+                "spearman": 0.9220998743506655,
+                "mae": 0.04969299211679787,
+                "mse": 0.005690636537855089,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.4735397346754553e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 3.9813256869081215e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 4.770100911488662e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.4207025139656437e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-HF.1": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 2.384185791015625e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608872410652,
+                "spearman": 0.7895032981530614,
+                "mae": 0.0709062235834531,
+                "mse": 0.014546741380847382,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608922689565,
+                "spearman": 0.7895046944866557,
+                "mae": 0.0709062230538387,
+                "mse": 0.014546741102631246,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 5.027891214481883e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.3963335943056876e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.296143940070053e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.782161358932944e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7810720289836206,
+                "spearman": 0.7902406632338281,
+                "mae": 0.07086982624830734,
+                "mse": 0.014546485958069465,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7810720339324635,
+                "spearman": 0.7902415974870445,
+                "mae": 0.0708698257172538,
+                "mse": 0.014546485681519738,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 4.948842891039362e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 9.342532163447714e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.310535483582512e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.7654972756252505e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "eSpCas9(1.1)": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.4901161193847656e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874110030938,
+                "spearman": 0.8474739375058747,
+                "mae": 0.06273257094024279,
+                "mse": 0.010585945262254943,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874136987742,
+                "spearman": 0.8474732861103357,
+                "mae": 0.06273257043427696,
+                "mse": 0.010585945049483356,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.6956803456101852e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 6.513955390641257e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.059658247930088e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.1277158680776953e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611551047010537,
+                "spearman": 0.8479171077570493,
+                "mae": 0.06269951754445423,
+                "mse": 0.010585598364953732,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.861155107386186,
+                "spearman": 0.8479164562106811,
+                "mae": 0.06269951709606632,
+                "mse": 0.010585598154275882,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.685132227675524e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 6.515463681910916e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 4.483879101346844e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 2.10677850165375e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "HypaCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.7881393432617188e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291807340093,
+                "spearman": 0.8336655978072548,
+                "mae": 0.05992316944875965,
+                "mse": 0.010094955795775394,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291881000555,
+                "spearman": 0.8336651777228042,
+                "mae": 0.05992316849602943,
+                "mse": 0.010094955395102393,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 7.366046217427424e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.200844505586332e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 9.527302211043143e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 4.0067300172141884e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386047996821853,
+                "spearman": 0.8339163048098794,
+                "mae": 0.05991836294238962,
+                "mse": 0.01009500873190877,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386048070389005,
+                "spearman": 0.8339158570211664,
+                "mae": 0.05991836202707781,
+                "mse": 0.01009500833130386,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 7.35671523699466e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.4778871299833156e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 9.153118124549664e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 4.006049103555398e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "evoCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.7136335372924805e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665673946891,
+                "spearman": 0.6338454865987636,
+                "mae": 0.044789227489851216,
+                "mse": 0.008373869833097227,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665842874852,
+                "spearman": 0.633847302851901,
+                "mae": 0.04478922621674896,
+                "mse": 0.008373869458823187,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.6892796161904755e-08,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.8162531374432689e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.2731022555612093e-09,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 3.7427404057932545e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6699600493390699,
+                "spearman": 0.6341036217162375,
+                "mae": 0.04475319149111426,
+                "mse": 0.008373659960494368,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.669960066271753,
+                "spearman": 0.6341045598674087,
+                "mae": 0.04475319022450834,
+                "mse": 0.008373659586237226,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.693268303348816e-08,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 9.381511711925583e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.2666059173715993e-09,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 3.7425714263794596e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "original_vs_export": {
+        "SpCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531251924142,
+                "spearman": 0.9218737350702019,
+                "mae": 0.05114970241481285,
+                "mse": 0.0058215844909354185,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531251924142,
+                "spearman": 0.9218737350702019,
+                "mae": 0.05114970241481285,
+                "mse": 0.0058215844909354185,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588313791858,
+                "spearman": 0.9219127946826912,
+                "mae": 0.05114852209465919,
+                "mse": 0.005821424798395923,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588313791858,
+                "spearman": 0.9219127946826912,
+                "mae": 0.05114852209465919,
+                "mse": 0.005821424798395923,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-NG": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "VRQR variant": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949074183303,
+                "spearman": 0.8806119862023958,
+                "mae": 0.05837905491149024,
+                "mse": 0.00675152278824957,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949074183303,
+                "spearman": 0.8806119862023958,
+                "mae": 0.05837905491149024,
+                "mse": 0.00675152278824957,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967481305583,
+                "spearman": 0.8806120289535172,
+                "mae": 0.05837612767788457,
+                "mse": 0.006751460074847523,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967481305583,
+                "spearman": 0.8806120289535172,
+                "mae": 0.05837612767788457,
+                "mse": 0.006751460074847523,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "xCas": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698199414426929,
+                "spearman": 0.8809640760097378,
+                "mae": 0.06027285484318825,
+                "mse": 0.007191281912988543,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698199414426929,
+                "spearman": 0.8809640760097378,
+                "mae": 0.06027285484318825,
+                "mse": 0.007191281912988543,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265371380834,
+                "spearman": 0.880966939020412,
+                "mae": 0.06026014314069175,
+                "mse": 0.007191110238344056,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265371380834,
+                "spearman": 0.880966939020412,
+                "mae": 0.06026014314069175,
+                "mse": 0.007191110238344056,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "Sniper-Cas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190191220348,
+                "spearman": 0.9221024644280362,
+                "mae": 0.04967695050159819,
+                "mse": 0.005690357914965244,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190191220348,
+                "spearman": 0.9221024644280362,
+                "mae": 0.04967695050159819,
+                "mse": 0.005690357914965244,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145267346269,
+                "spearman": 0.9221002724832342,
+                "mae": 0.04969299163978778,
+                "mse": 0.005690636395784838,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145267346269,
+                "spearman": 0.9221002724832342,
+                "mae": 0.04969299163978778,
+                "mse": 0.005690636395784838,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-HF.1": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608872410652,
+                "spearman": 0.7895032981530614,
+                "mae": 0.0709062235834531,
+                "mse": 0.014546741380847382,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608872410652,
+                "spearman": 0.7895032981530614,
+                "mae": 0.0709062235834531,
+                "mse": 0.014546741380847382,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7810720289836206,
+                "spearman": 0.7902406632338281,
+                "mae": 0.07086982624830734,
+                "mse": 0.014546485958069465,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7810720289836206,
+                "spearman": 0.7902406632338281,
+                "mae": 0.07086982624830734,
+                "mse": 0.014546485958069465,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "eSpCas9(1.1)": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874110030938,
+                "spearman": 0.8474739375058747,
+                "mae": 0.06273257094024279,
+                "mse": 0.010585945262254943,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874110030938,
+                "spearman": 0.8474739375058747,
+                "mae": 0.06273257094024279,
+                "mse": 0.010585945262254943,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611551047010537,
+                "spearman": 0.8479171077570493,
+                "mae": 0.06269951754445423,
+                "mse": 0.010585598364953732,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611551047010537,
+                "spearman": 0.8479171077570493,
+                "mae": 0.06269951754445423,
+                "mse": 0.010585598364953732,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "HypaCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291807340093,
+                "spearman": 0.8336655978072548,
+                "mae": 0.05992316944875965,
+                "mse": 0.010094955795775394,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291807340093,
+                "spearman": 0.8336655978072548,
+                "mae": 0.05992316944875965,
+                "mse": 0.010094955795775394,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386047996821853,
+                "spearman": 0.8339163048098794,
+                "mae": 0.05991836294238962,
+                "mse": 0.01009500873190877,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386047996821853,
+                "spearman": 0.8339163048098794,
+                "mae": 0.05991836294238962,
+                "mse": 0.01009500873190877,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "evoCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 0.0,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665673946891,
+                "spearman": 0.6338454865987636,
+                "mae": 0.044789227489851216,
+                "mse": 0.008373869833097227,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665673946891,
+                "spearman": 0.6338454865987636,
+                "mae": 0.044789227489851216,
+                "mse": 0.008373869833097227,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6699600493390699,
+                "spearman": 0.6341036217162375,
+                "mae": 0.04475319149111426,
+                "mse": 0.008373659960494368,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6699600493390699,
+                "spearman": 0.6341036217162375,
+                "mae": 0.04475319149111426,
+                "mse": 0.008373659960494368,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "archived_vs_original": {
+        "SpCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.192092894952701e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531253291127,
+                "spearman": 0.9218741508682023,
+                "mae": 0.05114970229758603,
+                "mse": 0.005821584478246365,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414531251924142,
+                "spearman": 0.9218737350702019,
+                "mae": 0.05114970241481285,
+                "mse": 0.0058215844909354185,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.366985413753241e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.1579800047486515e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.1722681853010286e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.2689053800751804e-11,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588315154785,
+                "spearman": 0.9219132105047094,
+                "mae": 0.05114852198410984,
+                "mse": 0.005821424785811879,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5021,
+                "missing": 165,
+                "pearson": 0.9414588313791858,
+                "spearman": 0.9219127946826912,
+                "mae": 0.05114852209465919,
+                "mse": 0.005821424798395923,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.3629264383752115e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.1582201826262377e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.1054935439291924e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.2584044049857024e-11,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-NG": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.1920928950914789e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457138482,
+                "spearman": 0.8409641930110089,
+                "mae": 0.06420729862845995,
+                "mse": 0.00683457545678724,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.106137403894536e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.8370458554350932e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.929237490929438e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.204354324602086e-12,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457138482,
+                "spearman": 0.8409641930110089,
+                "mae": 0.06420729862845995,
+                "mse": 0.00683457545678724,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3982,
+                "missing": 1204,
+                "pearson": 0.8678524457027869,
+                "spearman": 0.8409640093064233,
+                "mae": 0.06420729866775232,
+                "mse": 0.006834575457991594,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.106137403894536e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.8370458554350932e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.929237490929438e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.204354324602086e-12,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "VRQR variant": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.49011611910721e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949076337969,
+                "spearman": 0.8806122809372273,
+                "mae": 0.05837905484033615,
+                "mse": 0.006751522778373335,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711949074183303,
+                "spearman": 0.8806119862023958,
+                "mae": 0.05837905491149024,
+                "mse": 0.00675152278824957,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.1546664452642972e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.9473483154074387e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 7.115408956481772e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 9.876235246286669e-12,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967483460418,
+                "spearman": 0.8806123236883517,
+                "mae": 0.058376127606730485,
+                "mse": 0.006751460064971287,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 3979,
+                "missing": 1207,
+                "pearson": 0.8711967481305583,
+                "spearman": 0.8806120289535172,
+                "mae": 0.05837612767788457,
+                "mse": 0.006751460074847523,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.1548351991640402e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.9473483453834604e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 7.115408262592382e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 9.876236113648407e-12,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "xCas": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.192092894952701e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.869819941740227,
+                "spearman": 0.8809650892999338,
+                "mae": 0.06027285480571915,
+                "mse": 0.007191281897796531,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698199414426929,
+                "spearman": 0.8809640760097378,
+                "mae": 0.06027285484318825,
+                "mse": 0.007191281912988543,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.9753410846211636e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.013290195972516e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.746909726931591e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.519201257849101e-11,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265374369224,
+                "spearman": 0.8809679523135945,
+                "mae": 0.060260143100340446,
+                "mse": 0.007191110223102748,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.8698265371380834,
+                "spearman": 0.880966939020412,
+                "mae": 0.06026014314069175,
+                "mse": 0.007191110238344056,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.988389535829583e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.0132931824724523e-06,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 4.0351305630181855e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.5241308215507843e-11,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "Sniper-Cas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.490116118829654e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190190522397,
+                "spearman": 0.922102258145456,
+                "mae": 0.049676950519612156,
+                "mse": 0.00569035792169027,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402190191220348,
+                "spearman": 0.9221024644280362,
+                "mae": 0.04967695050159819,
+                "mse": 0.005690357914965244,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 6.979505862148017e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.0628258023958068e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.80139653194189e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 6.725025918086214e-12,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145266642548,
+                "spearman": 0.9221000661876954,
+                "mae": 0.04969299166068398,
+                "mse": 0.005690636402604158,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5170,
+                "missing": 16,
+                "pearson": 0.9402145267346269,
+                "spearman": 0.9221002724832342,
+                "mae": 0.04969299163978778,
+                "mse": 0.005690636395784838,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 7.037215254968032e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.062955388737464e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 2.0896201435860462e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 6.819320282069885e-12,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "SpCas9-HF.1": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 8.940696716308594e-08,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608874399794,
+                "spearman": 0.789503636419693,
+                "mae": 0.07090622353883883,
+                "mse": 0.014546741367263265,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7811608872410652,
+                "spearman": 0.7895032981530614,
+                "mae": 0.0709062235834531,
+                "mse": 0.014546741380847382,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 1.9891410740768833e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 3.3826663159430836e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 4.461427061119849e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.3584116470566343e-11,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.781072029184601,
+                "spearman": 0.7902405330370688,
+                "mae": 0.07086982619217974,
+                "mse": 0.014546485944290767,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.7810720289836206,
+                "spearman": 0.7902406632338281,
+                "mae": 0.07086982624830734,
+                "mse": 0.014546485958069465,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.0098034347881821e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 1.301967593736464e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.6127602565680945e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.3778698668143186e-11,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "eSpCas9(1.1)": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.6391277307681307e-07,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874111013841,
+                "spearman": 0.847474000773496,
+                "mae": 0.06273257092872721,
+                "mse": 0.010585945253339656,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611874110030938,
+                "spearman": 0.8474739375058747,
+                "mae": 0.06273257094024279,
+                "mse": 0.010585945262254943,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 9.829026481611436e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 6.32676212530825e-08,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 1.1515580156107319e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 8.915286911492792e-12,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.861155104796938,
+                "spearman": 0.8479171710314346,
+                "mae": 0.06269951754445423,
+                "mse": 0.010585598356244943,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5176,
+                "missing": 10,
+                "pearson": 0.8611551047010537,
+                "spearman": 0.8479171077570493,
+                "mae": 0.06269951754445423,
+                "mse": 0.010585598364953732,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 9.588430049944918e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 6.327438528686002e-08,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 8.708788898359465e-12,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "HypaCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 9.685754773225419e-08,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291804515579,
+                "spearman": 0.8336651206228907,
+                "mae": 0.059923169511363526,
+                "mse": 0.010094955809865884,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386291807340093,
+                "spearman": 0.8336655978072548,
+                "mae": 0.05992316944875965,
+                "mse": 0.010094955795775394,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.824513956056762e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.771843641337981e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 6.260387347412077e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.4090489192097877e-11,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386047993995946,
+                "spearman": 0.8339158274881683,
+                "mae": 0.059918363004993494,
+                "mse": 0.01009500874601387,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5177,
+                "missing": 9,
+                "pearson": 0.8386047996821853,
+                "spearman": 0.8339163048098794,
+                "mae": 0.05991836294238962,
+                "mse": 0.01009500873190877,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.825906175729642e-10,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 4.773217111564421e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 6.260387347412077e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.4105099033212554e-11,
+                  "passed": true
+                }
+              }
+            }
+          }
+        },
+        "evoCas9": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 8.940696716308594e-08,
+          "outputs": 5186,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665674419266,
+                "spearman": 0.633845758917318,
+                "mae": 0.044789227454301785,
+                "mse": 0.008373869831569994,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6700665673946891,
+                "spearman": 0.6338454865987636,
+                "mae": 0.044789227489851216,
+                "mse": 0.008373869833097227,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 4.7237547207146235e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 2.7231855437293007e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.554943145411826e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.5272332010152212e-12,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6699600493865828,
+                "spearman": 0.634103280224535,
+                "mae": 0.04475319145754982,
+                "mse": 0.00837365995897327,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 5161,
+                "missing": 25,
+                "pearson": 0.6699600493390699,
+                "spearman": 0.6341036217162375,
+                "mae": 0.04475319149111426,
+                "mse": 0.008373659960494368,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 4.7512882517253274e-11,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 3.4149170247133043e-07,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 3.356443595281533e-11,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 1.5210992188041672e-12,
+                  "passed": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cas12a": {
+      "original_vs_deployed": {
+        "Cas12a": {
+          "passed": true,
+          "output_passed": true,
+          "max_absolute_difference": 1.4901161193847656e-07,
+          "outputs": 1500,
+          "metrics": {
+            "raw": {
+              "reference": {
+                "n": 1500,
+                "missing": 0,
+                "pearson": 0.7612038616186096,
+                "spearman": 0.7489096964252249,
+                "mae": 0.15454434215601456,
+                "mse": 0.04348410721074731,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 1500,
+                "missing": 0,
+                "pearson": 0.7612038594561694,
+                "spearman": 0.7489096964252249,
+                "mae": 0.15454434164751243,
+                "mse": 0.043484107520668155,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.1624402268827225e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.08502129292765e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 3.099208459311775e-10,
+                  "passed": true
+                }
+              }
+            },
+            "clipped": {
+              "reference": {
+                "n": 1500,
+                "missing": 0,
+                "pearson": 0.7612038616186096,
+                "spearman": 0.7489096964252249,
+                "mae": 0.15454434215601456,
+                "mse": 0.04348410721074731,
+                "unavailable_reasons": {}
+              },
+              "observed": {
+                "n": 1500,
+                "missing": 0,
+                "pearson": 0.7612038594561694,
+                "spearman": 0.7489096964252249,
+                "mae": 0.15454434164751243,
+                "mse": 0.043484107520668155,
+                "unavailable_reasons": {}
+              },
+              "differences": {
+                "pearson": {
+                  "absolute_difference": 2.1624402268827225e-09,
+                  "passed": true
+                },
+                "spearman": {
+                  "absolute_difference": 0.0,
+                  "passed": true
+                },
+                "mae": {
+                  "absolute_difference": 5.08502129292765e-10,
+                  "passed": true
+                },
+                "mse": {
+                  "absolute_difference": 3.099208459311775e-10,
+                  "passed": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "preprocessing": {
+    "cas12a": {
+      "rows": 1500,
+      "source_rows": 15002,
+      "usable_rows": 15000,
+      "excluded": [
+        {
+          "source_row": 15000,
+          "raw": {
+            "50 bp synthetic target and target context sequence \n10 bp + PAM + 23 bp protospacer + 17 bp)": "",
+            "34 bp synthetic target and target context sequence\n(4 bp + PAM + 23 bp protospacer + 3 bp)": "",
+            "20 bp guide sequence (5' to 3')": "",
+            "Indel frequency\n(%, Background)": "",
+            "Indel read count\n(Background)": "",
+            "Total read count\n(Background)": "",
+            "Indel freqeuncy\n(Cpf1 delivered,%)": "",
+            "Indel read count\n(Cpf1 delivered)": "",
+            "Total read count\n(Cpf1 delivered)": "",
+            "Indel freqeuncy\n(Background substracted, %)": ""
+          },
+          "reasons": [
+            "missing_sequence",
+            "missing_target"
+          ]
+        },
+        {
+          "source_row": 15001,
+          "raw": {
+            "50 bp synthetic target and target context sequence \n10 bp + PAM + 23 bp protospacer + 17 bp)": "Filtering condition: reads above 200, background indels below 8%",
+            "34 bp synthetic target and target context sequence\n(4 bp + PAM + 23 bp protospacer + 3 bp)": "",
+            "20 bp guide sequence (5' to 3')": "",
+            "Indel frequency\n(%, Background)": "",
+            "Indel read count\n(Background)": "",
+            "Total read count\n(Background)": "",
+            "Indel freqeuncy\n(Cpf1 delivered,%)": "",
+            "Indel read count\n(Cpf1 delivered)": "",
+            "Total read count\n(Cpf1 delivered)": "",
+            "Indel freqeuncy\n(Background substracted, %)": ""
+          },
+          "reasons": [
+            "missing_sequence",
+            "missing_target"
+          ]
+        }
+      ],
+      "partition_counts": {
+        "test": 1500,
+        "train": 12000,
+        "validation": 1500
+      },
+      "test_disjoint_from_training_and_validation": true,
+      "source_and_table_and_row_hashes_verified": true
+    }
+  },
+  "reference_runtime": {
+    "backend": "tensorflow",
+    "keras": "3.14.1",
+    "tensorflow": "2.21.0",
+    "dtype": "float32"
+  },
+  "deployed_runtime": {
+    "python": "3.13.7",
+    "keras": "3.14.1",
+    "torch": "2.12.0+cpu",
+    "numpy": "2.3.2",
+    "shap": "0.52.0",
+    "h5py": "3.14.0",
+    "backend": "torch",
+    "torch_threads": "4",
+    "preprocessing": {
+      "spcas9": {
+        "rows": 5186,
+        "all_inputs_exact": true
+      },
+      "cas12a": {
+        "rows": 1500,
+        "all_inputs_exact": true
+      }
+    }
+  },
+  "limitations": [
+    "Cas12a training source attestation is retrospective; see preserved provenance.json.",
+    "SpCas9 historical evaluation records a dirty source snapshot digest; its full contemporaneous source snapshot is not in the adopted vault. Saved split, labels, predictions and both checkpoint files are retained and replayed here.",
+    "No new training, model selection, split change, or NT comparison is performed."
+  ],
+  "files": {
+    "spcas9-inputs.npz": "f084a10018aef0f021ce98f195e84b397b0783a193549665944b6a1e86e3010a",
+    "cas12a-inputs.npz": "ee1e3182f0885727f17eb60c1987e491749cada7e447aa69b10bb5649b913517",
+    "reference.npz": "e92b00debc55c80fea8bee16b86236d709b22721f9439fa6525bc65dcc84b8e6",
+    "deployed.npz": "bcbc9f401dbb4e822fd343168d1b8c18d6697fafce46230d517bc7b3e997bfb7",
+    "prepared.json": "2d2cf7f47ca1f662fd788ab5a11ef0ec1ae0640f2d87d191c4d9cf6ce05d9867",
+    "preprocessing.json": "478cc562303d3edc69f2cb05c690f3bc32d235b560549a76b5c257e8e09885cb",
+    "reference-runtime.json": "8e31b9ae4f2220b450c9f3c67e9be7ebef7ab8a3d06721bac29afab37bea2069",
+    "deployed-runtime.json": "2ff81245233ce8f1a0d8eb24e574411a57e0d26a8fcbf79d0520d26ff4201bf0"
+  }
+}
