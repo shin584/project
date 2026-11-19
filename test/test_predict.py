@@ -113,3 +113,30 @@ def test_version_label_names_the_asset_and_the_checkpoint_digest():
     assert predict.version_label(spec, "") == "spcas9-9hydra-v2 · sha256 미확인"
     nt = predict.MODEL_REGISTRY[("A", "SpCas9")]
     assert predict.version_label(nt, "cd" * 32) == "sha256 cdcdcdcdcdcd"
+
+
+def test_name_resolved_predictors_are_declared_to_the_packaging_spec():
+    """이름으로만 적힌 예측기는 PyInstaller 분석에 보이지 않는다 (#196/#197).
+
+    `FAMILY_PREDICTOR_CLASSES`의 문자열 항목은 런타임에 `importlib`이 푼다. 정적
+    import가 없으므로 `packaging/desktop.spec`의 `hiddenimports`에 적지 않으면
+    frozen 빌드에서만, 그 계열을 고른 순간에만 터진다. 두 곳이 어긋나면 여기서 드러난다.
+    """
+    from pathlib import Path
+
+    import predict
+
+    spec = (Path(__file__).resolve().parent.parent / "packaging/desktop.spec").read_text(
+        encoding="utf-8")
+    named = {entry.split(":")[0]
+             for table in predict.FAMILY_PREDICTOR_CLASSES.values()
+             for entry in table.values() if isinstance(entry, str)}
+    assert named, "문자열로 적힌 예측기가 없다 — 이 검사의 전제가 바뀌었다"
+    for module in sorted(named):
+        # 이름이 실제 모듈이어야 하고,
+        assert predict._predictor_class(
+            next(entry for table in predict.FAMILY_PREDICTOR_CLASSES.values()
+                 for entry in table.values()
+                 if isinstance(entry, str) and entry.startswith(module + ":")))
+        # 배포 spec이 그 이름을 알고 있어야 한다.
+        assert f"'{module}'" in spec, f"{module}이 desktop.spec의 hiddenimports에 없다"

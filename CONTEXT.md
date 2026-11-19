@@ -64,6 +64,21 @@ _Avoid_: 두 종류를 같은 열 이름으로 묶기
 XAI의 모든 기여도는 윈도우 좌표계에서 계산된다.
 _Avoid_: "입력 서열" (그건 사용자가 넣은 81bp다)
 
+Cas12a는 **계열마다 윈도우가 시작하는 자리가 다르다** (#197). NT는 PAM에서 바로
+시작하고(`window_upstream=0`), non-NT manifest CNN은 PAM보다 4bp 앞에서 시작한다
+(`window_upstream=4`). 길이는 둘 다 34bp이고 `site_key`도 같지만 `model_input_seq`가
+다르다. 계열별 탐색 설정은 `non_nt_cas12a_predict.MANIFEST_CAS_CONFIGS`이고
+렌더러는 `PredictionRenderer._scan`에서 그것을 고른다.
+
+그래서 `pam_scanner.WINDOW_LAYOUT["Cas12a"]`(PAM 4–7)은 **non-NT 윈도우에만 맞고
+NT 윈도우에는 맞지 않는다.** NT 윈도우에서 실제로 검색된 TTTV는 0–3이다 — #190이
+이미 기록한 불일치이며(`docs/demo-sequences.md`), #197로 non-NT 쪽만 일치하게 됐다.
+`WINDOW_LAYOUT`은 `cas_type` 하나로만 갈리므로 이 차이를 담지 못한다. 설명 화면의
+구간 색과 '모델이 실제로 읽은 구간'이 이것을 읽으므로, **non-NT 설명을 붙이는
+#199/#200은 계열별 layout을 함께 정해야 한다.** 지금은 non-NT 설명 경로가 막혀 있어
+드러나지 않는다. 관계는 `test/test_pam_scanner.py`가 고정해 둔다.
+_Avoid_: `WINDOW_LAYOUT`을 "그 Cas의 윈도우 구조"로 읽기 — 계열까지 정해야 뜻이 산다.
+
 **헤드**:
 멀티헤드 모델에서 설명 대상이 되는 출력 하나. SpCas9 모델은 출력이 9개이고
 `SPCAS9_VARIANTS`와 순서가 같다. Cas12a는 출력이 1개라 헤드가 하나다.

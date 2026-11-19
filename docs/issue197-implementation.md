@@ -107,10 +107,15 @@ reference, records, scanner configuration and the renderer scan hook.
 The Cas12a registry entries in `predict.py` and the non-NT scan override in
 `desktop/worker_renderer.py` sit inside blocks that #196 is still introducing.
 Their #197-only integration diff is committed as
-[`issue197-integration.patch`](issue197-integration.patch). The corresponding
-source changes remain in the shared working tree for the #196 commit to include;
-do not reapply the patch when those changes are already present. The complete
-session diff is also saved locally in `.scratch/issue197/changes.patch`.
+[`issue197-integration.patch`](issue197-integration.patch). The complete session
+diff is also saved locally in `.scratch/issue197/changes.patch`.
+
+**Resolved 2026-11-19:** those shared-file changes were included in the #196
+commit `f301327`, exactly as the patch records them. The patch is therefore
+provenance only — **do not reapply it**; both edits are already in the tree, and
+`#196`'s record names them in its own "same worktree" section. `ef1ff17` on its
+own still leaves `non_nt_cas12a_predict.py` unreferenced, so the two commits are
+only meaningful together.
 
 The 131-test result applies to the combined working tree with the ongoing #196
 foundation. This WIP commit alone is not an independently runnable completion

@@ -32,7 +32,11 @@ hiddenimports = (collect_submodules('transformers.models.esm') +
                  collect_submodules('transformers.models.auto') +
                  collect_submodules('shap') + collect_submodules('keras') +
                  ['matplotlib.backends.backend_agg',
-                 'desktop.worker_renderer', 'desktop.fake', 'non_nt_runtime'])
+                 'desktop.worker_renderer', 'desktop.fake', 'non_nt_runtime',
+                 # Resolved by name at runtime, so the analysis cannot see them:
+                 # the renderer factory (`ProcessDispatcher`) and the per-family
+                 # predictor table (`predict.FAMILY_PREDICTOR_CLASSES`, #196/#197).
+                 'non_nt_predict', 'non_nt_cas12a_predict'])
 a = Analysis([str(root / 'desktop_entry.py')], pathex=[str(root)],
              datas=datas, hiddenimports=hiddenimports,
              runtime_hooks=[str(root / 'packaging' / 'runtime_hook.py')],
