@@ -243,6 +243,15 @@ diagnostic value and a retry note - "XAI 검증에 실패하면 예측 표는 �
 설명에 경고·진단값·재시도 안내를 표시한다". #199 (SpCas9) and #200 (Cas12a)
 now own this requirement; the detailed evidence/cost handoff is in #214's report.
 
+> **Superseded on 2026-11-19, as to the display requirement only.** The screen
+> requirement above no longer holds: computable explanations are rendered with
+> the previous version's graphs even when they miss the numeric tolerances, and
+> no separate quality warning, diagnostic panel or retry screen is added. See
+> [XAI 표시 방침](../planning/xai-exhibition-display-policy.md). Everything else
+> on this page - the failures, the verdicts, the tolerances, the measurements and
+> the ownership of units, cache identity, path contracts and precision cost -
+> stands unchanged, and the failures are preserved in these internal records.
+
 ### One defect found and fixed
 
 SHAP was **not reproducible at all**: `shap.KernelExplainer` samples its subsets
