@@ -1,0 +1,75 @@
+{
+  "status": "fail",
+  "checks": [
+    {
+      "check": "nt:SpCas9|+|32:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:rollout:rendered",
+      "passed": false
+    }
+  ],
+  "observations": [
+    {
+      "label": "startup",
+      "time": 1795084957.4444928,
+      "family": "nt",
+      "ui_model_modules": [
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 0
+    },
+    {
+      "label": "prediction_and_automatic_xai",
+      "time": 1795084990.4784772,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    },
+    {
+      "label": "SpCas9|+|32:ig",
+      "time": 1795085007.4419134,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 1
+    },
+    {
+      "label": "SpCas9|+|32:shap",
+      "time": 1795085013.9202719,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    }
+  ],
+  "error": "Traceback (most recent call last):\n  File \"C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py\", line 145, in drive\n    explanations()\n    ~~~~~~~~~~~~^^\n  File \"C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py\", line 132, in explanations\n    check(f\"{family}:{case['site']}:{method}:rendered\", window.evaluate_js(\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        \"document.querySelectorAll('[data-slot=xai] img').length\") == expected)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py\", line 46, in check\n    raise AssertionError(name)\nAssertionError: nt:SpCas9|+|32:rollout:rendered\n"
+}

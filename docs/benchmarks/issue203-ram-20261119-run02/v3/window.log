@@ -1,0 +1,32 @@
+prepare {}
+scan_sites {}
+predict {}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1795085422.018388   10764 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1795085429.388423   10764 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+select_family {}
+scan_sites {}
+predict {}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'rollout', 'params': {}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'rollout', 'params': {}, 'size': 80}
+select_family {}
+scan_sites {}
+predict {}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1795085713.612882   21652 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1795085720.903247   21652 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+return_stable {}
+closing {}

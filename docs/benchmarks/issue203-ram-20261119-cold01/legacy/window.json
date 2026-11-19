@@ -1,0 +1,142 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "check": "nt:SpCas9|+|32:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:rollout:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:rollout:rendered",
+      "passed": true
+    }
+  ],
+  "observations": [
+    {
+      "label": "startup",
+      "time": 1795085955.2930381,
+      "family": "nt",
+      "ui_model_modules": [
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 0
+    },
+    {
+      "label": "prediction_and_automatic_xai",
+      "time": 1795085990.289507,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    },
+    {
+      "label": "SpCas9|+|32:ig",
+      "time": 1795086008.2995427,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 1
+    },
+    {
+      "label": "SpCas9|+|32:shap",
+      "time": 1795086046.5629835,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    },
+    {
+      "label": "SpCas9|+|32:rollout",
+      "time": 1795086052.2953775,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    },
+    {
+      "label": "Cas12a|+|16:ig",
+      "time": 1795086089.751628,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 1
+    },
+    {
+      "label": "Cas12a|+|16:shap",
+      "time": 1795086142.9606,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    },
+    {
+      "label": "Cas12a|+|16:rollout",
+      "time": 1795086153.2491102,
+      "family": "nt",
+      "ui_model_modules": [
+        "matplotlib",
+        "numpy",
+        "tokenizers",
+        "torch",
+        "transformers"
+      ],
+      "worker_pid": null,
+      "images": 2
+    }
+  ]
+}

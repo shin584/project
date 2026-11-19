@@ -1,0 +1,1936 @@
+{
+  "scope": "source only",
+  "runs": {
+    "legacy": {
+      "phases": [
+        {
+          "time": 0,
+          "id": 0,
+          "family": "nt",
+          "label": "startup_imports",
+          "samples": 53,
+          "observed_seconds": 5.2394187450408936,
+          "rss": {
+            "peak": 431882240,
+            "tail_median": 177674240.0,
+            "tail_min": 127373312,
+            "tail_max": 431882240
+          },
+          "private": {
+            "peak": 301326336,
+            "tail_median": 188198912.0,
+            "tail_min": 175403008,
+            "tail_max": 301326336
+          }
+        },
+        {
+          "id": 1,
+          "label": "prepare",
+          "family": "nt",
+          "time": 1795085166.7497005,
+          "samples": 382,
+          "observed_seconds": 38.35705256462097,
+          "rss": {
+            "peak": 2443833344,
+            "tail_median": 2313854976.0,
+            "tail_min": 2313842688,
+            "tail_max": 2316369920
+          },
+          "private": {
+            "peak": 2716823552,
+            "tail_median": 2694754304.0,
+            "tail_min": 2694754304,
+            "tail_max": 2694754304
+          }
+        },
+        {
+          "id": 3,
+          "label": "predict",
+          "family": "nt",
+          "time": 1795085205.2412653,
+          "samples": 211,
+          "observed_seconds": 21.238216161727905,
+          "rss": {
+            "peak": 4017852416,
+            "tail_median": 3981328384.0,
+            "tail_min": 3965480960,
+            "tail_max": 4017852416
+          },
+          "private": {
+            "peak": 4634550272,
+            "tail_median": 4628441088.0,
+            "tail_min": 4625104896,
+            "tail_max": 4632592384
+          }
+        },
+        {
+          "id": 4,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085226.5349374,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "rollout",
+          "params": {},
+          "size": 80,
+          "samples": 164,
+          "observed_seconds": 16.54297184944153,
+          "rss": {
+            "peak": 4029657088,
+            "tail_median": 3540430848.0,
+            "tail_min": 3524055040,
+            "tail_max": 3542540288
+          },
+          "private": {
+            "peak": 4762869760,
+            "tail_median": 4758992896.0,
+            "tail_min": 4758663168,
+            "tail_max": 4761235456
+          }
+        },
+        {
+          "id": 5,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085243.221147,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 152,
+          "observed_seconds": 15.352665185928345,
+          "rss": {
+            "peak": 3572154368,
+            "tail_median": 3062177792.0,
+            "tail_min": 3060584448,
+            "tail_max": 3062595584
+          },
+          "private": {
+            "peak": 4901117952,
+            "tail_median": 4814802944.0,
+            "tail_min": 4812853248,
+            "tail_max": 4815327232
+          }
+        },
+        {
+          "id": 6,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085258.68773,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 59,
+          "observed_seconds": 5.823373079299927,
+          "rss": {
+            "peak": 3094253568,
+            "tail_median": 3088523264.0,
+            "tail_min": 3087769600,
+            "tail_max": 3091832832
+          },
+          "private": {
+            "peak": 4836052992,
+            "tail_median": 4833370112.0,
+            "tail_min": 4833370112,
+            "tail_max": 4833370112
+          }
+        },
+        {
+          "id": 7,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085264.5603037,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "rollout",
+          "params": {},
+          "size": 80,
+          "samples": 50,
+          "observed_seconds": 5.504277944564819,
+          "rss": {
+            "peak": 3104305152,
+            "tail_median": 3097051136,
+            "tail_min": 3095199744,
+            "tail_max": 3104305152
+          },
+          "private": {
+            "peak": 4842819584,
+            "tail_median": 4840456192,
+            "tail_min": 4840275968,
+            "tail_max": 4842819584
+          }
+        },
+        {
+          "id": 8,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085270.1916034,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 342,
+          "observed_seconds": 34.51289081573486,
+          "rss": {
+            "peak": 3833040896,
+            "tail_median": 3315040256.0,
+            "tail_min": 3314446336,
+            "tail_max": 3315453952
+          },
+          "private": {
+            "peak": 5060112384,
+            "tail_median": 4849111040.0,
+            "tail_min": 4849111040,
+            "tail_max": 4849147904
+          }
+        },
+        {
+          "id": 9,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085304.8831184,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 60,
+          "observed_seconds": 5.881839752197266,
+          "rss": {
+            "peak": 3351326720,
+            "tail_median": 3350171648.0,
+            "tail_min": 3349319680,
+            "tail_max": 3351031808
+          },
+          "private": {
+            "peak": 4868739072,
+            "tail_median": 4867637248.0,
+            "tail_min": 4866633728,
+            "tail_max": 4868648960
+          }
+        },
+        {
+          "id": 10,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085310.868838,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "rollout",
+          "params": {},
+          "size": 80,
+          "samples": 105,
+          "observed_seconds": 10.463375329971313,
+          "rss": {
+            "peak": 3520937984,
+            "tail_median": 3500331008.0,
+            "tail_min": 3500326912,
+            "tail_max": 3500339200
+          },
+          "private": {
+            "peak": 4867100672,
+            "tail_median": 4850868224.0,
+            "tail_min": 4850868224,
+            "tail_max": 4850868224
+          }
+        },
+        {
+          "id": 11,
+          "label": "closing",
+          "family": "nt",
+          "time": 1795085321.3872654,
+          "samples": 312,
+          "observed_seconds": 31.26607632637024,
+          "rss": {
+            "peak": 3511885824,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          },
+          "private": {
+            "peak": 4850954240,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          }
+        }
+      ],
+      "window": {
+        "status": "pass",
+        "checks": [
+          {
+            "check": "nt:SpCas9|+|32:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:rollout:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:rollout:rendered",
+            "passed": true
+          }
+        ],
+        "observations": [
+          {
+            "label": "startup",
+            "time": 1795085205.161462,
+            "family": "nt",
+            "ui_model_modules": [
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 0
+          },
+          {
+            "label": "prediction_and_automatic_xai",
+            "time": 1795085243.0483387,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 2
+          },
+          {
+            "label": "SpCas9|+|32:ig",
+            "time": 1795085258.6763275,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 1
+          },
+          {
+            "label": "SpCas9|+|32:shap",
+            "time": 1795085264.5504203,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 2
+          },
+          {
+            "label": "SpCas9|+|32:rollout",
+            "time": 1795085270.183268,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 2
+          },
+          {
+            "label": "Cas12a|+|16:ig",
+            "time": 1795085304.7613804,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 1
+          },
+          {
+            "label": "Cas12a|+|16:shap",
+            "time": 1795085310.862801,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 2
+          },
+          {
+            "label": "Cas12a|+|16:rollout",
+            "time": 1795085321.3852665,
+            "family": "nt",
+            "ui_model_modules": [
+              "matplotlib",
+              "numpy",
+              "tokenizers",
+              "torch",
+              "transformers"
+            ],
+            "worker_pid": null,
+            "images": 2
+          }
+        ]
+      },
+      "sampler": {
+        "root_pid": 17256,
+        "exit_code": 0,
+        "samples": 1890,
+        "seconds": 191.31668839999475,
+        "max_sample_gap_seconds": 0.6697001000284217,
+        "access_errors": [],
+        "survivors": [],
+        "timed_out": false,
+        "process_inventory": {
+          "(17256, 1795085161.4330218)": {
+            "pid": 17256,
+            "created": 1795085161.4330218,
+            "ppid": 17724,
+            "name": "python.exe",
+            "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "cmdline": [
+              "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+              "-X",
+              "utf8",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py",
+              "C:\\project\\MC_project\\xai_dashboard_desktop",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\legacy",
+              "legacy",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\contract.json"
+            ]
+          },
+          "(17988, 1795085161.4636135)": {
+            "pid": 17988,
+            "created": 1795085161.4636135,
+            "ppid": 17256,
+            "name": "conhost.exe",
+            "exe": "C:\\Windows\\System32\\conhost.exe",
+            "cmdline": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          },
+          "(9832, 1795085164.417287)": {
+            "pid": 9832,
+            "created": 1795085164.417287,
+            "ppid": 17256,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--embedded-browser-webview=1",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--noerrdialogs",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--disable-features=ElasticOverscroll",
+              "--mojo-named-platform-channel-pipe=17256.19632.5522100310704817345",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(16708, 1795085164.7329905)": {
+            "pid": 16708,
+            "created": 1795085164.7329905,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=crashpad-handler",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "/prefetch:4",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d",
+              "--monitor-self-annotation=ptype=crashpad-handler",
+              "--user-stream-region=328,65568",
+              "--database=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView\\Crashpad",
+              "--annotation=IsOfficialBuild=1",
+              "--annotation=channel=",
+              "--annotation=chromium-version=157.0.8103.80",
+              "--annotation=exe=C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--annotation=plat=Win64",
+              "--annotation=prod=Edge WebView2",
+              "--annotation=ver=157.0.4341.60",
+              "--initial-client-data=0x188,0x18c,0x190,0x13c,0x198,0x7ff98133b3a0,0x7ff98133b3b0,0x7ff98133b3c0"
+            ]
+          },
+          "(14668, 1795085165.7411451)": {
+            "pid": 14668,
+            "created": 1795085165.7411451,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--gpu-recent-crash-count=0",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=1820,i,17034260084004114759,18016095494150533550,262144",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708988185955192",
+              "--mojo-platform-channel-handle=2000",
+              "/prefetch:2",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(2992, 1795085165.7617505)": {
+            "pid": 2992,
+            "created": 1795085165.7617505,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=network.mojom.NetworkService",
+              "--lang=ko",
+              "--service-sandbox-type=none",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2344,i,12647917344581852369,14356058493633628314,524288",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708989122997041",
+              "--mojo-platform-channel-handle=2348",
+              "/prefetch:11",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(16288, 1795085165.8526525)": {
+            "pid": 16288,
+            "created": 1795085165.8526525,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=storage.mojom.StorageService",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2728,i,15021312143822275244,6342941630309230097,524288",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708990060038890",
+              "--mojo-platform-channel-handle=2740",
+              "/prefetch:13",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(24140, 1795085166.1395967)": {
+            "pid": 24140,
+            "created": 1795085166.1395967,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=renderer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--video-capture-use-gpu-memory-buffer",
+              "--lang=ko",
+              "--device-scale-factor=1.25",
+              "--num-raster-threads=4",
+              "--enable-main-frame-before-activation",
+              "--renderer-client-id=5",
+              "--js-flags=--ms-user-locale=ko_KR",
+              "--ssd-no-pressure-read-main-dll",
+              "--launch-time-ticks=348594317493",
+              "--metrics-shmem-handle=4052,i,15108003773937989725,16290532017168380758,1048576",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708990997080739",
+              "--mojo-platform-channel-handle=3456",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d",
+              "/prefetch:1"
+            ]
+          },
+          "(23840, 1795085245.0348778)": {
+            "pid": 23840,
+            "created": 1795085245.0348778,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=4568,i,11407403743765525078,2760092676041812312,524288",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708991934122588",
+              "--mojo-platform-channel-handle=4160",
+              "/prefetch:14",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(14544, 1795085268.6824996)": {
+            "pid": 14544,
+            "created": 1795085268.6824996,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5148,i,15089194193178150560,2261410668065136846,524288",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708992871164437",
+              "--mojo-platform-channel-handle=4160",
+              "/prefetch:14",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(13448, 1795085285.7761264)": {
+            "pid": 13448,
+            "created": 1795085285.7761264,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--disable-gpu-sandbox",
+              "--use-gl=disabled",
+              "--gpu-vendor-id=32902",
+              "--gpu-device-id=16032",
+              "--gpu-sub-system-id=52762708",
+              "--gpu-revision=0",
+              "--gpu-driver-version=25.20.100.6471",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABoAAACAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAADgAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=5092,i,11224741077811694719,13059073577565580509,262144",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708993808206286",
+              "--mojo-platform-channel-handle=4956",
+              "/prefetch:10",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          },
+          "(17580, 1795085298.02929)": {
+            "pid": 17580,
+            "created": 1795085298.02929,
+            "ppid": 9832,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpu0ocv_17\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=356,i,12283660354701833011,2927921244151741765,524288",
+              "--field-trial-handle=2008,i,11214543885393587712,14241893375511703666,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2012,i,5284176950479315510,5880300389850560319,4",
+              "--trace-process-track-uuid=3190708994745248135",
+              "--mojo-platform-channel-handle=5196",
+              "/prefetch:14",
+              "/pfhostedapp:6e18979fe8f878dc884e6e34488fb1e4dfbec42d"
+            ]
+          }
+        }
+      }
+    },
+    "v3": {
+      "phases": [
+        {
+          "time": 0,
+          "id": 0,
+          "family": "non_nt",
+          "label": "startup_imports",
+          "samples": 58,
+          "observed_seconds": 5.739422798156738,
+          "rss": {
+            "peak": 430067712,
+            "tail_median": 271312896.0,
+            "tail_min": 118984704,
+            "tail_max": 430067712
+          },
+          "private": {
+            "peak": 199413760,
+            "tail_median": 114610176.0,
+            "tail_min": 67190784,
+            "tail_max": 199413760
+          }
+        },
+        {
+          "id": 1,
+          "label": "prepare",
+          "family": "non_nt",
+          "time": 1795085396.8167582,
+          "samples": 58,
+          "observed_seconds": 5.7283759117126465,
+          "rss": {
+            "peak": 490422272,
+            "tail_median": 490061824.0,
+            "tail_min": 489979904,
+            "tail_max": 490070016
+          },
+          "private": {
+            "peak": 341348352,
+            "tail_median": 340969472.0,
+            "tail_min": 340901888,
+            "tail_max": 340971520
+          }
+        },
+        {
+          "id": 3,
+          "label": "predict",
+          "family": "non_nt",
+          "time": 1795085402.7382889,
+          "samples": 274,
+          "observed_seconds": 27.409749507904053,
+          "rss": {
+            "peak": 1068425216,
+            "tail_median": 1050609664.0,
+            "tail_min": 1039314944,
+            "tail_max": 1068425216
+          },
+          "private": {
+            "peak": 1033707520,
+            "tail_median": 1014124544.0,
+            "tail_min": 1002622976,
+            "tail_max": 1033707520
+          }
+        },
+        {
+          "id": 4,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085430.3155375,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 97,
+          "observed_seconds": 9.632665157318115,
+          "rss": {
+            "peak": 1135218688,
+            "tail_median": 1132085248.0,
+            "tail_min": 1130979328,
+            "tail_max": 1132953600
+          },
+          "private": {
+            "peak": 1154654208,
+            "tail_median": 1152806912.0,
+            "tail_min": 1152802816,
+            "tail_max": 1152806912
+          }
+        },
+        {
+          "id": 5,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085440.0183377,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 63,
+          "observed_seconds": 6.2478461265563965,
+          "rss": {
+            "peak": 1146732544,
+            "tail_median": 1145806848.0,
+            "tail_min": 1134759936,
+            "tail_max": 1145810944
+          },
+          "private": {
+            "peak": 1198821376,
+            "tail_median": 1198141440.0,
+            "tail_min": 1187008512,
+            "tail_max": 1198141440
+          }
+        },
+        {
+          "id": 6,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085446.3347044,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 60,
+          "observed_seconds": 5.935551881790161,
+          "rss": {
+            "peak": 1159311360,
+            "tail_median": 1159008256.0,
+            "tail_min": 1146294272,
+            "tail_max": 1159065600
+          },
+          "private": {
+            "peak": 1223827456,
+            "tail_median": 1223708672.0,
+            "tail_min": 1210982400,
+            "tail_max": 1223815168
+          }
+        },
+        {
+          "id": 7,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085452.3940575,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 51,
+          "observed_seconds": 5.032008647918701,
+          "rss": {
+            "peak": 1159995392,
+            "tail_median": 1152466944.0,
+            "tail_min": 1151938560,
+            "tail_max": 1152798720
+          },
+          "private": {
+            "peak": 1224118272,
+            "tail_median": 1220773888.0,
+            "tail_min": 1220116480,
+            "tail_max": 1221595136
+          }
+        },
+        {
+          "id": 8,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085457.5091364,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 62,
+          "observed_seconds": 6.128363132476807,
+          "rss": {
+            "peak": 1177808896,
+            "tail_median": 1166282752.0,
+            "tail_min": 1162874880,
+            "tail_max": 1166282752
+          },
+          "private": {
+            "peak": 1251082240,
+            "tail_median": 1236299776.0,
+            "tail_min": 1232887808,
+            "tail_max": 1236299776
+          }
+        },
+        {
+          "id": 9,
+          "label": "select_family",
+          "family": "nt",
+          "time": 1795085463.7927654,
+          "samples": 302,
+          "observed_seconds": 30.259623050689697,
+          "rss": {
+            "peak": 2629099520,
+            "tail_median": 2470727680.0,
+            "tail_min": 2261012480,
+            "tail_max": 2629099520
+          },
+          "private": {
+            "peak": 2759352320,
+            "tail_median": 2726662144.0,
+            "tail_min": 2726400000,
+            "tail_max": 2727448576
+          }
+        },
+        {
+          "id": 11,
+          "label": "predict",
+          "family": "nt",
+          "time": 1795085494.120383,
+          "samples": 350,
+          "observed_seconds": 35.257381439208984,
+          "rss": {
+            "peak": 4045225984,
+            "tail_median": 4013686784.0,
+            "tail_min": 3910397952,
+            "tail_max": 4045225984
+          },
+          "private": {
+            "peak": 4678680576,
+            "tail_median": 4660934656.0,
+            "tail_min": 4657852416,
+            "tail_max": 4667961344
+          }
+        },
+        {
+          "id": 12,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085529.5438476,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 468,
+          "observed_seconds": 47.18076300621033,
+          "rss": {
+            "peak": 4102090752,
+            "tail_median": 3416010752.0,
+            "tail_min": 3415764992,
+            "tail_max": 3416043520
+          },
+          "private": {
+            "peak": 4816883712,
+            "tail_median": 4810280960.0,
+            "tail_min": 4809822208,
+            "tail_max": 4810280960
+          }
+        },
+        {
+          "id": 13,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085576.854186,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 136,
+          "observed_seconds": 13.59281039237976,
+          "rss": {
+            "peak": 3559366656,
+            "tail_median": 3434360832.0,
+            "tail_min": 3434360832,
+            "tail_max": 3434377216
+          },
+          "private": {
+            "peak": 4947460096,
+            "tail_median": 4839919616.0,
+            "tail_min": 4839919616,
+            "tail_max": 4839936000
+          }
+        },
+        {
+          "id": 14,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085590.5586085,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 51,
+          "observed_seconds": 5.01854133605957,
+          "rss": {
+            "peak": 3444928512,
+            "tail_median": 3444649984.0,
+            "tail_min": 3444490240,
+            "tail_max": 3444649984
+          },
+          "private": {
+            "peak": 4849659904,
+            "tail_median": 4849643520.0,
+            "tail_min": 4849639424,
+            "tail_max": 4849643520
+          }
+        },
+        {
+          "id": 15,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085595.7001681,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "rollout",
+          "params": {},
+          "size": 80,
+          "samples": 61,
+          "observed_seconds": 6.0226664543151855,
+          "rss": {
+            "peak": 3456024576,
+            "tail_median": 3450298368.0,
+            "tail_min": 3450298368,
+            "tail_max": 3450843136
+          },
+          "private": {
+            "peak": 4857810944,
+            "tail_median": 4851785728.0,
+            "tail_min": 4851781632,
+            "tail_max": 4852477952
+          }
+        },
+        {
+          "id": 16,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085601.7808046,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 291,
+          "observed_seconds": 29.82009720802307,
+          "rss": {
+            "peak": 4077621248,
+            "tail_median": 3360206848.0,
+            "tail_min": 3358392320,
+            "tail_max": 3360206848
+          },
+          "private": {
+            "peak": 5126103040,
+            "tail_median": 4934455296.0,
+            "tail_min": 4932415488,
+            "tail_max": 4934455296
+          }
+        },
+        {
+          "id": 17,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085631.6892786,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "shap",
+          "params": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "size": 80,
+          "samples": 506,
+          "observed_seconds": 51.18370580673218,
+          "rss": {
+            "peak": 3392598016,
+            "tail_median": 3312111616.0,
+            "tail_min": 3312111616,
+            "tail_max": 3312119808
+          },
+          "private": {
+            "peak": 4955582464,
+            "tail_median": 4944101376.0,
+            "tail_min": 4944097280,
+            "tail_max": 4944101376
+          }
+        },
+        {
+          "id": 18,
+          "label": "explain",
+          "family": "nt",
+          "time": 1795085683.0187743,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "rollout",
+          "params": {},
+          "size": 80,
+          "samples": 61,
+          "observed_seconds": 6.021732568740845,
+          "rss": {
+            "peak": 3338772480,
+            "tail_median": 3337947136.0,
+            "tail_min": 3329212416,
+            "tail_max": 3338100736
+          },
+          "private": {
+            "peak": 4955934720,
+            "tail_median": 4954992640.0,
+            "tail_min": 4947369984,
+            "tail_max": 4954992640
+          }
+        },
+        {
+          "id": 19,
+          "label": "select_family",
+          "family": "non_nt",
+          "time": 1795085689.1246395,
+          "samples": 28,
+          "observed_seconds": 2.7010934352874756,
+          "rss": {
+            "peak": 3347406848,
+            "tail_median": 321742848.0,
+            "tail_min": 294973440,
+            "tail_max": 2486849536
+          },
+          "private": {
+            "peak": 4961693696,
+            "tail_median": 333369344.0,
+            "tail_min": 267481088,
+            "tail_max": 4203356160
+          }
+        },
+        {
+          "id": 21,
+          "label": "predict",
+          "family": "non_nt",
+          "time": 1795085691.9251158,
+          "samples": 296,
+          "observed_seconds": 29.70255398750305,
+          "rss": {
+            "peak": 883437568,
+            "tail_median": 861622272.0,
+            "tail_min": 854159360,
+            "tail_max": 883437568
+          },
+          "private": {
+            "peak": 1044885504,
+            "tail_median": 1021409280.0,
+            "tail_min": 1014145024,
+            "tail_max": 1044885504
+          }
+        },
+        {
+          "id": 22,
+          "label": "explain",
+          "family": "non_nt",
+          "time": 1795085721.7534463,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "params": {
+            "steps": 32
+          },
+          "size": 80,
+          "samples": 98,
+          "observed_seconds": 9.736618518829346,
+          "rss": {
+            "peak": 952881152,
+            "tail_median": 952160256.0,
+            "tail_min": 950763520,
+            "tail_max": 952160256
+          },
+          "private": {
+            "peak": 1168371712,
+            "tail_median": 1167618048.0,
+            "tail_min": 1166098432,
+            "tail_max": 1167618048
+          }
+        },
+        {
+          "id": 23,
+          "label": "return_stable",
+          "family": "non_nt",
+          "time": 1795085731.6224089,
+          "samples": 100,
+          "observed_seconds": 9.975775241851807,
+          "rss": {
+            "peak": 950976512,
+            "tail_median": 946724864.0,
+            "tail_min": 946724864,
+            "tail_max": 946724864
+          },
+          "private": {
+            "peak": 1166176256,
+            "tail_median": 1161867264.0,
+            "tail_min": 1161867264,
+            "tail_max": 1161867264
+          }
+        },
+        {
+          "id": 24,
+          "label": "closing",
+          "family": "non_nt",
+          "time": 1795085741.6287284,
+          "samples": 60,
+          "observed_seconds": 5.919888257980347,
+          "rss": {
+            "peak": 957812736,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          },
+          "private": {
+            "peak": 1161994240,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          }
+        }
+      ],
+      "window": {
+        "status": "pass",
+        "checks": [
+          {
+            "check": "non_nt:SpCas9|+|32:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "non_nt:SpCas9|+|32:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "default_is_non_nt",
+            "passed": true
+          },
+          {
+            "check": "nt:previous_worker_and_children_exited",
+            "passed": true,
+            "old": {
+              "pid": 14732,
+              "create_time": 1795085396.8711667
+            },
+            "descendants": []
+          },
+          {
+            "check": "nt:dna_retained",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:rollout:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:ig:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:shap:rendered",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:rollout:rendered",
+            "passed": true
+          },
+          {
+            "check": "non_nt:previous_worker_and_children_exited",
+            "passed": true,
+            "old": {
+              "pid": 22444,
+              "create_time": 1795085464.0402472
+            },
+            "descendants": []
+          },
+          {
+            "check": "non_nt:dna_retained",
+            "passed": true
+          },
+          {
+            "check": "v3_ui_has_no_model_runtime",
+            "passed": true
+          }
+        ],
+        "observations": [
+          {
+            "label": "startup",
+            "time": 1795085402.716078,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 0
+          },
+          {
+            "label": "prediction_and_automatic_xai",
+            "time": 1795085440.013257,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 1
+          },
+          {
+            "label": "SpCas9|+|32:ig",
+            "time": 1795085446.3071506,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 1
+          },
+          {
+            "label": "SpCas9|+|32:shap",
+            "time": 1795085452.3903475,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 2
+          },
+          {
+            "label": "Cas12a|+|16:ig",
+            "time": 1795085457.505626,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 1
+          },
+          {
+            "label": "Cas12a|+|16:shap",
+            "time": 1795085463.780174,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 14732,
+            "images": 2
+          },
+          {
+            "label": "after_switch_automatic_analysis",
+            "time": 1795085576.816233,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 2
+          },
+          {
+            "label": "SpCas9|+|32:ig",
+            "time": 1795085590.5526943,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 1
+          },
+          {
+            "label": "SpCas9|+|32:shap",
+            "time": 1795085595.690972,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 2
+          },
+          {
+            "label": "SpCas9|+|32:rollout",
+            "time": 1795085601.7748022,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 2
+          },
+          {
+            "label": "Cas12a|+|16:ig",
+            "time": 1795085631.6597033,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 1
+          },
+          {
+            "label": "Cas12a|+|16:shap",
+            "time": 1795085683.000563,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 2
+          },
+          {
+            "label": "Cas12a|+|16:rollout",
+            "time": 1795085689.0927193,
+            "family": "nt",
+            "ui_model_modules": [],
+            "worker_pid": 22444,
+            "images": 2
+          },
+          {
+            "label": "after_switch_automatic_analysis",
+            "time": 1795085731.6191063,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 544,
+            "images": 1
+          },
+          {
+            "label": "return_stable",
+            "time": 1795085741.6258543,
+            "family": "non_nt",
+            "ui_model_modules": [],
+            "worker_pid": 544,
+            "images": 1
+          }
+        ]
+      },
+      "sampler": {
+        "root_pid": 9372,
+        "exit_code": 0,
+        "samples": 3531,
+        "seconds": 356.59214190003695,
+        "max_sample_gap_seconds": 0.28090459998929873,
+        "access_errors": [],
+        "survivors": [],
+        "timed_out": false,
+        "process_inventory": {
+          "(9372, 1795085391.0224771)": {
+            "pid": 9372,
+            "created": 1795085391.0224771,
+            "ppid": 8532,
+            "name": "python.exe",
+            "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "cmdline": [
+              "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+              "-X",
+              "utf8",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py",
+              "C:\\project\\MC_project\\dashboard_v3",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\v3",
+              "v3",
+              "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\contract.json"
+            ]
+          },
+          "(3088, 1795085391.0639355)": {
+            "pid": 3088,
+            "created": 1795085391.0639355,
+            "ppid": 9372,
+            "name": "conhost.exe",
+            "exe": "C:\\Windows\\System32\\conhost.exe",
+            "cmdline": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          },
+          "(22416, 1795085394.0175483)": {
+            "pid": 22416,
+            "created": 1795085394.0175483,
+            "ppid": 9372,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--embedded-browser-webview=1",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--noerrdialogs",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--disable-features=ElasticOverscroll",
+              "--mojo-named-platform-channel-pipe=9372.23112.17822901282171451850",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(5564, 1795085394.3390675)": {
+            "pid": 5564,
+            "created": 1795085394.3390675,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=crashpad-handler",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "/prefetch:4",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99",
+              "--monitor-self-annotation=ptype=crashpad-handler",
+              "--user-stream-region=320,65568",
+              "--database=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView\\Crashpad",
+              "--annotation=IsOfficialBuild=1",
+              "--annotation=channel=",
+              "--annotation=chromium-version=157.0.8103.80",
+              "--annotation=exe=C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--annotation=plat=Win64",
+              "--annotation=prod=Edge WebView2",
+              "--annotation=ver=157.0.4341.60",
+              "--initial-client-data=0x184,0x188,0x18c,0x160,0x194,0x7ff98133b3a0,0x7ff98133b3b0,0x7ff98133b3c0"
+            ]
+          },
+          "(5624, 1795085395.4686215)": {
+            "pid": 5624,
+            "created": 1795085395.4686215,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--gpu-recent-crash-count=0",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=1780,i,15666404222941019642,7623816481000655712,262144",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708988185955192",
+              "--mojo-platform-channel-handle=1936",
+              "/prefetch:2",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(3528, 1795085395.4904087)": {
+            "pid": 3528,
+            "created": 1795085395.4904087,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=network.mojom.NetworkService",
+              "--lang=ko",
+              "--service-sandbox-type=none",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2328,i,17065380376020865343,13800699109193852164,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708989122997041",
+              "--mojo-platform-channel-handle=2240",
+              "/prefetch:11",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(1324, 1795085395.5892286)": {
+            "pid": 1324,
+            "created": 1795085395.5892286,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=storage.mojom.StorageService",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2692,i,15585080529333476410,13603653748529836972,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708990060038890",
+              "--mojo-platform-channel-handle=2708",
+              "/prefetch:13",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(15816, 1795085395.950873)": {
+            "pid": 15816,
+            "created": 1795085395.950873,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=renderer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--video-capture-use-gpu-memory-buffer",
+              "--lang=ko",
+              "--device-scale-factor=1.25",
+              "--num-raster-threads=4",
+              "--enable-main-frame-before-activation",
+              "--renderer-client-id=5",
+              "--js-flags=--ms-user-locale=ko_KR",
+              "--ssd-no-pressure-read-main-dll",
+              "--launch-time-ticks=348824127545",
+              "--metrics-shmem-handle=4044,i,16441963059012708028,6568965149294836054,1048576",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708990997080739",
+              "--mojo-platform-channel-handle=4100",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99",
+              "/prefetch:1"
+            ]
+          },
+          "(14732, 1795085396.8711667)": {
+            "pid": 14732,
+            "created": 1795085396.8711667,
+            "ppid": 9372,
+            "name": "python.exe",
+            "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "cmdline": [
+              "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+              "-X",
+              "utf8",
+              "-c",
+              "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=9372, pipe_handle=2012)",
+              "--multiprocessing-fork"
+            ]
+          },
+          "(22444, 1795085464.0402472)": {
+            "pid": 22444,
+            "created": 1795085464.0402472,
+            "ppid": 9372,
+            "name": "python.exe",
+            "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "cmdline": [
+              "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+              "-X",
+              "utf8",
+              "-c",
+              "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=9372, pipe_handle=2016)",
+              "--multiprocessing-fork"
+            ]
+          },
+          "(4980, 1795085484.3852136)": {
+            "pid": 4980,
+            "created": 1795085484.3852136,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5040,i,11950563370875399227,8267759887443307221,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708991934122588",
+              "--mojo-platform-channel-handle=5056",
+              "/prefetch:14",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(3400, 1795085515.8838804)": {
+            "pid": 3400,
+            "created": 1795085515.8838804,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--disable-gpu-sandbox",
+              "--use-gl=disabled",
+              "--gpu-vendor-id=32902",
+              "--gpu-device-id=16032",
+              "--gpu-sub-system-id=52762708",
+              "--gpu-revision=0",
+              "--gpu-driver-version=25.20.100.6471",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABoAAACAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAADgAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5128,i,3051278763911931618,11064368096399304970,262144",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708992871164437",
+              "--mojo-platform-channel-handle=348",
+              "/prefetch:10",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(9496, 1795085525.8897967)": {
+            "pid": 9496,
+            "created": 1795085525.8897967,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=5072,i,18377901295981733684,10013001153575485697,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708993808206286",
+              "--mojo-platform-channel-handle=4956",
+              "/prefetch:14",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(24112, 1795085571.9199634)": {
+            "pid": 24112,
+            "created": 1795085571.9199634,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=5208,i,11618237908297672363,5610307747493465317,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708994745248135",
+              "--mojo-platform-channel-handle=4796",
+              "/prefetch:14",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(4860, 1795085623.7842927)": {
+            "pid": 4860,
+            "created": 1795085623.7842927,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5212,i,12205885424124391680,17527350816352092277,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708995682289984",
+              "--mojo-platform-channel-handle=5132",
+              "/prefetch:14",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          },
+          "(544, 1795085690.510533)": {
+            "pid": 544,
+            "created": 1795085690.510533,
+            "ppid": 9372,
+            "name": "python.exe",
+            "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "cmdline": [
+              "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+              "-X",
+              "utf8",
+              "-c",
+              "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=9372, pipe_handle=2800)",
+              "--multiprocessing-fork"
+            ]
+          },
+          "(20280, 1795085690.8421028)": {
+            "pid": 20280,
+            "created": 1795085690.8421028,
+            "ppid": 22416,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=unzip.mojom.Unzipper",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--video-capture-use-gpu-memory-buffer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\Users\\cmino\\AppData\\Local\\Temp\\tmpxychtze9\\EBWebView",
+              "--webview-exe-name=python.exe",
+              "--webview-exe-version=3.13.7",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5316,i,4773671564554385663,11698229561125910284,524288",
+              "--field-trial-handle=1944,i,2690936419457776702,2872787595803324858,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=1948,i,6000437561373566250,5237364207536586633,4",
+              "--trace-process-track-uuid=3190708996619331833",
+              "--mojo-platform-channel-handle=864",
+              "/prefetch:14",
+              "/pfhostedapp:cf297d3a0794254f89eb8679e7f8fb2868b49c99"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

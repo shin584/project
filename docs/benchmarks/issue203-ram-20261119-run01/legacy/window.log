@@ -1,0 +1,21 @@
+prepare {}
+scan_sites {}
+predict {}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'rollout', 'params': {}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'rollout', 'params': {}, 'size': 80}
+Traceback (most recent call last):
+  File "C:\project\MC_project\dashboard_v3\docs\benchmarks\ram_window.py", line 145, in drive
+    explanations()
+    ~~~~~~~~~~~~^^
+  File "C:\project\MC_project\dashboard_v3\docs\benchmarks\ram_window.py", line 132, in explanations
+    check(f"{family}:{case['site']}:{method}:rendered", window.evaluate_js(
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "document.querySelectorAll('[data-slot=xai] img').length") == expected)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\project\MC_project\dashboard_v3\docs\benchmarks\ram_window.py", line 46, in check
+    raise AssertionError(name)
+AssertionError: nt:SpCas9|+|32:rollout:rendered
+
+closing {}

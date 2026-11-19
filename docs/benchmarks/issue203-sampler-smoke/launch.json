@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python",
+    ".scratch/issue203/sample_workload.py"
+  ],
+  "cwd": "C:\\project\\MC_project\\dashboard_v3",
+  "scope": "manual workload; see external preregistration"
+}

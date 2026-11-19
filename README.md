@@ -1,5 +1,8 @@
 # XAI dashboard desktop
 
+Dashboard v3의 소스 실행 RAM 비교와 NT→non-NT 복귀 실측은
+[#203 기록](docs/issue203-implementation.md)에 있다. 최종 배포본 검증과 구분한다.
+
 2026-11-19 졸업 전시회 용도의 현재 XAI 표시 요구사항은
 [XAI 표시 방침](docs/planning/xai-exhibition-display-policy.md)을 따른다.
 수치 품질 기준 미달만으로 기존 그래프를 숨기거나 별도 경고로 대체하지 않는다.

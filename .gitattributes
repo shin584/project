@@ -14,3 +14,8 @@ docs/benchmarks/issue199-xai-20261119-resumed01/** -text whitespace=cr-at-eol
 docs/benchmarks/issue200-xai-20261119-run01/** -text whitespace=cr-at-eol
 # #202 contract, evaluator and retained test evidence bind exact bytes.
 docs/model-evaluation/** -text whitespace=cr-at-eol
+# #203 registration, raw observations and observer hashes retain measured bytes.
+docs/benchmarks/issue203-*/** -text whitespace=cr-at-eol
+docs/benchmarks/measure_ram.py -text whitespace=cr-at-eol
+docs/benchmarks/ram_window.py -text whitespace=cr-at-eol
+docs/benchmarks/ram_worker.py -text whitespace=cr-at-eol

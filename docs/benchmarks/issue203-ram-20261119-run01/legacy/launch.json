@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py",
+    "C:\\project\\MC_project\\xai_dashboard_desktop",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run01\\legacy",
+    "legacy",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run01\\contract.json"
+  ],
+  "cwd": "C:\\project\\MC_project\\xai_dashboard_desktop",
+  "contract_sha256": "095155ef412cd648a74c6839e799fe3ccded7575424d692f401c15d3c81c0659",
+  "started_at": "2026-11-19T10:41:51.728881+00:00"
+}

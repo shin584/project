@@ -1,0 +1,11 @@
+{"id": 1, "label": "prepare", "family": "nt", "time": 1795085166.7497005}
+{"id": 2, "label": "scan_sites", "family": "nt", "time": 1795085205.223045}
+{"id": 3, "label": "predict", "family": "nt", "time": 1795085205.2412653}
+{"id": 4, "label": "explain", "family": "nt", "time": 1795085226.5349374, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "params": {}, "size": 80}
+{"id": 5, "label": "explain", "family": "nt", "time": 1795085243.221147, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "ig", "params": {"steps": 32}, "size": 80}
+{"id": 6, "label": "explain", "family": "nt", "time": 1795085258.68773, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "params": {"nsamples": 64, "n_background": 4}, "size": 80}
+{"id": 7, "label": "explain", "family": "nt", "time": 1795085264.5603037, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "params": {}, "size": 80}
+{"id": 8, "label": "explain", "family": "nt", "time": 1795085270.1916034, "site": "Cas12a|+|16", "head": "Cas12a", "method": "ig", "params": {"steps": 32}, "size": 80}
+{"id": 9, "label": "explain", "family": "nt", "time": 1795085304.8831184, "site": "Cas12a|+|16", "head": "Cas12a", "method": "shap", "params": {"nsamples": 64, "n_background": 4}, "size": 80}
+{"id": 10, "label": "explain", "family": "nt", "time": 1795085310.868838, "site": "Cas12a|+|16", "head": "Cas12a", "method": "rollout", "params": {}, "size": 80}
+{"id": 11, "label": "closing", "family": "nt", "time": 1795085321.3872654}

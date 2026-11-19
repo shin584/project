@@ -1,0 +1,8 @@
+{"id": 1, "label": "prepare", "family": "nt", "time": 1795084916.9310496}
+{"id": 2, "label": "scan_sites", "family": "nt", "time": 1795084957.5948634}
+{"id": 3, "label": "predict", "family": "nt", "time": 1795084957.6242092}
+{"id": 4, "label": "explain", "family": "nt", "time": 1795084976.1197088, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "params": {}, "size": 80}
+{"id": 5, "label": "explain", "family": "nt", "time": 1795084990.5963507, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "ig", "params": {"steps": 32}, "size": 80}
+{"id": 6, "label": "explain", "family": "nt", "time": 1795085007.5267816, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "params": {"nsamples": 64, "n_background": 4}, "size": 80}
+{"id": 7, "label": "explain", "family": "nt", "time": 1795085013.927762, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "params": {}, "size": 80}
+{"id": 8, "label": "closing", "family": "nt", "time": 1795085019.4874513}

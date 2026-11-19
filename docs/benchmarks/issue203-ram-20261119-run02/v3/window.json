@@ -1,0 +1,201 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "check": "non_nt:SpCas9|+|32:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "non_nt:SpCas9|+|32:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "non_nt:Cas12a|+|16:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "non_nt:Cas12a|+|16:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "default_is_non_nt",
+      "passed": true
+    },
+    {
+      "check": "nt:previous_worker_and_children_exited",
+      "passed": true,
+      "old": {
+        "pid": 14732,
+        "create_time": 1795085396.8711667
+      },
+      "descendants": []
+    },
+    {
+      "check": "nt:dna_retained",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:rollout:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:ig:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:shap:rendered",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:rollout:rendered",
+      "passed": true
+    },
+    {
+      "check": "non_nt:previous_worker_and_children_exited",
+      "passed": true,
+      "old": {
+        "pid": 22444,
+        "create_time": 1795085464.0402472
+      },
+      "descendants": []
+    },
+    {
+      "check": "non_nt:dna_retained",
+      "passed": true
+    },
+    {
+      "check": "v3_ui_has_no_model_runtime",
+      "passed": true
+    }
+  ],
+  "observations": [
+    {
+      "label": "startup",
+      "time": 1795085402.716078,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 0
+    },
+    {
+      "label": "prediction_and_automatic_xai",
+      "time": 1795085440.013257,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 1
+    },
+    {
+      "label": "SpCas9|+|32:ig",
+      "time": 1795085446.3071506,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 1
+    },
+    {
+      "label": "SpCas9|+|32:shap",
+      "time": 1795085452.3903475,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 2
+    },
+    {
+      "label": "Cas12a|+|16:ig",
+      "time": 1795085457.505626,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 1
+    },
+    {
+      "label": "Cas12a|+|16:shap",
+      "time": 1795085463.780174,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 14732,
+      "images": 2
+    },
+    {
+      "label": "after_switch_automatic_analysis",
+      "time": 1795085576.816233,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 2
+    },
+    {
+      "label": "SpCas9|+|32:ig",
+      "time": 1795085590.5526943,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 1
+    },
+    {
+      "label": "SpCas9|+|32:shap",
+      "time": 1795085595.690972,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 2
+    },
+    {
+      "label": "SpCas9|+|32:rollout",
+      "time": 1795085601.7748022,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 2
+    },
+    {
+      "label": "Cas12a|+|16:ig",
+      "time": 1795085631.6597033,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 1
+    },
+    {
+      "label": "Cas12a|+|16:shap",
+      "time": 1795085683.000563,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 2
+    },
+    {
+      "label": "Cas12a|+|16:rollout",
+      "time": 1795085689.0927193,
+      "family": "nt",
+      "ui_model_modules": [],
+      "worker_pid": 22444,
+      "images": 2
+    },
+    {
+      "label": "after_switch_automatic_analysis",
+      "time": 1795085731.6191063,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 544,
+      "images": 1
+    },
+    {
+      "label": "return_stable",
+      "time": 1795085741.6258543,
+      "family": "non_nt",
+      "ui_model_modules": [],
+      "worker_pid": 544,
+      "images": 1
+    }
+  ]
+}

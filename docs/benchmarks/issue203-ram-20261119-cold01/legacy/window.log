@@ -1,0 +1,11 @@
+prepare {}
+scan_sites {}
+predict {}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'rollout', 'params': {}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'SpCas9|+|32', 'head': 'SpCas9-NG', 'method': 'rollout', 'params': {}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'ig', 'params': {'steps': 32}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'shap', 'params': {'nsamples': 64, 'n_background': 4}, 'size': 80}
+explain {'site': 'Cas12a|+|16', 'head': 'Cas12a', 'method': 'rollout', 'params': {}, 'size': 80}
+closing {}

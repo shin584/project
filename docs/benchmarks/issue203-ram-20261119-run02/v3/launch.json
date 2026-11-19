@@ -1,0 +1,15 @@
+{
+  "command": [
+    "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-X",
+    "utf8",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\ram_window.py",
+    "C:\\project\\MC_project\\dashboard_v3",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\v3",
+    "v3",
+    "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-run02\\contract.json"
+  ],
+  "cwd": "C:\\project\\MC_project\\dashboard_v3",
+  "contract_sha256": "b82ad6d2e016e1ced99ca0639a2c1e9e83a115a349fd3fd1cbe631a66ba4d917",
+  "started_at": "2026-11-19T10:49:51.013752+00:00"
+}

@@ -1,0 +1,133 @@
+{
+  "scope": "source execution on this PC, development TensorFlow cost included; not distribution validation",
+  "legacy_peak_bytes": {
+    "rss": 4029657088,
+    "private": 5060112384
+  },
+  "default_non_nt_peak_bytes": {
+    "rss": 1177808896,
+    "private": 1251082240
+  },
+  "v3_nt_peak_bytes": {
+    "rss": 4102090752,
+    "private": 5126103040
+  },
+  "observed_reduction_percent": {
+    "rss": 70.77148575477001,
+    "private": 75.27560368113753
+  },
+  "return_stable": {
+    "rss": {
+      "peak": 950976512,
+      "tail_median": 946724864.0,
+      "tail_min": 946724864,
+      "tail_max": 946724864
+    },
+    "private": {
+      "peak": 1166176256,
+      "tail_median": 1161867264.0,
+      "tail_min": 1161867264,
+      "tail_max": 1161867264
+    }
+  },
+  "initial_auto_xai_tail_median_bytes": {
+    "rss": 1132085248.0,
+    "private": 1152806912.0
+  },
+  "return_minus_initial_auto_bytes": {
+    "rss": -185360384.0,
+    "private": 9060352.0
+  },
+  "max_concurrent_workers": 1,
+  "nt_worker_observations_after_return": 0,
+  "worker_pids": [
+    544,
+    14732,
+    22444
+  ],
+  "checks": [
+    {
+      "check": "legacy:window",
+      "passed": true
+    },
+    {
+      "check": "legacy:sampler_exit",
+      "passed": true
+    },
+    {
+      "check": "legacy:webview_renderer_and_gpu_included",
+      "passed": true
+    },
+    {
+      "check": "v3:window",
+      "passed": true
+    },
+    {
+      "check": "v3:sampler_exit",
+      "passed": true
+    },
+    {
+      "check": "v3:webview_renderer_and_gpu_included",
+      "passed": true
+    },
+    {
+      "check": "v3:ui_runtime_not_loaded",
+      "passed": true
+    },
+    {
+      "check": "v3:default_non_nt_only",
+      "passed": true
+    },
+    {
+      "check": "v3:return_non_nt_only",
+      "passed": true
+    },
+    {
+      "check": "v3:both_nt_models_and_tokenizers_loaded",
+      "passed": true
+    },
+    {
+      "check": "v3:one_worker_at_a_time",
+      "passed": true
+    },
+    {
+      "check": "v3:no_nt_worker_after_return",
+      "passed": true
+    },
+    {
+      "check": "v3:raw_sample_count_matches",
+      "passed": true
+    },
+    {
+      "check": "cold:real_shap_without_disk_hit",
+      "passed": true
+    },
+    {
+      "check": "cold:window_and_cleanup",
+      "passed": true
+    }
+  ],
+  "cold_supplement": {
+    "path": "C:\\project\\MC_project\\dashboard_v3\\docs\\benchmarks\\issue203-ram-20261119-cold01",
+    "peak_bytes": {
+      "rss": 4077662208,
+      "private": 5087649792
+    },
+    "compute_counts": {
+      "integrated_gradients": 2,
+      "kernel_shap": 2,
+      "attention_rollout": 2,
+      "disk_shap_lookups": 2,
+      "disk_shap_hits": 0
+    },
+    "observed_reduction_percent": {
+      "rss": 71.11558447167971,
+      "private": 75.40942692307073
+    }
+  },
+  "counts": {
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0
+  }
+}

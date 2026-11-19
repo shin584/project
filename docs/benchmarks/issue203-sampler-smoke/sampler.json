@@ -1,0 +1,46 @@
+{
+  "root_pid": 16884,
+  "exit_code": 0,
+  "samples": 59,
+  "seconds": 5.83649630000582,
+  "max_sample_gap_seconds": 0.10485180001705885,
+  "access_errors": [],
+  "survivors": [],
+  "timed_out": false,
+  "process_inventory": {
+    "(16884, 1795085097.7302334)": {
+      "pid": 16884,
+      "created": 1795085097.7302334,
+      "ppid": 9796,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "python",
+        ".scratch/issue203/sample_workload.py"
+      ]
+    },
+    "(5720, 1795085097.7657683)": {
+      "pid": 5720,
+      "created": 1795085097.7657683,
+      "ppid": 16884,
+      "name": "conhost.exe",
+      "exe": "C:\\Windows\\System32\\conhost.exe",
+      "cmdline": [
+        "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+        "0x4"
+      ]
+    },
+    "(19272, 1795085097.9386015)": {
+      "pid": 19272,
+      "created": 1795085097.9386015,
+      "ppid": 16884,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-c",
+        "import time; payload=bytearray(24*1024*1024); time.sleep(2)"
+      ]
+    }
+  }
+}
