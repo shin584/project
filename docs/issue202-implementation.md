@@ -79,3 +79,32 @@ Cas12a 학습 소스의 사후 복원 한계는 보존했다. SpCas9의 기존 d
 
 이 결과는 XAI 수치 품질의 실패를 해결하지 않으며, 깨끗한 Windows 오프라인 배포,
 패키징 및 RAM 검증은 #203/#204 범위로 남는다.
+
+## Standards
+
+`code-review` 스킬의 두 독립 에이전트가 작업 시작점부터의 변경을 검토했다.
+검토 명령은 `git diff 1a297cdbdff2cc1b9214811b4a9ac8b8d4739b81...c444835`이며,
+커밋 목록은 `7d1fc7d`, `c444835`이다. tracker 설정 문서가 없어 #202의 실제
+GitHub 본문을 직접 제공했다. 이 마지막 문서 보완은 리뷰 결과를 기록한다.
+
+규칙 준수 지적은 **0건**이다. AGENTS.md의 브랜치·기존 화면 보존·선택 회귀 범위·
+실제 모델 검증·명령과 결과 보고를 준수했다. 원출력/헤드/계열 용어와 역사적 평가·
+새 test 실행의 구분도 적절하며 조치가 필요한 baseline smell은 발견하지 못했다.
+리뷰어는 archive SHA256, 등록 파일 57개, archive 안의 평가 소스·계약과 최종
+파일의 바이트 일치, 원 보고서 보존을 독립적으로 확인했다.
+
+## Spec
+
+요구사항 지적은 **0건**이다. 리뷰어는 동결 계약의 checkpoint·membership·전처리·
+단위·결측·raw/clipped 지표·parity 기준, SpCas9 5,186행·9헤드와 별도 Cas12a
+1,500행 평가, 기존 평가·선택 validation·새 추론의 구분을 확인했다.
+
+archive SHA256과 등록 파일 57개, raw artifact 해시, 전체 예측 배열의 크기,
+Cas12a test membership와 partition 비중복을 독립 검증했다. 보존된 배열에서
+Cas12a의 네 지표를 별도로 재계산해 보고서와 일치함을 확인했다. SpCas9의
+dirty source와 Cas12a 사후 학습 출처 한계가 명시되어 있으며 재학습·재선택·
+재분할·NT 비교는 발견하지 못했다.
+
+최종 리뷰 집계는 **Standards 0건 / Spec 0건**이다. 문서 경로, 공개한 archive와
+JSON의 모든 digest, ZIP CRC, 측정 소스와 현재 소스 일치 및 `git diff --check`도
+통과했다. 문서만 보완한 마지막 커밋에는 모델·테스트를 반복 실행하지 않았다.
