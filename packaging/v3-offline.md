@@ -5,6 +5,11 @@ Windows x64 로컬 디스크에 `XaiDashboardV3` 폴더 전체를 복사한다. 
 복구 시에도 검증된 원본 폴더 전체를 새 위치에 복사한다. 폴더 안의
 `START-HERE.txt`에 전달용 절차가 있다. Windows의 .NET Framework 4.8을 사용한다.
 
+Windows 10에서 사용할 경우 Microsoft의 Fixed Version 배포 절차에 따라
+`_internal/webview2`에 두 AppContainer 그룹의 읽기·실행 권한을 적용한다.
+이 배포본의 실측 환경은 Windows 11 x64다.
+[Microsoft Fixed Version 배포 절차](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution#the-fixed-version-runtime-distribution-mode)
+
 ## 로컬 자산으로 다시 빌드
 
 - 소스를 `release-manifest.json`의 `source_commit`으로 체크아웃한다.

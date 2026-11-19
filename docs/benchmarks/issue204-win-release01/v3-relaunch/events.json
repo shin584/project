@@ -1,0 +1,22 @@
+[
+  {
+    "label": "prepare",
+    "time": 1795089926.043
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 1,
+    "family": "non_nt",
+    "time": 1795089926.796
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 1,
+    "request_id": 1,
+    "family": "non_nt",
+    "time": 1795089926.798
+  }
+]

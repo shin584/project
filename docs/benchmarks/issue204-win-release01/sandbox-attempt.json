@@ -1,0 +1,9 @@
+{
+    "config":  "C:/project-backups/dashboard-v3/issue204/sandbox/dashboard-v3.wsb",
+    "configuration_parse":  "pass",
+    "networking":  "Disable",
+    "windows_build":  "26200",
+    "attempted_at":  "2026-11-19T11:57:18.1871905Z",
+    "status":  "pending_clean_environment",
+    "error":  "필요한 정보를 일부 찾을 수 없으므로 이 명령을 완전히 실행할 수 없습니다."
+}

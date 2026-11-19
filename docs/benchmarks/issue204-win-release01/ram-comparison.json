@@ -1,0 +1,158 @@
+{
+  "unit": "bytes except percentages",
+  "legacy_repeat_contract_sha256": "17b6347c5c2aa63f5cc47578b9aef12d4376cba0fc567de3b0e9ea4bf343fa1f",
+  "v3_contract_sha256": "543356aa8f54561a6914a891b0cd6d524df79d2cb677bb47b1ba85f868533295",
+  "phase_peaks": {
+    "legacy": {
+      "startup": {
+        "rss": 2310696960,
+        "private": 2729496576
+      },
+      "predict": {
+        "rss": 3075997696,
+        "private": 4652740608
+      },
+      "SpCas9 rollout": {
+        "rss": 2902065152,
+        "private": 4831399936
+      },
+      "SpCas9 ig": {
+        "rss": 2582228992,
+        "private": 4923346944
+      },
+      "SpCas9 shap": {
+        "rss": 2052456448,
+        "private": 4849156096
+      },
+      "Cas12a ig": {
+        "rss": 2449108992,
+        "private": 5102596096
+      },
+      "Cas12a shap": {
+        "rss": 2073681920,
+        "private": 4881694720
+      },
+      "Cas12a rollout": {
+        "rss": 2324844544,
+        "private": 4882653184
+      },
+      "peak": {
+        "rss": 3075997696,
+        "private": 5102596096
+      }
+    },
+    "v3_default": {
+      "startup": {
+        "rss": 512434176,
+        "private": 372068352
+      },
+      "predict": {
+        "rss": 894001152,
+        "private": 858427392
+      },
+      "Cas12a ig": {
+        "rss": 992522240,
+        "private": 1057951744
+      },
+      "SpCas9 ig": {
+        "rss": 988438528,
+        "private": 1030189056
+      },
+      "SpCas9 shap": {
+        "rss": 995426304,
+        "private": 1056878592
+      },
+      "Cas12a shap": {
+        "rss": 1014181888,
+        "private": 1085411328
+      },
+      "peak": {
+        "rss": 1014181888,
+        "private": 1085411328
+      }
+    },
+    "v3_nt": {
+      "startup": {
+        "rss": 1834713088,
+        "private": 2766520320
+      },
+      "predict": {
+        "rss": 2839470080,
+        "private": 4674977792
+      },
+      "SpCas9 shap": {
+        "rss": 2793766912,
+        "private": 4879540224
+      },
+      "SpCas9 ig": {
+        "rss": 2247290880,
+        "private": 4953722880
+      },
+      "SpCas9 rollout": {
+        "rss": 2146070528,
+        "private": 4889935872
+      },
+      "Cas12a ig": {
+        "rss": 2669928448,
+        "private": 5125988352
+      },
+      "Cas12a shap": {
+        "rss": 2082877440,
+        "private": 4958093312
+      },
+      "Cas12a rollout": {
+        "rss": 2107883520,
+        "private": 4962177024
+      },
+      "peak": {
+        "rss": 2839470080,
+        "private": 5125988352
+      }
+    },
+    "v3_return": {
+      "startup": {
+        "rss": 2118774784,
+        "private": 4970086400
+      },
+      "scan_sites": {
+        "rss": 199249920,
+        "private": 411271168
+      },
+      "predict": {
+        "rss": 587956224,
+        "private": 896454656
+      },
+      "Cas12a ig": {
+        "rss": 656244736,
+        "private": 1008074752
+      },
+      "return_stable": {
+        "rss": 656453632,
+        "private": 1008357376
+      },
+      "peak": {
+        "rss": 2118774784,
+        "private": 4970086400
+      }
+    }
+  },
+  "legacy_to_v3_default_reduction_percent": {
+    "rss": 67.0291727032555,
+    "private": 78.72825307786226
+  },
+  "return_tail_medians": {
+    "before_return": {
+      "rss": 2104074240.0,
+      "private": 4961546240.0
+    },
+    "after_return": {
+      "rss": 644345856.0,
+      "private": 1000030208.0
+    }
+  },
+  "v3_comparable_cutoff_utc_unix": 1795089783.8451667,
+  "v3_entire_run_peak": {
+    "rss": 3052179456,
+    "private": 5125988352
+  }
+}

@@ -1,0 +1,19 @@
+{"family": "non_nt", "label": "startup_ready", "time": 1795090203.3817747, "id": 1}
+{"family": "non_nt", "label": "scan_sites", "time": 1795090208.466, "id": 2}
+{"family": "non_nt", "label": "predict", "time": 1795090208.477, "id": 3}
+{"family": "non_nt", "label": "explain", "time": 1795090259.693, "site": "Cas12a|+|16", "head": "Cas12a", "method": "ig", "settings": {"steps": 32}, "id": 4}
+{"family": "non_nt", "label": "explain", "time": 1795090271.042, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "ig", "settings": {"steps": 32}, "id": 5}
+{"family": "non_nt", "label": "explain", "time": 1795090277.324, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 6}
+{"family": "non_nt", "label": "explain", "time": 1795090284.116, "site": "Cas12a|+|16", "head": "Cas12a", "method": "ig", "settings": {"steps": 32}, "id": 7}
+{"family": "non_nt", "label": "explain", "time": 1795090289.195, "site": "Cas12a|+|16", "head": "Cas12a", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 8}
+{"family": "nt", "label": "select_family", "time": 1795090296.131, "selected": "nt", "id": 9}
+{"family": "nt", "label": "scan_sites", "time": 1795090364.425, "id": 10}
+{"family": "nt", "label": "predict", "time": 1795090364.498, "id": 11}
+{"family": "nt", "label": "explain", "time": 1795090406.21, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 12}
+{"family": "nt", "label": "explain", "time": 1795090481.826, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "ig", "settings": {"steps": 32}, "id": 13}
+{"family": "nt", "label": "explain", "time": 1795090503.193, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 14}
+{"family": "nt", "label": "explain", "time": 1795090508.312, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "settings": {}, "id": 15}
+{"family": "nt", "label": "explain", "time": 1795090515.794, "site": "Cas12a|+|16", "head": "Cas12a", "method": "ig", "settings": {"steps": 32}, "id": 16}
+{"family": "nt", "label": "explain", "time": 1795090553.838, "site": "Cas12a|+|16", "head": "Cas12a", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 17}
+{"family": "nt", "label": "explain", "time": 1795090614.288, "site": "Cas12a|+|16", "head": "Cas12a", "method": "rollout", "settings": {}, "id": 18}
+{"family": "nt", "label": "window_close", "time": 1795090620.732764, "id": 19}

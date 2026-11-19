@@ -1,0 +1,39 @@
+﻿순위,Cas 변종,PAM,가이드 서열 (RNA),가닥,거리 (bp),원출력,예측 점수 (%),점수 기준,모델,모델 버전
+1,Cas12a,TTTA,AGAAUAAAUAAAAGCGCCACAGG,+,0,0.775,77.5,절단 효율,Cas12a CNN+BiLSTM manifest,cas12a-cnn-20261102 · sha256 94ac977865ef
+2,Cas12a,TTTA,GUCAAUCCUGUGGCGCUUUUAUU,-,12,0.6305,63.05,절단 효율,Cas12a CNN+BiLSTM manifest,cas12a-cnn-20261102 · sha256 94ac977865ef
+3,SpCas9(WT),TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.5391,53.91,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+4,Sniper,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.5368,53.68,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+5,eSpCas9(1.1),TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.4507,45.07,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+6,HypaCas9,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.4427,44.27,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+7,SpCas9(WT),AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.435,43.5,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+8,xCas9,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.4286,42.86,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+9,SpCas9-NG,TGT,GGCUGUGGUUUAGUCAAUCC,-,3,0.4225,42.25,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+10,SpCas9-HF1,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.4196,41.96,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+11,SpCas9-NG,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.4173,41.73,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+12,Sniper,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.3963,39.63,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+13,SpCas9-NG,AGC,UCGCUUUAAGAAUAAAUAAA,+,11,0.3872,38.72,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+14,SpCas9-NG,GGC,UGUGGUUUAGUCAAUCCUGU,-,0,0.3864,38.64,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+15,VRQR,GGA,GAAUAAAUAAAAGCGCCACA,+,2,0.3496,34.96,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+16,SpCas9-NG,GGA,GAAUAAAUAAAAGCGCCACA,+,2,0.3003,30.03,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+17,SpCas9-NG,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.2906,29.06,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+18,SpCas9-NG,CGC,UGGUUUAGUCAAUCCUGUGG,-,2,0.2652,26.52,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+19,SpCas9-NG,CGC,GCUUUAAGAAUAAAUAAAAG,+,9,0.2525,25.25,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+20,xCas9,CGC,GCUUUAAGAAUAAAUAAAAG,+,9,0.2312,23.12,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+21,xCas9,AGT,CAGGGCGCCGGCUGUGGUUU,-,12,0.2196,21.96,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+22,SpCas9-NG,AGT,CAGGGCGCCGGCUGUGGUUU,-,12,0.21,21.0,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+23,SpCas9-NG,TGA,AAAUAAAAGCGCCACAGGAU,+,2,0.2097,20.97,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+24,xCas9,TGA,AAAUAAAAGCGCCACAGGAU,+,2,0.2062,20.62,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+25,xCas9,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.1856,18.56,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+26,SpCas9-NG,AGC,CACAGGAUUGACUAAACCAC,+,14,0.1845,18.45,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+27,VRQR,TGA,AAAUAAAAGCGCCACAGGAU,+,2,0.1788,17.88,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+28,eSpCas9(1.1),AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.1781,17.81,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+29,xCas9,GGA,GAAUAAAUAAAAGCGCCACA,+,2,0.1589,15.89,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+30,xCas9,GGC,UGUGGUUUAGUCAAUCCUGU,-,0,0.1548,15.48,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+31,evoCas9,TGG,CUGUGGUUUAGUCAAUCCUG,-,1,0.1483,14.83,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+32,xCas9,AGC,CACAGGAUUGACUAAACCAC,+,14,0.1478,14.78,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+33,xCas9,CGC,UGGUUUAGUCAAUCCUGUGG,-,2,0.108,10.8,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+34,xCas9,AGC,UCGCUUUAAGAAUAAAUAAA,+,11,0.0895,8.95,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+35,HypaCas9,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.0854,8.54,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+36,SpCas9-HF1,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.081,8.1,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+37,xCas9,TGT,GGCUGUGGUUUAGUCAAUCC,-,3,0.0716,7.16,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe
+38,evoCas9,AGG,AGAAUAAAUAAAAGCGCCAC,+,3,0.0035,0.35,절단 효율,9-Hydra v2,spcas9-9hydra-v2 · sha256 ddbf86aa34fe

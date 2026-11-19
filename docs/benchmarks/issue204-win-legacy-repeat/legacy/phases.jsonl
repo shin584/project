@@ -1,0 +1,11 @@
+{"family": "nt", "label": "startup_ready", "time": 1795090704.6300893, "id": 1}
+{"family": "nt", "label": "scan_sites", "time": 1795090709.871, "id": 2}
+{"family": "nt", "label": "predict", "time": 1795090709.907, "id": 3}
+{"family": "nt", "label": "explain", "time": 1795090728.036, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "settings": {}, "id": 4}
+{"family": "nt", "label": "explain", "time": 1795090747.353, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "ig", "settings": {"steps": 32}, "id": 5}
+{"family": "nt", "label": "explain", "time": 1795090769.804, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 6}
+{"family": "nt", "label": "explain", "time": 1795090777.327, "site": "SpCas9|+|32", "head": "SpCas9-NG", "method": "rollout", "settings": {}, "id": 7}
+{"family": "nt", "label": "explain", "time": 1795090782.89, "site": "Cas12a|+|16", "head": "Cas12a", "method": "ig", "settings": {"steps": 32}, "id": 8}
+{"family": "nt", "label": "explain", "time": 1795090816.114, "site": "Cas12a|+|16", "head": "Cas12a", "method": "shap", "settings": {"nsamples": 64, "n_background": 4}, "id": 9}
+{"family": "nt", "label": "explain", "time": 1795090822.544, "site": "Cas12a|+|16", "head": "Cas12a", "method": "rollout", "settings": {}, "id": 10}
+{"family": "nt", "label": "window_close", "time": 1795090830.5581696, "id": 11}

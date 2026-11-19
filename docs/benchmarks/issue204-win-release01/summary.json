@@ -1,0 +1,3939 @@
+{
+  "scope": "frozen Windows releases",
+  "runs": {
+    "legacy": {
+      "phases": [
+        {
+          "time": 0,
+          "id": 0,
+          "family": "nt",
+          "label": "startup_imports",
+          "samples": 656,
+          "observed_seconds": 66.00924277305603,
+          "rss": {
+            "peak": 2285621248,
+            "tail_median": 2167795712.0,
+            "tail_min": 2079657984,
+            "tail_max": 2285621248
+          },
+          "private": {
+            "peak": 2725478400,
+            "tail_median": 2696245248.0,
+            "tail_min": 2695716864,
+            "tail_max": 2710585344
+          }
+        },
+        {
+          "family": "nt",
+          "label": "startup_ready",
+          "time": 1795090014.8322413,
+          "id": 1,
+          "samples": 1240,
+          "observed_seconds": 125.96846747398376,
+          "rss": {
+            "peak": 2995224576,
+            "tail_median": 2332975104.0,
+            "tail_min": 2330726400,
+            "tail_max": 2333511680
+          },
+          "private": {
+            "peak": 5073588224,
+            "tail_median": 4868886528.0,
+            "tail_min": 4868882432,
+            "tail_max": 4876500992
+          }
+        },
+        {
+          "family": "nt",
+          "label": "window_close",
+          "time": 1795090140.870789,
+          "id": 2,
+          "samples": 283,
+          "observed_seconds": 28.327276468276978,
+          "rss": {
+            "peak": 2368692224,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          },
+          "private": {
+            "peak": 4875792384,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          }
+        }
+      ],
+      "window": {
+        "status": "pass",
+        "checks": [
+          {
+            "check": "default_settings",
+            "passed": true,
+            "settings": {
+              "ig-steps": 32,
+              "shap-n": 64,
+              "shap-bg": 4,
+              "graph-size": 80
+            }
+          },
+          {
+            "check": "nt:prediction_rows",
+            "passed": true,
+            "count": 38
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:rollout:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:rollout:decoded",
+            "passed": true
+          }
+        ],
+        "families": {
+          "nt": {
+            "rows": [
+              {
+                "site": "SpCas9|+|32",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 51.98895989939809,
+                "cells": [
+                  "1",
+                  "SpCas9-NG",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "1.6857",
+                  "51.99%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9(WT)",
+                "raw": NaN,
+                "percent": 50.715859791359904,
+                "cells": [
+                  "2",
+                  "SpCas9(WT)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.1452",
+                  "50.72%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "Sniper",
+                "raw": NaN,
+                "percent": 49.06144427179336,
+                "cells": [
+                  "3",
+                  "Sniper",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.1431",
+                  "49.06%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9(WT)",
+                "raw": NaN,
+                "percent": 44.34059200416267,
+                "cells": [
+                  "4",
+                  "SpCas9(WT)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.8625",
+                  "44.34%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "VRQR",
+                "raw": NaN,
+                "percent": 43.00314186769724,
+                "cells": [
+                  "5",
+                  "VRQR",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "1.4581",
+                  "43.00%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "Sniper",
+                "raw": NaN,
+                "percent": 42.78037573876142,
+                "cells": [
+                  "6",
+                  "Sniper",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.8587",
+                  "42.78%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 40.341189766743184,
+                "cells": [
+                  "7",
+                  "SpCas9-NG",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "0.9095",
+                  "40.34%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 40.078847259206775,
+                "cells": [
+                  "8",
+                  "SpCas9-NG",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.8920",
+                  "40.08%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 39.680250405844454,
+                "cells": [
+                  "9",
+                  "xCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.2555",
+                  "39.68%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "eSpCas9(1.1)",
+                "raw": NaN,
+                "percent": 39.57373850986481,
+                "cells": [
+                  "10",
+                  "eSpCas9(1.1)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "1.1386",
+                  "39.57%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "HypaCas9",
+                "raw": NaN,
+                "percent": 37.65299779876351,
+                "cells": [
+                  "11",
+                  "HypaCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.2705",
+                  "37.65%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 36.74545488829612,
+                "cells": [
+                  "12",
+                  "SpCas9-NG",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.6699",
+                  "36.75%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "Cas12a|+|16",
+                "head": "Cas12a",
+                "raw": NaN,
+                "percent": 35.91322898864746,
+                "cells": [
+                  "13",
+                  "Cas12a",
+                  "TTTA",
+                  "AGAAUAAAUAAAAGCGCCACAGG",
+                  "+",
+                  "0",
+                  "0.3591",
+                  "35.91%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 35.54053511015296,
+                "cells": [
+                  "14",
+                  "SpCas9-NG",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "0.5896",
+                  "35.54%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "eSpCas9(1.1)",
+                "raw": NaN,
+                "percent": 34.91004513537288,
+                "cells": [
+                  "15",
+                  "eSpCas9(1.1)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.9070",
+                  "34.91%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 33.94786525638223,
+                "cells": [
+                  "16",
+                  "SpCas9-NG",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.4834",
+                  "33.95%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 33.634509350082276,
+                "cells": [
+                  "17",
+                  "xCas9",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.8841",
+                  "33.63%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 29.583325457768737,
+                "cells": [
+                  "18",
+                  "SpCas9-NG",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "0.1926",
+                  "29.58%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-HF1",
+                "raw": NaN,
+                "percent": 29.164098264880778,
+                "cells": [
+                  "19",
+                  "SpCas9-HF1",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.8117",
+                  "29.16%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "Cas12a|-|28",
+                "head": "Cas12a",
+                "raw": NaN,
+                "percent": 29.028421640396118,
+                "cells": [
+                  "20",
+                  "Cas12a",
+                  "TTTA",
+                  "GUCAAUCCUGUGGCGCUUUUAUU",
+                  "-",
+                  "12",
+                  "0.2903",
+                  "29.03%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "HypaCas9",
+                "raw": NaN,
+                "percent": 28.81477870508969,
+                "cells": [
+                  "21",
+                  "HypaCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.7923",
+                  "28.81%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-HF1",
+                "raw": NaN,
+                "percent": 24.50808280547142,
+                "cells": [
+                  "22",
+                  "SpCas9-HF1",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.5682",
+                  "24.51%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 22.430770865101817,
+                "cells": [
+                  "23",
+                  "SpCas9-NG",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "-0.2841",
+                  "22.43%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 21.883906861930488,
+                "cells": [
+                  "24",
+                  "xCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.1622",
+                  "21.88%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "VRQR",
+                "raw": NaN,
+                "percent": 21.407777762056888,
+                "cells": [
+                  "25",
+                  "VRQR",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.1274",
+                  "21.41%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 20.7828182655932,
+                "cells": [
+                  "26",
+                  "xCas9",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "0.0945",
+                  "20.78%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 19.65233594349975,
+                "cells": [
+                  "27",
+                  "xCas9",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.0251",
+                  "19.65%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 18.22699755823374,
+                "cells": [
+                  "28",
+                  "SpCas9-NG",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "-0.5642",
+                  "18.23%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|32",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 17.338790320774166,
+                "cells": [
+                  "29",
+                  "xCas9",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "-0.1171",
+                  "17.34%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 14.173178465906384,
+                "cells": [
+                  "30",
+                  "SpCas9-NG",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "-0.8344",
+                  "14.17%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 12.98678628327012,
+                "cells": [
+                  "31",
+                  "xCas9",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "-0.3844",
+                  "12.99%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 12.932642309576275,
+                "cells": [
+                  "32",
+                  "xCas9",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "-0.3878",
+                  "12.93%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 11.663506130321624,
+                "cells": [
+                  "33",
+                  "xCas9",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "-0.4657",
+                  "11.66%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "SpCas9-NG",
+                "raw": NaN,
+                "percent": 10.5170322190547,
+                "cells": [
+                  "34",
+                  "SpCas9-NG",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "-1.0780",
+                  "10.52%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "evoCas9",
+                "raw": NaN,
+                "percent": 9.463160241956711,
+                "cells": [
+                  "35",
+                  "evoCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.3565",
+                  "9.46%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 9.35633524668634,
+                "cells": [
+                  "36",
+                  "xCas9",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "-0.6075",
+                  "9.36%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "xCas9",
+                "raw": NaN,
+                "percent": 4.8721677854359156,
+                "cells": [
+                  "37",
+                  "xCas9",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "-0.8830",
+                  "4.87%",
+                  "절단 효율"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "evoCas9",
+                "raw": NaN,
+                "percent": 1.5106997789573668,
+                "cells": [
+                  "38",
+                  "evoCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "-0.3242",
+                  "1.51%",
+                  "절단 효율"
+                ]
+              }
+            ],
+            "xai": {
+              "SpCas9|+|32:SpCas9-NG:ig": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 빈 서열(모든 염기 값 0)이고, 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "예측 -61.52% − 기준 -67.26% · 기여도 합 -104.205%p · 완결성 오차 116.6806%p"
+              ],
+              "SpCas9|+|32:SpCas9-NG:shap": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "기준값 -89.22% + SHAP 합 +257.79%p = 168.57% · 실제 예측 168.57% · 가법성 오차 0.0000%p"
+              ],
+              "SpCas9|+|32:SpCas9-NG:rollout": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "위치별 정보 의존도 (Attention Rollout)",
+                "토큰 × 토큰 의존도 행렬 보기 (토큰 6개)",
+                "토큰 × 토큰 의존도 행렬",
+                "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+              ],
+              "Cas12a|+|16:Cas12a:ig": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 빈 서열(모든 염기 값 0)이고, 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "예측 15.65% − 기준 26.23% · 기여도 합 -60.167%p · 완결성 오차 30.6892%p"
+              ],
+              "Cas12a|+|16:Cas12a:shap": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "기준값 48.20% + SHAP 합 -12.28%p = 35.91% · 실제 예측 35.91% · 가법성 오차 0.0000%p"
+              ],
+              "Cas12a|+|16:Cas12a:rollout": [
+                "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+                "위치별 정보 의존도 (Attention Rollout)",
+                "토큰 × 토큰 의존도 행렬 보기 (토큰 10개)",
+                "토큰 × 토큰 의존도 행렬",
+                "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+              ]
+            }
+          }
+        },
+        "webview": {
+          "protocolVersion": "1.3",
+          "product": "Edg/157.0.4341.60",
+          "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+          "jsVersion": "15.7.11.7"
+        }
+      },
+      "sampler": {
+        "root_pid": 15576,
+        "exit_code": 0,
+        "samples": 2179,
+        "seconds": 220.59901840001112,
+        "max_sample_gap_seconds": 0.2532272000098601,
+        "access_errors": [],
+        "survivors": [],
+        "timed_out": false,
+        "process_inventory": {
+          "(15576, 1795089948.6859944)": {
+            "pid": 15576,
+            "created": 1795089948.6859944,
+            "ppid": 23364,
+            "name": "XaiDashboard.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\XaiDashboard.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\XaiDashboard.exe"
+            ]
+          },
+          "(20640, 1795089953.2831705)": {
+            "pid": 20640,
+            "created": 1795089953.2831705,
+            "ppid": 15576,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--embedded-browser-webview=1",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--noerrdialogs",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--disable-background-networking",
+              "--disable-features=ElasticOverscroll",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--proxy-server=http://127.0.0.1:9",
+              "--remote-debugging-address=127.0.0.1",
+              "--remote-debugging-port=53178",
+              "--mojo-named-platform-channel-pipe=15576.9076.11122043105759389416",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89"
+            ]
+          },
+          "(13524, 1795089953.5637326)": {
+            "pid": 13524,
+            "created": 1795089953.5637326,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=crashpad-handler",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "/prefetch:4",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89",
+              "--monitor-self-annotation=ptype=crashpad-handler",
+              "--user-stream-region=316,65568",
+              "--database=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView\\Crashpad",
+              "--annotation=IsOfficialBuild=1",
+              "--annotation=channel=",
+              "--annotation=chromium-version=157.0.8103.80",
+              "--annotation=exe=C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--annotation=plat=Win64",
+              "--annotation=prod=Edge WebView2",
+              "--annotation=ver=157.0.4341.60",
+              "--initial-client-data=0x180,0x184,0x188,0x15c,0x190,0x7ff95f7eb3a0,0x7ff95f7eb3b0,0x7ff95f7eb3c0"
+            ]
+          },
+          "(19288, 1795089954.868063)": {
+            "pid": 19288,
+            "created": 1795089954.868063,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--gpu-recent-crash-count=0",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=1828,i,4946944712500083645,3772173098866324873,262144",
+              "--field-trial-handle=2068,i,7923588179077830562,12945405690027689041,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2092,i,7447202855877068137,18215030075616644253,4",
+              "--trace-process-track-uuid=3190708988185955192",
+              "--mojo-platform-channel-handle=2060",
+              "/prefetch:2",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89"
+            ]
+          },
+          "(19516, 1795089954.8682184)": {
+            "pid": 19516,
+            "created": 1795089954.8682184,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=network.mojom.NetworkService",
+              "--lang=ko",
+              "--service-sandbox-type=none",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2256,i,2980547523744492785,4566270248929756069,524288",
+              "--field-trial-handle=2068,i,7923588179077830562,12945405690027689041,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2092,i,7447202855877068137,18215030075616644253,4",
+              "--trace-process-track-uuid=3190708989122997041",
+              "--mojo-platform-channel-handle=2340",
+              "/prefetch:11",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89"
+            ]
+          },
+          "(19176, 1795089954.9271517)": {
+            "pid": 19176,
+            "created": 1795089954.9271517,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=storage.mojom.StorageService",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2732,i,514122319393978395,316435573109919993,524288",
+              "--field-trial-handle=2068,i,7923588179077830562,12945405690027689041,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2092,i,7447202855877068137,18215030075616644253,4",
+              "--trace-process-track-uuid=3190708990060038890",
+              "--mojo-platform-channel-handle=2752",
+              "/prefetch:13",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89"
+            ]
+          },
+          "(13764, 1795089955.2924323)": {
+            "pid": 13764,
+            "created": 1795089955.2924323,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=renderer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--remote-debugging-port=53178",
+              "--video-capture-use-gpu-memory-buffer",
+              "--lang=ko",
+              "--device-scale-factor=1.25",
+              "--num-raster-threads=4",
+              "--enable-main-frame-before-activation",
+              "--renderer-client-id=5",
+              "--js-flags=--ms-user-locale=ko_KR",
+              "--ssd-no-pressure-read-main-dll",
+              "--launch-time-ticks=353383481391",
+              "--metrics-shmem-handle=4056,i,14193346506648383588,4660985074273305433,1048576",
+              "--field-trial-handle=2068,i,7923588179077830562,12945405690027689041,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2092,i,7447202855877068137,18215030075616644253,4",
+              "--trace-process-track-uuid=3190708990997080739",
+              "--mojo-platform-channel-handle=4068",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89",
+              "/prefetch:1"
+            ]
+          },
+          "(23160, 1795090074.8470504)": {
+            "pid": 23160,
+            "created": 1795090074.8470504,
+            "ppid": 20640,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--disable-gpu-sandbox",
+              "--use-gl=disabled",
+              "--gpu-vendor-id=32902",
+              "--gpu-device-id=16032",
+              "--gpu-sub-system-id=52762708",
+              "--gpu-revision=0",
+              "--gpu-driver-version=25.20.100.6471",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\legacy\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboard.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABoAAACAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAADgAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--ssd-no-pressure-read-main-dll",
+              "--metrics-shmem-handle=5156,i,6186053253687505855,5683927934110032881,262144",
+              "--field-trial-handle=2068,i,7923588179077830562,12945405690027689041,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2092,i,7447202855877068137,18215030075616644253,4",
+              "--trace-process-track-uuid=3190708991934122588",
+              "--mojo-platform-channel-handle=5160",
+              "/prefetch:10",
+              "/pfhostedapp:dea973f339a79708fdd1b6326974bd085e9d9d89"
+            ]
+          }
+        }
+      }
+    },
+    "v3": {
+      "phases": [
+        {
+          "time": 0,
+          "id": 0,
+          "family": "non_nt",
+          "label": "startup_imports",
+          "samples": 61,
+          "observed_seconds": 6.2801291942596436,
+          "rss": {
+            "peak": 422264832,
+            "tail_median": 278978560.0,
+            "tail_min": 129024000,
+            "tail_max": 422264832
+          },
+          "private": {
+            "peak": 202756096,
+            "tail_median": 124631040.0,
+            "tail_min": 78893056,
+            "tail_max": 202756096
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "prepare",
+          "time": 1795089455.942,
+          "id": 1,
+          "samples": 11,
+          "observed_seconds": 1.0082683563232422,
+          "rss": {
+            "peak": 486342656,
+            "tail_median": 471789568,
+            "tail_min": 431280128,
+            "tail_max": 486342656
+          },
+          "private": {
+            "peak": 352546816,
+            "tail_median": 239112192,
+            "tail_min": 204050432,
+            "tail_max": 352546816
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "startup_ready",
+          "time": 1795089457.1038773,
+          "id": 2,
+          "samples": 51,
+          "observed_seconds": 5.025448322296143,
+          "rss": {
+            "peak": 512434176,
+            "tail_median": 494798848.0,
+            "tail_min": 494755840,
+            "tail_max": 512434176
+          },
+          "private": {
+            "peak": 372068352,
+            "tail_median": 356861952.0,
+            "tail_min": 356859904,
+            "tail_max": 372068352
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "predict",
+          "time": 1795089462.207,
+          "id": 4,
+          "samples": 207,
+          "observed_seconds": 20.761114358901978,
+          "rss": {
+            "peak": 894001152,
+            "tail_median": 856274944.0,
+            "tail_min": 834813952,
+            "tail_max": 894001152
+          },
+          "private": {
+            "peak": 858427392,
+            "tail_median": 819773440.0,
+            "tail_min": 765730816,
+            "tail_max": 858427392
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089483.024,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 5,
+          "samples": 88,
+          "observed_seconds": 8.745519161224365,
+          "rss": {
+            "peak": 971452416,
+            "tail_median": 961681408.0,
+            "tail_min": 961613824,
+            "tail_max": 965447680
+          },
+          "private": {
+            "peak": 978870272,
+            "tail_median": 971939840.0,
+            "tail_min": 971874304,
+            "tail_max": 977313792
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089491.938,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 6,
+          "samples": 61,
+          "observed_seconds": 6.029515743255615,
+          "rss": {
+            "peak": 988438528,
+            "tail_median": 982145024.0,
+            "tail_min": 980013056,
+            "tail_max": 983236608
+          },
+          "private": {
+            "peak": 1030189056,
+            "tail_median": 1029427200.0,
+            "tail_min": 1028374528,
+            "tail_max": 1029427200
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089498.048,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "settings": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "id": 7,
+          "samples": 63,
+          "observed_seconds": 6.242239236831665,
+          "rss": {
+            "peak": 995426304,
+            "tail_median": 979062784.0,
+            "tail_min": 976982016,
+            "tail_max": 979517440
+          },
+          "private": {
+            "peak": 1056878592,
+            "tail_median": 1043685376.0,
+            "tail_min": 1042198528,
+            "tail_max": 1043685376
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089504.36,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 8,
+          "samples": 50,
+          "observed_seconds": 4.916586875915527,
+          "rss": {
+            "peak": 992522240,
+            "tail_median": 989675520.0,
+            "tail_min": 989474816,
+            "tail_max": 990199808
+          },
+          "private": {
+            "peak": 1057951744,
+            "tail_median": 1057865728.0,
+            "tail_min": 1057865728,
+            "tail_max": 1057894400
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089509.425,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "shap",
+          "settings": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "id": 9,
+          "samples": 63,
+          "observed_seconds": 6.22652006149292,
+          "rss": {
+            "peak": 1014181888,
+            "tail_median": 981794816.0,
+            "tail_min": 979439616,
+            "tail_max": 996372480
+          },
+          "private": {
+            "peak": 1085411328,
+            "tail_median": 1054177280.0,
+            "tail_min": 1052479488,
+            "tail_max": 1071448064
+          }
+        },
+        {
+          "family": "nt",
+          "label": "select_family",
+          "time": 1795089515.768,
+          "selected": "nt",
+          "id": 10,
+          "samples": 213,
+          "observed_seconds": 21.38275980949402,
+          "rss": {
+            "peak": 1834713088,
+            "tail_median": 1820659712.0,
+            "tail_min": 1744113664,
+            "tail_max": 1834713088
+          },
+          "private": {
+            "peak": 2766520320,
+            "tail_median": 2731356160.0,
+            "tail_min": 2730975232,
+            "tail_max": 2732261376
+          }
+        },
+        {
+          "family": "nt",
+          "label": "predict",
+          "time": 1795089537.272,
+          "id": 12,
+          "samples": 327,
+          "observed_seconds": 33.00887608528137,
+          "rss": {
+            "peak": 2839470080,
+            "tail_median": 2810044416,
+            "tail_min": 2785710080,
+            "tail_max": 2839470080
+          },
+          "private": {
+            "peak": 4674977792,
+            "tail_median": 4656730112,
+            "tail_min": 4655288320,
+            "tail_max": 4674977792
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089570.333,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "settings": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "id": 13,
+          "samples": 513,
+          "observed_seconds": 52.49711585044861,
+          "rss": {
+            "peak": 2793766912,
+            "tail_median": 2111741952.0,
+            "tail_min": 2110865408,
+            "tail_max": 2116063232
+          },
+          "private": {
+            "peak": 4809359360,
+            "tail_median": 4808376320.0,
+            "tail_min": 4808323072,
+            "tail_max": 4809359360
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089622.95,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 14,
+          "samples": 153,
+          "observed_seconds": 15.321637153625488,
+          "rss": {
+            "peak": 2247290880,
+            "tail_median": 2107047936.0,
+            "tail_min": 2103795712,
+            "tail_max": 2146353152
+          },
+          "private": {
+            "peak": 4953722880,
+            "tail_median": 4872642560.0,
+            "tail_min": 4870152192,
+            "tail_max": 4872642560
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089638.405,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "settings": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "id": 15,
+          "samples": 51,
+          "observed_seconds": 5.02277135848999,
+          "rss": {
+            "peak": 2124947456,
+            "tail_median": 2120986624,
+            "tail_min": 2120937472,
+            "tail_max": 2121003008
+          },
+          "private": {
+            "peak": 4879540224,
+            "tail_median": 4878696448,
+            "tail_min": 4878692352,
+            "tail_max": 4878696448
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089643.505,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "rollout",
+          "settings": {},
+          "id": 16,
+          "samples": 60,
+          "observed_seconds": 5.920609474182129,
+          "rss": {
+            "peak": 2146070528,
+            "tail_median": 2139836416.0,
+            "tail_min": 2139820032,
+            "tail_max": 2140598272
+          },
+          "private": {
+            "peak": 4889935872,
+            "tail_median": 4883513344.0,
+            "tail_min": 4883509248,
+            "tail_max": 4884058112
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089649.52,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 17,
+          "samples": 337,
+          "observed_seconds": 34.386322259902954,
+          "rss": {
+            "peak": 2669928448,
+            "tail_median": 2057506816.0,
+            "tail_min": 2056970240,
+            "tail_max": 2058588160
+          },
+          "private": {
+            "peak": 5125988352,
+            "tail_median": 4942176256.0,
+            "tail_min": 4942159872,
+            "tail_max": 4942430208
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089684.065,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "shap",
+          "settings": {
+            "nsamples": 64,
+            "n_background": 4
+          },
+          "id": 18,
+          "samples": 599,
+          "observed_seconds": 60.988332986831665,
+          "rss": {
+            "peak": 2082877440,
+            "tail_median": 2078969856.0,
+            "tail_min": 2078924800,
+            "tail_max": 2079772672
+          },
+          "private": {
+            "peak": 4958093312,
+            "tail_median": 4947623936.0,
+            "tail_min": 4947623936,
+            "tail_max": 4948156416
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089745.17,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "rollout",
+          "settings": {},
+          "id": 19,
+          "samples": 67,
+          "observed_seconds": 6.650940656661987,
+          "rss": {
+            "peak": 2107883520,
+            "tail_median": 2104074240.0,
+            "tail_min": 2103537664,
+            "tail_max": 2105614336
+          },
+          "private": {
+            "peak": 4962177024,
+            "tail_median": 4961546240.0,
+            "tail_min": 4961021952,
+            "tail_max": 4961546240
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "select_family",
+          "time": 1795089751.951,
+          "selected": "non_nt",
+          "id": 20,
+          "samples": 15,
+          "observed_seconds": 1.4019739627838135,
+          "rss": {
+            "peak": 2118774784,
+            "tail_median": 189530112,
+            "tail_min": 149606400,
+            "tail_max": 2118774784
+          },
+          "private": {
+            "peak": 4970086400,
+            "tail_median": 407822336,
+            "tail_min": 276721664,
+            "tail_max": 4970086400
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "scan_sites",
+          "time": 1795089753.455,
+          "id": 21,
+          "samples": 1,
+          "observed_seconds": 0.0,
+          "rss": {
+            "peak": 199249920,
+            "tail_median": 199249920,
+            "tail_min": 199249920,
+            "tail_max": 199249920
+          },
+          "private": {
+            "peak": 411271168,
+            "tail_median": 411271168,
+            "tail_min": 411271168,
+            "tail_max": 411271168
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "predict",
+          "time": 1795089753.466,
+          "id": 22,
+          "samples": 169,
+          "observed_seconds": 16.920987606048584,
+          "rss": {
+            "peak": 587956224,
+            "tail_median": 556371968.0,
+            "tail_min": 529297408,
+            "tail_max": 587956224
+          },
+          "private": {
+            "peak": 896454656,
+            "tail_median": 819996672.0,
+            "tail_min": 799047680,
+            "tail_max": 896454656
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089770.572,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 23,
+          "samples": 33,
+          "observed_seconds": 3.2199184894561768,
+          "rss": {
+            "peak": 656244736,
+            "tail_median": 644024320.0,
+            "tail_min": 612765696,
+            "tail_max": 656244736
+          },
+          "private": {
+            "peak": 1008074752,
+            "tail_median": 947488768.0,
+            "tail_min": 906153984,
+            "tail_max": 1008074752
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "return_stable",
+          "time": 1795089773.8367705,
+          "id": 24,
+          "samples": 100,
+          "observed_seconds": 9.954485893249512,
+          "rss": {
+            "peak": 656453632,
+            "tail_median": 644345856.0,
+            "tail_min": 644255744,
+            "tail_max": 644362240
+          },
+          "private": {
+            "peak": 1008357376,
+            "tail_median": 1000030208.0,
+            "tail_min": 1000030208,
+            "tail_max": 1000030208
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089783.877,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "settings": {
+            "steps": 40
+          },
+          "id": 27,
+          "samples": 13,
+          "observed_seconds": 1.2039010524749756,
+          "rss": {
+            "peak": 671244288,
+            "tail_median": 661213184,
+            "tail_min": 659341312,
+            "tail_max": 671244288
+          },
+          "private": {
+            "peak": 1051480064,
+            "tail_median": 1045868544,
+            "tail_min": 1013776384,
+            "tail_max": 1051480064
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089785.188,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "settings": {
+            "nsamples": 1024,
+            "n_background": 32
+          },
+          "id": 28,
+          "samples": 2,
+          "observed_seconds": 0.10559463500976562,
+          "rss": {
+            "peak": 674963456,
+            "tail_median": 674951168.0,
+            "tail_min": 674938880,
+            "tail_max": 674963456
+          },
+          "private": {
+            "peak": 1068343296,
+            "tail_median": 1067204608.0,
+            "tail_min": 1066065920,
+            "tail_max": 1068343296
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089785.438,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 30,
+          "samples": 14,
+          "observed_seconds": 1.2928073406219482,
+          "rss": {
+            "peak": 704692224,
+            "tail_median": 680101888.0,
+            "tail_min": 677875712,
+            "tail_max": 704692224
+          },
+          "private": {
+            "peak": 1094975488,
+            "tail_median": 1068161024.0,
+            "tail_min": 1065807872,
+            "tail_max": 1094975488
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089786.805,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "shap",
+          "settings": {
+            "nsamples": 1008,
+            "n_background": 32
+          },
+          "id": 31,
+          "samples": 2,
+          "observed_seconds": 0.09654092788696289,
+          "rss": {
+            "peak": 688017408,
+            "tail_median": 487147520.0,
+            "tail_min": 286277632,
+            "tail_max": 688017408
+          },
+          "private": {
+            "peak": 1075564544,
+            "tail_median": 689152000.0,
+            "tail_min": 302739456,
+            "tail_max": 1075564544
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "prepare",
+          "time": 1795089787.058,
+          "id": 32,
+          "samples": 9,
+          "observed_seconds": 0.8005239963531494,
+          "rss": {
+            "peak": 227770368,
+            "tail_median": 209498112,
+            "tail_min": 180682752,
+            "tail_max": 227770368
+          },
+          "private": {
+            "peak": 409800704,
+            "tail_median": 292892672,
+            "tail_min": 274751488,
+            "tail_max": 409800704
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "predict",
+          "time": 1795089787.89,
+          "id": 34,
+          "samples": 102,
+          "observed_seconds": 10.151435136795044,
+          "rss": {
+            "peak": 599523328,
+            "tail_median": 558524416.0,
+            "tail_min": 514322432,
+            "tail_max": 599523328
+          },
+          "private": {
+            "peak": 912138240,
+            "tail_median": 813774848.0,
+            "tail_min": 677093376,
+            "tail_max": 912138240
+          }
+        },
+        {
+          "family": "non_nt",
+          "label": "explain",
+          "time": 1795089798.176,
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 35,
+          "samples": 69,
+          "observed_seconds": 6.858667850494385,
+          "rss": {
+            "peak": 790773760,
+            "tail_median": 766115840.0,
+            "tail_min": 738893824,
+            "tail_max": 790773760
+          },
+          "private": {
+            "peak": 1045753856,
+            "tail_median": 1041180672.0,
+            "tail_min": 1032695808,
+            "tail_max": 1045753856
+          }
+        },
+        {
+          "family": "nt",
+          "label": "select_family",
+          "time": 1795089805.181,
+          "selected": "nt",
+          "id": 36,
+          "samples": 208,
+          "observed_seconds": 20.87142014503479,
+          "rss": {
+            "peak": 2440302592,
+            "tail_median": 2230009856.0,
+            "tail_min": 2021588992,
+            "tail_max": 2440302592
+          },
+          "private": {
+            "peak": 2815352832,
+            "tail_median": 2780037120.0,
+            "tail_min": 2779656192,
+            "tail_max": 2780823552
+          }
+        },
+        {
+          "family": "nt",
+          "label": "predict",
+          "time": 1795089826.124,
+          "id": 38,
+          "samples": 366,
+          "observed_seconds": 37.20400619506836,
+          "rss": {
+            "peak": 3052179456,
+            "tail_median": 3011764224.0,
+            "tail_min": 2984402944,
+            "tail_max": 3052179456
+          },
+          "private": {
+            "peak": 4696604672,
+            "tail_median": 4682551296.0,
+            "tail_min": 4678955008,
+            "tail_max": 4696604672
+          }
+        },
+        {
+          "family": "nt",
+          "label": "explain",
+          "time": 1795089863.455,
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "method": "ig",
+          "settings": {
+            "steps": 32
+          },
+          "id": 39,
+          "samples": 269,
+          "observed_seconds": 27.651185989379883,
+          "rss": {
+            "peak": 3042959360,
+            "tail_median": 2289991680,
+            "tail_min": 2271969280,
+            "tail_max": 2295234560
+          },
+          "private": {
+            "peak": 4885671936,
+            "tail_median": 4883099648,
+            "tail_min": 4881018880,
+            "tail_max": 4885671936
+          }
+        },
+        {
+          "family": "nt",
+          "label": "window_close",
+          "time": 1795089891.149594,
+          "id": 40,
+          "samples": 105,
+          "observed_seconds": 10.665256977081299,
+          "rss": {
+            "peak": 2202697728,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          },
+          "private": {
+            "peak": 4886589440,
+            "tail_median": 0.0,
+            "tail_min": 0,
+            "tail_max": 0
+          }
+        }
+      ],
+      "window": {
+        "status": "pass",
+        "checks": [
+          {
+            "check": "default_non_nt",
+            "passed": true
+          },
+          {
+            "check": "non_nt_rollout_disabled",
+            "passed": true
+          },
+          {
+            "check": "default_settings",
+            "passed": true,
+            "settings": {
+              "ig-steps": 32,
+              "shap-n": 64,
+              "shap-bg": 4,
+              "graph-size": 80
+            }
+          },
+          {
+            "check": "non_nt:prediction_rows",
+            "passed": true,
+            "count": 38
+          },
+          {
+            "check": "non_nt:SpCas9|+|32:SpCas9-NG:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "non_nt:SpCas9|+|32:SpCas9-NG:ig:units",
+            "passed": true
+          },
+          {
+            "check": "non_nt:SpCas9|+|32:SpCas9-NG:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "non_nt:SpCas9|+|32:SpCas9-NG:shap:units",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:Cas12a:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:Cas12a:ig:units",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:Cas12a:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "non_nt:Cas12a|+|16:Cas12a:shap:units",
+            "passed": true
+          },
+          {
+            "check": "nt:worker_replaced",
+            "passed": true,
+            "before": 11024,
+            "after": 3100
+          },
+          {
+            "check": "nt:dna_retained",
+            "passed": true
+          },
+          {
+            "check": "nt:prediction_rows",
+            "passed": true,
+            "count": 38
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:ig:units",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:shap:units",
+            "passed": true
+          },
+          {
+            "check": "nt:SpCas9|+|32:SpCas9-NG:rollout:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:ig:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:ig:units",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:shap:decoded",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:shap:units",
+            "passed": true
+          },
+          {
+            "check": "nt:Cas12a|+|16:Cas12a:rollout:decoded",
+            "passed": true
+          },
+          {
+            "check": "non_nt:worker_replaced",
+            "passed": true,
+            "before": 3100,
+            "after": 18036
+          },
+          {
+            "check": "non_nt:dna_retained",
+            "passed": true
+          },
+          {
+            "check": "consecutive_requests_latest_ig",
+            "passed": true
+          },
+          {
+            "check": "cancellable_shap_started",
+            "passed": true
+          },
+          {
+            "check": "cancel_and_discard_replayed_event",
+            "passed": true
+          },
+          {
+            "check": "cancelled_shap_sent_no_result",
+            "passed": true
+          },
+          {
+            "check": "worker_failure_visible",
+            "passed": true
+          },
+          {
+            "check": "retry_recreated_child",
+            "passed": true
+          },
+          {
+            "check": "resize_existing_graph_without_recompute",
+            "passed": true
+          },
+          {
+            "check": "non_nt:best:visible",
+            "passed": true
+          },
+          {
+            "check": "non_nt:variants:visible",
+            "passed": true
+          },
+          {
+            "check": "non_nt:detail:visible",
+            "passed": true
+          },
+          {
+            "check": "non_nt:xai:visible",
+            "passed": true
+          },
+          {
+            "check": "non_nt:csv_model_version",
+            "passed": true,
+            "models": [
+              [
+                "9-Hydra v2",
+                "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+              ],
+              [
+                "Cas12a CNN+BiLSTM manifest",
+                "cas12a-cnn-20261102 · sha256 94ac977865ef"
+              ]
+            ]
+          },
+          {
+            "check": "nt:worker_replaced",
+            "passed": true,
+            "before": 12244,
+            "after": 24388
+          },
+          {
+            "check": "nt:dna_retained",
+            "passed": true
+          },
+          {
+            "check": "nt:best:visible",
+            "passed": true
+          },
+          {
+            "check": "nt:variants:visible",
+            "passed": true
+          },
+          {
+            "check": "nt:detail:visible",
+            "passed": true
+          },
+          {
+            "check": "nt:xai:visible",
+            "passed": true
+          },
+          {
+            "check": "nt:csv_model_version",
+            "passed": true,
+            "models": [
+              [
+                "NT Cas12a",
+                "sha256 eae04f4ff269"
+              ],
+              [
+                "NT SpCas9",
+                "sha256 8a1a84ab4542"
+              ]
+            ]
+          }
+        ],
+        "families": {
+          "non_nt": {
+            "rows": [
+              {
+                "site": "Cas12a|+|16",
+                "head": "Cas12a",
+                "raw": 0.7750158905982971,
+                "percent": 77.50158905982971,
+                "cells": [
+                  "1",
+                  "Cas12a",
+                  "TTTA",
+                  "AGAAUAAAUAAAAGCGCCACAGG",
+                  "+",
+                  "0",
+                  "0.7750",
+                  "77.50%",
+                  "절단 효율",
+                  "Cas12a CNN+BiLSTM manifest",
+                  "cas12a-cnn-20261102 · sha256 94ac977865ef"
+                ]
+              },
+              {
+                "site": "Cas12a|-|28",
+                "head": "Cas12a",
+                "raw": 0.6304842233657837,
+                "percent": 63.04842233657837,
+                "cells": [
+                  "2",
+                  "Cas12a",
+                  "TTTA",
+                  "GUCAAUCCUGUGGCGCUUUUAUU",
+                  "-",
+                  "12",
+                  "0.6305",
+                  "63.05%",
+                  "절단 효율",
+                  "Cas12a CNN+BiLSTM manifest",
+                  "cas12a-cnn-20261102 · sha256 94ac977865ef"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9(WT)",
+                "raw": 0.539099395275116,
+                "percent": 53.9099395275116,
+                "cells": [
+                  "3",
+                  "SpCas9(WT)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.5391",
+                  "53.91%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "Sniper",
+                "raw": 0.5368332862854004,
+                "percent": 53.68332862854004,
+                "cells": [
+                  "4",
+                  "Sniper",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.5368",
+                  "53.68%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "eSpCas9(1.1)",
+                "raw": 0.45069658756256104,
+                "percent": 45.0696587562561,
+                "cells": [
+                  "5",
+                  "eSpCas9(1.1)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.4507",
+                  "45.07%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "HypaCas9",
+                "raw": 0.442703515291214,
+                "percent": 44.2703515291214,
+                "cells": [
+                  "6",
+                  "HypaCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.4427",
+                  "44.27%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9(WT)",
+                "raw": 0.43497776985168457,
+                "percent": 43.49777698516846,
+                "cells": [
+                  "7",
+                  "SpCas9(WT)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.4350",
+                  "43.50%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "xCas9",
+                "raw": 0.4285927414894104,
+                "percent": 42.85927414894104,
+                "cells": [
+                  "8",
+                  "xCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.4286",
+                  "42.86%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "SpCas9-NG",
+                "raw": 0.42250707745552063,
+                "percent": 42.25070774555206,
+                "cells": [
+                  "9",
+                  "SpCas9-NG",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "0.4225",
+                  "42.25%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-HF1",
+                "raw": 0.41959360241889954,
+                "percent": 41.959360241889954,
+                "cells": [
+                  "10",
+                  "SpCas9-HF1",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.4196",
+                  "41.96%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-NG",
+                "raw": 0.41727760434150696,
+                "percent": 41.727760434150696,
+                "cells": [
+                  "11",
+                  "SpCas9-NG",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.4173",
+                  "41.73%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "Sniper",
+                "raw": 0.3962748646736145,
+                "percent": 39.62748646736145,
+                "cells": [
+                  "12",
+                  "Sniper",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.3963",
+                  "39.63%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|32",
+                "head": "SpCas9-NG",
+                "raw": 0.38719987869262695,
+                "percent": 38.719987869262695,
+                "cells": [
+                  "13",
+                  "SpCas9-NG",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "0.3872",
+                  "38.72%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "SpCas9-NG",
+                "raw": 0.3864181935787201,
+                "percent": 38.64181935787201,
+                "cells": [
+                  "14",
+                  "SpCas9-NG",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "0.3864",
+                  "38.64%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "VRQR",
+                "raw": 0.34955698251724243,
+                "percent": 34.95569825172424,
+                "cells": [
+                  "15",
+                  "VRQR",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.3496",
+                  "34.96%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "SpCas9-NG",
+                "raw": 0.3002585172653198,
+                "percent": 30.025851726531982,
+                "cells": [
+                  "16",
+                  "SpCas9-NG",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.3003",
+                  "30.03%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-NG",
+                "raw": 0.29057425260543823,
+                "percent": 29.057425260543823,
+                "cells": [
+                  "17",
+                  "SpCas9-NG",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.2906",
+                  "29.06%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "SpCas9-NG",
+                "raw": 0.2651882767677307,
+                "percent": 26.51882767677307,
+                "cells": [
+                  "18",
+                  "SpCas9-NG",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "0.2652",
+                  "26.52%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "SpCas9-NG",
+                "raw": 0.25246426463127136,
+                "percent": 25.246426463127136,
+                "cells": [
+                  "19",
+                  "SpCas9-NG",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "0.2525",
+                  "25.25%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "xCas9",
+                "raw": 0.23120829463005066,
+                "percent": 23.120829463005066,
+                "cells": [
+                  "20",
+                  "xCas9",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "0.2312",
+                  "23.12%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "xCas9",
+                "raw": 0.2196463942527771,
+                "percent": 21.96463942527771,
+                "cells": [
+                  "21",
+                  "xCas9",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "0.2196",
+                  "21.96%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "SpCas9-NG",
+                "raw": 0.21003630757331848,
+                "percent": 21.003630757331848,
+                "cells": [
+                  "22",
+                  "SpCas9-NG",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "0.2100",
+                  "21.00%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "SpCas9-NG",
+                "raw": 0.2097111940383911,
+                "percent": 20.97111940383911,
+                "cells": [
+                  "23",
+                  "SpCas9-NG",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.2097",
+                  "20.97%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "xCas9",
+                "raw": 0.20624971389770508,
+                "percent": 20.624971389770508,
+                "cells": [
+                  "24",
+                  "xCas9",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.2062",
+                  "20.62%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "xCas9",
+                "raw": 0.1855686455965042,
+                "percent": 18.55686455965042,
+                "cells": [
+                  "25",
+                  "xCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.1856",
+                  "18.56%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "SpCas9-NG",
+                "raw": 0.18452681601047516,
+                "percent": 18.452681601047516,
+                "cells": [
+                  "26",
+                  "SpCas9-NG",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "0.1845",
+                  "18.45%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "VRQR",
+                "raw": 0.17882943153381348,
+                "percent": 17.882943153381348,
+                "cells": [
+                  "27",
+                  "VRQR",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.1788",
+                  "17.88%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "eSpCas9(1.1)",
+                "raw": 0.17810630798339844,
+                "percent": 17.810630798339844,
+                "cells": [
+                  "28",
+                  "eSpCas9(1.1)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.1781",
+                  "17.81%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "xCas9",
+                "raw": 0.1588558852672577,
+                "percent": 15.885588526725769,
+                "cells": [
+                  "29",
+                  "xCas9",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.1589",
+                  "15.89%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "xCas9",
+                "raw": 0.15481993556022644,
+                "percent": 15.481993556022644,
+                "cells": [
+                  "30",
+                  "xCas9",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "0.1548",
+                  "15.48%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "evoCas9",
+                "raw": 0.1482808142900467,
+                "percent": 14.82808142900467,
+                "cells": [
+                  "31",
+                  "evoCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.1483",
+                  "14.83%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "xCas9",
+                "raw": 0.14781039953231812,
+                "percent": 14.781039953231812,
+                "cells": [
+                  "32",
+                  "xCas9",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "0.1478",
+                  "14.78%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "xCas9",
+                "raw": 0.10800006985664368,
+                "percent": 10.800006985664368,
+                "cells": [
+                  "33",
+                  "xCas9",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "0.1080",
+                  "10.80%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|32",
+                "head": "xCas9",
+                "raw": 0.08952935039997101,
+                "percent": 8.9529350399971,
+                "cells": [
+                  "34",
+                  "xCas9",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "0.0895",
+                  "8.95%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "HypaCas9",
+                "raw": 0.0853533148765564,
+                "percent": 8.53533148765564,
+                "cells": [
+                  "35",
+                  "HypaCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.0854",
+                  "8.54%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-HF1",
+                "raw": 0.08099796622991562,
+                "percent": 8.099796622991562,
+                "cells": [
+                  "36",
+                  "SpCas9-HF1",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.0810",
+                  "8.10%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "xCas9",
+                "raw": 0.07163853943347931,
+                "percent": 7.163853943347931,
+                "cells": [
+                  "37",
+                  "xCas9",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "0.0716",
+                  "7.16%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "evoCas9",
+                "raw": 0.0035282219760119915,
+                "percent": 0.35282219760119915,
+                "cells": [
+                  "38",
+                  "evoCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.0035",
+                  "0.35%",
+                  "절단 효율",
+                  "9-Hydra v2",
+                  "spcas9-9hydra-v2 · sha256 ddbf86aa34fe"
+                ]
+              }
+            ],
+            "xai": {
+              "SpCas9|+|32:SpCas9-NG:ig": [
+                "설명 대상은 제한 전 예측 절단 효율 38.72% (원출력 0.38719988 × 100)이며 기여도 단위는 %p입니다. 기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.",
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "예측 38.72% − 기준 30.89% · 기여도 합 +8.318%p · 완결성 오차 0.4924%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "fraction output",
+                "raw 예측 0.38719988 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ],
+              "SpCas9|+|32:SpCas9-NG:shap": [
+                "설명 대상은 제한 전 예측 절단 효율 38.72% (원출력 0.38719988 × 100)이며 기여도 단위는 %p입니다. 기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.",
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "배경 seed 0 · 부분집합 seed 0 · 무작위 ACGT 배경 4개 · 샘플 64개",
+                "기준값 23.07% + SHAP 합 +15.65%p = 38.72% · 실제 예측 38.72% · 가법성 오차 0.0000%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "fraction output",
+                "raw 예측 0.38719988 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ],
+              "Cas12a|+|16:Cas12a:ig": [
+                "설명 대상은 제한 전 예측 절단 효율 77.50% (원출력 0.77501601 × 100)이며 기여도 단위는 %p입니다. 기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.",
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "합성 경로 F(x)=M(x,D(x))의 서열 기여도입니다. GC·인접 염기쌍 354개 파생 특징 경로를 포함하며, 특징의 독립적인 생물학적 중요도 비율이 아닙니다. 기준은 서열 영벡터와 파생 특징 0입니다. GC는 보간 계수에, 인접 염기쌍은 그 제곱에 비례합니다. 영벡터와 중간 soft input은 실제 DNA가 아니며 PAM도 보간됩니다. 기여도는 이 기준 입력과 경로에 의존합니다.",
+                "예측 77.50% − 기준 72.79% · 기여도 합 +4.839%p · 완결성 오차 0.1275%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "fraction output",
+                "raw 예측 0.77501601 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ],
+              "Cas12a|+|16:Cas12a:shap": [
+                "설명 대상은 제한 전 예측 절단 효율 77.50% (원출력 0.77501601 × 100)이며 기여도 단위는 %p입니다. 기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.",
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "변경된 모든 서열에서 GC·인접 염기쌍 354개 파생 특징을 함께 재계산합니다. 무작위 ACGT 배경은 실제 DNA 분포를 대표하지 않으며 PAM도 바뀔 수 있습니다. 기여도는 배경과 표본추출에 의존하며 생물학적 인과관계를 뜻하지 않습니다.",
+                "배경 seed 0 · 부분집합 seed 0 · 무작위 ACGT 배경 4개 · 샘플 64개",
+                "기준값 62.95% + SHAP 합 +14.55%p = 77.50% · 실제 예측 77.50% · 가법성 오차 0.0000%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "fraction output",
+                "raw 예측 0.77501601 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ]
+            }
+          },
+          "nt": {
+            "rows": [
+              {
+                "site": "SpCas9|+|32",
+                "head": "SpCas9-NG",
+                "raw": 1.6856821775436401,
+                "percent": 51.98895989939809,
+                "cells": [
+                  "1",
+                  "SpCas9-NG",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "1.6857",
+                  "51.99%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9(WT)",
+                "raw": 1.1451506614685059,
+                "percent": 50.715859791359904,
+                "cells": [
+                  "2",
+                  "SpCas9(WT)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.1452",
+                  "50.72%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "Sniper",
+                "raw": 1.1431035995483398,
+                "percent": 49.06144427179336,
+                "cells": [
+                  "3",
+                  "Sniper",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.1431",
+                  "49.06%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9(WT)",
+                "raw": 0.8624857068061829,
+                "percent": 44.34059200416267,
+                "cells": [
+                  "4",
+                  "SpCas9(WT)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.8625",
+                  "44.34%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "VRQR",
+                "raw": 1.458113431930542,
+                "percent": 43.00314186769724,
+                "cells": [
+                  "5",
+                  "VRQR",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "1.4581",
+                  "43.00%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "Sniper",
+                "raw": 0.8586913347244263,
+                "percent": 42.78037573876142,
+                "cells": [
+                  "6",
+                  "Sniper",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.8587",
+                  "42.78%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "SpCas9-NG",
+                "raw": 0.9094741344451904,
+                "percent": 40.341189766743184,
+                "cells": [
+                  "7",
+                  "SpCas9-NG",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "0.9095",
+                  "40.34%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "SpCas9-NG",
+                "raw": 0.8919916152954102,
+                "percent": 40.078847259206775,
+                "cells": [
+                  "8",
+                  "SpCas9-NG",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.8920",
+                  "40.08%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "xCas9",
+                "raw": 1.2555254697799683,
+                "percent": 39.680250405844454,
+                "cells": [
+                  "9",
+                  "xCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.2555",
+                  "39.68%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "eSpCas9(1.1)",
+                "raw": 1.1386070251464844,
+                "percent": 39.57373850986481,
+                "cells": [
+                  "10",
+                  "eSpCas9(1.1)",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "1.1386",
+                  "39.57%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "HypaCas9",
+                "raw": 1.270541787147522,
+                "percent": 37.65299779876351,
+                "cells": [
+                  "11",
+                  "HypaCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "1.2705",
+                  "37.65%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-NG",
+                "raw": 0.6698541641235352,
+                "percent": 36.74545488829612,
+                "cells": [
+                  "12",
+                  "SpCas9-NG",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.6699",
+                  "36.75%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "Cas12a|+|16",
+                "head": "Cas12a",
+                "raw": 0.3591322898864746,
+                "percent": 35.91322898864746,
+                "cells": [
+                  "13",
+                  "Cas12a",
+                  "TTTA",
+                  "AGAAUAAAUAAAAGCGCCACAGG",
+                  "+",
+                  "0",
+                  "0.3591",
+                  "35.91%",
+                  "절단 효율",
+                  "NT Cas12a",
+                  "sha256 eae04f4ff269"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "SpCas9-NG",
+                "raw": 0.5895582437515259,
+                "percent": 35.54053511015296,
+                "cells": [
+                  "14",
+                  "SpCas9-NG",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "0.5896",
+                  "35.54%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "eSpCas9(1.1)",
+                "raw": 0.9069539308547974,
+                "percent": 34.91004513537288,
+                "cells": [
+                  "15",
+                  "eSpCas9(1.1)",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.9070",
+                  "34.91%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-NG",
+                "raw": 0.4834226369857788,
+                "percent": 33.94786525638223,
+                "cells": [
+                  "16",
+                  "SpCas9-NG",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.4834",
+                  "33.95%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|41",
+                "head": "xCas9",
+                "raw": 0.8840963244438171,
+                "percent": 33.634509350082276,
+                "cells": [
+                  "17",
+                  "xCas9",
+                  "GGA",
+                  "GAAUAAAUAAAAGCGCCACA",
+                  "+",
+                  "2",
+                  "0.8841",
+                  "33.63%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "SpCas9-NG",
+                "raw": 0.19256946444511414,
+                "percent": 29.583325457768737,
+                "cells": [
+                  "18",
+                  "SpCas9-NG",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "0.1926",
+                  "29.58%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "SpCas9-HF1",
+                "raw": 0.8117178082466125,
+                "percent": 29.164098264880778,
+                "cells": [
+                  "19",
+                  "SpCas9-HF1",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.8117",
+                  "29.16%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "Cas12a|-|28",
+                "head": "Cas12a",
+                "raw": 0.2902842164039612,
+                "percent": 29.028421640396118,
+                "cells": [
+                  "20",
+                  "Cas12a",
+                  "TTTA",
+                  "GUCAAUCCUGUGGCGCUUUUAUU",
+                  "-",
+                  "12",
+                  "0.2903",
+                  "29.03%",
+                  "절단 효율",
+                  "NT Cas12a",
+                  "sha256 eae04f4ff269"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "HypaCas9",
+                "raw": 0.7923248410224915,
+                "percent": 28.81477870508969,
+                "cells": [
+                  "21",
+                  "HypaCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.7923",
+                  "28.81%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "SpCas9-HF1",
+                "raw": 0.568232536315918,
+                "percent": 24.50808280547142,
+                "cells": [
+                  "22",
+                  "SpCas9-HF1",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.5682",
+                  "24.51%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "SpCas9-NG",
+                "raw": -0.28407716751098633,
+                "percent": 22.430770865101817,
+                "cells": [
+                  "23",
+                  "SpCas9-NG",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "-0.2841",
+                  "22.43%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "xCas9",
+                "raw": 0.16218048334121704,
+                "percent": 21.883906861930488,
+                "cells": [
+                  "24",
+                  "xCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "0.1622",
+                  "21.88%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "VRQR",
+                "raw": 0.1273622214794159,
+                "percent": 21.407777762056888,
+                "cells": [
+                  "25",
+                  "VRQR",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.1274",
+                  "21.41%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|34",
+                "head": "xCas9",
+                "raw": 0.09453345835208893,
+                "percent": 20.7828182655932,
+                "cells": [
+                  "26",
+                  "xCas9",
+                  "CGC",
+                  "GCUUUAAGAAUAAAUAAAAG",
+                  "+",
+                  "9",
+                  "0.0945",
+                  "20.78%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "xCas9",
+                "raw": 0.025080585852265358,
+                "percent": 19.65233594349975,
+                "cells": [
+                  "27",
+                  "xCas9",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "0.0251",
+                  "19.65%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|45",
+                "head": "SpCas9-NG",
+                "raw": -0.5642168521881104,
+                "percent": 18.22699755823374,
+                "cells": [
+                  "28",
+                  "SpCas9-NG",
+                  "TGA",
+                  "AAAUAAAAGCGCCACAGGAU",
+                  "+",
+                  "2",
+                  "-0.5642",
+                  "18.23%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|32",
+                "head": "xCas9",
+                "raw": -0.11705555021762848,
+                "percent": 17.338790320774166,
+                "cells": [
+                  "29",
+                  "xCas9",
+                  "AGC",
+                  "UCGCUUUAAGAAUAAAUAAA",
+                  "+",
+                  "11",
+                  "-0.1171",
+                  "17.34%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "SpCas9-NG",
+                "raw": -0.834363579750061,
+                "percent": 14.173178465906384,
+                "cells": [
+                  "30",
+                  "SpCas9-NG",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "-0.8344",
+                  "14.17%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "xCas9",
+                "raw": -0.38442742824554443,
+                "percent": 12.98678628327012,
+                "cells": [
+                  "31",
+                  "xCas9",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "-0.3844",
+                  "12.99%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|57",
+                "head": "xCas9",
+                "raw": -0.38775384426116943,
+                "percent": 12.932642309576275,
+                "cells": [
+                  "32",
+                  "xCas9",
+                  "AGC",
+                  "CACAGGAUUGACUAAACCAC",
+                  "+",
+                  "14",
+                  "-0.3878",
+                  "12.93%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|45",
+                "head": "xCas9",
+                "raw": -0.4657251238822937,
+                "percent": 11.663506130321624,
+                "cells": [
+                  "33",
+                  "xCas9",
+                  "CGC",
+                  "UGGUUUAGUCAAUCCUGUGG",
+                  "-",
+                  "2",
+                  "-0.4657",
+                  "11.66%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|31",
+                "head": "SpCas9-NG",
+                "raw": -1.0780093669891357,
+                "percent": 10.5170322190547,
+                "cells": [
+                  "34",
+                  "SpCas9-NG",
+                  "AGT",
+                  "CAGGGCGCCGGCUGUGGUUU",
+                  "-",
+                  "12",
+                  "-1.0780",
+                  "10.52%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|42",
+                "head": "evoCas9",
+                "raw": 0.35648730397224426,
+                "percent": 9.463160241956711,
+                "cells": [
+                  "35",
+                  "evoCas9",
+                  "TGG",
+                  "CUGUGGUUUAGUCAAUCCUG",
+                  "-",
+                  "1",
+                  "0.3565",
+                  "9.46%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|43",
+                "head": "xCas9",
+                "raw": -0.6074696183204651,
+                "percent": 9.35633524668634,
+                "cells": [
+                  "36",
+                  "xCas9",
+                  "GGC",
+                  "UGUGGUUUAGUCAAUCCUGU",
+                  "-",
+                  "0",
+                  "-0.6075",
+                  "9.36%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|-|40",
+                "head": "xCas9",
+                "raw": -0.8829611539840698,
+                "percent": 4.8721677854359156,
+                "cells": [
+                  "37",
+                  "xCas9",
+                  "TGT",
+                  "GGCUGUGGUUUAGUCAAUCC",
+                  "-",
+                  "3",
+                  "-0.8830",
+                  "4.87%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              },
+              {
+                "site": "SpCas9|+|40",
+                "head": "evoCas9",
+                "raw": -0.3242434859275818,
+                "percent": 1.5106997789573668,
+                "cells": [
+                  "38",
+                  "evoCas9",
+                  "AGG",
+                  "AGAAUAAAUAAAAGCGCCAC",
+                  "+",
+                  "3",
+                  "-0.3242",
+                  "1.51%",
+                  "절단 효율",
+                  "NT SpCas9",
+                  "sha256 8a1a84ab4542"
+                ]
+              }
+            ],
+            "xai": {
+              "SpCas9|+|32:SpCas9-NG:ig": [
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "예측 51.99% − 기준 26.65% · 기여도 합 +25.353%p · 완결성 오차 0.0132%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "SpCas9_v3.ipynb: train targets / 100; nanmean/nanstd ddof=0",
+                "raw 예측 1.6856821 · 표시 배율 15.00599 · 예측/기준 오프셋 26.69363"
+              ],
+              "SpCas9|+|32:SpCas9-NG:shap": [
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "배경 seed 0 · 부분집합 seed 0 · 무작위 ACGT 배경 4개 · 샘플 64개",
+                "기준값 13.31% + SHAP 합 +38.68%p = 51.99% · 실제 예측 51.99% · 가법성 오차 0.0000%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "SpCas9_v3.ipynb: train targets / 100; nanmean/nanstd ddof=0",
+                "raw 예측 1.6856821 · 표시 배율 15.00599 · 예측/기준 오프셋 26.69363"
+              ],
+              "SpCas9|+|32:SpCas9-NG:rollout": [
+                "위치별 정보 의존도 (Attention Rollout)",
+                "토큰 × 토큰 의존도 행렬 보기 (토큰 6개)",
+                "토큰 × 토큰 의존도 행렬",
+                "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+              ],
+              "Cas12a|+|16:Cas12a:ig": [
+                "글자별 기여도 (Attribution Logo, IG)",
+                "기술적 참고",
+                "기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+                "예측 35.91% − 기준 63.81% · 기여도 합 -27.897%p · 완결성 오차 0.0044%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "NT registered fraction output after output_mode",
+                "raw 예측 0.35913217 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ],
+              "Cas12a|+|16:Cas12a:shap": [
+                "위치별 기여분 (SHAP)",
+                "SHAP 워터폴",
+                "기술적 참고 (기준값 · 합산값)",
+                "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+                "배경 seed 0 · 부분집합 seed 0 · 무작위 ACGT 배경 4개 · 샘플 64개",
+                "기준값 48.20% + SHAP 합 -12.28%p = 35.91% · 실제 예측 35.91% · 가법성 오차 0.0000%p",
+                "설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다.",
+                "출력 단위 참고",
+                "NT registered fraction output after output_mode",
+                "raw 예측 0.35913217 · 표시 배율 100 · 예측/기준 오프셋 0"
+              ],
+              "Cas12a|+|16:Cas12a:rollout": [
+                "위치별 정보 의존도 (Attention Rollout)",
+                "토큰 × 토큰 의존도 행렬 보기 (토큰 10개)",
+                "토큰 × 토큰 의존도 행렬",
+                "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+              ]
+            }
+          }
+        },
+        "webview": {
+          "protocolVersion": "1.3",
+          "product": "Edg/157.0.4341.60",
+          "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+          "jsVersion": "15.7.11.7"
+        }
+      },
+      "sampler": {
+        "root_pid": 22188,
+        "exit_code": 0,
+        "samples": 4452,
+        "seconds": 452.2872198999976,
+        "max_sample_gap_seconds": 0.4046659000450745,
+        "access_errors": [],
+        "survivors": [],
+        "timed_out": false,
+        "process_inventory": {
+          "(22188, 1795089449.5358894)": {
+            "pid": 22188,
+            "created": 1795089449.5358894,
+            "ppid": 20944,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe"
+            ]
+          },
+          "(14128, 1795089452.8541183)": {
+            "pid": 14128,
+            "created": 1795089452.8541183,
+            "ppid": 22188,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--embedded-browser-webview=1",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--noerrdialogs",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--disable-background-networking",
+              "--disable-features=ElasticOverscroll",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--proxy-server=http://127.0.0.1:9",
+              "--remote-debugging-address=127.0.0.1",
+              "--remote-debugging-port=53297",
+              "--mojo-named-platform-channel-pipe=22188.16800.15538637102220362310",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68"
+            ]
+          },
+          "(17016, 1795089453.0459468)": {
+            "pid": 17016,
+            "created": 1795089453.0459468,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=crashpad-handler",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "/prefetch:4",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68",
+              "--monitor-self-annotation=ptype=crashpad-handler",
+              "--user-stream-region=284,65568",
+              "--database=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView\\Crashpad",
+              "--annotation=IsOfficialBuild=1",
+              "--annotation=channel=",
+              "--annotation=chromium-version=157.0.8103.80",
+              "--annotation=exe=C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--annotation=plat=Win64",
+              "--annotation=prod=Edge WebView2",
+              "--annotation=ver=157.0.4341.60",
+              "--initial-client-data=0x180,0x184,0x188,0x15c,0x190,0x7ff95f7eb3a0,0x7ff95f7eb3b0,0x7ff95f7eb3c0"
+            ]
+          },
+          "(18604, 1795089454.4635787)": {
+            "pid": 18604,
+            "created": 1795089454.4635787,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--gpu-recent-crash-count=0",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=1768,i,6580501270940643085,5276917919359927636,262144",
+              "--field-trial-handle=2024,i,14294409665105097339,6563052264179872464,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2028,i,1287215105488268845,3409490262368991387,4",
+              "--trace-process-track-uuid=3190708988185955192",
+              "--mojo-platform-channel-handle=2020",
+              "/prefetch:2",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68"
+            ]
+          },
+          "(1340, 1795089454.4649282)": {
+            "pid": 1340,
+            "created": 1795089454.4649282,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=network.mojom.NetworkService",
+              "--lang=ko",
+              "--service-sandbox-type=none",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2076,i,15143962780900849266,12923783211511226709,524288",
+              "--field-trial-handle=2024,i,14294409665105097339,6563052264179872464,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2028,i,1287215105488268845,3409490262368991387,4",
+              "--trace-process-track-uuid=3190708989122997041",
+              "--mojo-platform-channel-handle=2324",
+              "/prefetch:11",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68"
+            ]
+          },
+          "(11160, 1795089454.591038)": {
+            "pid": 11160,
+            "created": 1795089454.591038,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=utility",
+              "--utility-sub-type=storage.mojom.StorageService",
+              "--lang=ko",
+              "--service-sandbox-type=service",
+              "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--startup-read-main-dll",
+              "--metrics-shmem-handle=2736,i,7252583482899062358,2026459399894904076,524288",
+              "--field-trial-handle=2024,i,14294409665105097339,6563052264179872464,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2028,i,1287215105488268845,3409490262368991387,4",
+              "--trace-process-track-uuid=3190708990060038890",
+              "--mojo-platform-channel-handle=2712",
+              "/prefetch:13",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68"
+            ]
+          },
+          "(14700, 1795089454.9326005)": {
+            "pid": 14700,
+            "created": 1795089454.9326005,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=renderer",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--allow-file-access-from-files",
+              "--remote-debugging-port=53297",
+              "--video-capture-use-gpu-memory-buffer",
+              "--lang=ko",
+              "--device-scale-factor=1.25",
+              "--num-raster-threads=4",
+              "--enable-main-frame-before-activation",
+              "--renderer-client-id=5",
+              "--js-flags=--ms-user-locale=ko_KR",
+              "--ssd-no-pressure-read-main-dll",
+              "--launch-time-ticks=352883119132",
+              "--metrics-shmem-handle=3992,i,16335977711675360796,3057348649235824094,1048576",
+              "--field-trial-handle=2024,i,14294409665105097339,6563052264179872464,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2028,i,1287215105488268845,3409490262368991387,4",
+              "--trace-process-track-uuid=3190708990997080739",
+              "--mojo-platform-channel-handle=4048",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68",
+              "/prefetch:1"
+            ]
+          },
+          "(11024, 1795089455.975665)": {
+            "pid": 11024,
+            "created": 1795089455.975665,
+            "ppid": 22188,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+              "--multiprocessing-fork",
+              "parent_pid=22188",
+              "pipe_handle=1904"
+            ]
+          },
+          "(3100, 1795089515.876424)": {
+            "pid": 3100,
+            "created": 1795089515.876424,
+            "ppid": 22188,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+              "--multiprocessing-fork",
+              "parent_pid=22188",
+              "pipe_handle=2024"
+            ]
+          },
+          "(18420, 1795089574.4624076)": {
+            "pid": 18420,
+            "created": 1795089574.4624076,
+            "ppid": 14128,
+            "name": "msedgewebview2.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+              "--type=gpu-process",
+              "--disable-gpu-sandbox",
+              "--use-gl=disabled",
+              "--gpu-vendor-id=32902",
+              "--gpu-device-id=16032",
+              "--gpu-sub-system-id=52762708",
+              "--gpu-revision=0",
+              "--gpu-driver-version=25.20.100.6471",
+              "--noerrdialogs",
+              "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence01\\v3\\webview-profile\\EBWebView",
+              "--webview-exe-name=XaiDashboardV3.exe",
+              "--embedded-browser-webview=1",
+              "--embedded-browser-webview-dpi-awareness=1",
+              "--gpu-preferences=WAAAAAAAAABoAAACAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAADgAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+              "--skip-read-main-dll",
+              "--metrics-shmem-handle=5168,i,18136979283852195857,12983741784574296623,262144",
+              "--field-trial-handle=2024,i,14294409665105097339,6563052264179872464,262144",
+              "--disable-features=ElasticOverscroll",
+              "--variations-seed-version",
+              "--pseudonymization-salt-handle=2028,i,1287215105488268845,3409490262368991387,4",
+              "--trace-process-track-uuid=3190708991934122588",
+              "--mojo-platform-channel-handle=5112",
+              "/prefetch:10",
+              "/pfhostedapp:317555058ba55d1ff0b435d13e4f30dbd468ce68"
+            ]
+          },
+          "(18036, 1795089752.5977786)": {
+            "pid": 18036,
+            "created": 1795089752.5977786,
+            "ppid": 22188,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+              "--multiprocessing-fork",
+              "parent_pid=22188",
+              "pipe_handle=2416"
+            ]
+          },
+          "(12244, 1795089787.0702417)": {
+            "pid": 12244,
+            "created": 1795089787.0702417,
+            "ppid": 22188,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+              "--multiprocessing-fork",
+              "parent_pid=22188",
+              "pipe_handle=2580"
+            ]
+          },
+          "(24388, 1795089805.3052964)": {
+            "pid": 24388,
+            "created": 1795089805.3052964,
+            "ppid": 22188,
+            "name": "XaiDashboardV3.exe",
+            "exe": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+            "cmdline": [
+              "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3\\XaiDashboardV3.exe",
+              "--multiprocessing-fork",
+              "parent_pid=22188",
+              "pipe_handle=4688"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

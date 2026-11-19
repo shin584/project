@@ -1,0 +1,21 @@
+{
+  "rtol": 1e-05,
+  "atol": 1e-08,
+  "families": {
+    "non_nt": {
+      "source_rows": 38,
+      "frozen_rows": 38,
+      "prediction_parity": true,
+      "xai_cases": 4,
+      "xai_captions_parity": true
+    },
+    "nt": {
+      "source_rows": 38,
+      "frozen_rows": 38,
+      "prediction_parity": true,
+      "xai_cases": 6,
+      "xai_captions_parity": true
+    }
+  },
+  "nt_csv_base_columns_match_preserved": true
+}

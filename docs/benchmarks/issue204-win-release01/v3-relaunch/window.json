@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "check": "default_non_nt",
+      "passed": true
+    },
+    {
+      "check": "non_nt_rollout_disabled",
+      "passed": true
+    }
+  ],
+  "families": {},
+  "webview": {
+    "protocolVersion": "1.3",
+    "product": "Edg/157.0.4341.60",
+    "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "jsVersion": "15.7.11.7"
+  }
+}

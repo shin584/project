@@ -1,0 +1,252 @@
+[
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 1,
+    "family": null,
+    "time": 1795090704.409
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": null,
+    "request_id": 1,
+    "family": null,
+    "time": 1795090704.416
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795090709.871
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 2,
+    "family": null,
+    "time": 1795090709.904
+  },
+  {
+    "label": "predict",
+    "time": 1795090709.907
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 3,
+    "family": null,
+    "time": 1795090717.954
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 3,
+    "family": null,
+    "time": 1795090719.262
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 3,
+    "family": null,
+    "time": 1795090727.074
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 3,
+    "family": null,
+    "time": 1795090727.901
+  },
+  {
+    "label": "explain",
+    "time": 1795090728.036,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "rollout",
+    "settings": {}
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 4,
+    "family": null,
+    "time": 1795090741.469
+  },
+  {
+    "label": "explain",
+    "time": 1795090747.353,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 5,
+    "family": null,
+    "time": 1795090749.789
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 5,
+    "family": null,
+    "time": 1795090752.869
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 5,
+    "family": null,
+    "time": 1795090756.16
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 5,
+    "family": null,
+    "time": 1795090758.61
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 5,
+    "family": null,
+    "time": 1795090764.531
+  },
+  {
+    "label": "explain",
+    "time": 1795090769.804,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 6,
+    "family": null,
+    "time": 1795090772.23
+  },
+  {
+    "label": "explain",
+    "time": 1795090777.327,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "rollout",
+    "settings": {}
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 7,
+    "family": null,
+    "time": 1795090777.822
+  },
+  {
+    "label": "explain",
+    "time": 1795090782.89,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 8,
+    "family": null,
+    "time": 1795090795.636
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 8,
+    "family": null,
+    "time": 1795090798.793
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 8,
+    "family": null,
+    "time": 1795090803.148
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": null,
+    "request_id": 8,
+    "family": null,
+    "time": 1795090807.019
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 8,
+    "family": null,
+    "time": 1795090810.938
+  },
+  {
+    "label": "explain",
+    "time": 1795090816.114,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 9,
+    "family": null,
+    "time": 1795090817.434
+  },
+  {
+    "label": "explain",
+    "time": 1795090822.544,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "rollout",
+    "settings": {}
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": null,
+    "request_id": 10,
+    "family": null,
+    "time": 1795090825.485
+  }
+]

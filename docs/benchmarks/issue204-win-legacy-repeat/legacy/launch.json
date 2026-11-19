@@ -1,0 +1,8 @@
+{
+  "command": [
+    "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard\\XaiDashboard.exe"
+  ],
+  "cwd": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-evidence02\\legacy\\unrelated-cwd",
+  "contract_sha256": "17b6347c5c2aa63f5cc47578b9aef12d4376cba0fc567de3b0e9ea4bf343fa1f",
+  "browser_args": "--remote-debugging-address=127.0.0.1 --remote-debugging-port=63626 --disable-background-networking --proxy-server=http://127.0.0.1:9 --host-resolver-rules=\"MAP * ~NOTFOUND, EXCLUDE localhost\""
+}

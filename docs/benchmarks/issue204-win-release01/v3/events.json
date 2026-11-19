@@ -1,0 +1,1657 @@
+[
+  {
+    "label": "prepare",
+    "time": 1795089455.942
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 1,
+    "family": "non_nt",
+    "time": 1795089456.985
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 1,
+    "request_id": 1,
+    "family": "non_nt",
+    "time": 1795089456.989
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795089462.196
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 2,
+    "family": "non_nt",
+    "time": 1795089462.205
+  },
+  {
+    "label": "predict",
+    "time": 1795089462.207
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 3,
+    "family": "non_nt",
+    "time": 1795089482.449
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 3,
+    "family": "non_nt",
+    "time": 1795089482.865
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 3,
+    "family": "non_nt",
+    "time": 1795089483.017
+  },
+  {
+    "label": "explain",
+    "time": 1795089483.024,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 4,
+    "family": "non_nt",
+    "time": 1795089483.545
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 4,
+    "family": "non_nt",
+    "time": 1795089483.709
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 4,
+    "family": "non_nt",
+    "time": 1795089483.868
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 4,
+    "family": "non_nt",
+    "time": 1795089484.039
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 4,
+    "family": "non_nt",
+    "time": 1795089486.7
+  },
+  {
+    "label": "explain",
+    "time": 1795089491.938,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 5,
+    "family": "non_nt",
+    "time": 1795089492.061
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 5,
+    "family": "non_nt",
+    "time": 1795089492.152
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 5,
+    "family": "non_nt",
+    "time": 1795089492.219
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 5,
+    "family": "non_nt",
+    "time": 1795089492.291
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 5,
+    "family": "non_nt",
+    "time": 1795089492.989
+  },
+  {
+    "label": "explain",
+    "time": 1795089498.048,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.131
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.187
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.266
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.322
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.391
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089498.456
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 6,
+    "family": "non_nt",
+    "time": 1795089499.294
+  },
+  {
+    "label": "explain",
+    "time": 1795089504.36,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 7,
+    "family": "non_nt",
+    "time": 1795089504.376
+  },
+  {
+    "label": "explain",
+    "time": 1795089509.425,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089509.527
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089509.612
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089509.72
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089509.809
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089509.913
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089510.02
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 1,
+    "request_id": 8,
+    "family": "non_nt",
+    "time": 1795089510.68
+  },
+  {
+    "label": "select_family",
+    "time": 1795089515.768,
+    "selected": "nt"
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 10,
+    "family": "nt",
+    "time": 1795089537.247
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 2,
+    "request_id": 10,
+    "family": "nt",
+    "time": 1795089537.249
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795089537.25
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 11,
+    "family": "nt",
+    "time": 1795089537.27
+  },
+  {
+    "label": "predict",
+    "time": 1795089537.272
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 12,
+    "family": "nt",
+    "time": 1795089561.579
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 12,
+    "family": "nt",
+    "time": 1795089562.168
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 12,
+    "family": "nt",
+    "time": 1795089569.396
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 12,
+    "family": "nt",
+    "time": 1795089570.244
+  },
+  {
+    "label": "explain",
+    "time": 1795089570.333,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089582.166
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089582.931
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089584.683
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089585.413
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089586.178
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089586.983
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089587.669
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089588.339
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089589.131
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089590.376
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089591.154
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089592
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089592.7
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089593.465
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089594.324
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089595.608
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089596.48
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089597.503
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089598.409
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089599.395
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089600.677
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089602.047
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089604.012
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089605.278
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089606.371
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089607.287
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089608.273
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089609.14
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089610.126
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089611.063
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089612.048
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089612.992
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089613.931
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089614.86
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 13,
+    "family": "nt",
+    "time": 1795089617.356
+  },
+  {
+    "label": "explain",
+    "time": 1795089622.95,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 14,
+    "family": "nt",
+    "time": 1795089624.782
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 14,
+    "family": "nt",
+    "time": 1795089627.12
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 14,
+    "family": "nt",
+    "time": 1795089629.238
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 14,
+    "family": "nt",
+    "time": 1795089630.934
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 14,
+    "family": "nt",
+    "time": 1795089633.333
+  },
+  {
+    "label": "explain",
+    "time": 1795089638.405,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 15,
+    "family": "nt",
+    "time": 1795089638.429
+  },
+  {
+    "label": "explain",
+    "time": 1795089643.505,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "rollout",
+    "settings": {}
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 16,
+    "family": "nt",
+    "time": 1795089644.414
+  },
+  {
+    "label": "explain",
+    "time": 1795089649.52,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 17,
+    "family": "nt",
+    "time": 1795089663.842
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 17,
+    "family": "nt",
+    "time": 1795089667.143
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 17,
+    "family": "nt",
+    "time": 1795089670.427
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 17,
+    "family": "nt",
+    "time": 1795089674.466
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 17,
+    "family": "nt",
+    "time": 1795089678.723
+  },
+  {
+    "label": "explain",
+    "time": 1795089684.065,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "shap",
+    "settings": {
+      "nsamples": 64,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089685.141
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089686.616
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089688.891
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089690.474
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089692.614
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089694.314
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089696.064
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089697.657
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089699.211
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089701.08
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089703.153
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089704.941
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089706.347
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089707.814
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089709.156
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089710.778
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089712.198
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089713.781
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089715.217
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089716.604
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089718.145
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089719.721
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089721.294
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089722.676
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089723.992
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089725.826
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089727.178
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089728.389
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089729.746
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089731.023
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089732.47
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089734.263
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089736.608
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089738.323
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 18,
+    "family": "nt",
+    "time": 1795089740.035
+  },
+  {
+    "label": "explain",
+    "time": 1795089745.17,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "rollout",
+    "settings": {}
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 2,
+    "request_id": 19,
+    "family": "nt",
+    "time": 1795089746.793
+  },
+  {
+    "label": "select_family",
+    "time": 1795089751.951,
+    "selected": "non_nt"
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 21,
+    "family": "non_nt",
+    "time": 1795089753.451
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 3,
+    "request_id": 21,
+    "family": "non_nt",
+    "time": 1795089753.453
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795089753.455
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 22,
+    "family": "non_nt",
+    "time": 1795089753.462
+  },
+  {
+    "label": "predict",
+    "time": 1795089753.466
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 23,
+    "family": "non_nt",
+    "time": 1795089770.054
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 23,
+    "family": "non_nt",
+    "time": 1795089770.43
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 23,
+    "family": "non_nt",
+    "time": 1795089770.552
+  },
+  {
+    "label": "explain",
+    "time": 1795089770.572,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 24,
+    "family": "non_nt",
+    "time": 1795089770.954
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 24,
+    "family": "non_nt",
+    "time": 1795089771.065
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 24,
+    "family": "non_nt",
+    "time": 1795089771.185
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 24,
+    "family": "non_nt",
+    "time": 1795089771.301
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 24,
+    "family": "non_nt",
+    "time": 1795089773.759
+  },
+  {
+    "label": "explain",
+    "time": 1795089783.869,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 128,
+      "n_background": 4
+    }
+  },
+  {
+    "label": "explain",
+    "time": 1795089783.877,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 40
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089784.128
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089784.2
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089784.269
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089784.329
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089784.398
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 26,
+    "family": "non_nt",
+    "time": 1795089785.102
+  },
+  {
+    "label": "explain",
+    "time": 1795089785.188,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 1024,
+      "n_background": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 27,
+    "family": "non_nt",
+    "time": 1795089785.263
+  },
+  {
+    "label": "cancel",
+    "time": 1795089785.392
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 27,
+    "family": "non_nt",
+    "time": 1795089785.399
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 27,
+    "family": "non_nt",
+    "time": 1795089785.428
+  },
+  {
+    "label": "explain",
+    "time": 1795089785.438,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 29,
+    "family": "non_nt",
+    "time": 1795089785.691
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 29,
+    "family": "non_nt",
+    "time": 1795089785.763
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 29,
+    "family": "non_nt",
+    "time": 1795089785.839
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 29,
+    "family": "non_nt",
+    "time": 1795089785.914
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 3,
+    "request_id": 29,
+    "family": "non_nt",
+    "time": 1795089786.768
+  },
+  {
+    "label": "explain",
+    "time": 1795089786.805,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "shap",
+    "settings": {
+      "nsamples": 1008,
+      "n_background": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 3,
+    "request_id": 30,
+    "family": "non_nt",
+    "time": 1795089786.888
+  },
+  {
+    "label": "event",
+    "type": "error",
+    "generation": 3,
+    "request_id": 30,
+    "family": "non_nt",
+    "time": 1795089786.904
+  },
+  {
+    "label": "prepare",
+    "time": 1795089787.058
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 32,
+    "family": "non_nt",
+    "time": 1795089787.878
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 4,
+    "request_id": 32,
+    "family": "non_nt",
+    "time": 1795089787.88
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795089787.883
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 4,
+    "request_id": 33,
+    "family": "non_nt",
+    "time": 1795089787.89
+  },
+  {
+    "label": "predict",
+    "time": 1795089787.89
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 34,
+    "family": "non_nt",
+    "time": 1795089797.729
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 34,
+    "family": "non_nt",
+    "time": 1795089798.062
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 4,
+    "request_id": 34,
+    "family": "non_nt",
+    "time": 1795089798.173
+  },
+  {
+    "label": "explain",
+    "time": 1795089798.176,
+    "site": "Cas12a|+|16",
+    "head": "Cas12a",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 35,
+    "family": "non_nt",
+    "time": 1795089798.518
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 35,
+    "family": "non_nt",
+    "time": 1795089798.632
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 35,
+    "family": "non_nt",
+    "time": 1795089798.749
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 4,
+    "request_id": 35,
+    "family": "non_nt",
+    "time": 1795089798.869
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 4,
+    "request_id": 35,
+    "family": "non_nt",
+    "time": 1795089800.998
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 4,
+    "request_id": 36,
+    "family": "non_nt",
+    "time": 1795089805.106
+  },
+  {
+    "label": "select_family",
+    "time": 1795089805.181,
+    "selected": "nt"
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 38,
+    "family": "nt",
+    "time": 1795089826.105
+  },
+  {
+    "label": "event",
+    "type": "ready",
+    "generation": 5,
+    "request_id": 38,
+    "family": "nt",
+    "time": 1795089826.109
+  },
+  {
+    "label": "scan_sites",
+    "time": 1795089826.11
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 5,
+    "request_id": 39,
+    "family": "nt",
+    "time": 1795089826.123
+  },
+  {
+    "label": "predict",
+    "time": 1795089826.124
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 40,
+    "family": "nt",
+    "time": 1795089854.077
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 40,
+    "family": "nt",
+    "time": 1795089855.543
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 40,
+    "family": "nt",
+    "time": 1795089862.576
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 5,
+    "request_id": 40,
+    "family": "nt",
+    "time": 1795089863.431
+  },
+  {
+    "label": "explain",
+    "time": 1795089863.455,
+    "site": "SpCas9|+|32",
+    "head": "SpCas9-NG",
+    "method": "ig",
+    "settings": {
+      "steps": 32
+    }
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 41,
+    "family": "nt",
+    "time": 1795089870.43
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 41,
+    "family": "nt",
+    "time": 1795089872.282
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 41,
+    "family": "nt",
+    "time": 1795089873.889
+  },
+  {
+    "label": "event",
+    "type": "progress",
+    "generation": 5,
+    "request_id": 41,
+    "family": "nt",
+    "time": 1795089875.476
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 5,
+    "request_id": 41,
+    "family": "nt",
+    "time": 1795089885.791
+  },
+  {
+    "label": "event",
+    "type": "result",
+    "generation": 5,
+    "request_id": 42,
+    "family": "nt",
+    "time": 1795089890.993
+  }
+]

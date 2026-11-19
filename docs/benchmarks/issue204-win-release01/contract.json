@@ -1,0 +1,189 @@
+{
+  "issue": 204,
+  "registered_at": "2026-11-19T11:57:10.229171+00:00",
+  "scope": "frozen release comparison on the development PC",
+  "releases": {
+    "legacy": {
+      "root": "C:\\project-backups\\dashboard-v3\\issue192-20261118\\workfolder\\dist\\XaiDashboard",
+      "executable_sha256": "f8667972c257f97cb2d96bd320d19261b5691a94a49ece61f82745fe3a8bc3a3",
+      "manifest_sha256": "cbcdd7b35fd920c10d205193e1d9f72e3a48bef68d66ab8d406309fd36f24d79",
+      "source_commit": "54b77ee207891a8b90b21e818542ae9f9ed7911b",
+      "dependencies": {
+        "pyinstaller": "6.22.3",
+        "pywebview": "6.2.1",
+        "torch": "2.12.0",
+        "transformers": "5.8.1",
+        "safetensors": "0.7.0",
+        "numpy": "2.3.2",
+        "pandas": "2.3.3",
+        "matplotlib": "3.10.7",
+        "logomaker": "0.8.7",
+        "shap": "0.52.0",
+        "psutil": "7.2.2"
+      },
+      "webview2_sha256": "c40a84d4cbd25e4c14ef69a9f39418028239d7dadb08159d1228ab805367ced2",
+      "assets": {
+        "models/Cas12a.safetensors": "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969",
+        "models/SpCas9.safetensors": "8a1a84ab4542da1eef9720ab54c785d1d2faa721e43b4731da018ec8b64fe9d9",
+        "tokenizer/tokenizer_config.json": "e5cdd63d5f8feb1eaaf4d04ff596944cc6028e93e6ca91a4d25381b3cf5d39cf",
+        "tokenizer/vocab.txt": "afa9b1cf611ab623d9fae2beb94db924796014b0054b3aaf1c9e047b13386e77"
+      }
+    },
+    "v3": {
+      "root": "C:\\project-backups\\dashboard-v3\\issue204\\XaiDashboardV3",
+      "executable_sha256": "4acc2acb39e1ddc94a7371a405bbe3565cff67f5eac45f8b924bbc9662734a2e",
+      "manifest_sha256": "1335e70286c5dc2d2c64fb84d5718efff1dcd6a2963283fc774f3e4a3a910d57",
+      "source_commit": "995fff0b592c662ca514e21f0c9414e0a8808e54",
+      "dependencies": {
+        "Jinja2": "3.1.6",
+        "MarkupSafe": "3.0.3",
+        "PyYAML": "6.0.3",
+        "Pygments": "2.20.0",
+        "absl-py": "2.4.0",
+        "altgraph": "0.17.5",
+        "annotated-doc": "0.0.7",
+        "annotated-types": "0.8.0",
+        "anyio": "4.14.2",
+        "bottle": "0.13.4",
+        "certifi": "2026.10.23",
+        "cffi": "2.1.1",
+        "click": "8.5.1",
+        "cloudpickle": "3.1.2",
+        "clr_loader": "0.3.1",
+        "colorama": "0.4.6",
+        "contourpy": "1.4.0",
+        "cycler": "0.12.1",
+        "filelock": "3.29.0",
+        "fonttools": "4.68.0",
+        "fsspec": "2026.4.0",
+        "h11": "0.16.0",
+        "h5py": "3.14.0",
+        "hf-xet": "1.8.0",
+        "httpcore": "1.0.9",
+        "httpx": "0.28.1",
+        "huggingface_hub": "1.33.0",
+        "idna": "3.20",
+        "joblib": "1.5.2",
+        "keras": "3.14.1",
+        "kiwisolver": "1.5.1",
+        "llvmlite": "0.50.0",
+        "logomaker": "0.8.7",
+        "markdown-it-py": "4.2.0",
+        "matplotlib": "3.10.7",
+        "mdurl": "0.1.2",
+        "ml_dtypes": "0.5.4",
+        "mpmath": "1.3.0",
+        "namex": "0.1.0",
+        "networkx": "3.6.1",
+        "numba": "0.68.0",
+        "numpy": "2.3.2",
+        "optree": "0.19.1",
+        "packaging": "25.0",
+        "pandas": "2.3.3",
+        "pefile": "2024.8.26",
+        "pillow": "13.0.0",
+        "pip": "25.2",
+        "proxy_tools": "0.1.0",
+        "psutil": "7.2.2",
+        "pycparser": "3.12",
+        "pydantic": "2.13.5",
+        "pydantic_core": "2.46.5",
+        "pyinstaller": "6.22.3",
+        "pyinstaller-hooks-contrib": "2026.10",
+        "pyparsing": "3.3.3",
+        "python-dateutil": "2.9.0.post0",
+        "pythonnet": "3.2.1",
+        "pytz": "2025.2",
+        "pywebview": "6.2.1",
+        "pywin32-ctypes": "0.2.3",
+        "regex": "2026.11.19",
+        "rich": "15.0.0",
+        "safetensors": "0.7.0",
+        "scikit-learn": "1.7.1",
+        "scipy": "1.16.1",
+        "setuptools": "80.9.0",
+        "shap": "0.52.0",
+        "shellingham": "1.5.4",
+        "six": "1.17.0",
+        "slicer": "0.0.8",
+        "sympy": "1.14.0",
+        "threadpoolctl": "3.6.0",
+        "tokenizers": "0.22.2",
+        "torch": "2.12.0",
+        "tqdm": "4.67.1",
+        "transformers": "5.8.1",
+        "typer": "0.29.2",
+        "typing-inspection": "0.4.5",
+        "typing_extensions": "4.15.0",
+        "tzdata": "2025.2"
+      },
+      "webview2_sha256": "c40a84d4cbd25e4c14ef69a9f39418028239d7dadb08159d1228ab805367ced2",
+      "assets": {
+        "models/Cas12a.safetensors": "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969",
+        "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+        "models/non_nt/spcas9-9hydra-v2/model.keras": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+        "models/non_nt/spcas9-9hydra-v2/training/9hydra_v2.keras": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+        "models/SpCas9.safetensors": "8a1a84ab4542da1eef9720ab54c785d1d2faa721e43b4731da018ec8b64fe9d9",
+        "tokenizer/tokenizer_config.json": "e5cdd63d5f8feb1eaaf4d04ff596944cc6028e93e6ca91a4d25381b3cf5d39cf",
+        "tokenizer/vocab.txt": "afa9b1cf611ab623d9fae2beb94db924796014b0054b3aaf1c9e047b13386e77"
+      }
+    }
+  },
+  "measurement_modes": [
+    "legacy",
+    "v3"
+  ],
+  "pc": {
+    "host": "SJun",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "logical_cpus": 8,
+    "ram_bytes": 8373960704
+  },
+  "observer_sha256": {
+    "measure_package.py": "12737cbfe8c517294d5828c8af49ab8a5671dbc6a396de5a885481e2ba743694",
+    "measure_ram.py": "4934286dee76dc292e488ba34611bd8ed0e92a578dacd21f511836160dfd3558"
+  },
+  "dna": "CAAAGTAGCCGGTCGCTTTAAGAATAAATAAAAGCGCCACAGGATTGACTAAACCACAGCCGGCGCCCTGGCCCCCTACCG",
+  "settings": {
+    "ig_steps": 32,
+    "shap_nsamples": 64,
+    "shap_n_background": 4
+  },
+  "cases": [
+    {
+      "site": "SpCas9|+|32",
+      "head": "SpCas9-NG"
+    },
+    {
+      "site": "Cas12a|+|16",
+      "head": "Cas12a"
+    }
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "KERAS_BACKEND": "torch",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1"
+  },
+  "sample_interval_seconds": 0.1,
+  "settle_seconds": 5,
+  "stable_seconds": 10,
+  "operation_timeout_seconds": 900,
+  "run_timeout_seconds": 3600,
+  "sequence": [
+    "legacy:startup,predict,automatic-XAI,both-Cas-IG/SHAP/Rollout,close",
+    "v3:default-nonNT,startup,predict,automatic-XAI,both-Cas-IG/SHAP",
+    "v3:switch-NT,automatic-analysis,both-Cas-IG/SHAP/Rollout",
+    "v3:return-nonNT,automatic-analysis,10-second-stable,acceptance checks,close"
+  ],
+  "metrics": {
+    "rss": "simultaneous process working-set sum (may count shared pages twice)",
+    "private": "simultaneous private commit sum, including paged-out memory",
+    "peak": "maximum simultaneous sum per phase",
+    "stable": "final 2 seconds median/min/max"
+  },
+  "offline_scope": "fresh WebView2 profile and frozen HF cache; local dead proxy, DNS overrides and CDP offline mode; Windows host adapter remains enabled",
+  "legacy_disk_shap": "production policy; packaged cache may be used"
+}

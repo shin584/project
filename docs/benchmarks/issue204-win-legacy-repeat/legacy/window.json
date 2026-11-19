@@ -1,0 +1,753 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "check": "default_settings",
+      "passed": true,
+      "settings": {
+        "ig-steps": 32,
+        "shap-n": 64,
+        "shap-bg": 4,
+        "graph-size": 80
+      }
+    },
+    {
+      "check": "nt:prediction_rows",
+      "passed": true,
+      "count": 38
+    },
+    {
+      "check": "nt:SpCas9|+|32:SpCas9-NG:ig:decoded",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:SpCas9-NG:shap:decoded",
+      "passed": true
+    },
+    {
+      "check": "nt:SpCas9|+|32:SpCas9-NG:rollout:decoded",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:Cas12a:ig:decoded",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:Cas12a:shap:decoded",
+      "passed": true
+    },
+    {
+      "check": "nt:Cas12a|+|16:Cas12a:rollout:decoded",
+      "passed": true
+    },
+    {
+      "check": "prediction_and_explanation_boundaries_captured",
+      "passed": true
+    }
+  ],
+  "families": {
+    "nt": {
+      "rows": [
+        {
+          "site": "SpCas9|+|32",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 51.98895989939809,
+          "cells": [
+            "1",
+            "SpCas9-NG",
+            "AGC",
+            "UCGCUUUAAGAAUAAAUAAA",
+            "+",
+            "11",
+            "1.6857",
+            "51.99%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "SpCas9(WT)",
+          "raw": NaN,
+          "percent": 50.715859791359904,
+          "cells": [
+            "2",
+            "SpCas9(WT)",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "1.1452",
+            "50.72%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "Sniper",
+          "raw": NaN,
+          "percent": 49.06144427179336,
+          "cells": [
+            "3",
+            "Sniper",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "1.1431",
+            "49.06%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "SpCas9(WT)",
+          "raw": NaN,
+          "percent": 44.34059200416267,
+          "cells": [
+            "4",
+            "SpCas9(WT)",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.8625",
+            "44.34%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|41",
+          "head": "VRQR",
+          "raw": NaN,
+          "percent": 43.00314186769724,
+          "cells": [
+            "5",
+            "VRQR",
+            "GGA",
+            "GAAUAAAUAAAAGCGCCACA",
+            "+",
+            "2",
+            "1.4581",
+            "43.00%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "Sniper",
+          "raw": NaN,
+          "percent": 42.78037573876142,
+          "cells": [
+            "6",
+            "Sniper",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.8587",
+            "42.78%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|40",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 40.341189766743184,
+          "cells": [
+            "7",
+            "SpCas9-NG",
+            "TGT",
+            "GGCUGUGGUUUAGUCAAUCC",
+            "-",
+            "3",
+            "0.9095",
+            "40.34%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|41",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 40.078847259206775,
+          "cells": [
+            "8",
+            "SpCas9-NG",
+            "GGA",
+            "GAAUAAAUAAAAGCGCCACA",
+            "+",
+            "2",
+            "0.8920",
+            "40.08%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 39.680250405844454,
+          "cells": [
+            "9",
+            "xCas9",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "1.2555",
+            "39.68%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "eSpCas9(1.1)",
+          "raw": NaN,
+          "percent": 39.57373850986481,
+          "cells": [
+            "10",
+            "eSpCas9(1.1)",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "1.1386",
+            "39.57%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "HypaCas9",
+          "raw": NaN,
+          "percent": 37.65299779876351,
+          "cells": [
+            "11",
+            "HypaCas9",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "1.2705",
+            "37.65%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 36.74545488829612,
+          "cells": [
+            "12",
+            "SpCas9-NG",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "0.6699",
+            "36.75%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "Cas12a|+|16",
+          "head": "Cas12a",
+          "raw": NaN,
+          "percent": 35.91322898864746,
+          "cells": [
+            "13",
+            "Cas12a",
+            "TTTA",
+            "AGAAUAAAUAAAAGCGCCACAGG",
+            "+",
+            "0",
+            "0.3591",
+            "35.91%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|43",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 35.54053511015296,
+          "cells": [
+            "14",
+            "SpCas9-NG",
+            "GGC",
+            "UGUGGUUUAGUCAAUCCUGU",
+            "-",
+            "0",
+            "0.5896",
+            "35.54%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "eSpCas9(1.1)",
+          "raw": NaN,
+          "percent": 34.91004513537288,
+          "cells": [
+            "15",
+            "eSpCas9(1.1)",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "0.9070",
+            "34.91%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 33.94786525638223,
+          "cells": [
+            "16",
+            "SpCas9-NG",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.4834",
+            "33.95%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|41",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 33.634509350082276,
+          "cells": [
+            "17",
+            "xCas9",
+            "GGA",
+            "GAAUAAAUAAAAGCGCCACA",
+            "+",
+            "2",
+            "0.8841",
+            "33.63%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|45",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 29.583325457768737,
+          "cells": [
+            "18",
+            "SpCas9-NG",
+            "CGC",
+            "UGGUUUAGUCAAUCCUGUGG",
+            "-",
+            "2",
+            "0.1926",
+            "29.58%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "SpCas9-HF1",
+          "raw": NaN,
+          "percent": 29.164098264880778,
+          "cells": [
+            "19",
+            "SpCas9-HF1",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "0.8117",
+            "29.16%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "Cas12a|-|28",
+          "head": "Cas12a",
+          "raw": NaN,
+          "percent": 29.028421640396118,
+          "cells": [
+            "20",
+            "Cas12a",
+            "TTTA",
+            "GUCAAUCCUGUGGCGCUUUUAUU",
+            "-",
+            "12",
+            "0.2903",
+            "29.03%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "HypaCas9",
+          "raw": NaN,
+          "percent": 28.81477870508969,
+          "cells": [
+            "21",
+            "HypaCas9",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.7923",
+            "28.81%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "SpCas9-HF1",
+          "raw": NaN,
+          "percent": 24.50808280547142,
+          "cells": [
+            "22",
+            "SpCas9-HF1",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.5682",
+            "24.51%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|34",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 22.430770865101817,
+          "cells": [
+            "23",
+            "SpCas9-NG",
+            "CGC",
+            "GCUUUAAGAAUAAAUAAAAG",
+            "+",
+            "9",
+            "-0.2841",
+            "22.43%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 21.883906861930488,
+          "cells": [
+            "24",
+            "xCas9",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "0.1622",
+            "21.88%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|45",
+          "head": "VRQR",
+          "raw": NaN,
+          "percent": 21.407777762056888,
+          "cells": [
+            "25",
+            "VRQR",
+            "TGA",
+            "AAAUAAAAGCGCCACAGGAU",
+            "+",
+            "2",
+            "0.1274",
+            "21.41%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|34",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 20.7828182655932,
+          "cells": [
+            "26",
+            "xCas9",
+            "CGC",
+            "GCUUUAAGAAUAAAUAAAAG",
+            "+",
+            "9",
+            "0.0945",
+            "20.78%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|45",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 19.65233594349975,
+          "cells": [
+            "27",
+            "xCas9",
+            "TGA",
+            "AAAUAAAAGCGCCACAGGAU",
+            "+",
+            "2",
+            "0.0251",
+            "19.65%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|45",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 18.22699755823374,
+          "cells": [
+            "28",
+            "SpCas9-NG",
+            "TGA",
+            "AAAUAAAAGCGCCACAGGAU",
+            "+",
+            "2",
+            "-0.5642",
+            "18.23%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|32",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 17.338790320774166,
+          "cells": [
+            "29",
+            "xCas9",
+            "AGC",
+            "UCGCUUUAAGAAUAAAUAAA",
+            "+",
+            "11",
+            "-0.1171",
+            "17.34%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|57",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 14.173178465906384,
+          "cells": [
+            "30",
+            "SpCas9-NG",
+            "AGC",
+            "CACAGGAUUGACUAAACCAC",
+            "+",
+            "14",
+            "-0.8344",
+            "14.17%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|31",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 12.98678628327012,
+          "cells": [
+            "31",
+            "xCas9",
+            "AGT",
+            "CAGGGCGCCGGCUGUGGUUU",
+            "-",
+            "12",
+            "-0.3844",
+            "12.99%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|57",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 12.932642309576275,
+          "cells": [
+            "32",
+            "xCas9",
+            "AGC",
+            "CACAGGAUUGACUAAACCAC",
+            "+",
+            "14",
+            "-0.3878",
+            "12.93%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|45",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 11.663506130321624,
+          "cells": [
+            "33",
+            "xCas9",
+            "CGC",
+            "UGGUUUAGUCAAUCCUGUGG",
+            "-",
+            "2",
+            "-0.4657",
+            "11.66%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|31",
+          "head": "SpCas9-NG",
+          "raw": NaN,
+          "percent": 10.5170322190547,
+          "cells": [
+            "34",
+            "SpCas9-NG",
+            "AGT",
+            "CAGGGCGCCGGCUGUGGUUU",
+            "-",
+            "12",
+            "-1.0780",
+            "10.52%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|42",
+          "head": "evoCas9",
+          "raw": NaN,
+          "percent": 9.463160241956711,
+          "cells": [
+            "35",
+            "evoCas9",
+            "TGG",
+            "CUGUGGUUUAGUCAAUCCUG",
+            "-",
+            "1",
+            "0.3565",
+            "9.46%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|43",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 9.35633524668634,
+          "cells": [
+            "36",
+            "xCas9",
+            "GGC",
+            "UGUGGUUUAGUCAAUCCUGU",
+            "-",
+            "0",
+            "-0.6075",
+            "9.36%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|-|40",
+          "head": "xCas9",
+          "raw": NaN,
+          "percent": 4.8721677854359156,
+          "cells": [
+            "37",
+            "xCas9",
+            "TGT",
+            "GGCUGUGGUUUAGUCAAUCC",
+            "-",
+            "3",
+            "-0.8830",
+            "4.87%",
+            "절단 효율"
+          ]
+        },
+        {
+          "site": "SpCas9|+|40",
+          "head": "evoCas9",
+          "raw": NaN,
+          "percent": 1.5106997789573668,
+          "cells": [
+            "38",
+            "evoCas9",
+            "AGG",
+            "AGAAUAAAUAAAAGCGCCAC",
+            "+",
+            "3",
+            "-0.3242",
+            "1.51%",
+            "절단 효율"
+          ]
+        }
+      ],
+      "xai": {
+        "SpCas9|+|32:SpCas9-NG:ig": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "글자별 기여도 (Attribution Logo, IG)",
+          "기술적 참고",
+          "기준 입력은 빈 서열(모든 염기 값 0)이고, 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+          "예측 -61.52% − 기준 -67.26% · 기여도 합 -104.205%p · 완결성 오차 116.6806%p"
+        ],
+        "SpCas9|+|32:SpCas9-NG:shap": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "위치별 기여분 (SHAP)",
+          "SHAP 워터폴",
+          "기술적 참고 (기준값 · 합산값)",
+          "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+          "기준값 -89.22% + SHAP 합 +257.79%p = 168.57% · 실제 예측 168.57% · 가법성 오차 0.0000%p"
+        ],
+        "SpCas9|+|32:SpCas9-NG:rollout": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "위치별 정보 의존도 (Attention Rollout)",
+          "토큰 × 토큰 의존도 행렬 보기 (토큰 6개)",
+          "토큰 × 토큰 의존도 행렬",
+          "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+        ],
+        "Cas12a|+|16:Cas12a:ig": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "글자별 기여도 (Attribution Logo, IG)",
+          "기술적 참고",
+          "기준 입력은 빈 서열(모든 염기 값 0)이고, 기준 대비 변화를 위치별로 나눈 값입니다. 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).",
+          "예측 15.65% − 기준 26.23% · 기여도 합 -60.167%p · 완결성 오차 30.6892%p"
+        ],
+        "Cas12a|+|16:Cas12a:shap": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "위치별 기여분 (SHAP)",
+          "SHAP 워터폴",
+          "기술적 참고 (기준값 · 합산값)",
+          "위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. 배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.",
+          "기준값 48.20% + SHAP 합 -12.28%p = 35.91% · 실제 예측 35.91% · 가법성 오차 0.0000%p"
+        ],
+        "Cas12a|+|16:Cas12a:rollout": [
+          "초록 PAM은 가위가 찾는 표지판, 파랑 guide는 자를 위치를 지정하는 주소, 회색 flank는 주변 서열입니다. 아래 그래프의 가로축이 이 구간과 같습니다.",
+          "위치별 정보 의존도 (Attention Rollout)",
+          "토큰 × 토큰 의존도 행렬 보기 (토큰 10개)",
+          "토큰 × 토큰 의존도 행렬",
+          "24개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다."
+        ]
+      }
+    }
+  },
+  "webview": {
+    "protocolVersion": "1.3",
+    "product": "Edg/157.0.4341.60",
+    "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "jsVersion": "15.7.11.7"
+  }
+}
