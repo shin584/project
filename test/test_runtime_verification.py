@@ -80,6 +80,7 @@ def build_complete_bundle(base, protocol_path=None, run_id="fixture-206"):
     contract = load(work / "snapshot/contract.json")
     protocol = load(work / "snapshot/protocol.json")
     docs = {
+        "float32": {"investigations": []},
         "reference": {"backend": "tensorflow", "keras": "3.14.1", "tensorflow": "2.21.0",
                       "models": {key: {"layer_names": layers} for key, layers in manifest["topology"].items()}},
         "ram": {key: {**{stage: 1000000 for stage in (

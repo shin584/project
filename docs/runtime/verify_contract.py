@@ -825,7 +825,8 @@ def run_investigation(work: Path) -> int:
     diagnostic_rows, diagnostic_raw = [], {}
     if protocol.get("diagnostic_producer") == 211:
         from gradient_diagnostics import run_diagnostics
-        diagnostic_rows, diagnostic_raw = run_diagnostics(work, CONTRACT, protocol)
+        diagnostic_rows, diagnostic_raw = run_diagnostics(work, CONTRACT, protocol,
+            precision="float64" if protocol.get("split_diagnostics") == 212 else "both")
     produced = {r["id"] for r in diagnostic_rows}
     report = producer_report or {"investigations": [
         {"id": name, "state": "unverified", "planned": definition["planned"],
@@ -840,10 +841,19 @@ def run_investigation(work: Path) -> int:
     return 0
 
 
+def run_float32(work: Path) -> int:
+    protocol = read_json(work / "snapshot/protocol.json")
+    from gradient_diagnostics import run_diagnostics
+    rows, raw = run_diagnostics(work, CONTRACT, protocol, precision="float32")
+    (work / "float32.json").write_text(json.dumps({"investigations": rows}, indent=2), encoding="utf-8")
+    np.savez_compressed(work / "float32-raw.npz", **raw)
+    return 0
+
+
 def main() -> int:
     global CONTRACT, FROZEN_INPUTS
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("step", choices=("init", "reference", "verify", "ram", "minimal", "diagnose", "investigation"))
+    parser.add_argument("step", choices=("init", "reference", "verify", "ram", "minimal", "diagnose", "float32", "investigation"))
     parser.add_argument("--work", type=Path)
     parser.add_argument("--run-id")
     parser.add_argument("--contract", type=Path, default=DOCS / "contract.json")
@@ -876,6 +886,8 @@ def main() -> int:
                 code = run_diagnose(work)
             elif args.step == "investigation":
                 code = run_investigation(work)
+            elif args.step == "float32":
+                code = run_float32(work)
             else:
                 code = run_ram(work)
             result["exit_code"] = code

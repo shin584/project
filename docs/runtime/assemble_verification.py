@@ -16,7 +16,7 @@ import numpy as np
 import candidate_policy
 from offline_policy import recovery_failures
 
-from verification_bundle import (STAGES, digest, identity, load_manifest,
+from verification_bundle import (registered_stages, digest, identity, load_manifest,
                                  read_json, verify_receipt)
 from verification_policy import (MODELS, RAM_STAGES, all_finite, expected_arrays,
                                  expected_checks, inventory_failures,
@@ -113,13 +113,14 @@ def assemble(work: Path) -> dict:
         report["contract_sha256"] = digest(work / "snapshot/contract.json")
         contract = read_json(work / "snapshot/contract.json")
         protocol = read_json(work / "snapshot/protocol.json")
+        stages = registered_stages(protocol)
         if protocol["frozen_contract_sha256"] != report["contract_sha256"]:
             raise ValueError("Protocol/contract identity mismatch")
         expected = expected_checks(contract, manifest["topology"])
         arrays_expected = expected_arrays(contract, manifest["topology"])
         if (manifest["expected_checks"] != expected
                 or manifest["expected_arrays"] != arrays_expected
-                or manifest["stages"] != {k: list(v) for k, v in STAGES.items()}):
+                or manifest["stages"] != {k: list(v) for k, v in stages.items()}):
             raise ValueError("Frozen inventory disagrees with contract/protocol/topology")
         journal = read_json(work / "journal.json")
         if journal["state"] != "ready" or (work / "active-stage.json").exists():
@@ -128,7 +129,11 @@ def assemble(work: Path) -> dict:
         report["inventory"] = {}
         raw = {}
         documents = {}
-        for stage, files in STAGES.items():
+        for stage, files in stages.items():
+            if (stage == "investigation" and protocol.get("split_diagnostics") == 212
+                    and stage not in journal["completed"]
+                    and not any((work / name).exists() for name in (*files, "investigation.receipt.json"))):
+                continue
             try:
                 receipt = verify_receipt(work, stage)
                 report["execution"][stage] = receipt
@@ -284,8 +289,24 @@ def assemble(work: Path) -> dict:
                         or observed.get("held_models") != [key] or not observed.get("command")):
                     errors.append(f"Missing/failed RAM measurement: {key}")
         outcome = "incomplete"
-        if "investigation" in documents:
-            investigation = documents["investigation"]
+        if "investigation" in documents or "float32" in documents:
+            deferred = "investigation" not in documents
+            if deferred:
+                investigation = {"investigations": [*documents["float32"]["investigations"], *[
+                    {"id": name, "state": "unverified", "planned": definition["planned"],
+                     "completed": 0, "raw_arrays": [], "reason": "Preregistered #213 stage has not started"}
+                    for name, definition in protocol["investigations"].items()
+                    if not name.startswith("float32_")]]}
+                investigation_raw = raw["float32"]
+            else:
+                investigation = documents["investigation"]
+                investigation_raw = raw["investigation"]
+                if protocol.get("split_diagnostics") == 212:
+                    original = documents["float32"]["investigations"]
+                    if ([r for r in investigation["investigations"] if r["id"].startswith("float32_")] != original
+                            or any(n not in investigation_raw or not np.array_equal(a, investigation_raw[n])
+                                   for n, a in raw["float32"].items())):
+                        raise ValueError("Investigation changed completed float32 evidence")
             outcome, counts = investigation_outcome(investigation, protocol)
             report["investigation_counts"] = counts
             report["investigations"] = investigation["investigations"]
@@ -302,23 +323,24 @@ def assemble(work: Path) -> dict:
                         or plan["history_sha256"] != digest(work / "snapshot/diagnostic-history.json")
                         or plan["core_sha256"] != digest(work / "verification-core.json")
                         or plan["diagnose_sha256"] != digest(work / "diagnose.json")
-                        or report["execution"]["investigation"].get("auxiliary_artifacts", {}).get(
+                        or report["execution"]["float32" if protocol.get("split_diagnostics") == 212 else "investigation"].get("auxiliary_artifacts", {}).get(
                             "diagnostic-plan.json") != digest(work / "diagnostic-plan.json")):
                     raise ValueError("Diagnostic preregistration/input identity mismatch")
                 with np.load(work / "snapshot/inputs.npz", allow_pickle=False) as inputs:
-                    validate_diagnostic_report(investigation, raw["investigation"], targets,
-                                               documents["reference"]["models"], inputs, boundary_layers)
-            if "selection" in protocol.get("candidate_protocol", {}):
+                    validate_diagnostic_report(investigation, investigation_raw, targets,
+                                               documents["reference"]["models"], inputs, boundary_layers,
+                                               float32_only=deferred)
+            if not deferred and "selection" in protocol.get("candidate_protocol", {}):
                 errors += candidate_evidence_errors(investigation, raw.get("investigation", {}),
                                                     protocol, contract)
             for row in investigation["investigations"]:
                 for name in row.get("raw_arrays", []):
-                    if name not in raw.get("investigation", {}):
+                    if name not in investigation_raw:
                         errors.append(f"Missing investigation raw array: {name}")
                     else:
                         shapes = protocol["investigations"][row["id"]].get("raw_shapes", {})
                         shape = shapes.get(name.rsplit("/", 1)[-1])
-                        if shape is not None and list(raw["investigation"][name].shape) != shape:
+                        if shape is not None and list(investigation_raw[name].shape) != shape:
                             errors.append(f"Wrong investigation raw output shape: {name}")
         report["claims"] = classify(checks)
         report["verified_claims"] = sorted(name for name, row in report["claims"].items()

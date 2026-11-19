@@ -544,12 +544,19 @@ def precision_effects(rows32, rows64, raw):
             row["original_step"] = original
 
 
-def run_diagnostics(work, contract, protocol):
+def run_diagnostics(work, contract, protocol, *, precision="both"):
     """Produce the four registered rows; callers may merge candidate rows."""
     config = protocol["diagnostic_protocol"]
     validate_settings(config)
     for stage in ("verify", "diagnose"):
         verify_receipt(work, stage)
+    if precision == "float64":
+        verify_receipt(work, "float32")
+        document = read_json(work / "float32.json")
+        with np.load(work / "float32-raw.npz", allow_pickle=False) as archive:
+            raw = {name: archive[name] for name in archive.files}
+        rows = document["investigations"]
+        return _run_precision_followup(work, rows, raw)
     historical = read_json(work / "snapshot/diagnostic-history.json")
     targets = plan_locations(contract, historical, read_json(work / "verification-core.json"),
                              read_json(work / "diagnose.json"))
@@ -560,7 +567,7 @@ def run_diagnostics(work, contract, protocol):
         "core_sha256": digest(work / "verification-core.json"),
         "diagnose_sha256": digest(work / "diagnose.json"),
         "settings": config})
-    rows, raw, float32 = [], {}, {}
+    rows, raw = [], {}
     # Mandatory float32 work is outside the optional float64 budget and all
     # models finish it before the first optional child may be launched.
     for model, model_key in MODELS.items():
@@ -572,7 +579,6 @@ def run_diagnostics(work, contract, protocol):
         result, arrays = sweep(runtime, selected, _inputs(work, contract, model), "float32",
                                checkpoint=lambda r, a: _checkpoint(directory, r, a))
         _checkpoint(directory, result, arrays)
-        float32[model] = result
         raw.update(arrays)
         name = "float32_" + model
         raw[name] = np.array([sum(len(r["steps"]) for r in result), len(selected) * 6])
@@ -581,6 +587,14 @@ def run_diagnostics(work, contract, protocol):
                      "locations": result})
         del runtime
         gc.collect()
+    if precision == "float32":
+        return rows, raw
+    return _run_precision_followup(work, rows, raw)
+
+
+def _run_precision_followup(work, rows, raw):
+    float32 = {model: next(r["locations"] for r in rows if r["id"] == "float32_" + model)
+               for model in MODELS}
     batch_start = time.monotonic()
     deadline = batch_start + 1800
     for model in MODELS:
@@ -616,7 +630,8 @@ def validate_settings(config):
         raise ValueError("Diagnostic protocol changed the fixed #211 settings/budgets")
 
 
-def validate_diagnostic_report(document, raw, targets, reference=None, frozen_inputs=None, boundary_layers=None):
+def validate_diagnostic_report(document, raw, targets, reference=None, frozen_inputs=None, boundary_layers=None,
+                               *, float32_only=False):
     """Replay the public report inventory, dtypes and fixed comparison lines."""
     rows = {r["id"]: r for r in document["investigations"]}
     previous_end = 0.0
@@ -634,6 +649,13 @@ def validate_diagnostic_report(document, raw, targets, reference=None, frozen_in
             raise ValueError("Unresolved original failure was discarded")
         if row32["state"] != ("unresolved" if selected64 else "pass"):
             raise ValueError("Float32 findings state differs from preserved failures")
+        counts = raw.get("float32_" + model)
+        if counts is not None and not np.array_equal(counts, [len(selected) * 6, len(selected) * 6]):
+            raise ValueError("Float32 completed/incomplete step counts disagree")
+        if float32_only:
+            if counts is None or set(row32.get("raw_arrays", [])) - set(raw):
+                raise ValueError("Missing mandatory float32 raw inventory")
+            continue
         row64 = rows["float64_" + model]
         if row64["state"] == "not_applicable":
             if (selected64 or row64.get("locations") or row64.get("execution")

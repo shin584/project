@@ -32,6 +32,23 @@ STAGES = {
 DEPENDENCIES = {"verify": ("reference",), "diagnose": ("reference",)}
 
 
+def registered_stages(protocol):
+    stages = dict(STAGES)
+    if protocol.get("split_diagnostics") == 212:
+        stages["float32"] = ("float32.json", "float32-raw.npz")
+    return stages
+
+
+def stage_dependencies(work, stage):
+    protocol = read_json(work / "snapshot/protocol.json")
+    if protocol.get("split_diagnostics") == 212:
+        if stage == "float32":
+            return ("verify", "diagnose")
+        if stage == "investigation":
+            return ("float32",)
+    return DEPENDENCIES.get(stage, ())
+
+
 def digest(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -179,7 +196,7 @@ def initialize(work: Path, run_id: str, contract_path: Path,
         "topology": topology,
         "expected_checks": expected_checks(contract, topology),
         "expected_arrays": expected_arrays(contract, topology),
-        "stages": {k: list(v) for k, v in STAGES.items()},
+        "stages": {k: list(v) for k, v in registered_stages(protocol).items()},
     }
     write_json(work / "manifest.json", frozen)
     (work / "manifest.sha256").write_text(digest(work / "manifest.json"), encoding="ascii")
@@ -209,10 +226,11 @@ def identity(work: Path, stage: str) -> dict:
 
 
 def verify_receipt(work: Path, stage: str) -> dict:
+    files = registered_stages(read_json(work / "snapshot/protocol.json"))[stage]
     receipt = read_json(work / f"{stage}.receipt.json")
     if receipt["identity"] != identity(work, stage):
         raise ValueError(f"Stage identity mismatch: {stage}")
-    if set(receipt["artifacts"]) != set(STAGES[stage]):
+    if set(receipt["artifacts"]) != set(files):
         raise ValueError(f"Partial artifact set: {stage}")
     for name, checksum in receipt["artifacts"].items():
         if digest(artifact(work, name)) != checksum:
@@ -220,13 +238,13 @@ def verify_receipt(work: Path, stage: str) -> dict:
     for name, checksum in receipt.get("auxiliary_artifacts", {}).items():
         if digest(artifact(work, name)) != checksum:
             raise ValueError(f"Execution log checksum mismatch: {name}")
-    for dependency in DEPENDENCIES.get(stage, ()):
+    for dependency in stage_dependencies(work, stage):
         if receipt["dependencies"].get(dependency) != digest(work / f"{dependency}.receipt.json"):
             raise ValueError(f"Mixed dependency: {stage}/{dependency}")
     if not receipt.get("command") or not receipt.get("environment") or "exit_code" not in receipt:
         raise ValueError(f"Missing execution metadata: {stage}")
     if stage == "investigation":
-        require_planned_termination(read_json(work / STAGES[stage][0]))
+        require_planned_termination(read_json(work / files[0]))
     return receipt
 
 
@@ -242,6 +260,7 @@ def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
     if snapshot_only and stage != "offline":
         raise ValueError("Only independent recovery may execute from transported snapshots")
     journal = read_json(work / "journal.json")
+    files = registered_stages(read_json(work / "snapshot/protocol.json"))[stage]
     if journal["state"] != "ready" or stage in journal["completed"]:
         raise ValueError("Interrupted/finished stage cannot resume; use a new bundle")
     try:
@@ -250,11 +269,11 @@ def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
         journal.update(state="invalidated", active=stage)
         update_journal(work, journal)
         raise
-    for name in STAGES[stage]:
+    for name in files:
         if (work / name).exists():
             raise ValueError(f"Refusing pre-existing result: {name}")
     dependencies = {}
-    for dependency in DEPENDENCIES.get(stage, ()):
+    for dependency in stage_dependencies(work, stage):
         verify_receipt(work, dependency)
         dependencies[dependency] = digest(work / f"{dependency}.receipt.json")
     try:
@@ -278,7 +297,7 @@ def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
         load_manifest(work, live=not snapshot_only)
         if result["exit_code"] not in (0, 1):
             raise ValueError("Stage did not finish with a valid numerical result")
-        document_path = work / STAGES[stage][0]
+        document_path = work / files[0]
         document = read_json(document_path)
         if stage == "investigation":
             require_planned_termination(document)
@@ -289,11 +308,12 @@ def stage_execution(work: Path, stage: str, *, snapshot_only: bool = False):
         receipt.update(ended_at=now(), exit_code=result["exit_code"],
                        final_environment=environment(),
                        auxiliary_artifacts={name: digest(work / name) for name in (
+                           ("diagnostic-plan.json",) if stage == "float32" else
                            ("investigation-stdout.txt", "investigation-stderr.txt", "diagnostic-plan.json") if stage == "investigation" else
                            ("offline-install-stdout.txt", "offline-install-stderr.txt",
                             "offline-run-stdout.txt", "offline-run-stderr.txt") if stage == "offline" else ())
                            if (work / name).exists()},
-                       artifacts={name: digest(work / name) for name in STAGES[stage]})
+                       artifacts={name: digest(work / name) for name in files})
         write_json(work / f"{stage}.receipt.json", receipt)
         journal["completed"].append(stage)
         journal.update(state="ready", active=None)
