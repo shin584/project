@@ -13,6 +13,20 @@ import core
 
 from desktop.api import OnBatch
 
+def _non_nt_reference(predictor, site, result) -> str:
+    """Explain the proven ratio conversion without treating attribution as causality."""
+    if getattr(getattr(predictor, "spec", None), "family", None) != "non_nt":
+        return ""
+    if site.cas_type != "SpCas9":
+        return ""
+    note = (f'<p class="caption">설명 대상은 제한 전 예측 절단 효율 {result.pred * 100:.2f}% '
+            f'(원출력 {result.pred:.8g} × 100)이며 기여도 단위는 %p입니다. '
+            '기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.</p>')
+    if not 0 <= result.pred <= 1:
+        note += ('<p class="caption">표의 점수는 0~100%로 제한되지만, '
+                 '이 설명은 제한 전 출력을 대상으로 하므로 표와 다릅니다.</p>')
+    return note
+
 
 def controls_template(
     sites: Sequence[core.CandidateSite],
@@ -107,8 +121,10 @@ def explanation_fragment(
         result = cache.integrated_gradients(
             predictor, model_key, head, window, steps, on_batch=on_batch
         )
+        reference = _non_nt_reference(predictor, site, result)
         units = result.units
         body = '<h3>글자별 기여도 (Attribution Logo, IG)</h3>'
+        body += reference
         body += f'<p>글자가 위로 클수록 {units.target}을 많이 올린 자리, 아래로 클수록 깎아먹은 자리입니다.</p>'
         body += _figure(core.attribution_logo(units.contribution(result.attribution), window, layout, efficiency=units.efficiency),
                         "글자별 기여도 (Attribution Logo, IG)", size)
@@ -130,17 +146,21 @@ def explanation_fragment(
         result = cache.kernel_shap(
             predictor, model_key, head, window, nsamples, background, on_batch=on_batch
         )
+        reference = _non_nt_reference(predictor, site, result)
         units = result.units
         values = units.contribution(result.values)
         body = '<h3>위치별 기여분 (SHAP)</h3>'
+        body += reference
         body += f'<p>빨강은 {units.target}을 올린 자리, 파랑은 내린 자리입니다. 워터폴은 기준점에서 각 기여를 더해 최종 예측값에 도달하는 과정입니다.</p>'
         body += _figure(core.shap_bars(values, window, layout, efficiency=units.efficiency), "위치별 기여분 (SHAP)", size)
-        body += _figure(core.shap_waterfall(values, units.prediction(result.base_value), window, layout),
+        body += _figure(core.shap_waterfall(values, float(units.prediction(result.base_value)), window, layout),
                         "SHAP 워터폴", size)
         body += top_positions("영향이 가장 컸던 자리 3곳", values, signed=True)
         body += ('<details><summary>기술적 참고 (기준값 · 합산값)</summary>'
                  '<p>위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. '
                  '배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.</p>'
+                 f'<p class="caption">배경 seed {result.background_seed} · 부분집합 seed {result.subset_seed} · '
+                 f'무작위 ACGT 배경 {background}개 · 샘플 {nsamples}개</p>'
                  f'<p class="caption">기준값 {units.prediction(result.base_value):.2f}{units.value_unit} + '
                  f'SHAP 합 {values.sum():+.2f}{units.delta_unit} = '
                  f'{units.prediction((result.base_value + result.values.sum())):.2f}{units.value_unit} · '
@@ -161,7 +181,8 @@ def explanation_fragment(
     else:
         raise ValueError(f"모르는 XAI 기법: {method}")
 
-    if method in ("ig", "shap"):
+    if isinstance(result, (core.IGResult, core.SHAPResult)):
+        units = result.units
         note = ("설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다."
                 if units.efficiency else "설명은 모델 원출력 단위이며 효율이나 백분위 기여도가 아닙니다.")
         body += f'<p class="caption">{note}</p>'

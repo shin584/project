@@ -1,0 +1,222 @@
+{
+  "issue": 199,
+  "status": "pass",
+  "checks": [
+    {
+      "check": "non_nt_rollout_disabled_with_reason",
+      "passed": true
+    },
+    {
+      "check": "defaults_unchanged",
+      "passed": true
+    },
+    {
+      "check": "ig_logo_rendered",
+      "passed": true
+    },
+    {
+      "check": "resize_reuses_png_without_calculation",
+      "passed": true
+    },
+    {
+      "check": "shap_bars_and_waterfall_rendered",
+      "passed": true
+    },
+    {
+      "check": "units_seeds_and_causality_reference",
+      "passed": true
+    },
+    {
+      "check": "no_separate_quality_warning",
+      "passed": true
+    },
+    {
+      "check": "unsupported_site_cancels_previous_calculation",
+      "passed": true
+    },
+    {
+      "check": "unsupported_site_clears_previous_window_metrics_and_chart",
+      "passed": true
+    },
+    {
+      "check": "precision_progress_and_cancel",
+      "passed": true
+    },
+    {
+      "check": "can_reselect_cached_default_after_cancel",
+      "passed": true
+    },
+    {
+      "check": "ui_has_no_model_libraries",
+      "passed": true
+    }
+  ],
+  "child_closed": true,
+  "events": [
+    {
+      "type": "progress",
+      "request_id": 1,
+      "done": 1,
+      "total": 1,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "ready",
+      "request_id": 1,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 2,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 16,
+      "total": 17,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 17,
+      "total": 17,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 3,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 6,
+      "done": 8,
+      "total": 32,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 6,
+      "done": 16,
+      "total": 32,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 6,
+      "done": 24,
+      "total": 32,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 6,
+      "done": 32,
+      "total": 32,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 6,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 4,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 8,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 72,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 136,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 200,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 7,
+      "done": 260,
+      "total": 260,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 7,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 8,
+      "done": 32,
+      "total": 32800,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 11,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 12,
+      "done": 32,
+      "total": 32800,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 14,
+      "generation": 1,
+      "family": "non_nt"
+    }
+  ],
+  "passed": 12,
+  "failed": 0,
+  "skipped": 0
+}

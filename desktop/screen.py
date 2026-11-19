@@ -164,6 +164,7 @@ SCREEN_HTML = r"""<!doctype html>
         <details>
           <summary>계산 설정</summary>
           <p class="caption">IG는 단계 수만큼, SHAP은 (샘플 수 × 배경 수)만큼 추론을 반복합니다.</p>
+          <p class="caption">정밀 계산은 아래 값을 높인 뒤 설명 계산을 누르세요. 계산 중 진행률을 확인하고 취소할 수 있습니다.</p>
           <label for="ig-steps">IG 적분 단계 수</label>
           <input id="ig-steps" type="number" min="8" max="256" value="32" step="8">
           <label for="shap-n">SHAP 샘플 수</label>
@@ -177,6 +178,7 @@ SCREEN_HTML = r"""<!doctype html>
           <label><input type="radio" name="xai-method" value="rollout" checked>Attention Rollout</label>
           <label><input type="radio" name="xai-method" value="ig">Integrated Gradients (IG)</label>
           <label><input type="radio" name="xai-method" value="shap">SHAP (Shapley Additive exPlanations)</label>
+          <p id="rollout-reason" class="caption" hidden>non-NT 모델은 attention 층이 없어 Attention Rollout을 지원하지 않습니다.</p>
         </fieldset>
         <button type="submit">설명 계산</button>
       </form>
@@ -201,6 +203,15 @@ SCREEN_HTML = r"""<!doctype html>
           "SpCas9과 Cas12a 모두 예측 절단 효율(%)을 표시합니다. 변이와의 거리는 거리 (bp) 열에서 확인할 수 있습니다.";
       };
       updateScoreHelp();
+      function updateMethodSupport() {
+        const rollout = document.querySelector('[name="xai-method"][value="rollout"]');
+        rollout.disabled = family === "non_nt" && !preview;
+        byId("rollout-reason").hidden = !rollout.disabled;
+        if (rollout.disabled && rollout.checked) {
+          document.querySelector('[name="xai-method"][value="ig"]').checked = true;
+        }
+      }
+      updateMethodSupport();
       let started = false;
       let busy = false;
       let analysisDna = "";
@@ -291,6 +302,7 @@ SCREEN_HTML = r"""<!doctype html>
         reanalyze = Boolean(byId("dna").value.trim());
         clearResults();
         updateScoreHelp();
+        updateMethodSupport();
         byId("retry-prepare").hidden = true;
         byId("model-status").textContent = `${familyLabel()} 다시 불러오는 중...`;
         byId("notice").textContent = "이전 작업과 결과를 지우고 선택한 모델을 준비합니다.";
@@ -299,8 +311,11 @@ SCREEN_HTML = r"""<!doctype html>
 
       function explain() {
         if (!ready || !analysisDna) return;
-        if (family === "non_nt" && !preview) {
-          slot("xai").textContent = "non-NT 설명 계산은 준비 중입니다.";
+        if (family === "non_nt" && !preview && byId("xai-site").value.startsWith("Cas12a|")) {
+          cancelTask();
+          byId("xai-window").replaceChildren();
+          byId("xai-metrics").replaceChildren();
+          slot("xai").textContent = "non-NT Cas12a 설명 계산은 준비 중입니다 (#200).";
           return;
         }
         if (!byId("xai-controls").reportValidity()) return;

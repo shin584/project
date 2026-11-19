@@ -236,7 +236,7 @@ def test_progress_callback_exception_cancels_the_prediction(predictor, manifest)
         predictor.predict_batch([site_for(manifest["fixtures"]["windows"][0])], on_batch=refuse)
 
 
-# ── 설명은 아직 없다 ──────────────────────────────────────────
+# ── 설명 연결 (#199) ──────────────────────────────────────────
 
 def test_explain_heads_match_the_prediction_rows(predictor, manifest):
     """XAI의 헤드 선택이 이 계열의 예측 행과 같은 집합을 가리킨다."""
@@ -246,7 +246,30 @@ def test_explain_heads_match_the_prediction_rows(predictor, manifest):
         assert sorted(predictor.explain_heads(site)) == sorted(r.cas_name for r in rows)
 
 
-def test_explanation_is_reported_as_not_implemented(predictor):
-    """구현되지 않은 기법을 성공 결과로 내놓지 않는다 (#199가 붙인다)."""
-    with pytest.raises(NotImplementedError, match="#199"):
-        predictor.explain_handle("SpCas9-NG")
+def test_all_explanation_heads_match_prediction_function_and_are_finite(predictor):
+    from non_nt_runtime import one_hot
+
+    contract = json.loads((ROOT / "docs/runtime/contract.json").read_text(encoding="utf-8"))
+    windows = [c["window"] for c in contract["cases"]["spcas9"]]
+    x = np.stack([one_hot(w) for w in windows])
+    expected = predictor.runtime.forward_all([x])
+    for index, head in enumerate(SPCAS9_VARIANTS):
+        handle = predictor.explain_handle(head)
+        assert handle.model_key == predictor.explanation_identity()
+        assert handle.model_key.verified and handle.head == head
+        assert handle.attention_fn is None
+        np.testing.assert_allclose(handle.raw_fn(x), expected[:, index], atol=1e-6, rtol=0)
+        value, grads = handle.ig_grad_fn([x])
+        np.testing.assert_allclose(value, expected[:, index], atol=1e-6, rtol=0)
+        assert grads[0].shape == x.shape
+        assert np.isfinite(grads[0]).all()
+        np.testing.assert_array_equal(handle.ig_inputs(windows[0])[0], x[0])
+        # The gradient path also explains the same function at interior points.
+        y, interior_grads = handle.ig_grad_fn([x * 0.5])
+        np.testing.assert_allclose(y, handle.raw_fn(x * 0.5), atol=1e-6, rtol=0)
+        assert np.isfinite(interior_grads[0]).all()
+
+
+def test_unknown_explanation_head_is_rejected(predictor):
+    with pytest.raises(ValueError, match="헤드"):
+        predictor.explain_handle("unknown")

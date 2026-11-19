@@ -8,3 +8,5 @@ docs/runtime/cas12a-ig-contract.json -text whitespace=cr-at-eol
 docs/runtime/evidence/issue195-comparison01/** -text whitespace=cr-at-eol
 # #201 frozen contract and measurement artifacts bind exact bytes on every OS.
 docs/nt-xai/** -text whitespace=cr-at-eol
+# #199 measured contract/source/raw evidence keeps its recorded bytes.
+docs/benchmarks/issue199-xai-20261119-resumed01/** -text whitespace=cr-at-eol

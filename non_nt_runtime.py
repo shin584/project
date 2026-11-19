@@ -23,6 +23,7 @@ from dataclasses import dataclass, field, replace
 import model_source
 import numpy as np
 from predict import ExplainHandle
+from xai.identity import ExplanationIdentity
 
 #: 이 모듈이 강제하는 Keras backend.
 BACKEND = "torch"
@@ -407,7 +408,7 @@ class RuntimeHandle(ExplainHandle):
 
 def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
                    derive: Callable | None = None,
-                   model_key: str | None = None) -> RuntimeHandle:
+                   model_key: ExplanationIdentity | str | None = None) -> RuntimeHandle:
     """런타임 하나를 기존 IG/SHAP 루프에 쓸 수 있는 handle로 감싼다.
 
     derive(seq) -> [F] 를 주면 파생 특징 입력이 있는 모델(Cas12a)이 되고, IG는
@@ -418,6 +419,8 @@ def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
     handle_head_name = runtime.head_names[head]
 
     def _features_for(X: np.ndarray) -> np.ndarray:
+        if derive is None:
+            raise ValueError("파생 특징 함수가 없습니다")
         return np.stack([derive(_onehot_to_seq(row)) for row in X]).astype(np.float32)
 
     def raw_fn(X, on_batch: Callable | None = None):

@@ -1,8 +1,7 @@
 """non-NT 계열의 예측기 (#196). 채택 런타임은 `non_nt_runtime`이 정한다.
 
-이 모듈은 **예측**만 한다. 설명(IG·SHAP) 계산을 기존 XAI 루프에 꽂는 일은 #199이고,
-Cas12a non-NT 예측은 #197이다. 아직 없는 것을 성공한 결과로 내놓지 않기 위해,
-`explain_handle`은 구현되지 않았다고 분명히 말하고 멈춘다.
+SpCas9 설명은 동일 런타임의 전방/gradient를 기존 IG·SHAP 루프에 연결한다 (#199).
+원출력을 그대로 설명하며, % / %p 변환은 화면에서만 한다.
 
 왜 `predict.py`가 아니라 따로 있는가
     `predict.py`를 import하면 NT 설정·레지스트리까지 따라오지만 torch/transformers는
@@ -46,6 +45,10 @@ SPCAS9_HEAD_LAYERS: tuple[str, ...] = (
 #: 모델이 받는 윈도우 길이. `pam_scanner.CAS_CONFIGS`의 SpCas9 `model_input_len`과,
 #: export manifest의 입력 모양 [None, 30, 4]과 같아야 한다.
 SPCAS9_WINDOW_LENGTH = 30
+
+# 계산 정의가 바뀌면 올린다. 영벡터 IG / 위치별 무작위 ACGT KernelSHAP,
+# 원출력은 published_percentage/100, clip하지 않는다.
+SPCAS9_EXPLANATION_PROTOCOL = "non-nt-spcas9-sequence-zero-ig-acgt-shap-raw-ratio-v1"
 
 
 class NonNTSpCas9Predictor(BasePredictor):
@@ -155,11 +158,33 @@ class NonNTSpCas9Predictor(BasePredictor):
         """이 사이트에서 설명 대상이 될 수 있는 변종. NT 다중헤드와 같은 목록이다.
 
         예측 행이 있는 변종과 같은 집합이라, XAI의 사이트·헤드 선택이 이 계열의
-        예측 행을 그대로 가리킨다 (#196). 실제 설명 계산은 #199가 붙인다.
+        예측 행을 그대로 가리킨다 (#196, #199).
         """
         return [v for v in SPCAS9_VARIANTS if variant_compatible(v, site.pam_seq)]
 
+    def explanation_identity(self):
+        import json
+        from non_nt_runtime import runtime_versions
+        from xai.identity import ExplanationIdentity
+
+        checkpoint = self.runtime.checkpoint_sha256
+        if checkpoint is None:
+            raise RuntimeError("설명 checkpoint 식별을 확인할 수 없습니다.")
+        return ExplanationIdentity(
+            family=self.spec.family, model="non_nt/SpCas9",
+            checkpoints=(checkpoint,),
+            protocol=SPCAS9_EXPLANATION_PROTOCOL,
+            configuration=json.dumps({**runtime_versions(), "dtype": "float32"}, sort_keys=True),
+        )
+
     def explain_handle(self, head: str):
-        raise NotImplementedError(
-            "non-NT SpCas9의 IG·SHAP 계산은 아직 연결되지 않았습니다 (#199). "
-            "#196은 예측 결과와 기존 보기·CSV의 연결까지입니다.")
+        from non_nt_runtime import explain_handle
+
+        if head not in SPCAS9_VARIANTS:
+            raise ValueError(f"모르는 SpCas9 헤드: {head}")
+        handle = explain_handle(
+            self.runtime, SPCAS9_VARIANTS.index(head), SPCAS9_WINDOW_LENGTH,
+            model_key=self.explanation_identity())
+        # 캐시의 head는 런타임 층 이름 대신 화면과 같은 변종 이름이다.
+        handle.head = head
+        return handle
