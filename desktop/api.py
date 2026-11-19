@@ -349,7 +349,11 @@ class DesktopApi:
         한 번만 일어나고(ADR 0001의 모듈 수준 싱글턴), 그 뒤의 호출은 `ready`만
         다시 보낸다. 그래서 화면은 언제 불러도 신호를 받는다.
         """
-        return {"request_id": self._dispatcher.submit_lifecycle(self._renderer.warm_up)}
+        return self._reply(self._dispatcher.submit_lifecycle(self._renderer.warm_up))
+
+    def select_family(self, family: str) -> dict:
+        """Switch both Cas predictors together; preparation reports `ready`."""
+        return self._dispatcher.select_family(family)
 
     def scan_sites(self, dna: str) -> dict:
         return self._submit(
@@ -405,6 +409,7 @@ class DesktopApi:
         """
         # 저장 대화상자는 계산이 아니라 사용자 선택이므로 작업자에 맡기지 않는다.
         # 닫으면 요청 자체가 생기지 않아 진행 중인 계산도 건드리지 않는다.
+        generation = getattr(self._dispatcher, "generation", None)
         chosen = self._ask_save_path(CSV_FILENAME)
         if not chosen:
             return {"request_id": None}
@@ -412,12 +417,21 @@ class DesktopApi:
 
         def job(on_batch: OnBatch) -> Fragments:
             table = self._renderer.csv_table(dna, on_batch, filters)
-            target.write_bytes(csv_bytes(table))
+            data = csv_bytes(table)
+            publish = lambda: target.write_bytes(data)
+            commit = getattr(self._dispatcher, "commit_if_current", None)
+            if commit is None:
+                publish()
+            else:
+                commit(publish)
             return {
                 "notice": '<p class="notice">저장했습니다: '
                 f"{html.escape(str(target))}</p>"
             }
 
+        if generation is not None:
+            rid = self._dispatcher.submit_for_generation(job, generation)
+            return {"request_id": None} if rid is None else self._reply(rid)
         return self._submit(job)
 
     def cancel(self) -> dict:
@@ -425,7 +439,13 @@ class DesktopApi:
         return {"request_id": None}
 
     def _submit(self, job: Callable[[OnBatch], Fragments]) -> dict:
-        return {"request_id": self._dispatcher.submit(job)}
+        return self._reply(self._dispatcher.submit(job))
+
+    def _reply(self, request_id: int) -> dict:
+        reply = {"request_id": request_id}
+        if hasattr(self._dispatcher, "generation"):
+            reply.update(generation=self._dispatcher.generation, family=self._dispatcher.family)
+        return reply
 
 
 def webview_emitter(window) -> Callable[[dict], None]:

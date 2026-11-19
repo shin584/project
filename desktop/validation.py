@@ -120,6 +120,14 @@ def _run(output, baseline, meta, report, *, preview):
         def drive():
             try:
                 wait("!document.getElementById('analyze').disabled")
+                if not preview:
+                    # This preserved-baseline validator explicitly checks NT;
+                    # the application itself now always starts with non-NT.
+                    window.evaluate_js("""
+                      const family = document.getElementById('model-family');
+                      family.value = 'nt'; family.dispatchEvent(new Event('change'));
+                    """)
+                    wait("!document.getElementById('analyze').disabled")
                 window.evaluate_js("document.getElementById('dna').value = " + json.dumps(meta["input_seq"])
                                    + "; document.getElementById('analyze').click()")
                 wait("document.querySelector('[data-slot=xai] img')?.naturalWidth > 0")

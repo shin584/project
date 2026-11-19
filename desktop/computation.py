@@ -15,6 +15,10 @@ from desktop.api import Cancelled, Dispatcher
 
 OPERATIONS = frozenset({"warm_up", "sites_fragment", "prediction_fragments",
                         "explanation_fragment", "csv_table"})
+FAMILY_FACTORIES = {
+    "non_nt": "desktop.worker_renderer:NonNTComputationRenderer",
+    "nt": "desktop.worker_renderer:ComputationRenderer",
+}
 
 
 def _send(connection, message):
@@ -179,13 +183,16 @@ class ProcessRenderer:
 class ProcessDispatcher(Dispatcher):
     """Existing latest-request scheduler with a replaceable child lifetime."""
 
-    def __init__(self, emit, *, preview=False, factory_name=None):
+    def __init__(self, emit, *, preview=False, factory_name=None, family="non_nt"):
+        if family not in FAMILY_FACTORIES:
+            raise ValueError(f"Unknown model family: {family}")
+        self.family = family
+        self._factory_override = factory_name or ("desktop.fake:FakeRenderer" if preview else None)
         self.generation = 1
         self._context = threading.local()
         self._submissions = threading.Lock()
         self._sink = emit
-        self.renderer = ProcessRenderer(self, factory_name or (
-            "desktop.fake:FakeRenderer" if preview else "desktop.worker_renderer:ComputationRenderer"))
+        self.renderer = ProcessRenderer(self, self._factory_override or FAMILY_FACTORIES[family])
         super().__init__(self._emit_current)
 
     @property
@@ -196,7 +203,7 @@ class ProcessDispatcher(Dispatcher):
         # Dispatcher calls this while holding its lock; restart uses that lock
         # too, so no old ready/progress/result/error can follow invalidation.
         if self._context.generation == self.generation and not self._closed:
-            self._sink({**event, "generation": self.generation})
+            self._sink({**event, "generation": self.generation, "family": self.family})
 
     def _tag(self, job):
         generation = self.generation
@@ -209,17 +216,24 @@ class ProcessDispatcher(Dispatcher):
 
         return tagged
 
-    def _submit_process(self, job, *, lifecycle):
+    def _submit_process(self, job, *, lifecycle, expected_generation=None):
         with self._submissions:
             if self._closed:
                 raise RuntimeError("Computation dispatcher is closed")
+            if expected_generation is not None and expected_generation != self.generation:
+                return None
             if self.renderer.exited:
                 self._restart()
+                if expected_generation is not None:
+                    return None
             submit = super().submit_lifecycle if lifecycle else super().submit
             return submit(self._tag(job))
 
     def submit(self, job):
         return self._submit_process(job, lifecycle=False)
+
+    def submit_for_generation(self, job, generation):
+        return self._submit_process(job, lifecycle=False, expected_generation=generation)
 
     def submit_lifecycle(self, job):
         return self._submit_process(job, lifecycle=True)
@@ -252,6 +266,34 @@ class ProcessDispatcher(Dispatcher):
                 raise RuntimeError("Computation dispatcher is closed")
             self._restart()
             return self.generation
+
+    def select_family(self, family):
+        """Invalidate, confirm exit, choose the factory, then queue preparation.
+
+        Re-selecting the current family only asks the existing renderer for its
+        ready signal; its predictors and explanation caches remain alive.
+        """
+        if family not in FAMILY_FACTORIES:
+            raise ValueError(f"Unknown model family: {family}")
+        with self._submissions:
+            if self._closed:
+                raise RuntimeError("Computation dispatcher is closed")
+            changed = family != self.family
+            if changed or self.renderer.exited:
+                self._restart()
+            self.family = family
+            self.renderer._factory_name = self._factory_override or FAMILY_FACTORIES[family]
+            rid = super().submit_lifecycle(self._tag(self.renderer.warm_up))
+            return {"request_id": rid, "generation": self.generation,
+                    "family": self.family, "changed": changed}
+
+    def commit_if_current(self, action):
+        """Publish a CSV under the same invalidation lock as result events."""
+        with self._lock:
+            if (self._context.generation != self.generation
+                    or self._context.request_id != self._latest or self._closed):
+                raise Cancelled()
+            action()
 
     def close(self):
         with self._submissions:

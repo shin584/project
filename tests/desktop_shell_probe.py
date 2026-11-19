@@ -335,6 +335,38 @@ runpy.run_module('desktop', run_name='__main__')
             window.evaluate_js("document.getElementById('retry-prepare').click()")
             wait_for("!document.getElementById('analyze').disabled && document.getElementById('retry-prepare').hidden")
             report["retry_ready"] = window.evaluate_js("document.getElementById('model-status').textContent")
+            report["default_family"] = window.evaluate_js("document.getElementById('model-family').value")
+            previous = report["bridge_calls"][-1]["reply"]
+            report["switch_cleared"] = window.evaluate_js("""(() => {
+              const family = document.getElementById('model-family');
+              family.value = 'nt'; family.dispatchEvent(new Event('change'));
+              return document.getElementById('analyze').disabled &&
+                document.getElementById('xai-controls').hidden &&
+                ['sites', 'best', 'variants', 'detail', 'xai'].every(name =>
+                  document.querySelector(`[data-slot="${name}"]`).textContent === '');
+            })()""")
+            # Deliver all kinds of old events while the new selection is still
+            # waiting for its bridge reply (including the old ready fast path).
+            window.evaluate_js("""for (const type of ['ready', 'progress', 'result', 'error']) {
+              window.xaiDesktop.onEvent({type, generation: 1, request_id: """
+                + str(previous["request_id"]) + """, done: 1, total: 2, html: 'STALE',
+                fragments: {best: 'STALE', xai: 'STALE'}});
+            }""")
+            window.evaluate_js("""
+              const family = document.getElementById('model-family');
+              for (const value of ['non_nt', 'nt']) {
+                family.value = value; family.dispatchEvent(new Event('change'));
+              }
+            """)
+            wait_for("""!document.getElementById('analyze').disabled &&
+              document.getElementById('task-state').hidden &&
+              document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            report["switch_input_preserved"] = window.evaluate_js("document.getElementById('dna').value") == dna
+            report["switch_no_stale"] = window.evaluate_js("!document.body.textContent.includes('STALE')")
+            before_repeat = len(report["bridge_calls"])
+            window.evaluate_js("document.getElementById('model-family').dispatchEvent(new Event('change'))")
+            time.sleep(.2)
+            report["same_family_no_request"] = len(report["bridge_calls"]) == before_repeat
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port

@@ -82,6 +82,12 @@ SCREEN_HTML = r"""<!doctype html>
 <body>
   <aside aria-label="입력">
     <h2>서열 입력</h2>
+    <label for="model-family">예측 모델 계열 (두 Cas 공통)</label>
+    <select id="model-family">
+      <option value="non_nt" selected>기본 (non-NT)</option>
+      <option value="nt">NT</option>
+    </select>
+    <p class="caption">SpCas9과 Cas12a를 함께 바꿉니다. 모델 계열에 따라 예측 점수와 후보 순위가 달라질 수 있습니다.</p>
     <form id="analysis-form">
       <label for="dna">81bp DNA 서열</label>
       <input id="dna" type="text" placeholder="ATCG..." autocomplete="off" spellcheck="false">
@@ -119,7 +125,7 @@ SCREEN_HTML = r"""<!doctype html>
         <div data-slot="sites"></div>
         <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
         <h2>절단 효율 예측 결과</h2>
-        <p class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
+        <p id="score-help" class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
           SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다. 자세한 내용은 아래
           '모델 출력 해석 상태'를 펼쳐 보세요. 거리 보정은 적용하지 않았고,
           변이와의 거리는 '거리 (bp)' 열에서 확인할 수 있습니다.</p>
@@ -185,6 +191,16 @@ SCREEN_HTML = r"""<!doctype html>
       const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
       let ready = false;
       let generation = 0;
+      let family = "non_nt";
+      let reanalyze = false;
+      const preview = document.body.dataset.preview === "true";
+      const familyLabel = () => family === "nt" ? "NT" : "기본 (non-NT)";
+      const ntScoreHelp = byId("score-help").innerHTML;
+      const updateScoreHelp = () => {
+        byId("score-help").innerHTML = family === "nt" ? ntScoreHelp :
+          "SpCas9과 Cas12a 모두 예측 절단 효율(%)을 표시합니다. 변이와의 거리는 거리 (bp) 열에서 확인할 수 있습니다.";
+      };
+      updateScoreHelp();
       let started = false;
       let busy = false;
       let analysisDna = "";
@@ -225,6 +241,7 @@ SCREEN_HTML = r"""<!doctype html>
           .then(reply => {
             if (token !== serial) return;
             activeId = reply.request_id;
+            if (reply.generation !== undefined) generation = reply.generation;
             // save_csv answers null when the user closes the save dialog: no
             // request was made, so no event will ever arrive to end this one.
             if (activeId === null) { finish(); return; }
@@ -251,10 +268,30 @@ SCREEN_HTML = r"""<!doctype html>
         byId("retry-prepare").hidden = true;
         byId("notice").textContent = "";
         byId("model-status").textContent = "모델 준비 중";
+        if (analysisDna) reanalyze = true;
         request("prepare");
       });
 
+      byId("model-family").addEventListener("change", () => {
+        const selected = byId("model-family").value;
+        if (selected === family) return;
+        family = selected;
+        ready = false;
+        reanalyze = Boolean(byId("dna").value.trim());
+        clearResults();
+        updateScoreHelp();
+        byId("retry-prepare").hidden = true;
+        byId("model-status").textContent = `${familyLabel()} 다시 불러오는 중...`;
+        byId("notice").textContent = "이전 작업과 결과를 지우고 선택한 모델을 준비합니다.";
+        request("select_family", family);
+      });
+
       function explain() {
+        if (!ready || !analysisDna) return;
+        if (family === "non_nt" && !preview) {
+          slot("xai").textContent = "non-NT 설명 계산은 준비 중입니다.";
+          return;
+        }
         if (!byId("xai-controls").reportValidity()) return;
         if (byId("xai-window").firstElementChild?.dataset.siteKey !== byId("xai-site").value) {
           byId("xai-window").replaceChildren();
@@ -447,21 +484,34 @@ SCREEN_HTML = r"""<!doctype html>
       }
       byId("graph-size").addEventListener("input", resizeChart);
 
-      byId("analysis-form").addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!ready || (busy && operation !== "explain")) return;
-        analysisDna = byId("dna").value;
-        byId("notice").textContent = "PAM 탐색 중...";
+      function clearResults() {
         byId("results").hidden = true;
         byId("xai-controls").hidden = true;
+        byId("xai-site").replaceChildren();
+        byId("xai-head").replaceChildren();
         byId("xai-window").replaceChildren();
+        byId("xai-metrics").replaceChildren();
         byId("task-state").hidden = true;
+        byId("task-label").textContent = "";
+        byId("task-progress").removeAttribute("value");
         detailSearched = null;  // the new analysis brings its own detail fragment
         byId('model-diagnostics')?.remove();
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
+      }
+
+      function analyze() {
+        analysisDna = byId("dna").value;
+        clearResults();
+        byId("notice").textContent = "PAM 탐색 중...";
         request("scan_sites", analysisDna);
+      }
+
+      byId("analysis-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!ready || (busy && operation !== "explain")) return;
+        analyze();
       });
 
       window.xaiDesktop = {
@@ -480,23 +530,24 @@ SCREEN_HTML = r"""<!doctype html>
           setTimeout(prepare, 250);
         },
         onEvent(event) {
-          if (event.generation !== undefined) {
-            if (event.generation < generation) return;
-            generation = event.generation;
-          }
-          if (event.type === "ready") {
-            ready = true;
-            byId("retry-prepare").hidden = true;
-            byId("model-status").innerHTML = event.html;
-            if (operation === "prepare") finish();
-            else updateButton();
-            return;
-          }
           if (activeId === null) {
             earlyEvents.push(event);
             return;
           }
           if (event.request_id !== activeId) return;
+          if (event.generation !== undefined && event.generation !== generation) return;
+          if (event.family !== undefined && event.family !== family) return;
+          if (event.type === "ready") {
+            ready = true;
+            byId("retry-prepare").hidden = true;
+            byId("model-status").innerHTML = event.html;
+            finish();
+            if (reanalyze) {
+              reanalyze = false;
+              analyze();
+            }
+            return;
+          }
           if (event.type === "progress") {
             if (operation === "predict" || operation === "explain" || operation === "save_csv") {
               const pct = event.total > 0 ? Math.min(100, Math.max(0, event.done / event.total * 100)) : 0;

@@ -31,3 +31,24 @@ class SlowReadyRenderer(FakeRenderer):
         time.sleep(2)
         on_batch(2, 2)
         return '<p class="status">old ready</p>'
+
+
+class SlowFamilyRenderer(SlowReadyRenderer):
+    """Expose a cancellable start, followed by a noninterruptible operation."""
+
+    @staticmethod
+    def _pause(on_batch):
+        on_batch(1, 2)
+        time.sleep(2)
+
+    def prediction_fragments(self, dna, on_batch):
+        self._pause(on_batch)
+        return super().prediction_fragments(dna, on_batch)
+
+    def explanation_fragment(self, dna, site_key, head, method, params, size, on_batch):
+        self._pause(on_batch)
+        return super().explanation_fragment(dna, site_key, head, method, params, size, on_batch)
+
+    def csv_table(self, dna, on_batch, filters=None):
+        self._pause(on_batch)
+        return super().csv_table(dna, on_batch, filters)

@@ -35,7 +35,7 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["initial"] == {"status": "모델 준비 중", "disabled": True}
     assert report["ready_status"] == "모델 준비 완료"
     assert report["sidebar"] == {
-        "labels": ["81bp DNA 서열", "XAI 그래프 크기"],
+        "labels": ["예측 모델 계열 (두 Cas 공통)", "81bp DNA 서열", "XAI 그래프 크기"],
         "button": "분석 시작",
         "graph": ["40", "100", "5", "80"],
     }
@@ -138,6 +138,9 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["stale_generation_ignored"]
     assert report["retry_visible_on_error"]
     assert report["retry_ready"] == "모델 준비 완료"
+    assert report["default_family"] == "non_nt"
+    assert report["switch_cleared"] and report["switch_input_preserved"]
+    assert report["switch_no_stale"] and report["same_family_no_request"]
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []

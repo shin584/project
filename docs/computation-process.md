@@ -31,6 +31,21 @@ new generation to start. Close also terminates and confirms child exit. A dead
 child produces a visible error; the next submission starts a fresh generation.
 Preparation failures can be retried from the window.
 
+The desktop starts with `non_nt` on every launch (#198); this does not change
+the legacy core/Streamlit default. `select_family` changes both Cas predictors
+together. It retains the same proxy object held by `DesktopApi`, invalidates
+the generation, confirms child exit, then changes the child factory and queues
+preparation. Repeated selection keeps the process and its caches. Replies and
+events carry family/generation, and the shell checks them with the active
+request ID, including ready signals buffered before a bridge reply. The old
+CSV search state and every view are cleared before reanalysis. A pending save
+dialog is bound to its original generation; CSV writes share the scheduler's
+invalidation lock, so an obsolete computation cannot write after a switch.
+
+The preserved `--validate` command explicitly selects NT before checking the NT
+baseline. Real-family window acceptance is `tests/family_window_probe.py`;
+non-NT explanation execution remains #199/#200 and is indicated in the screen.
+
 The child owns the predictors, runtime references and memory caches. NT cache
 identity includes family, checkpoint SHA256, score configuration and explanation
 protocol, dtype and batch size, then method, head, window sequence and calculation settings. Graph

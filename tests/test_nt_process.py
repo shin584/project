@@ -49,7 +49,7 @@ def test_real_nt_prediction_parity_and_process_owned_xai(tmp_path, monkeypatch):
     meta = json.loads((baseline / "capture.json").read_text(encoding="utf-8"))
     dna = meta["input_seq"]
     events = []
-    dispatcher = ProcessDispatcher(events.append)
+    dispatcher = ProcessDispatcher(events.append, family="nt")
     saved = tmp_path / "predictions.csv"
     api = DesktopApi(dispatcher.renderer, dispatcher, lambda _: str(saved))
     stop = threading.Event()

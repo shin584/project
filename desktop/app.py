@@ -30,7 +30,7 @@ def main(*, preview: bool = False) -> int:
         webview.settings["REMOTE_DEBUGGING_PORT"] = None
         window = webview.create_window(
             "CRISPR PAM Scanner + XAI",
-            html=SCREEN_HTML
+            html=SCREEN_HTML.replace('<body>', '<body data-preview="true">')
             if preview
             else SCREEN_HTML.replace('<p class="demo">', '<p class="demo" hidden>'),
             width=1280,
@@ -57,6 +57,7 @@ def main(*, preview: bool = False) -> int:
         api = DesktopApi(dispatcher.renderer, dispatcher, ask_save_path=ask_save_path)
         window.expose(
             api.prepare,
+            api.select_family,
             api.scan_sites,
             api.predict,
             api.explain,

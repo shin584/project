@@ -125,8 +125,8 @@ OUTPUT_MODES = ("raw", "sigmoid", "percent", "zscore")
 #: 입증되지 않는다). 각 Cas에는 **선택한 계열의 예측기 하나만** 쓴다 (#191).
 FAMILIES = ("nt", "non_nt")
 
-#: 계열을 지정하지 않은 호출이 쓰는 계열. 지금은 기존 NT 동작이 기본이다.
-#: 기본 시작 계열을 non-NT로 바꾸는 것은 #198의 범위다.
+#: 계열을 지정하지 않은 기존 코어/Streamlit 호출은 NT를 유지한다.
+#: 데스크톱은 ProcessDispatcher가 non-NT를 기본으로 명시해 선택한다 (#198).
 DEFAULT_FAMILY = "nt"
 
 
