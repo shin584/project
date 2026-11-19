@@ -139,6 +139,16 @@ py -3.13 -m ruff check --select F,E9 docs/benchmarks/measure_ram.py docs/benchma
 py -3.13 -X utf8 docs/benchmarks/plot_ram.py docs/benchmarks/issue203-ram-20261119-run02
 ```
 
+Git의 자동 줄바꿈 변환을 발견해 `.gitattributes`로 등록 계약·원시 자료·해시 대상
+관찰 도구의 바이트를 고정했다. 실제 측정 파일은 변경하지 않았다. 보관 검사기는
+다음 명령으로 Git blob과 등록 observer·launch 계약 해시의 일치를 확인한다.
+커밋 전 `--staged` 검사에서 **13 통과 / 0 실패 / 0 건너뜀**이었다.
+
+```powershell
+py -3.13 -X utf8 docs/benchmarks/verify_ram_archive.py --staged
+py -3.13 -X utf8 docs/benchmarks/verify_ram_archive.py
+```
+
 별도 sampler 점검은 실제 Python 부모 8MiB·자식 24MiB 할당을 실행해 두 Python
 프로세스 관측·할당을 포함한 private peak·정상 종료 **3 통과 / 0 실패 / 0 건너뜀**이었다.
 [점검 자료](benchmarks/issue203-sampler-smoke/README.md)에 실제 명령·검사식을 남겼다.
