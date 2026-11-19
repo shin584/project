@@ -1,49 +1,37 @@
-# python -m PyInstaller --noconfirm packaging/desktop.spec
+# Build via packaging/build_desktop.py with staged and verified inputs.
+# ruff: noqa: F821
+import os
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_submodules
+
+from PyInstaller.utils.hooks import collect_submodules, copy_metadata
 
 root = Path(SPECPATH).parent
-assets = root / '.packaging' / 'assets'
-required = [assets / 'tokenizer' / 'vocab.txt',
-            assets / 'webview2' / 'msedgewebview2.exe',
-            root / 'models' / 'Cas12a.safetensors',
-            root / 'models' / 'SpCas9.safetensors',
-            # Adopted non-NT checkpoints (#191). Keras 3 reads these under the
-            # torch backend; see docs/runtime/README.md (#193).
-            root / 'models' / 'non_nt' / 'spcas9-9hydra-v2' / 'model.keras',
-            root / 'models' / 'non_nt' / 'cas12a-cnn-20261102' / 'cas12a_cnn_manifest.keras']
-for path in required:
-    if not path.is_file():
-        raise SystemExit(f'Missing packaging input: {path}; see packaging/README.md')
-
-datas = [(str(assets / 'tokenizer'), 'tokenizer'),
-         (str(assets / 'webview2'), 'webview2'),
-         (str(required[2]), 'models'), (str(required[3]), 'models'),
-         (str(required[4]), 'models/non_nt/spcas9-9hydra-v2'),
-         (str(required[5]), 'models/non_nt/cas12a-cnn-20261102'),
-         (str(root / 'data' / 'precomputed_shap'), 'data/precomputed_shap'),
-         (str(root / 'docs' / 'equivalence-baseline'), 'equivalence-baseline')]
-# Keras 3 resolves layers and savers through dynamic imports, so the whole
-# package ships rather than a hand-listed set (#193). TensorFlow stays excluded
-# below: `keras.src.saving` only *probes* for it through a LazyModule, so the
-# probe resolves to False in the bundle and the torch backend carries the
-# forward pass and the IG gradients alone.
-hiddenimports = (collect_submodules('transformers.models.esm') +
-                 collect_submodules('transformers.models.auto') +
-                 collect_submodules('shap') + collect_submodules('keras') +
-                 ['matplotlib.backends.backend_agg',
-                 'desktop.worker_renderer', 'desktop.fake', 'non_nt_runtime',
-                 # Resolved by name at runtime, so the analysis cannot see them:
-                 # the renderer factory (`ProcessDispatcher`) and the per-family
-                 # predictor table (`predict.FAMILY_PREDICTOR_CLASSES`, #196/#197).
-                 'non_nt_predict', 'non_nt_cas12a_predict'])
-a = Analysis([str(root / 'desktop_entry.py')], pathex=[str(root)],
-             datas=datas, hiddenimports=hiddenimports,
-             runtime_hooks=[str(root / 'packaging' / 'runtime_hook.py')],
-             excludes=['streamlit', 'tensorflow', 'tensorboard', 'IPython',
-                       'jupyter', 'pytest', 'torchvision', 'torchaudio', 'PyQt5',
-                       'PyQt6', 'PySide2', 'PySide6', 'tkinter'])
+assets = Path(os.environ["DASHBOARD_V3_STAGED_ASSETS"])
+datas = [
+    (str(assets / name), name)
+    for name in ("models", "tokenizer", "webview2")
+]
+datas += [
+    (str(root / "docs/equivalence-baseline" / name), "equivalence-baseline")
+    for name in ("capture.json", "candidates.json", "crispr_prediction_results.csv")
+]
+datas += copy_metadata("shap")
+hiddenimports = (
+    collect_submodules("transformers.models.esm")
+    + collect_submodules("transformers.models.auto")
+    + collect_submodules("shap")
+    + collect_submodules("keras")
+    + ["matplotlib.backends.backend_agg", "desktop.worker_renderer", "desktop.fake",
+       "non_nt_predict", "non_nt_cas12a_predict"]
+)
+a = Analysis(
+    [str(root / "desktop_entry.py")], pathex=[str(root)], datas=datas,
+    hiddenimports=hiddenimports, runtime_hooks=[str(root / "packaging/runtime_hook.py")],
+    excludes=["streamlit", "tensorflow", "tensorboard", "IPython", "jupyter",
+              "pytest", "torchvision", "torchaudio", "PyQt5", "PyQt6", "PySide2",
+              "PySide6", "tkinter", "gdown"],
+)
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='XaiDashboard',
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="XaiDashboardV3",
           console=False, debug=False, strip=False, upx=False)
-coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name='XaiDashboard')
+coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="XaiDashboardV3")

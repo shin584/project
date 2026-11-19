@@ -1,0 +1,17 @@
+Dashboard v3 | Windows x64
+
+Copy the entire XaiDashboardV3 folder to a local drive. Keep the executable,
+_internal, and the release manifest together. Run XaiDashboardV3.exe.
+Each new launch starts in non-NT. Use the model family selector to switch
+to NT and reanalyze the current sequence. Non-NT supports IG and SHAP.
+NT also supports Attention Rollout.
+
+Run from PowerShell to verify every transferred file:
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\verify-v3.ps1
+Compare the displayed manifest SHA-256 to the release handoff.
+
+For recovery, copy the complete verified folder into a new local directory.
+Point verification at the new copy. If a file is missing or differs,
+restore from the release copy before launching. The fixed WebView2 runtime,
+Python runtimes, tokenizer, and models travel with the folder.
+The Windows host must support x64 desktop apps and .NET Framework 4.8.
