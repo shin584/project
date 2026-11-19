@@ -67,12 +67,15 @@ def identify(folder, mode):
 
 def register(output, legacy, v3):
     capture = json.loads((BASELINE / "capture.json").read_text(encoding="utf-8"))
-    identity = {mode: identify(path, mode) for mode, path in (("legacy", legacy), ("v3", v3))}
+    releases = {"legacy": legacy}
+    if v3 is not None:
+        releases["v3"] = v3
+    identity = {mode: identify(path, mode) for mode, path in releases.items()}
     output.mkdir(parents=True, exist_ok=False)
     save(output / "contract.json", {
         "issue": 204, "registered_at": datetime.now(timezone.utc).isoformat(),
-        "scope": "frozen release comparison on the development PC",
-        "releases": identity, "measurement_modes": ["legacy", "v3"],
+        "scope": "frozen release comparison on the development PC" if v3 else "frozen legacy repeat",
+        "releases": identity, "measurement_modes": list(identity),
         "pc": {"host": platform.node(), "platform": platform.platform(),
                "logical_cpus": psutil.cpu_count(), "ram_bytes": psutil.virtual_memory().total},
         "observer_sha256": {p.name: digest(p) for p in (Path(__file__), Path(__file__).with_name("measure_ram.py"))},
@@ -249,7 +252,8 @@ def drive(page, process, desktop, output, mode, contract, report):
         record(f"{family}:dna_retained", page.locator("#dna").input_value() == contract["dna"])
 
     try:
-        page.wait_for_function("window.pywebview?.api && window.xaiDesktop", timeout=60000)
+        page.wait_for_function("""typeof window.pywebview?.api?.predict === 'function' &&
+            typeof window.pywebview?.api?.explain === 'function' && window.xaiDesktop""", timeout=60000)
         page.evaluate(OBSERVE)
         wait_idle()
         if v3:
@@ -268,6 +272,10 @@ def drive(page, process, desktop, output, mode, contract, report):
         time.sleep(contract["settle_seconds"])
         capture()
         if not v3:
+            record("prediction_and_explanation_boundaries_captured", page.evaluate("""() =>
+              window.releaseTrace.some(e => e.label === 'predict') &&
+              window.releaseTrace.filter(e => e.label === 'explain').length >= 7
+            """))
             mark("window_close")
             return
         switch("nt")
@@ -454,7 +462,9 @@ def main():
     registration = commands.add_parser("register")
     registration.add_argument("output", type=Path)
     registration.add_argument("--legacy", type=Path, required=True)
-    registration.add_argument("--v3", type=Path, required=True)
+    release_selection = registration.add_mutually_exclusive_group(required=True)
+    release_selection.add_argument("--v3", type=Path)
+    release_selection.add_argument("--legacy-only", action="store_true")
     execution = commands.add_parser("run")
     execution.add_argument("output", type=Path)
     execution.add_argument("mode", choices=("legacy", "v3", "v3-relaunch", "source"))
@@ -464,7 +474,7 @@ def main():
     comparison.add_argument("output", type=Path)
     args = parser.parse_args()
     if args.command == "register":
-        register(args.output.resolve(), args.legacy.resolve(), args.v3.resolve())
+        register(args.output.resolve(), args.legacy.resolve(), args.v3.resolve() if args.v3 else None)
         return 0
     if args.command == "compare":
         return compare(args.output.resolve())
