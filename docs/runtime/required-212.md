@@ -76,3 +76,16 @@ Both agreed local-volume copies must be checksummed; they do not establish
 physical or off-host independence. Numerical quality remains limited to all
 nine SpCas9 forward heads, NG gradient/XAI and the current Cas12a dual-input
 path. Candidate success never promotes user defaults (IG 32, SHAP 64/4).
+
+Archive the completed boundary and write its versioned evidence index using
+the auxiliary recording tool below. It verifies both existing pinned model
+vault copies against the measured checkpoints, checks every archive entry
+against its source, then verifies the C:/D: archive checksums. It includes raw
+arrays, frozen inputs, receipts, logs, summary and prepared wheels; the installed
+recovery tree is reproducible from those wheels. The recording tool is included
+in the archive and does not change the frozen measurement source files.
+
+```powershell
+python -X utf8 docs/runtime/evidence/archive_boundary_212.py C:/project-backups/dashboard-v3/issue205/<run-id> docs/runtime/evidence/<run-id>.json
+$LASTEXITCODE
+```
