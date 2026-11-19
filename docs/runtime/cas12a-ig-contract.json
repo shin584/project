@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "issue": 195,
+  "status": "frozen-before-measurement",
+  "registered_at": "2026-11-19",
+  "freeze_rule": "Do not relax cases or thresholds after measurement. Preserve failed checks; code execution and numerical quality are separate verdicts. Existing #193 evidence remains dual-input evidence.",
+  "checkpoint": {
+    "path": "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",
+    "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f"
+  },
+  "runtime_contract": "contract.json",
+  "cases": [
+    {"id": "C1", "window": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT"},
+    {"id": "C2", "window": "TTTATAAAGTTTTGGCTCCTTACCTGGTTCCCCT"},
+    {"id": "C3", "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"},
+    {"id": "C4", "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC"}
+  ],
+  "feature_parity_cases": "C1-C4, all 16 dinucleotide pairs tiled across 34 bases, and N at each of the 34 positions of C1; all 354 features per case",
+  "continuous_extension": {
+    "layout": "ACGT channels; protospacer = x[8:31]; GC total = sum(p[:,1:3])/23; GC tail = sum(p[-8:,1:3])/8; pair[i,b,c] = p[i,b]*p[i+1,c]; flatten position, first base, second base; prepend GC total and tail",
+    "baseline": "x0=0 in all 34x4 channels; D(0)=0 in all 354 features; baseline is not a DNA sequence",
+    "composite": "F(x)=M(x,D(x)); dF/dx = partial M/partial x + J_D(x)^T partial M/partial D; path = (alpha*x,D(alpha*x)), with linear GC and alpha^2 dinucleotides",
+    "dual": "G(x,z)=M(x,z); path = (alpha*x,alpha*D(x)); dinucleotides scale with alpha; sequence attribution is partial, and only the signed sum over both inputs is complete"
+  },
+  "settings": {
+    "alphas": [0.0, 0.25, 0.5, 1.0],
+    "gradient_alphas": [0.5, 1.0],
+    "ig_steps": [32, 256],
+    "user_default_ig_steps": 32,
+    "ig_rule": "midpoint; float32 model, float64 gradient/attribution accumulation",
+    "soft_fixture": "float64 x[p,b] = (((4*p+b)*7)%19+1)/20 for all 34x4 entries; deliberately not one-hot or normalized",
+    "feature_vjp_weights": "w[k]=((k%17)-8)/17 for 354 features",
+    "fd_step_feature": 1e-5,
+    "fd_step_model": 1e-2
+  },
+  "criteria": {
+    "feature_parity": {"max_abs_error": 1e-7},
+    "feature_soft_vjp": {"max_abs_error": 1e-8},
+    "path_scaling": {"max_abs_error": 1e-7},
+    "function_match": {"max_abs_error": 1e-6},
+    "chain_rule": {"max_abs_error": 1e-6, "min_cosine": 0.9999},
+    "model_coordinate_fd": {"max_relative_l2": 0.02, "min_cosine": 0.999},
+    "completeness": {"max_abs_error_raw": 0.001},
+    "resolution": {"min_pearson": 0.99, "max_difference_over_reference_peak": 0.05, "min_sign_agreement_on_10pct_peak": 1.0},
+    "finiteness": "All measured outputs, gradients, attributions and diagnostics finite"
+  },
+  "comparison_rule": "Run both paths at the same cases, alphas and IG resolutions. Never gate on per-position agreement BETWEEN paths. Prefer composite for the single-sequence screen if feature parity, soft gradient, chain rule and endpoint/function checks establish feasibility. Record FD, completeness and resolution failures without treating 256 steps as a new default or biological validation.",
+  "screen_contract": {
+    "composite": "34 signed per-position contributions, including the derived-feature chain; their sum explains unclipped M(x,D(x))-M(0,0). No separate feature attribution or biological importance ratio.",
+    "dual_if_retained": "Label sequence contributions as partial. Expose signed sequence total, signed derived-feature total and joint completeness; never redistribute feature contributions to bases.",
+    "units": "IGResult remains raw probability; presentation multiplies prediction/baseline by 100 to percent and contributions/error by 100 to percentage points. Explain before table clipping.",
+    "display_policy": "Preserve computable graphs and prediction table; numerical failures go to internal evidence with no separate quality warning. Exceptions/no-result/NaN/inf retain existing error handling. Precision is explicit and optional.",
+    "limitations": "Zero and soft inputs are not real DNA; independent channel perturbations are a mathematical extension. PAM can vary on the path. Attribution depends on baseline and path and is not biological causality."
+  },
+  "protocols": {
+    "composite": "cas12a-cnn-ig-composite-gc-dinuc-zero-midpoint-raw-v1",
+    "dual": "cas12a-cnn-ig-dual-zero-midpoint-raw-v1"
+  },
+  "identity": "family + actual checkpoint SHA + protocol (path, feature definition, baseline, integration and raw unit) + runtime versions/dtype/threads; existing cache adds head/window/steps or SHAP settings/seeds. Unverified runtime has no cache identity.",
+  "out_of_scope": "Production predictor/UI wiring and optional precision controls belong to #200. NT units to #201. Whole-tree RAM and final offline packaging to #203/#204. No new SHAP quality claim or biological study."
+}

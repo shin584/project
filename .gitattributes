@@ -3,3 +3,6 @@ models/non_nt/** -text whitespace=cr-at-eol
 # The additive protocol binds the original contract's exact bytes on every OS.
 docs/runtime/contract.json -text whitespace=cr-at-eol
 docs/runtime/protocol-206.json -text whitespace=cr-at-eol
+# #195 registration and evidence checksums bind exact bytes across checkouts.
+docs/runtime/cas12a-ig-contract.json -text whitespace=cr-at-eol
+docs/runtime/evidence/issue195-comparison01/** -text whitespace=cr-at-eol

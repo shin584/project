@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import model_source
 import numpy as np
@@ -116,6 +116,7 @@ class NonNTRuntime:
     def __init__(self, key: str, model) -> None:
         self.key = key
         self._model = model
+        self._checkpoint_sha256: str | None = None
         self._probe = None
         self._probe_names: list[str] = []
 
@@ -137,7 +138,11 @@ class NonNTRuntime:
             )
         keras = import_keras()
         path = model_source.resolve(CHECKPOINTS[key])
-        return cls(key, keras.saving.load_model(path, compile=False))
+        from xai.identity import file_sha256
+
+        runtime = cls(key, keras.saving.load_model(path, compile=False))
+        runtime._checkpoint_sha256 = file_sha256(path)
+        return runtime
 
     # ── 구조 ──────────────────────────────────────────────
 
@@ -315,6 +320,26 @@ class NonNTRuntime:
                 raise ValueError(f"{self.key} 입력 모양이 {shape}가 아니라 {got}다")
         return arrays
 
+    def composite_gradients(self, sequences, head: int = 0):
+        """Cas12a F(x)=M(x,D(x)) -> (output [N], total sequence gradient).
+
+        Both paths use the same model instance. autograd differentiates through
+        the GC sums and adjacent products, including both direct and derived
+        input terms, without accumulating model parameter gradients.
+        """
+        import torch
+        from cas12a.continuous import derive_features
+
+        if self.key != "cas12a":
+            raise ValueError("The composite feature path is defined only for Cas12a")
+        arrays = np.asarray(sequences, dtype=np.float32)
+        if arrays.ndim != 3:
+            raise ValueError("Cas12a sequences require [N, 34, 4]")
+        x = torch.from_numpy(arrays.copy()).requires_grad_(True)
+        y = self._head(self._call([x, derive_features(x)]), head)
+        gradient, = torch.autograd.grad(y.sum(), x)
+        return y.detach().numpy().copy(), gradient.detach().numpy().copy()
+
 
 # ════════════════════════════════════════════════
 # 기존 XAI 루프에 꽂는 handle
@@ -343,13 +368,15 @@ class RuntimeHandle(ExplainHandle):
     `project`는 **서열 입력**의 위치별 기여도만 돌려준다. 파생 특징 입력이 있는
     Cas12a에서 그 기여도를 염기에 임의 배분하지 않기 위해서다. 대신 입력별 signed
     합계를 `input_totals`에 남겨, 호출자가 특징 쪽 기여를 모른 채 잃지 않게 한다.
-    두 입력을 화면에 어떻게 제시할지, 그리고 합성 경로 `F(x) = model(x, derive(x))`를
-    채택할지는 #195가 정한다. 이 handle은 그 결정을 대신하지 않는다.
+    기존 이중 입력 진입점은 #193 검증 재현용으로 보존한다. #195에서 채택한 합성
+    경로는 `cas12a_explain_handle`을 사용하며, 이때 유일한 Input_Seq 합계에는
+    파생 특징을 통한 chain rule 기여까지 포함된다.
     """
 
     #: 입력 이름 → 마지막 `project` 호출에서 본 signed 기여도 합. `project`가
     #: 제자리에서 갱신하므로, 호출자가 들고 있는 것과 같은 사전이다.
     input_totals: dict[str, float] = field(default_factory=dict)
+    ig_path: str = "sequence"
 
 
 def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
@@ -399,7 +426,7 @@ def explain_handle(runtime: NonNTRuntime, head: int, window_length: int,
     return RuntimeHandle(
         raw_fn=raw_fn, ig_inputs=ig_inputs, ig_grad_fn=ig_grad_fn, project=project,
         attention_fn=None, model_key=model_key, head=handle_head_name,
-        input_totals=input_totals,
+        input_totals=input_totals, ig_path="dual" if derive else "sequence",
     )
 
 
@@ -412,13 +439,70 @@ def cas12a_derive(seq: str) -> np.ndarray:
     `cas12a/features.py`는 이 워크트리의 것과 줄바꿈만 다르고 내용이 같다.
     순서가 틀리면 예측은 그럴듯하게 나오면서 조용히 틀린다 (#91).
 
-    여기서는 문자열을 세는 기존 추출기를 그대로 쓴다. 미분 가능한 동등 구현이
-    필요한 합성 IG 경로는 #195가 정한다.
+    학습 특징 parity와 기존 이중 입력 검증의 기준 추출기다. #195의 미분 가능한
+    동등 확장은 `cas12a.continuous.derive_features`에 있다.
     """
     from cas12a import features
 
     gc_feat, dinuc_feat = features.extract_seq_features(seq)
     return np.concatenate([gc_feat, dinuc_feat]).astype(np.float32)
+
+
+CAS12A_IG_PROTOCOLS = {
+    "composite": "cas12a-cnn-ig-composite-gc-dinuc-zero-midpoint-raw-v1",
+    "dual": "cas12a-cnn-ig-dual-zero-midpoint-raw-v1",
+}
+
+
+def cas12a_explain_handle(runtime: NonNTRuntime, *, path: str = "composite") -> RuntimeHandle:
+    """#195's selected Cas12a explanation contract; dual is comparison-only.
+
+    The selected path returns a single 34-position attribution explaining the
+    whole sequence function. Values stay in raw probability units. The existing
+    IG loop owns midpoint integration, progress and cancellation; #200 owns UI
+    wiring and percent/percentage-point presentation.
+
+    Identity includes the actual loaded checkpoint, path protocol and runtime
+    configuration. A manually constructed runtime has no proven checkpoint and
+    therefore cannot claim a cache identity. Legacy explain_handle remains the
+    unchanged dual-input entry point for frozen #193 measurement producers.
+    """
+    if runtime.key != "cas12a":
+        raise ValueError("This explanation contract requires the Cas12a runtime")
+    if path not in CAS12A_IG_PROTOCOLS:
+        raise ValueError(f"Unknown Cas12a IG path: {path!r}")
+    from xai.identity import ExplanationIdentity
+    import json
+
+    model_key = None
+    if runtime._checkpoint_sha256 is not None:
+        model_key = ExplanationIdentity(
+            family="non_nt", model="non_nt/Cas12a",
+            checkpoints=(runtime._checkpoint_sha256,), protocol=CAS12A_IG_PROTOCOLS[path],
+            configuration=json.dumps({**runtime_versions(), "dtype": "float32"}, sort_keys=True),
+        )
+    handle = explain_handle(runtime, head=0, window_length=34,
+                            derive=cas12a_derive, model_key=model_key)
+    if path == "dual":
+        return handle
+
+    def raw_fn(X, on_batch=None):
+        import torch
+        from cas12a.continuous import derive_features
+
+        X = np.asarray(X, dtype=np.float32)
+        with torch.no_grad():
+            features = derive_features(torch.from_numpy(X)).numpy()
+        return runtime.forward([X, features], on_batch=on_batch)
+
+    def ig_grad_fn(batch):
+        if len(batch) != 1:
+            raise ValueError("Composite IG takes one sequence input")
+        y, gradient = runtime.composite_gradients(batch[0])
+        return y, [gradient]
+
+    return replace(handle, raw_fn=raw_fn, ig_inputs=lambda seq: [one_hot(seq)],
+                   ig_grad_fn=ig_grad_fn, ig_path="composite")
 
 
 def _onehot_to_seq(row: np.ndarray) -> str:

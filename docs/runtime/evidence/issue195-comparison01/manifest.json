@@ -1,0 +1,18 @@
+{
+  "arrays.npz": {
+    "bytes": 104684,
+    "sha256": "704efe0b7429bf20e5b6f800c0467f8e2ef434f754fc653dffe48c79dca28cf3"
+  },
+  "registration.json": {
+    "bytes": 1519,
+    "sha256": "0a8d0467878e74559e344a804fcfa4f3bc40e9c52b8868e00889b2e3a25e2980"
+  },
+  "report.json": {
+    "bytes": 30581,
+    "sha256": "9d2d98f56bcd73958e108b3aa553b04336b3add84f402cf6bfeccaf18676dd3a"
+  },
+  "snapshot.zip": {
+    "bytes": 44638,
+    "sha256": "3a85d0c31667a936ab4aacf7bdf3c78566d151a47c290da43939e9a30d93777a"
+  }
+}

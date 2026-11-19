@@ -1,5 +1,11 @@
 # non-NT forward and gradient runtime (#193)
 
+The #195 [Cas12a IG decision](cas12a-ig-decision.md) selects composite IG for the
+single-sequence screen, with a separate [frozen contract](cas12a-ig-contract.json)
+and retained measurement evidence. Numerical quality still **fails**, including
+C2 completeness at 256 steps. Historical measurements on this page and in
+`contract.json` remain dual-input evidence.
+
 The completed #205 validation bundle and reporting corrections are recorded in
 [#214 archive replay and handoff](issue214-validation.md). Its required numerical
 outcome is **fail / exit 1**, with 605 passing and 43 failing checks. The historical
