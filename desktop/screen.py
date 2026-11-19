@@ -311,13 +311,6 @@ SCREEN_HTML = r"""<!doctype html>
 
       function explain() {
         if (!ready || !analysisDna) return;
-        if (family === "non_nt" && !preview && byId("xai-site").value.startsWith("Cas12a|")) {
-          cancelTask();
-          byId("xai-window").replaceChildren();
-          byId("xai-metrics").replaceChildren();
-          slot("xai").textContent = "non-NT Cas12a 설명 계산은 준비 중입니다 (#200).";
-          return;
-        }
         if (!byId("xai-controls").reportValidity()) return;
         if (byId("xai-window").firstElementChild?.dataset.siteKey !== byId("xai-site").value) {
           byId("xai-window").replaceChildren();

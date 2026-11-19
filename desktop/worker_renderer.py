@@ -77,7 +77,7 @@ class NonNTComputationRenderer(ComputationRenderer):
     """non-NT family: the adopted Keras-3-on-torch runtime (#193, #196).
 
     Predictions, the four views and the CSV come from this family's checkpoints
-    only. SpCas9 IG/SHAP use that same runtime; Cas12a UI wiring belongs to #200.
+    only. Both Cas IG/SHAP use that same runtime, with Cas12a's composite path.
     """
 
     FAMILY = "non_nt"
@@ -97,6 +97,4 @@ class NonNTComputationRenderer(ComputationRenderer):
         return self._load()[("A", cas)].model_identity()
 
     def _model_key(self, cas):
-        if cas == "SpCas9":
-            return self._load()[("A", cas)].explanation_identity()
-        raise NotImplementedError(f"non-NT {cas} 설명 계산은 #200에서 제공합니다.")
+        return self._load()[("A", cas)].explanation_identity()

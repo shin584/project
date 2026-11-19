@@ -1,7 +1,8 @@
 """Manifest CNN+BiLSTM Cas12a prediction from a scanned 34bp window (#197).
 
 The adopted runtime derives the training-time 354 features from the window;
-callers supply no feature values. Explanation calculation belongs to #200.
+callers supply no feature values. IG follows #195's composite sequence path;
+SHAP recomputes those same features for every perturbed sequence (#200).
 """
 
 from collections.abc import Callable, Sequence
@@ -79,5 +80,21 @@ class NonNTCas12aPredictor(BasePredictor):
     def explain_heads(self, site: CandidateSite) -> list[str]:
         return ["Cas12a"] if site.cas_type == "Cas12a" else []
 
+    def explanation_identity(self):
+        # The adopted handle owns the path protocol and actual loaded SHA.
+        from xai.identity import verified
+
+        identity = verified(self.explain_handle("Cas12a").model_key)
+        if identity is None:
+            raise RuntimeError("Cas12a 설명 checkpoint 식별을 확인할 수 없습니다.")
+        return identity
+
     def explain_handle(self, head: str):
-        raise NotImplementedError("non-NT Cas12a 설명 계산은 #200에서 제공합니다.")
+        from non_nt_runtime import cas12a_explain_handle
+
+        if head != "Cas12a":
+            raise ValueError(f"모르는 Cas12a 헤드: {head}")
+        handle = cas12a_explain_handle(self.runtime)
+        # Use the same name as the prediction row in both memory/disk caches.
+        handle.head = head
+        return handle

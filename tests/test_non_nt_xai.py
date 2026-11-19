@@ -123,11 +123,8 @@ def test_non_nt_quality_uses_frozen_bound_and_persists_internal_failure(predicto
         record_quality(bad, identity, request)
 
 
-def test_non_nt_rollout_is_unavailable_and_cas12a_remains_separate(predictor):
+def test_non_nt_spcas9_rollout_is_unavailable(predictor):
     view = NonNTComputationRenderer({("A", "SpCas9"): predictor})
     with pytest.raises((NotImplementedError, ValueError), match="attention|Attention"):
         view.explanation_fragment(DNA, "SpCas9|+|40", "SpCas9-NG", "rollout", {},
-                                  80, lambda d, t: None)
-    with pytest.raises(NotImplementedError, match="#200"):
-        view.explanation_fragment(DNA, "Cas12a|+|16", "Cas12a", "ig", {"steps": 32},
                                   80, lambda d, t: None)

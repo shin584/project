@@ -1,0 +1,22 @@
+{
+  "command": [
+    "docs/runtime/verify_issue200.py",
+    "docs/benchmarks/issue200-xai-20261119-run01"
+  ],
+  "source_sha256": {
+    "docs/runtime/contract.json": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+    "docs/runtime/cas12a-ig-contract.json": "d79c10934ce9f42fe354b881448cbe48dd5b8a941b4672214abc6005028ffe54",
+    "docs/runtime/verify_issue200.py": "32a02756475563b4f664c7c9936fc61e61963652eb9f388e31b1b7b0c240876d",
+    "docs/runtime/verify_cas12a_ig.py": "495ea161431a797cef26ba9c4194dfabcb0e63e4369bf9ff52ef933c38a38552",
+    "non_nt_cas12a_predict.py": "b5852a04afe7cacc14f4db05fee317924da36ff61c51bd0565a8aa59a4920b4f",
+    "non_nt_runtime.py": "291727a45269a3a4496d63b6c17e8b3fc7f57521b0e2f139267e0f46e39664c8",
+    "predict.py": "397e90c8dca5174a90e02cbc85f3ccae239f81d0d2fe74e1de4c6921d7b92b02",
+    "cas12a/continuous.py": "b52d2192a0730acff9f736a3030833895c7ab6d5dca4d1b4c023f67f74ce44bf",
+    "cas12a/features.py": "f810b92bc4af09818c956813ddd5d7078ebc4b3f10c44a2f0628c412ad44b85e",
+    "model_source.py": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba",
+    "xai/explain.py": "166d876863bdef406bb225dee8b7a974f81dd4bdc69eeb6282dc2ccef0757123",
+    "xai/units.py": "c620585db0a284cac7f4912bd528412d5d506a722a6db308ecf8753dad69e23a",
+    "xai/identity.py": "516ba33211217ce6bd1bffe7d9a925a32b992b21e8664e2d3c55416648f2ad06",
+    "xai/quality.py": "2b509f5879fbd14671e95ee3e38211c644c1c113e03826d6103fa0aec17f2756"
+  }
+}

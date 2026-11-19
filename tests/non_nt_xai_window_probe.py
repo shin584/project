@@ -1,6 +1,7 @@
-"""#199 real WebView2/child-process acceptance, without showing a desktop window.
+"""#199/#200 real WebView2/child-process acceptance, with a hidden desktop window.
 
 py -3.13 -X utf8 tests/non_nt_xai_window_probe.py OUTPUT_DIRECTORY
+py -3.13 -X utf8 tests/non_nt_xai_window_probe.py OUTPUT_DIRECTORY Cas12a
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 DNA = "GATCCAGTCAGCATGCTTTACGATCGTACGATCGAATCGTAGGCTAGCATCGATCGATGCATCGTAGCTAGCTAGCATCGA"
 
 
-def run(output):
+def run(output, cas="SpCas9"):
     import webview
     from bundle_runtime import configure_offline
     from desktop.api import DesktopApi, webview_emitter
@@ -28,8 +29,11 @@ def run(output):
     configure_offline()
     output.mkdir(parents=True, exist_ok=False)
     events = []
-    report = {"issue": 199, "status": "fail", "checks": []}
-    window = webview.create_window("#199 acceptance", html=SCREEN_HTML, hidden=True,
+    report = {"issue": 200 if cas == "Cas12a" else 199, "cas": cas, "status": "fail", "checks": []}
+    selected = "Cas12a|+|16" if cas == "Cas12a" else "SpCas9|+|40"
+    head = "Cas12a" if cas == "Cas12a" else "SpCas9-NG"
+    other = "SpCas9|+|40" if cas == "Cas12a" else "Cas12a|+|16"
+    window = webview.create_window(f"{cas} acceptance", html=SCREEN_HTML, hidden=True,
                                    width=1280, height=840)
     if window is None:
         raise RuntimeError('Could not create the acceptance window')
@@ -82,13 +86,21 @@ def run(output):
             wait("document.querySelector('#xai-site option[value=\"SpCas9|+|40\"]') !== null")
             window.evaluate_js("""
               document.getElementById('tab-xai').click();
-              const site = document.getElementById('xai-site'); site.value = 'SpCas9|+|40';
+              const site = document.getElementById('xai-site'); site.value = SELECTED_SITE;
               site.dispatchEvent(new Event('change', {bubbles:true}));
-              const head = document.getElementById('xai-head'); head.value = 'SpCas9-NG';
+              const head = document.getElementById('xai-head'); head.value = SELECTED_HEAD;
               head.dispatchEvent(new Event('change', {bubbles:true}));
-            """)
+            """.replace("SELECTED_SITE", json.dumps(selected)).replace("SELECTED_HEAD", json.dumps(head)))
             wait("document.querySelectorAll('[data-slot=xai] img').length === 1 && document.getElementById('task-state').hidden")
             check("ig_logo_rendered", len(capture("ig")) == 1)
+            prediction_table = window.evaluate_js("document.querySelector('[data-slot=best]').innerHTML")
+            if cas == "Cas12a":
+                check("single_cas12a_head_and_manifest_coordinates", window.evaluate_js("""
+                  document.getElementById('xai-head').value === 'Cas12a' &&
+                  document.getElementById('xai-head').options.length === 1 &&
+                  document.getElementById('xai-window').textContent.includes('PAM 4–7') &&
+                  document.querySelector('[data-slot=xai]').textContent.includes('합성 경로')
+                """))
             before = len(events)
             first = capture("ig-before-resize")
             window.evaluate_js("""
@@ -105,6 +117,10 @@ def run(output):
             text = window.evaluate_js("document.querySelector('[data-slot=xai]').textContent")
             check("units_seeds_and_causality_reference", all(s in text for s in ("제한 전", "%p", "배경 seed 0", "인과관계")))
             check("no_separate_quality_warning", window.evaluate_js("!document.querySelector('[data-slot=xai] .warning, [data-slot=xai] [role=alert]')"))
+            if cas == "Cas12a":
+                check("feature_recalculation_reference", "354" in text and "재계산" in text)
+            check("explanations_preserve_prediction_table", prediction_table == window.evaluate_js(
+                "document.querySelector('[data-slot=best]').innerHTML"))
             window.evaluate_js("""
               document.getElementById('shap-n').value = 1024;
               document.getElementById('shap-bg').value = 32;
@@ -113,25 +129,26 @@ def run(output):
             wait("!document.getElementById('task-state').hidden && Number(document.getElementById('task-progress').value) > 0")
             old = events[-1]["request_id"]
             window.evaluate_js("""
-              const site = document.getElementById('xai-site'); site.value = 'Cas12a|+|16';
+              document.getElementById('shap-n').value = 64;
+              document.getElementById('shap-bg').value = 4;
+              const site = document.getElementById('xai-site'); site.value = OTHER_SITE;
               site.dispatchEvent(new Event('change', {bubbles:true}));
-            """)
-            wait("document.querySelector('[data-slot=xai]').textContent.includes('#200') && document.getElementById('task-state').hidden")
-            check("unsupported_site_cancels_previous_calculation", dispatcher.wait_idle(30) and dispatcher.outcome(old) == 'cancelled')
-            check("unsupported_site_clears_previous_window_metrics_and_chart", window.evaluate_js("""
-              !document.getElementById('xai-window').children.length &&
-              !document.getElementById('xai-metrics').children.length &&
-              !document.querySelector('[data-slot=xai] img') &&
-              document.querySelector('[data-slot=xai]').textContent.includes('#200')
-            """))
+            """.replace("OTHER_SITE", json.dumps(other)))
+            wait("document.querySelectorAll('[data-slot=xai] img').length === 2 && document.getElementById('task-state').hidden")
+            check("site_switch_cancels_previous_calculation", dispatcher.wait_idle(30) and dispatcher.outcome(old) == 'cancelled')
+            check("site_switch_replaces_window_metrics_and_chart", window.evaluate_js("""
+              document.querySelector('#xai-window [data-site-key]').dataset.siteKey === OTHER_SITE &&
+              !document.querySelector('[data-slot=xai]').textContent.includes('#200') &&
+              document.getElementById('xai-metrics').textContent.includes(OTHER_CAS)
+            """.replace("OTHER_SITE", json.dumps(other)).replace("OTHER_CAS", json.dumps(other.split('|')[0]))))
             window.evaluate_js("""
               document.getElementById('shap-n').value = 64;
               document.getElementById('shap-bg').value = 4;
-              const site = document.getElementById('xai-site'); site.value = 'SpCas9|+|40';
+              const site = document.getElementById('xai-site'); site.value = SELECTED_SITE;
               site.dispatchEvent(new Event('change', {bubbles:true}));
-              const head = document.getElementById('xai-head'); head.value = 'SpCas9-NG';
+              const head = document.getElementById('xai-head'); head.value = SELECTED_HEAD;
               head.dispatchEvent(new Event('change', {bubbles:true}));
-            """)
+            """.replace("SELECTED_SITE", json.dumps(selected)).replace("SELECTED_HEAD", json.dumps(head)))
             wait("document.querySelectorAll('[data-slot=xai] img').length === 2 && document.getElementById('task-state').hidden")
             progress_start = len(events)
             window.evaluate_js("""
@@ -175,4 +192,4 @@ def run(output):
 
 
 if __name__ == "__main__":
-    raise SystemExit(run(Path(sys.argv[1]).resolve()))
+    raise SystemExit(run(Path(sys.argv[1]).resolve(), sys.argv[2] if len(sys.argv) > 2 else "SpCas9"))

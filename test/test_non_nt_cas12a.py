@@ -134,6 +134,7 @@ def test_prediction_replaces_previous_family_rows(predictor):
         assert site.efficiency_pct > 0
 
 
-def test_explanations_are_explicitly_left_for_issue200(predictor):
-    with pytest.raises(NotImplementedError, match="#200"):
-        predictor.explain_handle("Cas12a")
+def test_explanations_use_same_checkpoint_as_prediction(predictor):
+    handle = predictor.explain_handle("Cas12a")
+    assert handle.model_key.checkpoints == (predictor.model_identity().checkpoint_sha256,)
+    assert handle.ig_path == "composite" and handle.head == "Cas12a"

@@ -1,0 +1,769 @@
+{
+  "issue": 200,
+  "identity": {
+    "family": "non_nt",
+    "model": "non_nt/Cas12a",
+    "checkpoints": [
+      "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f"
+    ],
+    "protocol": "cas12a-cnn-ig-composite-gc-dinuc-zero-midpoint-raw-v1",
+    "configuration": "{\"backend\": \"torch\", \"dtype\": \"float32\", \"h5py\": \"3.14.0\", \"keras\": \"3.14.1\", \"numpy\": \"2.3.2\", \"python\": \"3.13.7\", \"shap\": \"0.52.0\", \"torch\": \"2.12.0+cpu\", \"torch_threads\": \"4\"}"
+  },
+  "source_sha256": {
+    "docs/runtime/contract.json": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+    "docs/runtime/cas12a-ig-contract.json": "d79c10934ce9f42fe354b881448cbe48dd5b8a941b4672214abc6005028ffe54",
+    "docs/runtime/verify_issue200.py": "32a02756475563b4f664c7c9936fc61e61963652eb9f388e31b1b7b0c240876d",
+    "docs/runtime/verify_cas12a_ig.py": "495ea161431a797cef26ba9c4194dfabcb0e63e4369bf9ff52ef933c38a38552",
+    "non_nt_cas12a_predict.py": "b5852a04afe7cacc14f4db05fee317924da36ff61c51bd0565a8aa59a4920b4f",
+    "non_nt_runtime.py": "291727a45269a3a4496d63b6c17e8b3fc7f57521b0e2f139267e0f46e39664c8",
+    "predict.py": "397e90c8dca5174a90e02cbc85f3ccae239f81d0d2fe74e1de4c6921d7b92b02",
+    "cas12a/continuous.py": "b52d2192a0730acff9f736a3030833895c7ab6d5dca4d1b4c023f67f74ce44bf",
+    "cas12a/features.py": "f810b92bc4af09818c956813ddd5d7078ebc4b3f10c44a2f0628c412ad44b85e",
+    "model_source.py": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba",
+    "xai/explain.py": "166d876863bdef406bb225dee8b7a974f81dd4bdc69eeb6282dc2ccef0757123",
+    "xai/units.py": "c620585db0a284cac7f4912bd528412d5d506a722a6db308ecf8753dad69e23a",
+    "xai/identity.py": "516ba33211217ce6bd1bffe7d9a925a32b992b21e8664e2d3c55416648f2ad06",
+    "xai/quality.py": "2b509f5879fbd14671e95ee3e38211c644c1c113e03826d6103fa0aec17f2756"
+  },
+  "checks": [
+    {
+      "check": "C1/function/0.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/function/0.25",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/function/0.5",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/chain/0.5/max_abs",
+      "measured": 2.1827872842550278e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/chain/0.5/cosine",
+      "measured": 0.9999999999999991,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C1/function/1.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/chain/1.0/max_abs",
+      "measured": 3.1141098588705063e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/chain/1.0/cosine",
+      "measured": 0.9999999999999996,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C1/ig/32/completeness",
+      "measured": 0.0005908448879381467,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/ig/256/completeness",
+      "measured": 6.946232190330193e-05,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/ig_resolution/pearson",
+      "measured": 0.999987283246854,
+      "bound": 0.99,
+      "passed": true
+    },
+    {
+      "check": "C1/ig_resolution/max_abs_diff",
+      "measured": 0.00014373231988429325,
+      "bound": 0.0010126721475899104,
+      "passed": true
+    },
+    {
+      "check": "C1/ig_resolution/sign_agreement",
+      "measured": 1.0,
+      "bound": 1,
+      "passed": true
+    },
+    {
+      "check": "C1/shap/seed0/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/shap/seed1/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/shap/seed2/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/shap/repeat/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/shap/finer/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C1/shap_all_mutations/features",
+      "measured": 0.0,
+      "bound": 1e-07,
+      "passed": true
+    },
+    {
+      "check": "C1/shap_all_mutations/function",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C1/shap_determinism",
+      "measured": 0.0,
+      "bound": 1e-09,
+      "passed": true
+    },
+    {
+      "check": "C1/shap_cross_seed/0-1/pearson",
+      "measured": 0.4028025017796522,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_cross_seed/0-1/max_abs_diff",
+      "measured": 0.17477980020500095,
+      "bound": 0.03934759215229927,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_cross_seed/0-2/pearson",
+      "measured": 0.4893216518578316,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_cross_seed/0-2/max_abs_diff",
+      "measured": 0.1448020166442519,
+      "bound": 0.03934759215229927,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_cross_seed/1-2/pearson",
+      "measured": 0.5868061590765773,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_cross_seed/1-2/max_abs_diff",
+      "measured": 0.10183804399437957,
+      "bound": 0.03934759215229927,
+      "passed": false
+    },
+    {
+      "check": "C1/shap_default_vs_finer/pearson",
+      "measured": 0.5442026554235296,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C1/finite",
+      "measured": true,
+      "bound": "all arrays finite",
+      "passed": true
+    },
+    {
+      "check": "C2/function/0.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/function/0.25",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/function/0.5",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/chain/0.5/max_abs",
+      "measured": 1.862645149230957e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/chain/0.5/cosine",
+      "measured": 0.9999999999999998,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C2/function/1.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/chain/1.0/max_abs",
+      "measured": 1.7229467630386353e-08,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/chain/1.0/cosine",
+      "measured": 0.9999999999999994,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C2/ig/32/completeness",
+      "measured": 0.00399036499675276,
+      "bound": 0.001,
+      "passed": false
+    },
+    {
+      "check": "C2/ig/256/completeness",
+      "measured": 0.001227337467327061,
+      "bound": 0.001,
+      "passed": false
+    },
+    {
+      "check": "C2/ig_resolution/pearson",
+      "measured": 0.9999948613857441,
+      "bound": 0.99,
+      "passed": true
+    },
+    {
+      "check": "C2/ig_resolution/max_abs_diff",
+      "measured": 0.0011871119968418498,
+      "bound": 0.009546844933538523,
+      "passed": true
+    },
+    {
+      "check": "C2/ig_resolution/sign_agreement",
+      "measured": 1.0,
+      "bound": 1,
+      "passed": true
+    },
+    {
+      "check": "C2/shap/seed0/additivity",
+      "measured": 5.960464477539063e-08,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C2/shap/seed1/additivity",
+      "measured": 5.960464483090178e-08,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C2/shap/seed2/additivity",
+      "measured": 5.960464460885717e-08,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C2/shap/repeat/additivity",
+      "measured": 5.960464477539063e-08,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C2/shap/finer/additivity",
+      "measured": 5.960464483090178e-08,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C2/shap_all_mutations/features",
+      "measured": 0.0,
+      "bound": 1e-07,
+      "passed": true
+    },
+    {
+      "check": "C2/shap_all_mutations/function",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C2/shap_determinism",
+      "measured": 0.0,
+      "bound": 1e-09,
+      "passed": true
+    },
+    {
+      "check": "C2/shap_cross_seed/0-1/pearson",
+      "measured": 0.49514214273159846,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_cross_seed/0-1/max_abs_diff",
+      "measured": 0.18275105779369524,
+      "bound": 0.05933310441820752,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_cross_seed/0-2/pearson",
+      "measured": 0.39221599519897116,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_cross_seed/0-2/max_abs_diff",
+      "measured": 0.18622802570463287,
+      "bound": 0.05933310441820752,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_cross_seed/1-2/pearson",
+      "measured": 0.4407394155645679,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_cross_seed/1-2/max_abs_diff",
+      "measured": 0.3109895475208856,
+      "bound": 0.05933310441820752,
+      "passed": false
+    },
+    {
+      "check": "C2/shap_default_vs_finer/pearson",
+      "measured": 0.7413989108758116,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C2/finite",
+      "measured": true,
+      "bound": "all arrays finite",
+      "passed": true
+    },
+    {
+      "check": "C3/function/0.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/function/0.25",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/function/0.5",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/chain/0.5/max_abs",
+      "measured": 2.168235369026661e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/chain/0.5/cosine",
+      "measured": 0.9999999999999993,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C3/function/1.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/chain/1.0/max_abs",
+      "measured": 8.818460628390312e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/chain/1.0/cosine",
+      "measured": 0.9999999999999992,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C3/ig/32/completeness",
+      "measured": 0.001888126905214449,
+      "bound": 0.001,
+      "passed": false
+    },
+    {
+      "check": "C3/ig/256/completeness",
+      "measured": 9.907876557235795e-05,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/ig_resolution/pearson",
+      "measured": 0.999993640541747,
+      "bound": 0.99,
+      "passed": true
+    },
+    {
+      "check": "C3/ig_resolution/max_abs_diff",
+      "measured": 0.00032798176744108787,
+      "bound": 0.0029355774557643603,
+      "passed": true
+    },
+    {
+      "check": "C3/ig_resolution/sign_agreement",
+      "measured": 1.0,
+      "bound": 1,
+      "passed": true
+    },
+    {
+      "check": "C3/shap/seed0/additivity",
+      "measured": 1.1102230246251565e-16,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/shap/seed1/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/shap/seed2/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/shap/repeat/additivity",
+      "measured": 1.1102230246251565e-16,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/shap/finer/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C3/shap_all_mutations/features",
+      "measured": 0.0,
+      "bound": 1e-07,
+      "passed": true
+    },
+    {
+      "check": "C3/shap_all_mutations/function",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C3/shap_determinism",
+      "measured": 0.0,
+      "bound": 1e-09,
+      "passed": true
+    },
+    {
+      "check": "C3/shap_cross_seed/0-1/pearson",
+      "measured": 0.5084860238309286,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_cross_seed/0-1/max_abs_diff",
+      "measured": 0.1443414663627506,
+      "bound": 0.035040181865544015,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_cross_seed/0-2/pearson",
+      "measured": 0.5576398581653711,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_cross_seed/0-2/max_abs_diff",
+      "measured": 0.14906921737938597,
+      "bound": 0.035040181865544015,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_cross_seed/1-2/pearson",
+      "measured": 0.682725623341159,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_cross_seed/1-2/max_abs_diff",
+      "measured": 0.06055235862731864,
+      "bound": 0.035040181865544015,
+      "passed": false
+    },
+    {
+      "check": "C3/shap_default_vs_finer/pearson",
+      "measured": 0.47613507785598147,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C3/finite",
+      "measured": true,
+      "bound": "all arrays finite",
+      "passed": true
+    },
+    {
+      "check": "C4/function/0.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/function/0.25",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/function/0.5",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/chain/0.5/max_abs",
+      "measured": 4.889443516731262e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/chain/0.5/cosine",
+      "measured": 0.9999999999999996,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C4/function/1.0",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/chain/1.0/max_abs",
+      "measured": 2.08092387765646e-09,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/chain/1.0/cosine",
+      "measured": 0.999999999999999,
+      "bound": 0.9999,
+      "passed": true
+    },
+    {
+      "check": "C4/ig/32/completeness",
+      "measured": 0.0013099123807478463,
+      "bound": 0.001,
+      "passed": false
+    },
+    {
+      "check": "C4/ig/256/completeness",
+      "measured": 2.0228599282745563e-05,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/ig_resolution/pearson",
+      "measured": 0.9999854868020107,
+      "bound": 0.99,
+      "passed": true
+    },
+    {
+      "check": "C4/ig_resolution/max_abs_diff",
+      "measured": 0.0001527702042949386,
+      "bound": 0.0021150019125343532,
+      "passed": true
+    },
+    {
+      "check": "C4/ig_resolution/sign_agreement",
+      "measured": 1.0,
+      "bound": 1,
+      "passed": true
+    },
+    {
+      "check": "C4/shap/seed0/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/shap/seed1/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/shap/seed2/additivity",
+      "measured": 2.220446049250313e-16,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/shap/repeat/additivity",
+      "measured": 0.0,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/shap/finer/additivity",
+      "measured": 7.45058070794613e-09,
+      "bound": 0.001,
+      "passed": true
+    },
+    {
+      "check": "C4/shap_all_mutations/features",
+      "measured": 0.0,
+      "bound": 1e-07,
+      "passed": true
+    },
+    {
+      "check": "C4/shap_all_mutations/function",
+      "measured": 0.0,
+      "bound": 1e-06,
+      "passed": true
+    },
+    {
+      "check": "C4/shap_determinism",
+      "measured": 0.0,
+      "bound": 1e-09,
+      "passed": true
+    },
+    {
+      "check": "C4/shap_cross_seed/0-1/pearson",
+      "measured": 0.19353951878218062,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_cross_seed/0-1/max_abs_diff",
+      "measured": 0.24460224972941097,
+      "bound": 0.06973341593710039,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_cross_seed/0-2/pearson",
+      "measured": -0.12653155952408796,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_cross_seed/0-2/max_abs_diff",
+      "measured": 0.27220160520306075,
+      "bound": 0.06973341593710039,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_cross_seed/1-2/pearson",
+      "measured": 0.0012305286555324266,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_cross_seed/1-2/max_abs_diff",
+      "measured": 0.28061746954917927,
+      "bound": 0.06973341593710039,
+      "passed": false
+    },
+    {
+      "check": "C4/shap_default_vs_finer/pearson",
+      "measured": 0.22337626784725587,
+      "bound": 0.9,
+      "passed": false
+    },
+    {
+      "check": "C4/finite",
+      "measured": true,
+      "bound": "all arrays finite",
+      "passed": true
+    },
+    {
+      "check": "sources_unchanged_during_measurement",
+      "measured": true,
+      "bound": true,
+      "passed": true
+    }
+  ],
+  "scope": "Measure production Cas12a XAI against frozen #195/#193 cases and limits.\n\npy -3.13 -X utf8 docs/runtime/verify_issue200.py NEW_OUTPUT_DIRECTORY\nExit 1 preserves numerical failures; display acceptance is measured separately.\nDoes not modify or replace #205 evidence. SHAP always bypasses the disk cache.\n",
+  "shap_mutation_audits": {
+    "C1": {
+      "rows": 17509,
+      "features_max_abs": 0.0,
+      "function_max_abs": 0.0,
+      "calls": 20
+    },
+    "C2": {
+      "rows": 17509,
+      "features_max_abs": 0.0,
+      "function_max_abs": 0.0,
+      "calls": 20
+    },
+    "C3": {
+      "rows": 17509,
+      "features_max_abs": 0.0,
+      "function_max_abs": 0.0,
+      "calls": 20
+    },
+    "C4": {
+      "rows": 17509,
+      "features_max_abs": 0.0,
+      "function_max_abs": 0.0,
+      "calls": 20
+    }
+  },
+  "seconds": 332.85204440000234,
+  "passed": 85,
+  "failed": 32,
+  "verdict": "fail",
+  "skipped": 0,
+  "evidence_sha256": {
+    "raw.npz": "f39f2f8acfbe58455ee03320098177ae667564c144ee1c749721ce3832ff629a",
+    "registration.json": "6573541be3780f5e1f303a85f2a91c3962f17bce810d6a9f2292214e3c38e5ff",
+    "measured-source.zip": "ff3628a638043259cac7ed7e41da452e91317b63027da67e93950d73c6e9863c"
+  }
+}

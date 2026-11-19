@@ -10,3 +10,5 @@ docs/runtime/evidence/issue195-comparison01/** -text whitespace=cr-at-eol
 docs/nt-xai/** -text whitespace=cr-at-eol
 # #199 measured contract/source/raw evidence keeps its recorded bytes.
 docs/benchmarks/issue199-xai-20261119-resumed01/** -text whitespace=cr-at-eol
+# #200 numerical and display evidence retains its measured bytes/checksums.
+docs/benchmarks/issue200-xai-20261119-run01/** -text whitespace=cr-at-eol

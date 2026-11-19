@@ -68,8 +68,10 @@ def test_real_cas12a_only_child_loads_lazily_and_connects_views_selection_and_cs
         assert abs(float(table[1][7]) - value * 100) <= .01
         run(lambda: api.save_csv(DNA, {"cas_names": []}))
         assert len(list(csv.reader(io.StringIO(saved.read_text(encoding="utf-8-sig"))))) == 1
-        error, _ = run(lambda: api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig"), "error")
-        assert "#200" in str(error)
+        explanation, ig_events = run(lambda: api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig"))
+        assert "data:image/png;base64," in explanation["fragments"]["xai"]
+        assert "합성 경로" in explanation["fragments"]["xai"]
+        assert any(e["type"] == "progress" for e in ig_events)
         assert access_log.read_text() == accesses, "view/CSV/XAI selection reloaded the checkpoint"
     finally:
         dispatcher.close()

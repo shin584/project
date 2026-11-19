@@ -17,8 +17,6 @@ def _non_nt_reference(predictor, site, result) -> str:
     """Explain the proven ratio conversion without treating attribution as causality."""
     if getattr(getattr(predictor, "spec", None), "family", None) != "non_nt":
         return ""
-    if site.cas_type != "SpCas9":
-        return ""
     note = (f'<p class="caption">설명 대상은 제한 전 예측 절단 효율 {result.pred * 100:.2f}% '
             f'(원출력 {result.pred:.8g} × 100)이며 기여도 단위는 %p입니다. '
             '기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.</p>')
@@ -26,6 +24,23 @@ def _non_nt_reference(predictor, site, result) -> str:
         note += ('<p class="caption">표의 점수는 0~100%로 제한되지만, '
                  '이 설명은 제한 전 출력을 대상으로 하므로 표와 다릅니다.</p>')
     return note
+
+
+def _cas12a_reference(predictor, site, method) -> str:
+    if (getattr(getattr(predictor, "spec", None), "family", None) != "non_nt"
+            or site.cas_type != "Cas12a"):
+        return ""
+    if method == "ig":
+        return ('<p>합성 경로 F(x)=M(x,D(x))의 서열 기여도입니다. '
+                'GC·인접 염기쌍 354개 파생 특징 경로를 포함하며, '
+                '특징의 독립적인 생물학적 중요도 비율이 아닙니다. '
+                '기준은 서열 영벡터와 파생 특징 0입니다. '
+                'GC는 보간 계수에, 인접 염기쌍은 그 제곱에 비례합니다. '
+                '영벡터와 중간 soft input은 실제 DNA가 아니며 PAM도 보간됩니다. '
+                '기여도는 이 기준 입력과 경로에 의존합니다.</p>')
+    return ('<p>변경된 모든 서열에서 GC·인접 염기쌍 354개 파생 특징을 함께 재계산합니다. '
+            '무작위 ACGT 배경은 실제 DNA 분포를 대표하지 않으며 PAM도 바뀔 수 있습니다. '
+            '기여도는 배경과 표본추출에 의존하며 생물학적 인과관계를 뜻하지 않습니다.</p>')
 
 
 def controls_template(
@@ -136,6 +151,7 @@ def explanation_fragment(
         body += ('<details><summary>기술적 참고</summary>'
                  '<p>기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. '
                  '기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).</p>'
+                 + _cas12a_reference(predictor, site, method) +
                  f'<p class="caption">예측 {units.prediction(result.pred):.2f}{units.value_unit} − '
                  f'기준 {units.prediction(result.baseline_pred):.2f}{units.value_unit} · '
                  f'기여도 합 {units.contribution(result.attribution).sum():+.3f}{units.delta_unit} · '
@@ -159,6 +175,7 @@ def explanation_fragment(
         body += ('<details><summary>기술적 참고 (기준값 · 합산값)</summary>'
                  '<p>위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. '
                  '배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.</p>'
+                 + _cas12a_reference(predictor, site, method) +
                  f'<p class="caption">배경 seed {result.background_seed} · 부분집합 seed {result.subset_seed} · '
                  f'무작위 ACGT 배경 {background}개 · 샘플 {nsamples}개</p>'
                  f'<p class="caption">기준값 {units.prediction(result.base_value):.2f}{units.value_unit} + '

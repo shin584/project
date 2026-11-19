@@ -54,12 +54,13 @@ def record_quality(result, model_identity, request):
     if not all(np.isfinite(a).all() for a in arrays):
         raise ValueError("XAI result contains NaN/inf")
     limit = RESIDUAL_ATOL_PP + RESIDUAL_RTOL * signal
-    non_nt_spcas9 = (model_identity is not None and model_identity.family == 'non_nt'
-                    and model_identity.model == 'non_nt/SpCas9')
-    if non_nt_spcas9 and isinstance(result, (IGResult, SHAPResult)):
+    non_nt_bound = ({'non_nt/SpCas9': 5e-3, 'non_nt/Cas12a': 1e-3}.get(model_identity.model)
+                    if model_identity is not None and model_identity.family == 'non_nt' else None)
+    if non_nt_bound is not None and isinstance(result, (IGResult, SHAPResult)):
         # #193 contract.json: IG completeness and SHAP additivity both <= .005
-        # in raw ratio units. #201's NT relative term must not relax this gate.
-        limit = float(result.units.contribution(5e-3))
+        # in raw ratio units (Cas12a <= .001, also frozen by #195).
+        # #201's NT relative term must not relax these gates.
+        limit = float(result.units.contribution(non_nt_bound))
         if np.shape(arrays[0]) != (len(request[2]),):
             raise ValueError('XAI result length does not match the model window')
     residual_unit = result.units.delta_unit if isinstance(result, (IGResult, SHAPResult)) else 'attention'
