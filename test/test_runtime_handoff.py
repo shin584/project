@@ -1,6 +1,7 @@
 """#212 planned stage boundary through the existing journal/report CLIs."""
 
 import sys
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -15,7 +16,7 @@ from verification_bundle import stage_execution
 
 
 @pytest.mark.parametrize("fault", [None, "missing_raw", "changed_input", "interrupted"])
-def test_preregistered_float32_boundary_preserves_required_evidence(tmp_path, fault):
+def test_preregistered_float32_boundary_preserves_required_evidence(tmp_path, monkeypatch, fault):
     docs = Path(diagnostics.__file__).parent
     work = build_complete_bundle(tmp_path, docs / "protocol-212.json", "fixture-212")
     # The builder supplies synthetic prior stages. Neither investigation has
@@ -78,3 +79,20 @@ def test_preregistered_float32_boundary_preserves_required_evidence(tmp_path, fa
         duplicate = cli("verify_contract.py", "float32", "--work", work)
         assert duplicate.returncode == 1
         assert "cannot resume" in duplicate.stdout
+        # The existing child-process seam supplies unsupported qualification.
+        # Followup must consume the completed float32 evidence unchanged.
+        before = {p.name: sha(p) for p in work.glob("float32*") if p.is_file()}
+        original_popen = subprocess.Popen
+        def child(command, **kwargs):
+            directory = Path(command[-1])
+            script = ("from pathlib import Path; "
+                f"Path({str(directory / 'qualification.json')!r}).write_text("
+                "'{\"qualified\": false, \"reason\": \"unsupported fixture op\"}')")
+            return original_popen([sys.executable, "-c", script], **kwargs)
+        monkeypatch.setattr(subprocess, "Popen", child)
+        followup, followup_raw = diagnostics.run_diagnostics(work, contract, protocol, precision="float64")
+        assert followup[:2] == rows
+        assert [r["state"] for r in followup[2:]] == ["unavailable", "unavailable"]
+        assert before == {p.name: sha(p) for p in work.glob("float32*") if p.is_file()}
+        for name, value in raw.items():
+            np.testing.assert_array_equal(followup_raw[name], value)
