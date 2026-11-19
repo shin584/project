@@ -1,0 +1,52 @@
+{
+  "schema": "dashboard-v3-held-out-evaluation-v1",
+  "issue": 202,
+  "base_commit": "1a297cdbdff2cc1b9214811b4a9ac8b8d4739b81",
+  "purpose": "Descriptive test performance and full-test deployment parity; no accuracy floor or model selection.",
+  "prohibited": ["training", "checkpoint reselection", "resplitting", "tuning from test results", "non-NT/NT comparison"],
+  "inference": {"dtype": "float32", "training": false, "batch_size": 64, "torch_threads": 4, "tensorflow_threads": 4},
+  "metrics": {
+    "names": ["pearson", "spearman", "mae", "mse"],
+    "accumulation_dtype": "float64",
+    "missing_targets": "Exclude NaN targets per head, retain all inputs/predictions; record n and missing count. Reject infinite targets or any nonfinite prediction.",
+    "undefined_correlation": "null plus reason for fewer than two observations or a constant target/prediction",
+    "primary": "raw checkpoint output against training-scale targets",
+    "secondary": "clip predictions to [0,1] against the same targets, separately labelled; never overwrite raw outputs",
+    "units": {"targets_and_outputs": "published percentage/100", "mae": "fraction", "mse": "fraction squared", "correlations": "dimensionless"}
+  },
+  "parity": {
+    "output": {"atol": 0.000001, "rtol": 0.00001},
+    "metric_absolute_tolerance": {"pearson": 0.00001, "spearman": 0.0001, "mae": 0.00001, "mse": 0.00001},
+    "basis": "Output bounds reuse the preserved SpCas9 export contract. Metric bounds are fixed before test inference; Spearman allows float32 near-tie rank changes. Every row and head must pass, with no aggregate masking.",
+    "comparisons": ["SpCas9 original TensorFlow vs export TensorFlow", "SpCas9 original TensorFlow vs deployed torch", "SpCas9 archived predictions vs original TensorFlow", "Cas12a original TensorFlow vs deployed torch"],
+    "preprocessing": "Exact float32 array equality between original encoding and deployed encoding for every test row and input."
+  },
+  "spcas9": {
+    "rows": 5186,
+    "original": "models/non_nt/spcas9-9hydra-v2/training/9hydra_v2.keras",
+    "original_sha256": "24e31cc6b9df8520e2bf761d33f7bb475c4658a9a479242b67db882946d0d2b8",
+    "deployed": "models/non_nt/spcas9-9hydra-v2/model.keras",
+    "deployed_sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+    "directory": "models/non_nt/spcas9-9hydra-v2",
+    "heads": ["SpCas9", "SpCas9-NG", "VRQR variant", "xCas", "Sniper-Cas9", "SpCas9-HF.1", "eSpCas9(1.1)", "HypaCas9", "evoCas9"],
+    "layers": ["Output_SpCas9", "Output_SpCas9_NG", "Output_VRQR_variant", "Output_xCas", "Output_Sniper_Cas9", "Output_SpCas9_HF_1", "Output_eSpCas9_1_1_", "Output_HypaCas9", "Output_evoCas9"],
+    "preprocessing": "Saved published test.csv order, 30bp A/C/G/T one-hot (unknown bases zero), nine target columns divided by 100; no target clipping. Original test source checkpoint SHA must equal export.source SHA.",
+    "selection": "Preserved training log: validation loss, epoch 41; historical test result is an inherited evaluation, not a new independent study."
+  },
+  "cas12a": {
+    "rows": 1500,
+    "original": "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",
+    "original_sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+    "deployed": "models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",
+    "deployed_sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+    "directory": "models/non_nt/cas12a-cnn-20261102",
+    "heads": ["Cas12a"],
+    "layers": ["dense_2"],
+    "source_sha256": "c465925148023dcfe01e388c79c17ccaf73bc454c815eaef72595ba6ee71d028",
+    "partition_manifest_sha256": "e45c8b1128f85ba90b6f2bd17921b64b069081686321bc2809afc1fc8a3bdc9c",
+    "partition_sha256": "680fc75f023e49ce6baae41a581e00d9ba06da024294691964f4ff1f03942f6d",
+    "preprocessing": "Use preserved source_snapshot.zip cas12a.cnn_manifest verification and partition_arrays on test membership only; 34bp flank/PAM/guide/flank, ACGT float32 and 354 derived features. Original source excludes missing sequence/unparseable or missing target before splitting; finite targets divide by 100 and clip [0,1]. Reject any unexpected exclusion or missing test target.",
+    "selection": "Checkpoint already selected by lowest validation loss, epoch 5. Preserved validation_predictions.csv is selection evidence, never independent test evidence.",
+    "provenance_limitation": "Training source snapshot is retrospective (#117), with no contemporaneous attestation; test inference cannot repair historical training provenance."
+  }
+}

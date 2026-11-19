@@ -12,3 +12,5 @@ docs/nt-xai/** -text whitespace=cr-at-eol
 docs/benchmarks/issue199-xai-20261119-resumed01/** -text whitespace=cr-at-eol
 # #200 numerical and display evidence retains its measured bytes/checksums.
 docs/benchmarks/issue200-xai-20261119-run01/** -text whitespace=cr-at-eol
+# #202 contract, evaluator and retained test evidence bind exact bytes.
+docs/model-evaluation/** -text whitespace=cr-at-eol
