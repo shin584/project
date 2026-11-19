@@ -34,6 +34,9 @@ def _table(headers: list[str], rows: list[list[Any]], attrs: list[dict]) -> str:
 
 
 class PredictionRenderer:
+    #: 이 렌더러가 쓰는 모델 계열. 한 프로세스는 한 계열만 든다 (ADR 0007).
+    FAMILY = "nt"
+
     def __init__(self, predictors: dict | None = None, *, explanation_cache=None):
         self._predictors = predictors
         self._explanation_cache = explanation_cache
@@ -44,17 +47,20 @@ class PredictionRenderer:
     def _scan(self, dna: str):
         return core.scan_all(dna)
 
-    def warm_up(self, on_batch: OnBatch) -> str:
+    def _load(self) -> dict:
         if self._predictors is None:
-            self._predictors = core.load_predictors()
+            self._predictors = core.load_predictors(family=self.FAMILY)
+        return self._predictors
+
+    def warm_up(self, on_batch: OnBatch) -> str:
+        self._load()
         on_batch(1, 1)
         return '<p class="status">모델 준비 완료</p>'
 
     def _rows_with_progress(
         self, dna: str, on_batch: OnBatch
     ) -> list[core.VariantResult]:
-        if self._predictors is None:
-            self._predictors = core.load_predictors()
+        self._load()
         scan = self._scan(dna)
         total_sites = sum(
             sum(s.cas_type == cas and bool(s.model_input_seq) for s in scan.sites)
@@ -106,17 +112,21 @@ class PredictionRenderer:
         diagnostics = []
         for cas in sorted({row.cas_type for row in rows}):
             items = [row for row in rows if row.cas_type == cas]
-            # Preview subclasses deliberately have no predictors and must not
-            # import predict/torch just to describe their synthetic scores.
-            spec = core.MODEL_REGISTRY.get(("A", cas)) if self._predictors is not None else None
-            mode = spec.output_mode if spec else "?"
+            # The row carries which model and checkpoint produced it, so this
+            # block never has to guess from a registry key that is the same for
+            # every family. Rows made without a predictor claim no model (#196).
+            identity = next((row.identity for row in items if row.identity), None)
             what = "효율(%)" if items[0].score_kind == "efficiency" else "백분위(%)"
+            # 식별이 없으면 모델 이름을 적지 않는다 — "?"를 적으면 모델을 못 찾은
+            # 것과 모델이 없는 것이 같아 보인다 (#196).
+            model = (f'모델 {html.escape(identity.name)} '
+                     f'<code>{html.escape(identity.version)}</code> · ' if identity else "")
             diagnostics.append(
-                f'<li><strong>{html.escape(cas)}</strong> · 원출력 '
+                f'<li><strong>{html.escape(cas)}</strong> · {model}원출력 '
                 f'{min(r.raw_score for r in items):.3f} ~ {max(r.raw_score for r in items):.3f}'
-                f' · 해석 <code>{html.escape(mode)}</code> → 화면 표시는 {what}</li>'
+                f' → 화면 표시는 {what}</li>'
             )
-        diagnostic_html = ('<details id="model-diagnostics"><summary>모델 출력 해석 상태</summary><ul>'
+        diagnostic_html = ('<details id="model-diagnostics"><summary>모델과 출력 범위</summary><ul>'
                            + ''.join(diagnostics) + '</ul></details>')
         return {
             "best": diagnostic_html + best_candidates_fragment(rows),
@@ -148,8 +158,7 @@ class PredictionRenderer:
         site = next((s for s in self._scan(dna).sites if s.site_key == site_key), None)
         if site is None:
             raise LookupError(f"그런 사이트가 없습니다: {site_key}")
-        if self._predictors is None:
-            self._predictors = core.load_predictors()
+        self._load()
         if head not in self._explain_heads(site):
             raise LookupError(f"이 사이트에 없는 헤드입니다: {head}")
         return explanation_fragment(

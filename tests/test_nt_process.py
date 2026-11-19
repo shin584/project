@@ -100,7 +100,16 @@ def test_real_nt_prediction_parity_and_process_owned_xai(tmp_path, monkeypatch):
         assert options["Cas12a|+|16"] == ["Cas12a"]
         stage = "csv"
         _, csv_events = run(lambda: api.save_csv(dna))
-        assert saved.read_bytes() == (baseline / "crispr_prediction_results.csv").read_bytes()
+        # #196이 모델·버전 열을 맨 끝에 더했다. 보존된 기준이 증거로 남긴 것은
+        # 기존 열의 값과 순서이므로 그 부분을 바이트로 비교하고, 더해진 열은 이
+        # 계열의 checkpoint를 가리키는지 따로 본다.
+        from desktop.detail_view import csv_against_baseline
+
+        comparison = csv_against_baseline(
+            saved.read_bytes(), (baseline / "crispr_prediction_results.csv").read_bytes())
+        assert comparison["csv_base_columns_byte_equal"], comparison
+        assert comparison["csv_model_columns"][0] == ["모델", "모델 버전"]
+        assert comparison["csv_model_columns"][1][0].startswith("NT ")
         assert not any(e["type"] == "progress" for e in csv_events), "CSV recomputed predictions"
         for target in meta["xai"]:
             for method in ("ig", "shap", "rollout"):
@@ -120,7 +129,7 @@ def test_real_nt_prediction_parity_and_process_owned_xai(tmp_path, monkeypatch):
                 assert not any(e["type"] == "progress" for e in received)
         assert not set(sys.modules).intersection({"torch", "transformers", "predict", "numpy", "matplotlib", "shap"})
         evidence.update(status="pass", child_pid=child.pid, generation=dispatcher.generation,
-                        csv_bytes=len(saved.read_bytes()), csv_byte_equal=True,
+                        csv_bytes=len(saved.read_bytes()), csv_base_columns_byte_equal=True,
                         ui_has_no_computation_imports=True)
     finally:
         dispatcher.close()

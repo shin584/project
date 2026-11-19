@@ -97,6 +97,35 @@ class CandidateSite:
         return f"{self.cas_type}|{self.strand}|{self.pam_start}"
 
 
+@dataclass(frozen=True)
+class ModelIdentity:
+    """예측 행 하나를 **어느 모델의 어느 checkpoint가** 냈는지 (#196).
+
+    예측 행과 함께 다닌다. CSV의 '모델'·'모델 버전' 열, 화면의 원출력 단위 안내,
+    계산 프로세스의 예측 캐시 키가 모두 이 한 값을 쓴다 — 세 곳이 따로 세면
+    저장된 CSV가 가리키는 모델과 화면이 보여준 모델이 조용히 갈라질 수 있다.
+
+    `checkpoint_sha256`은 경로 이름이 아니라 **파일 내용**의 식별이다. 어떻게 얻는지는
+    계열마다 다르다.
+      · non-NT — `model_source.NON_NT_FILES`에 고정된 sha256. `model_source.resolve`가
+        적재 때 실제 바이트를 그 값과 대조하므로, 어긋난 파일로는 추론 자체가 안 된다.
+      · NT     — 실제 파일을 해시한 값 (`nt_explanation_identity`가 memo한다).
+
+    설명(XAI) 캐시 식별은 이것이 아니라 `xai.identity.ExplanationIdentity`다.
+    설명 프로토콜까지 포함해야 하고, 그 프로토콜은 계열이 소유한다.
+    """
+
+    family:            str
+    cas:               str
+    name:              str
+    version:           str
+    raw_unit:          str = ""
+    checkpoint_sha256: str = ""
+
+    def __str__(self) -> str:
+        return f"{self.family}/{self.cas}/{self.name}@{self.version}"
+
+
 @dataclass
 class VariantResult:
     """모델 하나가 사이트 하나(변종 하나)에 낸 예측 결과"""
@@ -114,6 +143,10 @@ class VariantResult:
     cas_type:    str = ""         # SpCas9 | Cas12a
     model:       str = "A"        # 예측한 모델 (A | B)
     window_seq:  str = ""         # 모델에 들어간 입력 윈도우
+    #: 이 행을 낸 모델·checkpoint의 식별 (아래 `ModelIdentity`). 예측기를 거치지
+    #: 않고 만든 행(미리보기 등)은 None이고, 그때 화면은 모델 이름이나 단위를
+    #: **주장하지 않는다** (#196).
+    identity:    ModelIdentity | None = None
 
 
 @dataclass

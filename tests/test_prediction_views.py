@@ -48,6 +48,7 @@ def row(
     cas="SpCas9",
     guide="ATCG",
     model="A",
+    identity=None,
 ):
     return VariantResult(
         cas_name=name,
@@ -61,6 +62,7 @@ def row(
         site_key=site,
         cas_type=cas,
         model=model,
+        identity=identity,
     )
 
 
@@ -230,3 +232,29 @@ def test_real_renderer_propagates_progress_cancellation():
 
     with pytest.raises(Cancelled):
         renderer.prediction_fragments(DNA, cancel)
+
+
+# ── 원출력 단위 안내 (#196) ───────────────────────────────────
+
+
+def test_the_raw_unit_note_comes_from_the_model_that_made_the_rows():
+    """계열마다 원출력 단위가 다르므로 안내 문구를 코드에 적어 두지 않는다."""
+    from core import ModelIdentity
+
+    nt = ModelIdentity(family="nt", cas="SpCas9", name="NT SpCas9", version="v",
+                       raw_unit="z-score (학습 분포 표준화)")
+    non_nt = ModelIdentity(family="non_nt", cas="SpCas9", name="9-Hydra v2", version="v",
+                           raw_unit="공개 효율(%) ÷ 100 비율")
+    for identity in (nt, non_nt):
+        fragment = best_candidates_fragment([row("s", "SpCas9(WT)", 40, identity=identity)])
+        assert identity.name in fragment
+        assert identity.raw_unit in fragment
+    # 다른 계열의 단위 설명이 섞이지 않는다.
+    only_non_nt = best_candidates_fragment([row("s", "SpCas9(WT)", 40, identity=non_nt)])
+    assert "z-score" not in only_non_nt
+
+
+def test_rows_without_an_identity_claim_no_raw_unit():
+    fragment = best_candidates_fragment([row("s", "SpCas9(WT)", 40)])
+    assert "'원출력'은 모델이 낸 값 그대로입니다." in fragment
+    assert "z-score" not in fragment and "raw-units" not in fragment

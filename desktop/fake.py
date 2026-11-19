@@ -70,6 +70,8 @@ def rows_of(site: CandidateSite) -> list[VariantResult]:
                 cas_type=site.cas_type,
                 model="A",
                 window_seq=site.model_input_seq,
+                # 모델 식별은 **비워 둔다**. 미리보기에는 checkpoint도 계열도
+                # 없으므로, 화면과 CSV가 모델 이름·단위를 주장하지 않는다 (#196).
             )
         )
     return rows

@@ -1,0 +1,292 @@
+{
+  "issue": 196,
+  "created_utc": "2026-11-19T06:43:41.436424+00:00",
+  "environment": {
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "keras": "3.14.1",
+    "torch": "2.12.0+cpu",
+    "numpy": "2.3.2",
+    "shap": "0.52.0",
+    "h5py": "3.14.0",
+    "backend": "torch",
+    "torch_threads": "4"
+  },
+  "model": {
+    "family": "non_nt",
+    "name": "9-Hydra v2",
+    "version": "spcas9-9hydra-v2 · sha256 ddbf86aa34fe",
+    "checkpoint_sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+    "path": "models/non_nt/spcas9-9hydra-v2/model.keras",
+    "output_mode": "raw",
+    "raw_unit": "공개 효율(%) ÷ 100 비율 — 0~1로 자른 뒤 ×100이 예측 효율(%)입니다"
+  },
+  "tolerance": {
+    "source": "docs/runtime/contract.json criteria.forward_parity",
+    "max_abs_diff": 0.0001,
+    "max_rel_diff": 0.001
+  },
+  "head_order": {
+    "layers": [
+      "Output_SpCas9",
+      "Output_SpCas9_NG",
+      "Output_VRQR_variant",
+      "Output_xCas",
+      "Output_Sniper_Cas9",
+      "Output_SpCas9_HF_1",
+      "Output_eSpCas9_1_1_",
+      "Output_HypaCas9",
+      "Output_evoCas9"
+    ],
+    "variants": [
+      "SpCas9(WT)",
+      "SpCas9-NG",
+      "VRQR",
+      "xCas9",
+      "Sniper",
+      "SpCas9-HF1",
+      "eSpCas9(1.1)",
+      "HypaCas9",
+      "evoCas9"
+    ],
+    "matches_export_manifest": true
+  },
+  "encoding": {
+    "window_length": 30,
+    "channels": [
+      "A",
+      "C",
+      "G",
+      "T"
+    ],
+    "input_shapes": [
+      [
+        30,
+        4
+      ]
+    ]
+  },
+  "fixed_case_parity": {
+    "reference": "models/non_nt/spcas9-9hydra-v2/export-manifest.json validation.distinct_batch",
+    "rows_compared": 19,
+    "heads_covered": [
+      "HypaCas9",
+      "Sniper",
+      "SpCas9(WT)",
+      "SpCas9-HF1",
+      "SpCas9-NG",
+      "VRQR",
+      "eSpCas9(1.1)",
+      "evoCas9",
+      "xCas9"
+    ],
+    "worst_abs_error": 5.960464477539063e-08,
+    "worst_rel_error": 5.111600851154564e-07,
+    "passed": true,
+    "cases": [
+      {
+        "window": "ACGTACGTACGTACGTACGTACGTAGGTCA",
+        "pam": "AGG",
+        "rows": [
+          {
+            "variant": "SpCas9(WT)",
+            "reference_raw": 0.5581128597259521,
+            "raw_score": 0.5581128597259521,
+            "abs_error": 0.0,
+            "rel_error": 0.0,
+            "efficiency_pct": 55.811285972595215,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "SpCas9-NG",
+            "reference_raw": 0.43572303652763367,
+            "raw_score": 0.43572309613227844,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 1.3679479802213872e-07,
+            "efficiency_pct": 43.572309613227844,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "xCas9",
+            "reference_raw": 0.4175117015838623,
+            "raw_score": 0.4175116717815399,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 7.138080747111504e-08,
+            "efficiency_pct": 41.75116717815399,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "Sniper",
+            "reference_raw": 0.5274763107299805,
+            "raw_score": 0.5274763703346252,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 1.1299966190501158e-07,
+            "efficiency_pct": 52.747637033462524,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "SpCas9-HF1",
+            "reference_raw": 0.14267730712890625,
+            "raw_score": 0.14267724752426147,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 4.1775840864124915e-07,
+            "efficiency_pct": 14.267724752426147,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "eSpCas9(1.1)",
+            "reference_raw": 0.3090905249118805,
+            "raw_score": 0.3090905249118805,
+            "abs_error": 0.0,
+            "rel_error": 0.0,
+            "efficiency_pct": 30.90905249118805,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "HypaCas9",
+            "reference_raw": 0.18805119395256042,
+            "raw_score": 0.18805113434791565,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 3.169596721115584e-07,
+            "efficiency_pct": 18.805113434791565,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "evoCas9",
+            "reference_raw": 0.025507695972919464,
+            "raw_score": 0.02550768293440342,
+            "abs_error": 1.30385160446167e-08,
+            "rel_error": 5.111600851154564e-07,
+            "efficiency_pct": 2.550768293440342,
+            "score_kind": "efficiency"
+          }
+        ]
+      },
+      {
+        "window": "TGCATGCATGCATGCATGCATGCATGGATC",
+        "pam": "TGG",
+        "rows": [
+          {
+            "variant": "SpCas9(WT)",
+            "reference_raw": 0.516192615032196,
+            "raw_score": 0.5161925554275513,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 1.1546977434319349e-07,
+            "efficiency_pct": 51.61925554275513,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "SpCas9-NG",
+            "reference_raw": 0.3985632061958313,
+            "raw_score": 0.3985632061958313,
+            "abs_error": 0.0,
+            "rel_error": 0.0,
+            "efficiency_pct": 39.85632061958313,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "xCas9",
+            "reference_raw": 0.333312064409256,
+            "raw_score": 0.3333120048046112,
+            "abs_error": 5.960464477539063e-08,
+            "rel_error": 1.7882534459420372e-07,
+            "efficiency_pct": 33.33120048046112,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "Sniper",
+            "reference_raw": 0.502373218536377,
+            "raw_score": 0.502373218536377,
+            "abs_error": 0.0,
+            "rel_error": 0.0,
+            "efficiency_pct": 50.237321853637695,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "SpCas9-HF1",
+            "reference_raw": 0.24973812699317932,
+            "raw_score": 0.24973809719085693,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 1.1933429126946746e-07,
+            "efficiency_pct": 24.973809719085693,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "eSpCas9(1.1)",
+            "reference_raw": 0.3317336440086365,
+            "raw_score": 0.3317336142063141,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 8.983810634208518e-08,
+            "efficiency_pct": 33.17336142063141,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "HypaCas9",
+            "reference_raw": 0.29292187094688416,
+            "raw_score": 0.29292184114456177,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 1.0174154047069909e-07,
+            "efficiency_pct": 29.292184114456177,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "evoCas9",
+            "reference_raw": 0.035013217478990555,
+            "raw_score": 0.03501320257782936,
+            "abs_error": 1.4901161193847656e-08,
+            "rel_error": 4.2558674314318576e-07,
+            "efficiency_pct": 3.501320257782936,
+            "score_kind": "efficiency"
+          }
+        ]
+      },
+      {
+        "window": "CATGGATTACAGATTACAGATTACCGAGTC",
+        "pam": "CGA",
+        "rows": [
+          {
+            "variant": "SpCas9-NG",
+            "reference_raw": 0.4164332151412964,
+            "raw_score": 0.4164332151412964,
+            "abs_error": 0.0,
+            "rel_error": 0.0,
+            "efficiency_pct": 41.64332151412964,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "VRQR",
+            "reference_raw": 0.4715520739555359,
+            "raw_score": 0.4715520441532135,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 6.320049053692736e-08,
+            "efficiency_pct": 47.15520441532135,
+            "score_kind": "efficiency"
+          },
+          {
+            "variant": "xCas9",
+            "reference_raw": 0.21992188692092896,
+            "raw_score": 0.21992185711860657,
+            "abs_error": 2.9802322387695312e-08,
+            "rel_error": 1.3551321701059469e-07,
+            "efficiency_pct": 21.992185711860657,
+            "score_kind": "efficiency"
+          }
+        ]
+      }
+    ]
+  },
+  "unit_provenance": {
+    "declared_scale": "published percentage / 100 (the scale 9-Hydra v2 was trained on)",
+    "export_manifest_scale": "published_percentage/100",
+    "activation": "linear",
+    "replayed_rows": 8,
+    "worst_abs_error": 1.341104507446289e-07,
+    "passed": true
+  },
+  "not_in_this_ticket": {
+    "explanations": "#199",
+    "cas12a_non_nt": "#197",
+    "default_family_and_selector": "#198",
+    "contract_raw_unit_label_correction": "docs/issue196-implementation.md"
+  }
+}

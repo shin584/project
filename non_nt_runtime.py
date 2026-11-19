@@ -147,6 +147,11 @@ class NonNTRuntime:
     # ── 구조 ──────────────────────────────────────────────
 
     @property
+    def checkpoint_sha256(self) -> str | None:
+        """적재한 checkpoint 바이트의 sha256. 직접 구성한 런타임은 None이다."""
+        return self._checkpoint_sha256
+
+    @property
     def input_shapes(self) -> list[tuple[int, ...]]:
         """배치 차원을 뺀 입력 모양 목록."""
         return [tuple(int(d) for d in t.shape[1:]) for t in self._model.inputs]
@@ -266,19 +271,40 @@ class NonNTRuntime:
         on_batch(done, total)은 배치 완료마다 **서열 수**를 보고한다. 콜백 예외는
         호출자에게 전파해 계산을 취소할 수 있다 (ADR 0001).
         배치 크기는 값에 영향을 주지 않는다.
+
+        전방은 어차피 모든 출력을 계산하므로(`_call`), `forward_all`의 결과에서 그
+        열을 고른다. 같은 그래프·같은 추론 모드이고 head 선택은 산술이 아니다.
+        """
+        if not 0 <= head < self.n_outputs:
+            raise IndexError(f"head {head}는 출력 {self.n_outputs}개 범위 밖이다")
+        return self.forward_all(arrays, batch_size=batch_size, on_batch=on_batch)[:, head]
+
+    def forward_all(self, arrays, batch_size: int = BATCH_SIZE,
+                    on_batch: Callable | None = None) -> np.ndarray:
+        """입력 배열 목록(각각 [N, ...]) → **모든** 출력 [N, n_outputs].
+
+        전방 루프는 여기 하나뿐이다. `forward`는 이 결과에서 한 열을 고른다.
+
+        예측 경로가 이것을 쓴다. 9개 헤드를 각각 `forward`로 부르면 진행률이 서열
+        수의 9배로 보고된다. 설명·검증 경로는 헤드 하나만 보므로 `forward`를 쓴다.
+
+        on_batch(done, total)은 배치 완료마다 **서열 수**를 보고한다 (NT 예측기와
+        같은 단위). 콜백 예외는 호출자에게 전파해 계산을 취소할 수 있다.
         """
         import torch
 
         arrays = [np.asarray(a, dtype=np.float32) for a in self._check(arrays)]
         total = arrays[0].shape[0]
-        out = np.empty(total, dtype=np.float32)
+        out = np.empty((total, self.n_outputs), dtype=np.float32)
         step = max(1, int(batch_size))
         for start in range(0, total, step):
             stop = min(start + step, total)
             with torch.no_grad():
                 tensors = [torch.from_numpy(a[start:stop]) for a in arrays]
-                y = self._head(self._call(tensors), head)
-            out[start:stop] = y.detach().numpy()
+                heads = self._call(tensors)
+            heads = heads if isinstance(heads, (list, tuple)) else [heads]
+            for index, head in enumerate(heads):
+                out[start:stop, index] = head.reshape(-1).detach().numpy()
             if on_batch is not None:
                 on_batch(stop, total)
         return out

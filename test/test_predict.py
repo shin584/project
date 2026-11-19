@@ -51,3 +51,65 @@ def test_esm_configuration_is_reconstructed_from_shapes_without_tensors():
     assert cfg.token_dropout
     assert (cfg.pad_token_id, cfg.mask_token_id) == (1, 2)
     assert cfg._attn_implementation == "eager"
+
+
+# ── 모델 계열 ──────────────────────────────────────────────────
+
+
+def test_each_family_loads_only_its_own_registry():
+    """계열 하나만 만든다. 다른 계열의 예측기는 그 프로세스에 없다 (#191, #196)."""
+    import predict
+
+    nt = predict.load_predictors(warmup=False, family="nt")
+    non_nt = predict.load_predictors(warmup=False, family="non_nt")
+    assert set(nt) == set(non_nt) == {("A", "SpCas9"), ("A", "Cas12a")}
+    assert all(p.spec.family == "nt" for p in nt.values())
+    assert all(p.spec.family == "non_nt" for p in non_nt.values())
+    assert type(nt[("A", "SpCas9")]).__name__ == "NTClassifierPredictor"
+    assert type(non_nt[("A", "SpCas9")]).__name__ == "NonNTSpCas9Predictor"
+
+
+def test_the_non_nt_family_warms_nothing_up():
+    """해당 Cas의 사이트가 나왔을 때만 적재한다 — 시작 때 데우지 않는다 (#196)."""
+    import predict
+
+    assert predict.FAMILY_WARMUP["non_nt"] == ()
+    assert predict.FAMILY_WARMUP["nt"] == predict.WARMUP_KEYS
+
+
+def test_an_unknown_family_is_rejected():
+    import predict
+
+    with pytest.raises(ValueError, match="모르는 모델 계열"):
+        predict.load_predictors(warmup=False, family="sacas9")
+
+
+def test_default_family_keeps_the_existing_nt_behaviour():
+    """기본 시작 계열을 바꾸는 것은 #198의 범위다."""
+    import predict
+
+    assert predict.DEFAULT_FAMILY == "nt"
+    assert predict.load_predictors(warmup=False) is predict.load_predictors(
+        warmup=False, family="nt")
+
+
+def test_unconnected_models_claim_no_checkpoint():
+    """미연동 슬롯은 checkpoint도 단위도 주장하지 않는다."""
+    import predict
+
+    spec = predict.ModelSpec("B", "SaCas9", (), family="non_nt", name="SaCas9")
+    predictor = predict.UnconnectedPredictor(spec)
+    assert not predictor.connected and predictor.predict_batch([]) == []
+    identity = predictor.model_identity()
+    assert identity.version == "미연동" and identity.checkpoint_sha256 == ""
+    assert identity.raw_unit == ""
+
+
+def test_version_label_names_the_asset_and_the_checkpoint_digest():
+    import predict
+
+    spec = predict.NON_NT_REGISTRY[("A", "SpCas9")]
+    assert predict.version_label(spec, "ab" * 32) == "spcas9-9hydra-v2 · sha256 abababababab"
+    assert predict.version_label(spec, "") == "spcas9-9hydra-v2 · sha256 미확인"
+    nt = predict.MODEL_REGISTRY[("A", "SpCas9")]
+    assert predict.version_label(nt, "cd" * 32) == "sha256 cdcdcdcdcdcd"

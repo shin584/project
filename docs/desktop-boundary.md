@@ -87,9 +87,19 @@ CSV는 Streamlit 화면과 같이 **전체 상세 한 장뿐**이고, 파일 이
 상세 행의 `data-raw`는 반올림 전 원출력이다. v3 검증은 이 값과 `data-eff`를
 보존된 고정 사례의 원출력·표시 점수와 비교한다 (`rtol=1e-5`, `atol=1e-8`).
 
-저장한 파일은 Streamlit의 다운로드와 **바이트까지 같다**: UTF-8 BOM으로 시작하고
-줄 끝은 CRLF다 (`desktop/api.py`의 `csv_bytes`). 둘 다 `os.linesep`에 맡기지 않고
-못 박았다 — #181 기준 파일은 고정된 산출물이고 게이트 2가 바이트로 비교한다.
+저장한 파일은 UTF-8 BOM으로 시작하고 줄 끝은 CRLF다 (`desktop/api.py`의
+`csv_bytes`). 둘 다 `os.linesep`에 맡기지 않고 못 박았다 — #181 기준 파일은 고정된
+산출물이고 게이트 2가 바이트로 비교한다.
+
+#196이 맨 끝에 `모델`·`모델 버전` 두 열을 더했으므로, 저장한 파일 **전체**가
+Streamlit의 다운로드와 바이트까지 같지는 않다. 바이트 비교의 대상은 **기존
+9열**(`desktop/detail_view.py`의 `BASE_COLUMNS`)이다. 자르는 자리는
+`detail_view.base_columns_only` 하나가 정하고, 보존된 기준과의 대조는
+`detail_view.csv_against_baseline`이 한다 — `desktop/validation.py`,
+`docs/equivalence-baseline/compare_baseline.py`, `tests/test_nt_process.py`가
+그 함수를 함께 쓴다. 보고 항목은 `csv_base_columns_byte_equal`(게이트가 보는 값),
+`csv_whole_file_byte_equal`, `csv_model_columns`다. 기존 열의 **값·순서와 필터·정렬
+의미는 바뀌지 않았다.**
 
 `prepare()`는 창을 띄운 직후에 부른다. 화면은 "모델 준비 중"을 보여주다가
 `ready`를 받고 분석 버튼을 연다. 여러 번 불러도 안전하다 — 로딩은 한 번만
@@ -146,10 +156,15 @@ JS가 할 일은 슬롯 이름에 맞는 자리에 조각을 끼워 넣는 것�
 |---|---|---|
 | Best Candidates | 순위 · 최적 Cas 변종 · PAM · 가이드 서열 (RNA) · 가닥 · 거리 (bp) · 예측 점수 (%) · 원출력 | `app.py:221-229` |
 | 변종 비교 | 가이드 × 변종 **피벗** (평평한 목록이 아니다). 열은 그 입력에 나타난 변종만, `SPCAS9_VARIANTS` 순서 | `app.py:260-270` |
-| 전체 상세 보기 | 순위 · Cas 변종 · PAM · 가이드 서열 (RNA) · 가닥 · 거리 (bp) · 원출력 · 예측 점수 (%) · 점수 기준 | `app.py:353-364` |
+| 전체 상세 보기 | 순위 · Cas 변종 · PAM · 가이드 서열 (RNA) · 가닥 · 거리 (bp) · 원출력 · 예측 점수 (%) · 점수 기준 · **모델 · 모델 버전** | `app.py:353-364` + #196 |
 
 `예측 점수 (%)`의 뜻은 `점수 기준` 열이 정한다 (`절단 효율` 또는
 `학습 분포 백분위`). **기준이 다른 행끼리는 점수를 직접 비교할 수 없다.**
+
+끝의 두 열은 #196이 더했다. 값은 예측 행이 들고 온 모델 식별에서 나오며
+(`CONTEXT.md`의 '모델 식별'), **행마다** 그 행을 낸 모델을 가리킨다 — 한 표에 Cas가
+섞이면 섞인 대로 맞다. 예측기를 거치지 않은 행(미리보기)은 모델을 주장하지 않고
+`detail_view.UNKNOWN_MODEL`을 적는다.
 
 ## 3. 진행률·취소 이벤트
 

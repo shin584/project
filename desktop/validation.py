@@ -32,7 +32,11 @@ def validate(output: Path, *, preview: bool = False) -> int:
               "python": platform.python_version(), "platform": platform.platform(),
               "gate_status": "pending_clean_environment_and_remaining_v3_tickets",
               "xai_quality": "pending #201; execution/display only",
-              "prediction_tolerance": {"rtol": 1e-5, "atol": 1e-8, "csv": "byte equality"},
+              # #196 appended the model/version columns, so the preserved baseline
+              # is compared on the existing columns only; the cut and the
+              # comparison live in detail_view (docs/desktop-boundary.md).
+              "prediction_tolerance": {"rtol": 1e-5, "atol": 1e-8,
+                                       "csv": "byte equality on the base columns"},
               "other_pc_validation": "pending", "visual_review": "pending"}
     started = time.monotonic()
     try:
@@ -50,7 +54,7 @@ def _run(output, baseline, meta, report, *, preview):
     import webview
     import webview.http
 
-    from desktop import api
+    from desktop import api, detail_view
     from desktop.app import main
 
     counts = {"events": 0, "progress": 0, "requests": 0}
@@ -129,9 +133,10 @@ def _run(output, baseline, meta, report, *, preview):
                 wait("document.getElementById('notice').textContent.includes('저장했습니다:')")
                 idle()
                 if not preview:
-                    report["csv_byte_equal"] = ((output / "crispr_prediction_results.csv").read_bytes()
-                                                == (baseline / "crispr_prediction_results.csv").read_bytes())
-                    if not report["csv_byte_equal"]:
+                    saved_csv = (output / "crispr_prediction_results.csv").read_bytes()
+                    expected_csv = (baseline / "crispr_prediction_results.csv").read_bytes()
+                    report.update(detail_view.csv_against_baseline(saved_csv, expected_csv))
+                    if not report["csv_base_columns_byte_equal"]:
                         raise RuntimeError("NT prediction CSV differs from the fixed baseline")
                     reference = json.loads((baseline / "candidates.json").read_text(encoding="utf-8"))
                     actual = window.evaluate_js("""Array.from(document.querySelectorAll('#detail-results tbody tr')).map(r => ({

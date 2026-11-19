@@ -23,6 +23,9 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent.parent))
+
+from desktop.detail_view import csv_against_baseline  # noqa: E402
 
 RTOL, ATOL = 1e-5, 1e-8
 
@@ -45,6 +48,13 @@ def compare_csv(base: Path, other: Path, msgs: list[str]) -> None:
     b, o = base.read_bytes(), other.read_bytes()
     if b == o:
         print(f"  같음 ({len(b)} bytes)")
+        return
+    # #196이 데스크톱 CSV 맨 끝에 모델·모델 버전 열을 더했다. Streamlit 기준에는
+    # 그 열이 없으므로, 기존 열만 떼어 먼저 비교한다 — 같으면 동등성은 그대로다.
+    comparison = csv_against_baseline(o, b)
+    if comparison["csv_base_columns_byte_equal"]:
+        print(f"  기존 열은 같음 ({len(b)} vs {len(o)} bytes). "
+              f"더해진 열: {comparison['csv_model_columns']}")
         return
     bl = b.decode("utf-8-sig").splitlines()
     ol = o.decode("utf-8-sig").splitlines()

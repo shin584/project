@@ -111,6 +111,39 @@ fields, so the handle surface has one definition; it adds only `input_totals`,
 the per-input signed contribution sums that keep the Cas12a feature-input
 contribution from being silently dropped or spread over bases.
 
+## Correction: the SpCas9 `raw_unit` label in `contract.json` (#196, 2026-11-19)
+
+`contract.json` records `models.spcas9_non_nt.raw_unit` as
+`"z-score (training-distribution standardized), order equals SPCAS9_VARIANTS"`.
+**The unit half of that label is wrong**; the head-order half is correct.
+
+The adopted SpCas9 checkpoint emits the **published efficiency percentage
+divided by 100**. Three preserved artifacts say so, and the archived numbers
+themselves rule out a z-score:
+
+- `models/non_nt/spcas9-9hydra-v2/export-manifest.json` — `output.scale` is
+  `published_percentage/100` and `output.activation` is `linear`.
+- `models/non_nt/spcas9-9hydra-v2/test_eval/results.json` — `scale` is
+  `"published percentage / 100 (the scale 9-Hydra v2 was trained on)"`, and that
+  file's metrics compare `*_pred` against `*_true` **on that same scale**.
+- `models/non_nt/spcas9-9hydra-v2/test_eval/predictions.csv` — the recorded
+  predictions are small positive fractions (evoCas9 ≈ 0.026) sitting beside
+  `*_true` values of the same size. A standardized score would straddle zero and
+  could not be compared with the targets directly.
+
+`#196` re-ran both checks against the live runtime: worst absolute error 6.0e-8
+on the export manifest's fixed cases (19 rows, all nine heads) and 1.3e-7 on
+eight held-out test rows replayed from `predictions.csv`
+(`docs/benchmarks/issue196-spcas9-parity.json`).
+
+`contract.json` is left **unamended**: it is #193's frozen measurement input, and
+ADR 0002 keeps verification provenance intact. The corrected field is a
+descriptive label, not one of the frozen numeric criteria, so
+`issue212-20261119-required01` and its `fail` verdict are unaffected. The
+runtime value that the screens use lives in `predict.NON_NT_REGISTRY`
+(`output_mode="raw"`, with the provenance in its comment); the reasoning is in
+`docs/issue196-implementation.md`.
+
 ## Packaging method
 
 `packaging/desktop.spec` currently excludes `tensorflow` **and** `keras`.

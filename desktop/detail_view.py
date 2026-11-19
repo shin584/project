@@ -19,7 +19,10 @@ from core import VariantResult, dna_to_rna
 from desktop.prediction_views import score_cell
 
 EFF = "예측 점수 (%)"
-DETAIL_COLUMNS = [
+
+#: Streamlit 화면이 내려주던 열. **순서와 의미를 바꾸지 않는다** — `app.py:353-364`의
+#: 기준이고, `docs/equivalence-baseline/`의 보존된 CSV가 이 열들로 떠 있다.
+BASE_COLUMNS = [
     "순위",
     "Cas 변종",
     "PAM",
@@ -30,6 +33,16 @@ DETAIL_COLUMNS = [
     EFF,
     "점수 기준",
 ]
+
+#: #196에서 **맨 끝에** 더한 열. 값은 예측 행이 들고 온 모델 식별에서 나온다
+#: (`CONTEXT.md`의 '모델 식별'). 모델을 바꾸면 예측값과 순위가 달라지므로, 저장된
+#: 표가 어느 모델·어느 checkpoint의 결과인지 그 파일만 보고 알 수 있어야 한다.
+MODEL_COLUMNS = ["모델", "모델 버전"]
+
+DETAIL_COLUMNS = BASE_COLUMNS + MODEL_COLUMNS
+
+#: 예측기를 거치지 않은 행(미리보기 등)의 모델 열. 모델 이름을 꾸며 넣지 않는다.
+UNKNOWN_MODEL = "—"
 _SCORE_KIND_LABEL = {"efficiency": "절단 효율", "percentile": "학습 분포 백분위"}
 
 #: Streamlit slider limits (`app.py:327-335`).
@@ -127,6 +140,7 @@ def _cells(row: VariantResult, rank: int) -> list[Any]:
     값이 Streamlit의 CSV와 일치한다'는 #185의 완료 기준이라, 두 쪽이 열을 따로
     세면 조용히 어긋날 수 있다.
     """
+    identity = row.identity
     return [
         rank,
         row.cas_name,
@@ -137,6 +151,8 @@ def _cells(row: VariantResult, rank: int) -> list[Any]:
         round(row.raw_score, 4),
         round(row.efficiency_pct, 2),
         _SCORE_KIND_LABEL[row.score_kind],
+        identity.name if identity else UNKNOWN_MODEL,
+        identity.version if identity else UNKNOWN_MODEL,
     ]
 
 
@@ -149,6 +165,47 @@ def detail_table(rows: Sequence[VariantResult]) -> list[list[Any]]:
     return [list(DETAIL_COLUMNS)] + [
         _cells(row, rank) for rank, row in enumerate(rows, start=1)
     ]
+
+
+def base_columns_only(table: Sequence[Sequence[Any]]) -> list[list[Any]]:
+    """`BASE_COLUMNS`만 남긴 표. 보존된 기준 CSV와 대조할 때 쓴다 (#196).
+
+    #196이 모델·버전 열을 끝에 더하면서 저장 파일이 기준 CSV와 바이트로 같지 않게
+    됐다. 기준이 증거로 남긴 것은 **기존 열의 값과 순서**이므로, 그 부분만 떼어
+    비교한다. 양쪽이 같은 자리에서 자르도록 함수는 하나만 둔다.
+    """
+    width = len(BASE_COLUMNS)
+    return [list(row[:width]) for row in table]
+
+
+def csv_rows(data: bytes) -> list[list[str]]:
+    """저장된 CSV 바이트 → 셀 목록. `desktop.api.csv_bytes`의 역이다."""
+    import csv
+    import io
+
+    return list(csv.reader(io.StringIO(data.decode("utf-8-sig"), newline="")))
+
+
+def csv_against_baseline(saved: bytes, expected: bytes) -> dict:
+    """저장된 CSV를 보존된 기준과 대조한다 (#196).
+
+    모델·버전 열이 끝에 붙었으므로 파일 전체가 바이트로 같지는 않다. 기준이 증거로
+    남긴 것은 기존 열의 값과 순서이니 그 부분을 바이트로 비교하고, 더해진 열은 따로
+    보고한다. `desktop/validation.py`, `docs/equivalence-baseline/compare_baseline.py`,
+    `tests/test_nt_process.py`가 **이 함수 하나**를 함께 쓴다.
+
+    **기준 쪽 바이트는 건드리지 않는다.** 양쪽을 다시 직렬화하면 인용 규칙이나 줄
+    끝이 달라도 통과해 버려서, 바이트 비교가 아니라 왕복 비교가 된다. 열을 떼어내야
+    하는 저장 파일만 다시 직렬화하고, 보존된 기준의 원래 바이트와 맞춘다.
+    """
+    from desktop.api import csv_bytes
+
+    saved_rows = csv_rows(saved)
+    return {
+        "csv_base_columns_byte_equal": csv_bytes(base_columns_only(saved_rows)) == expected,
+        "csv_whole_file_byte_equal": saved == expected,
+        "csv_model_columns": [row[-len(MODEL_COLUMNS):] for row in saved_rows[:2]],
+    }
 
 
 # ════════════════════════════════════════════════
@@ -168,18 +225,22 @@ def _rows_html(rows: Sequence[VariantResult]) -> str:
     그 예측 행의 이름이다 (`CONTEXT.md`의 '헤드'·'예측 행'). 한 속성을 둘로 겸해
     쓰면 둘이 갈라지는 날 조용히 틀린다.
     """
+    raw = BASE_COLUMNS.index("원출력")
+    score = BASE_COLUMNS.index(EFF)
     body = []
     for rank, row in enumerate(rows, start=1):
         cells = _cells(row, rank)
-        display = [*cells[:6], f"{row.raw_score:.4f}"]
+        # 원출력은 반올림 전 값을 그대로 보여주고, 점수 칸만 색을 입힌다.
+        display = [*cells[:raw], f"{row.raw_score:.4f}"]
         body.append(
             f'<tr data-site-key="{_esc(row.site_key)}" data-head="{_esc(row.cas_name)}"'
             f' data-cas-name="{_esc(row.cas_name)}"'
             f' data-raw="{_esc(row.raw_score)}"'
             f' data-eff="{_esc(row.efficiency_pct)}" data-dist="{_esc(row.distance)}">'
             + "".join(f"<td>{_esc(cell)}</td>" for cell in display)
-            + score_cell(cells[7], 2)
-            + f"<td>{_esc(cells[8])}</td></tr>"
+            + score_cell(cells[score], 2)
+            + "".join(f"<td>{_esc(cell)}</td>" for cell in cells[score + 1:])
+            + "</tr>"
         )
     return "".join(body)
 

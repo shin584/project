@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import html
 import math
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
 from core import CAS_CONFIGS, SPCAS9_VARIANTS, VariantResult, dna_to_rna
 
@@ -161,11 +161,32 @@ def best_candidates_fragment(rows: Sequence[VariantResult]) -> str:
                 body,
             )
         )
-    parts.append(
-        "<p class=\"caption\">'원출력'은 모델이 낸 값 그대로입니다. SpCas9은 z-score라 "
-        "변종마다 평균·표준편차가 달라서, 원출력이 낮아도 효율이 더 높을 수 있습니다.</p></section>"
+    parts.append(_raw_unit_caption(best.values()))
+    return "".join(parts) + "</section>"
+
+
+def _raw_unit_caption(rows: Iterable[VariantResult]) -> str:
+    """'원출력' 열의 단위 안내. 각 행이 들고 온 모델 식별에서 그대로 읽는다 (#196).
+
+    계열마다 원출력의 단위가 다르다 — NT SpCas9은 z-score, non-NT SpCas9은 공개
+    효율의 비율이다. 그래서 단위를 코드에 적어 두면 다른 계열에서 **틀린 설명**이
+    된다. 출처가 확인된 단위만 `ModelSpec.raw_unit`에 적혀 있고, 비어 있거나 식별이
+    없는 행에 대해서는 아무 단위도 주장하지 않는다.
+    """
+    seen: dict[tuple[str, str], str] = {}
+    for row in rows:
+        identity = row.identity
+        if identity is None or not identity.raw_unit:
+            continue
+        seen.setdefault((row.cas_type, identity.name), identity.raw_unit)
+    lead = "<p class=\"caption\">'원출력'은 모델이 낸 값 그대로입니다."
+    if not seen:
+        return lead + "</p>"
+    items = "".join(
+        f"<li>{_esc(cas)} · {_esc(name)}: {_esc(unit)}</li>"
+        for (cas, name), unit in seen.items()
     )
-    return "".join(parts)
+    return f'{lead}</p><ul class="caption raw-units">{items}</ul>'
 
 
 def variant_comparison_fragment(rows: Sequence[VariantResult]) -> str:

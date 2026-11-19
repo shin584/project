@@ -21,6 +21,7 @@ predict.py
     pip install torch transformers safetensors
 """
 
+import importlib
 import logging
 import math
 from abc import ABC, abstractmethod
@@ -37,7 +38,7 @@ if TYPE_CHECKING:
 from model_source import configure_offline, is_packaged, resource_root
 from pam_scanner import (
     CAS_CONFIGS,
-    SPCAS9_VARIANTS, CandidateSite, ScanResult, VariantResult,
+    SPCAS9_VARIANTS, CandidateSite, ModelIdentity, ScanResult, VariantResult,
     variant_compatible,
 )
 
@@ -90,7 +91,12 @@ def nt_explanation_identity(spec):
     from dataclasses import asdict
 
     from xai import identity
-    configuration = {"spec": asdict(spec), "dtype": NT_DTYPE, "batch_size": NT_BATCH_SIZE}
+    # 계산에 영향을 주는 항목만 담는다. `name`·`asset_id`·`raw_unit`은 화면 표시용
+    # 이름이고 `family`는 ExplanationIdentity가 따로 들고 있으므로, 그것들이 바뀌어도
+    # 같은 계산이다. spec 전체를 넣으면 이름을 고치는 것만으로 기존 SHAP 캐시가
+    # 전부 미스가 된다.
+    computation = {k: v for k, v in asdict(spec).items() if k in _IDENTITY_SPEC_FIELDS}
+    configuration = {"spec": computation, "dtype": NT_DTYPE, "batch_size": NT_BATCH_SIZE}
     paths = [model_source.resolve(path) for path in spec.paths]
     stats = tuple((str(p), os.stat(p).st_size, os.stat(p).st_mtime_ns) for p in paths)
     key = (json.dumps(configuration, sort_keys=True), NT_EXPLANATION_PROTOCOL, stats)
@@ -115,6 +121,14 @@ logger = logging.getLogger(__name__)
 
 OUTPUT_MODES = ("raw", "sigmoid", "percent", "zscore")
 
+#: 모델 계열. `xai.identity.FAMILIES`와 같은 이름을 쓴다 (한쪽만 고치면 캐시 식별이
+#: 입증되지 않는다). 각 Cas에는 **선택한 계열의 예측기 하나만** 쓴다 (#191).
+FAMILIES = ("nt", "non_nt")
+
+#: 계열을 지정하지 않은 호출이 쓰는 계열. 지금은 기존 NT 동작이 기본이다.
+#: 기본 시작 계열을 non-NT로 바꾸는 것은 #198의 범위다.
+DEFAULT_FAMILY = "nt"
+
 
 @dataclass(frozen=True)
 class ModelSpec:
@@ -122,6 +136,15 @@ class ModelSpec:
     cas:         str               # 'SpCas9' | 'Cas12a'
     paths:       tuple[str, ...]   # 모델 파일 (미연동이면 빈 튜플)
     output_mode: str = "raw"       # 위 OUTPUT_MODES 중 하나
+    #: 이 모델이 속한 계열 (`FAMILIES`).
+    family:      str = "nt"
+    #: 화면·CSV에 적는 모델 이름. 비어 있으면 `model/cas`를 쓴다.
+    name:        str = ""
+    #: 보관된 checkpoint 묶음의 식별자 (`models/non_nt/<asset_id>/`). 없으면 빈 문자열.
+    asset_id:    str = ""
+    #: 원출력 단위를 사람 말로 적은 것. 화면이 '원출력' 열을 설명할 때 그대로 쓴다.
+    #: **출처가 확인된 단위만 적는다** — 비어 있으면 화면은 단위를 주장하지 않는다.
+    raw_unit:    str = ""
     #: output_mode가 "zscore"일 때만 쓴다. **학습 때 타깃을 표준화하며 쓴** 평균·표준편차.
     #: 평가 데이터로 다시 구한 값이 아니라, 학습 파이프라인이 적용한 바로 그 값이어야 한다.
     #: 반드시 **0~1 척도(fraction)** 로 넣는다. 퍼센트(49.6)가 아니라 0.496이다.
@@ -130,6 +153,24 @@ class ModelSpec:
     #: 둘 다 채우면 효율(%)로 역변환하고, 비워두면 백분위로 표시한다.
     target_mean: float | tuple[float, ...] | None = None
     target_std:  float | tuple[float, ...] | None = None
+
+    @property
+    def label(self) -> str:
+        return self.name or f"{self.model}/{self.cas}"
+
+
+#: 계산 식별(`nt_explanation_identity`)에 들어가는 spec 항목. 나머지는 표시용 이름이다.
+_IDENTITY_SPEC_FIELDS = frozenset(
+    {"model", "cas", "paths", "output_mode", "target_mean", "target_std"})
+
+
+def version_label(spec: ModelSpec, checkpoint_sha256: str) -> str:
+    """CSV '모델 버전' 열. 보관 식별자와 checkpoint 해시 앞자리를 함께 적는다.
+
+    버전 이름만 적으면 같은 이름 아래 파일이 바뀐 것을 CSV에서 알 수 없다.
+    """
+    digest = f"sha256 {checkpoint_sha256[:12]}" if checkpoint_sha256 else "sha256 미확인"
+    return f"{spec.asset_id} · {digest}" if spec.asset_id else digest
 
 
 # 경로는 프로젝트 폴더 기준 상대 경로다. 실제로 어디서 가져오는지는 model_source가 정한다.
@@ -159,14 +200,53 @@ _SPCAS9_TARGET_STD = (
     0.1912237, 0.2013223, 0.1848161, 0.1168224,
 )
 
+#: **NT 계열**의 레지스트리. 이름은 기존 그대로 둔다 (facade·화면·시험이 쓴다).
 MODEL_REGISTRY: dict[tuple[str, str], ModelSpec] = {
     ("A", "SpCas9"): ModelSpec(
         "A", "SpCas9", ("models/SpCas9.safetensors",),
-        output_mode="zscore",
+        output_mode="zscore", family="nt", name="NT SpCas9",
+        raw_unit="z-score (학습 분포 표준화) — 변종마다 평균·표준편차가 달라 "
+                 "원출력이 낮아도 효율이 더 높을 수 있습니다",
         target_mean=_SPCAS9_TARGET_MEAN, target_std=_SPCAS9_TARGET_STD),
     ("A", "Cas12a"): ModelSpec(
         "A", "Cas12a", ("models/Cas12a.safetensors",),
-        output_mode="raw"),
+        output_mode="raw", family="nt", name="NT Cas12a",
+        raw_unit="0~1 비율 — 0~1로 자른 뒤 ×100이 예측 효율(%)입니다"),
+}
+
+# ── non-NT 계열 ──────────────────────────────────────────────
+#
+# SpCas9 원출력의 단위는 **확인된 출처**가 있다 (#196의 '출처가 확인되지 않은 단위는
+# 효율로 표시하지 않는다'). 세 산출물이 같은 말을 한다.
+#   · `models/non_nt/spcas9-9hydra-v2/export-manifest.json` — `output.scale` =
+#     "published_percentage/100", `activation` = linear, 헤드 9개의 index→protein이
+#     `SPCAS9_VARIANTS` 순서와 같다.
+#   · 같은 폴더의 `test_eval/results.json` — `scale` = "published percentage / 100
+#     (the scale 9-Hydra v2 was trained on)". `*_true`와 `*_pred`를 그 척도에서 직접 비교한다.
+#   · `models/non_nt/manifest.json` — 학습 원본 → export의 출처·SHA 연결.
+# 따라서 output_mode는 "raw"다: 0~1로 자른 뒤 ×100이 예측 효율(%)이다.
+#
+# `docs/runtime/contract.json`의 `models.spcas9_non_nt.raw_unit`은 이 모델을
+# "z-score"라고 적었는데, 위 세 산출물과 어긋나는 **설명 문구의 오류**다. 근거와
+# 재측정은 `docs/issue196-implementation.md`에 있다. 그 필드는 #193의 수치 판정
+# 기준이 아니므로 동결된 허용 오차에는 영향이 없다.
+NON_NT_REGISTRY: dict[tuple[str, str], ModelSpec] = {
+    ("A", "SpCas9"): ModelSpec(
+        "A", "SpCas9", ("models/non_nt/spcas9-9hydra-v2/model.keras",),
+        output_mode="raw", family="non_nt", name="9-Hydra v2",
+        asset_id="spcas9-9hydra-v2",
+        raw_unit="공개 효율(%) ÷ 100 비율 — 0~1로 자른 뒤 ×100이 예측 효율(%)입니다"),
+    ("A", "Cas12a"): ModelSpec(
+        "A", "Cas12a", ("models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",),
+        output_mode="raw", family="non_nt", name="Cas12a CNN+BiLSTM manifest",
+        asset_id="cas12a-cnn-20261102",
+        raw_unit="0~1 비율 — ×100이 예측 절단 효율(%)입니다"),
+}
+
+#: 계열 → 레지스트리.
+FAMILY_REGISTRIES: dict[str, dict[tuple[str, str], ModelSpec]] = {
+    "nt": MODEL_REGISTRY,
+    "non_nt": NON_NT_REGISTRY,
 }
 
 
@@ -226,7 +306,8 @@ def _to_display_score(spec: ModelSpec, raw: float, head_index: int = 0) -> tuple
     return min(max(float(raw), 0.0), 1.0) * 100.0, "efficiency"
 
 
-def _result(spec: ModelSpec, site: CandidateSite, cas_name: str, raw: float) -> VariantResult:
+def variant_result(spec: ModelSpec, site: CandidateSite, cas_name: str, raw: float,
+                   identity: ModelIdentity | None = None) -> VariantResult:
     """모델 원출력 하나를 VariantResult로 만든다.
 
     efficiency_pct(화면 표시용)의 의미는 score_kind가 정한다.
@@ -243,6 +324,7 @@ def _result(spec: ModelSpec, site: CandidateSite, cas_name: str, raw: float) -> 
         score_kind=kind,
         site_key=site.site_key, cas_type=site.cas_type,
         model=spec.model, window_seq=site.model_input_seq,
+        identity=identity,
     )
 
 
@@ -276,6 +358,15 @@ class BasePredictor(ABC):
     def __init__(self, spec: ModelSpec) -> None:
         self.spec = spec
 
+    def model_identity(self) -> ModelIdentity:
+        """이 예측기가 실제로 드는 모델의 식별 (#196).
+
+        예측 행·CSV·예측 캐시 키가 같이 쓴다. 모델을 적재하지 않고도 답해야 한다 —
+        계산 프로세스는 예측하기 **전에** 캐시 키를 만들고, 사이트가 없으면 모델을
+        아예 올리지 않는다 (#191의 지연 로딩).
+        """
+        raise NotImplementedError(f"{self.spec.label}는 모델 식별을 제공하지 않습니다")
+
     @abstractmethod
     def predict_batch(self, sites: list[CandidateSite],
                       on_batch: Callable | None = None) -> list[VariantResult]:
@@ -296,6 +387,11 @@ class BasePredictor(ABC):
 class UnconnectedPredictor(BasePredictor):
     """아직 연동되지 않은 모델. 예측 결과를 만들지 않는다."""
     connected = False
+
+    def model_identity(self) -> ModelIdentity:
+        """예측 행을 만들지 않으므로 checkpoint도 단위도 없다. 식별은 '미연동'이다."""
+        return ModelIdentity(family=self.spec.family, cas=self.spec.cas,
+                             name=self.spec.label, version="미연동")
 
     def predict_batch(self, sites, on_batch: Callable | None = None):
         return []
@@ -380,6 +476,19 @@ class NTClassifierPredictor(BasePredictor):
         """이 예측기가 든 모델의 계산 식별 (#208). 부를 때마다 현재 파일·프로토콜을
         따른다 (해시는 nt_explanation_identity가 memo한다)."""
         return nt_explanation_identity(self.spec)
+
+    def model_identity(self) -> ModelIdentity:
+        """checkpoint 바이트의 해시로 식별한다 (경로 이름이 아니다).
+
+        가중치는 올리지 않는다. 해시는 `nt_explanation_identity`가 파일 상태별로
+        memo하므로, 예측 한 번에 한 번만 계산된다.
+        """
+        identity = nt_explanation_identity(self.spec)
+        checkpoint = identity.checkpoints[0] if identity.checkpoints else ""
+        return ModelIdentity(
+            family=self.spec.family, cas=self.spec.cas, name=self.spec.label,
+            version=version_label(self.spec, checkpoint),
+            raw_unit=self.spec.raw_unit, checkpoint_sha256=checkpoint)
 
     def _ensure_loaded(self) -> None:
         if self._model is not None:
@@ -501,16 +610,19 @@ class NTClassifierPredictor(BasePredictor):
         if not sites:
             return []
         preds = self._logits([s.model_input_seq for s in sites], on_batch=on_batch)
+        identity = self.model_identity()
 
         results = []
         if self.is_multihead:
             for j, variant in enumerate(SPCAS9_VARIANTS):
                 for site, row in zip(sites, preds):
                     if variant_compatible(variant, site.pam_seq):   # 인식하는 PAM만
-                        results.append(_result(self.spec, site, variant, float(row[j])))
+                        results.append(
+                            variant_result(self.spec, site, variant, float(row[j]), identity))
         else:
             for site, row in zip(sites, preds):
-                results.append(_result(self.spec, site, self.spec.cas, float(row[0])))
+                results.append(
+                    variant_result(self.spec, site, self.spec.cas, float(row[0]), identity))
         return results
 
     def explain_heads(self, site):
@@ -604,28 +716,82 @@ class NTClassifierPredictor(BasePredictor):
 # 앱 시작 때 미리 데울 모델 (시연용). 여기 없는 모델은 계속 지연 로딩된다.
 WARMUP_KEYS: tuple[tuple[str, str], ...] = (("A", "Cas12a"),)
 
-# 연동된 (모델, Cas) 조합 → 예측기 클래스
+# 연동된 (모델, Cas) 조합 → 예측기 클래스 (**NT 계열**)
 PREDICTOR_CLASSES: dict[tuple[str, str], type[BasePredictor]] = {
     ("A", "SpCas9"): NTClassifierPredictor,
     ("A", "Cas12a"): NTClassifierPredictor,
 }
 
+#: 계열 → {(모델, Cas): 예측기 클래스 또는 "모듈:이름"}.
+#: non-NT 예측기는 Keras 런타임을 끌어오므로 **이름으로만** 적는다. 그 계열을 고르지
+#: 않은 프로세스가 import만으로 그 비용을 치르지 않게 한다 (#191의 RAM 설계).
+#: NT 항목은 위의 `PREDICTOR_CLASSES`를 **호출 시점에** 읽는다 (`predictor_classes`).
+#: 여기에 사본을 두면, 그 이름을 갈아 끼워 지연 로딩을 검사하는 기존 시험·도구에서
+#: 교체가 먹지 않는다.
+FAMILY_PREDICTOR_CLASSES: dict[str, dict[tuple[str, str], object]] = {
+    "non_nt": {
+        ("A", "SpCas9"): "non_nt_predict:NonNTSpCas9Predictor",
+        ("A", "Cas12a"): "non_nt_cas12a_predict:NonNTCas12aPredictor",
+    },
+}
+
+#: 계열 → 앱 시작 때 데울 키. non-NT는 **아무것도 데우지 않는다** — 해당 Cas의
+#: 사이트가 실제로 나왔을 때만 적재한다 (#196).
+FAMILY_WARMUP: dict[str, tuple[tuple[str, str], ...]] = {
+    "nt": WARMUP_KEYS,
+    "non_nt": (),
+}
+
+
+def predictor_classes(family: str) -> dict[tuple[str, str], object]:
+    """그 계열의 {(모델, Cas): 예측기} 표."""
+    return PREDICTOR_CLASSES if family == "nt" else FAMILY_PREDICTOR_CLASSES[family]
+
+
+def _predictor_class(entry) -> type[BasePredictor]:
+    if isinstance(entry, str):
+        module, name = entry.split(":")
+        return getattr(importlib.import_module(module), name)
+    return entry
+
+
+def load_predictors(warmup: bool = True,
+                    family: str | None = None) -> dict[tuple[str, str], BasePredictor]:
+    """한 **계열**의 예측기들. 프로세스에서 재사용한다 (초기화는 cache_clear()).
+
+    계열 하나만 만든다. 다른 계열을 쓰려면 계산 프로세스를 교체한다 (ADR 0007) —
+    그래서 non-NT를 쓰는 프로세스는 NT 가중치도 토크나이저도 준비하지 않는다.
+
+    인자를 **정규화한 뒤** 캐시한다. `@cache`를 바로 걸면 `load_predictors()`와
+    `load_predictors(family="nt")`가 서로 다른 키가 되어, 한 프로세스가 같은 계열의
+    예측기를 두 벌 만들고 가중치도 두 번 올린다.
+    """
+    return _load_predictors(bool(warmup), DEFAULT_FAMILY if family is None else family)
+
 
 @cache
-def load_predictors(warmup: bool = True) -> dict[tuple[str, str], BasePredictor]:
-    """프로세스에서 예측기와 선택 워밍업을 재사용한다. 초기화는 cache_clear()로 한다."""
+def _load_predictors(warmup: bool, family: str) -> dict[tuple[str, str], BasePredictor]:
+    if family not in FAMILIES:
+        raise ValueError(f"모르는 모델 계열: {family!r} ({' | '.join(FAMILIES)} 중 하나)")
     predictors = {}
-    for key, spec in MODEL_REGISTRY.items():
-        cls = PREDICTOR_CLASSES.get(key)
+    classes = predictor_classes(family)
+    for key, spec in FAMILY_REGISTRIES[family].items():
+        entry = classes.get(key)
+        cls = _predictor_class(entry) if entry is not None else None
         predictors[key] = cls(spec) if (cls and spec.paths) else UnconnectedPredictor(spec)
-    # 워밍업은 WARMUP_KEYS만. 전부 데우면 지연 로딩이 깨져 모든 가중치가 상주한다.
+    # 워밍업은 그 계열의 키만. 전부 데우면 지연 로딩이 깨져 모든 가중치가 상주한다.
     # 모듈 캐시는 화면 재실행 사이에도 유지되므로 같은 설정의 워밍업은 한 번만 돈다.
     if warmup:
-        for key in WARMUP_KEYS:
+        for key in FAMILY_WARMUP[family]:
             p = predictors.get(key)
             if p is not None and p.connected and hasattr(p, "warmup"):
                 p.warmup()
     return predictors
+
+
+#: 기존 호출 방식을 유지한다 — `predict.load_predictors.cache_clear()`로 초기화한다.
+load_predictors.cache_clear = _load_predictors.cache_clear
+load_predictors.cache_info = _load_predictors.cache_info
 
 
 def connected_models(predictors: dict) -> set[str]:

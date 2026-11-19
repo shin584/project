@@ -384,6 +384,27 @@ def test_nt_identity_hashes_checkpoint_bytes_and_follows_the_protocol(tmp_path, 
     assert predict.nt_explanation_identity(spec) != first
 
 
+def test_display_only_spec_fields_do_not_change_the_explanation_identity(tmp_path):
+    """#196이 더한 표시용 이름이 기존 설명 캐시를 전부 미스로 만들지 않는지.
+
+    `name`·`asset_id`·`raw_unit`은 화면이 읽는 이름이고 `family`는 식별이 따로 들고
+    있다. 계산은 그대로이므로 식별도 그대로여야 한다 — 그렇지 않으면 열 이름을
+    고치는 것만으로 사전계산 SHAP 캐시가 버려진다.
+    """
+    import predict
+
+    weights = tmp_path / "Cas12a.safetensors"
+    weights.write_bytes(b"checkpoint one")
+    spec = dataclasses.replace(predict.MODEL_REGISTRY[("A", "Cas12a")], paths=(str(weights),))
+    renamed = dataclasses.replace(
+        spec, name="다른 이름", asset_id="other-asset", raw_unit="다른 단위 설명")
+    assert predict.nt_explanation_identity(renamed) == predict.nt_explanation_identity(spec)
+
+    # 반대로 계산을 바꾸는 항목은 식별을 바꾼다.
+    rescaled = dataclasses.replace(spec, output_mode="sigmoid")
+    assert predict.nt_explanation_identity(rescaled) != predict.nt_explanation_identity(spec)
+
+
 def test_the_streamlit_name_path_follows_protocol_and_checkpoint_changes(tmp_path, monkeypatch):
     """예측기가 대는 식별은 프로세스 수명 동안 굳지 않는다 — #201이 프로토콜을 올리거나
     checkpoint 파일이 바뀌면 이름 키("A/Cas12a") 경로도 예전 결과를 재사용하지 않는다."""

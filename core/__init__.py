@@ -30,6 +30,7 @@ _EXPORTS: dict[str, tuple[str, str]] = {
     "WINDOW_LAYOUT": ("pam_scanner", "WINDOW_LAYOUT"),
     "CandidateSite": ("pam_scanner", "CandidateSite"),
     "VariantResult": ("pam_scanner", "VariantResult"),
+    "ModelIdentity": ("pam_scanner", "ModelIdentity"),
     "ScanResult": ("pam_scanner", "ScanResult"),
     "validate_sequence": ("pam_scanner", "validate_sequence"),
     "scan_all": ("pam_scanner", "scan_all"),
@@ -39,6 +40,8 @@ _EXPORTS: dict[str, tuple[str, str]] = {
     # 예측: 연동된 모델 A로 사이트를 점수화한다
     "ModelSpec": ("predict", "ModelSpec"),
     "MODEL_REGISTRY": ("predict", "MODEL_REGISTRY"),
+    "FAMILIES": ("predict", "FAMILIES"),
+    "DEFAULT_FAMILY": ("predict", "DEFAULT_FAMILY"),
     "BasePredictor": ("predict", "BasePredictor"),
     "ExplainHandle": ("predict", "ExplainHandle"),
     "load_predictors": ("predict", "load_predictors"),
@@ -90,12 +93,12 @@ def __dir__() -> list[str]:
 if TYPE_CHECKING:
     from pam_scanner import (
         CAS_CONFIGS, SPCAS9_VARIANTS, WINDOW_LAYOUT, CandidateSite, CasConfig,
-        ScanResult, VariantResult, dna_to_rna, print_scan_report, reverse_complement,
-        scan_all, validate_sequence,
+        ModelIdentity, ScanResult, VariantResult, dna_to_rna, print_scan_report,
+        reverse_complement, scan_all, validate_sequence,
     )
     from predict import (
-        MODEL_REGISTRY, BasePredictor, ExplainHandle, ModelSpec, connected_models,
-        load_predictors, run_prediction,
+        DEFAULT_FAMILY, FAMILIES, MODEL_REGISTRY, BasePredictor, ExplainHandle,
+        ModelSpec, connected_models, load_predictors, run_prediction,
     )
     from xai.charts import (
         SEGMENT_COLORS, attribution_logo, rollout_profile, rollout_token_heatmap,

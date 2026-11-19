@@ -48,7 +48,10 @@ equivalence baseline; XAI unit correctness remains #201's separate scope.
 The v3 `--validate` command observes public window events and the actual DOM;
 the old in-process predictor hooks cannot observe a spawned worker. It checks
 unrounded raw/display scores against 13 fixed candidate rows with tolerances
-declared before execution (`rtol=1e-5`, `atol=1e-8`), byte-identical CSV, all four
+declared before execution (`rtol=1e-5`, `atol=1e-8`), a CSV whose existing
+columns are byte-identical to the preserved baseline (#196 appended the model
+and model-version columns, so the whole file no longer is; see
+`docs/desktop-boundary.md` and `detail_view.csv_against_baseline`), all four
 views, six real NT XAI displays, repeated-method hits and CSS-only resizing.
 Model checkpoints and head order remain unchanged. This is not an XAI quality
 claim or completion of the later frozen/offline v3 packaging gate.

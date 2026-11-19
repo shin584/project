@@ -10,22 +10,35 @@ from pathlib import Path
 import pytest
 from core import VariantResult
 from desktop.api import csv_bytes
+from core import ModelIdentity
 from desktop.detail_view import (
+    BASE_COLUMNS,
     DETAIL_COLUMNS,
+    MODEL_COLUMNS,
+    UNKNOWN_MODEL,
     DetailFilter,
+    base_columns_only,
+    csv_against_baseline,
+    csv_rows,
     detail_fragment,
     detail_table,
 )
+
+MODEL = ModelIdentity(family="nt", cas="SpCas9", name="NT SpCas9",
+                      version="sha256 0123456789ab")
+CAS12A = ModelIdentity(family="nt", cas="Cas12a", name="NT Cas12a",
+                       version="sha256 0123456789ab")
 
 BASELINE = Path(__file__).resolve().parent.parent / "docs" / "equivalence-baseline"
 
 
 def row(name, eff, *, dist=3, raw=0.0, kind="efficiency", site="SpCas9|+|40",
-        cas="SpCas9", guide="ATCGATCGATCGATCGATCG", pam="AGG", strand="+"):
+        cas="SpCas9", guide="ATCGATCGATCGATCGATCG", pam="AGG", strand="+",
+        identity=None):
     return VariantResult(
         cas_name=name, pam_seq=pam, guide_seq=guide, distance=dist, strand=strand,
         raw_score=raw, efficiency_pct=eff, score_kind=kind, site_key=site,
-        cas_type=cas, model="A",
+        cas_type=cas, model="A", identity=identity,
     )
 
 
@@ -68,15 +81,34 @@ class Rows(HTMLParser):
 
 
 def test_table_uses_the_streamlit_columns_values_and_ranks():
-    rows = [row("SpCas9(WT)", 51.98895989939809, raw=1.6856821775436401)]
+    rows = [row("SpCas9(WT)", 51.98895989939809, raw=1.6856821775436401, identity=MODEL)]
     assert detail_table(rows) == [
         DETAIL_COLUMNS,
-        [1, "SpCas9(WT)", "AGG", "AUCGAUCGAUCGAUCGAUCG", "+", 3, 1.6857, 51.99, "절단 효율"],
+        [1, "SpCas9(WT)", "AGG", "AUCGAUCGAUCGAUCGAUCG", "+", 3, 1.6857, 51.99, "절단 효율",
+         "NT SpCas9", "sha256 0123456789ab"],
     ]
-    assert DETAIL_COLUMNS == [
+    # #196은 기존 열을 그 순서대로 두고 모델·버전만 **맨 끝에** 더한다.
+    assert BASE_COLUMNS == [
         "순위", "Cas 변종", "PAM", "가이드 서열 (RNA)", "가닥", "거리 (bp)",
         "원출력", "예측 점수 (%)", "점수 기준",
     ]
+    assert DETAIL_COLUMNS == BASE_COLUMNS + MODEL_COLUMNS
+    assert MODEL_COLUMNS == ["모델", "모델 버전"]
+
+
+def test_rows_without_a_predictor_claim_no_model():
+    """미리보기·가짜 행이 모델 이름을 꾸며 내지 않는다 (#196)."""
+    cells = detail_table([row("SpCas9(WT)", 10.0)])[1]
+    assert cells[-2:] == [UNKNOWN_MODEL, UNKNOWN_MODEL]
+
+
+def test_each_row_names_the_model_that_produced_it():
+    """한 CSV에 Cas가 섞여도 모델 열은 행마다 그 행을 낸 모델을 가리킨다."""
+    other = ModelIdentity(family="nt", cas="Cas12a", name="NT Cas12a", version="sha256 cafe")
+    rows = [row("SpCas9(WT)", 60.0, identity=MODEL),
+            row("Cas12a", 70.0, cas="Cas12a", site="Cas12a|+|16", identity=other)]
+    assert [cells[-2:] for cells in detail_table(rows)[1:]] == [
+        ["NT SpCas9", "sha256 0123456789ab"], ["NT Cas12a", "sha256 cafe"]]
 
 
 def test_each_row_keeps_its_own_score_kind():
@@ -85,10 +117,11 @@ def test_each_row_keeps_its_own_score_kind():
         row("Cas12a", 70.0, kind="efficiency", cas="Cas12a", site="Cas12a|+|16"),
         row("SpCas9(WT)", 60.0, kind="percentile"),
     ]
-    kinds = [cells[-1] for cells in detail_table(rows)[1:]]
+    kind_column = DETAIL_COLUMNS.index("점수 기준")
+    kinds = [cells[kind_column] for cells in detail_table(rows)[1:]]
     assert kinds == ["절단 효율", "학습 분포 백분위"]
     fragment = detail_fragment(rows)
-    assert [r["cells"][-1] for r in Rows(fragment).rows] == kinds
+    assert [r["cells"][kind_column] for r in Rows(fragment).rows] == kinds
     assert "'점수 기준' 열이 다른 행끼리는 점수를 직접 비교할 수 없습니다." in fragment
 
 
@@ -105,7 +138,9 @@ def test_csv_is_byte_identical_to_the_streamlit_baseline():
         for r in captured["detail"]["rows"]
     ]
     expected = (BASELINE / "crispr_prediction_results.csv").read_bytes()
-    assert csv_bytes(detail_table(rows)) == expected
+    # #196이 모델·버전 열을 끝에 더했다. 기준이 증거로 남긴 것은 기존 열의 값과
+    # 순서이므로 그 부분을 바이트로 비교한다.
+    assert csv_bytes(base_columns_only(detail_table(rows))) == expected
     # 기준을 뜰 때의 기본 필터는 한 줄도 떨어뜨리지 않았다.
     assert captured["detail"]["dropped_by_default_filter"] == 0
     assert len(DetailFilter.parse(None).apply(rows)) == len(rows)
@@ -142,7 +177,7 @@ def test_csv_rounds_and_writes_exactly_like_the_pandas_download():
             for i, r in enumerate(rows, start=1)
         ]
     ).to_csv(index=False, lineterminator="\r\n")
-    assert csv_bytes(detail_table(rows)) == expected.encode("utf-8-sig")
+    assert csv_bytes(base_columns_only(detail_table(rows))) == expected.encode("utf-8-sig")
 
 
 # ── 필터 ───────────────────────────────────────────
@@ -208,15 +243,16 @@ def test_filter_rejects_what_the_streamlit_controls_cannot_produce(raw):
 
 
 def test_fragment_lists_every_row_with_the_values_the_screen_filters_on():
-    rows = [row("SpCas9(WT)", 51.98895989939809, dist=11, site="SpCas9|+|32"),
-            row("Cas12a", 7.25, dist=1, cas="Cas12a", site="Cas12a|-|60")]
+    rows = [row("SpCas9(WT)", 51.98895989939809, dist=11, site="SpCas9|+|32",
+                identity=MODEL),
+            row("Cas12a", 7.25, dist=1, cas="Cas12a", site="Cas12a|-|60", identity=CAS12A)]
     parsed = Rows(detail_fragment(rows))
     assert parsed.head == DETAIL_COLUMNS
     assert [r["cells"] for r in parsed.rows] == [
         ["1", "SpCas9(WT)", "AGG", "AUCGAUCGAUCGAUCGAUCG", "+", "11", "0.0000",
-         "51.99%", "절단 효율"],
+         "51.99%", "절단 효율", "NT SpCas9", "sha256 0123456789ab"],
         ["2", "Cas12a", "AGG", "AUCGAUCGAUCGAUCGAUCG", "+", "1", "0.0000",
-         "7.25%", "절단 효율"],
+         "7.25%", "절단 효율", "NT Cas12a", "sha256 0123456789ab"],
     ]
     first = parsed.rows[0]["attrs"]
     assert first["data-site-key"] == "SpCas9|+|32"
@@ -270,3 +306,31 @@ def test_fragment_is_self_contained():
     fragment = detail_fragment([row("<b>", 50.0)])
     assert "<script" not in fragment
     assert "<b>" not in fragment
+
+
+# ── 보존된 기준과의 대조 (#196) ────────────────────────────────
+
+
+def test_baseline_comparison_keeps_the_preserved_bytes_untouched():
+    """더해진 열을 뗀 저장 파일이 보존된 기준의 **원래 바이트**와 같아야 한다.
+
+    양쪽을 다시 직렬화하면 인용 규칙이나 줄 끝이 달라도 통과해, 바이트 비교가
+    아니라 왕복 비교가 된다. 기준 쪽은 건드리지 않는다.
+    """
+    expected = (BASELINE / "crispr_prediction_results.csv").read_bytes()
+    rows = csv_rows(expected)
+    saved = csv_bytes([[*rows[0], *MODEL_COLUMNS]]
+                      + [[*row, "NT SpCas9", "sha256 0123456789ab"] for row in rows[1:]])
+    report = csv_against_baseline(saved, expected)
+    assert report["csv_base_columns_byte_equal"]
+    assert not report["csv_whole_file_byte_equal"]
+    assert report["csv_model_columns"] == [
+        ["모델", "모델 버전"], ["NT SpCas9", "sha256 0123456789ab"]]
+
+
+def test_baseline_comparison_rejects_a_changed_existing_column():
+    expected = (BASELINE / "crispr_prediction_results.csv").read_bytes()
+    rows = csv_rows(expected)
+    rows[1][1] = "다른 변종"
+    saved = csv_bytes([[*row, "m", "v"] for row in rows])
+    assert not csv_against_baseline(saved, expected)["csv_base_columns_byte_equal"]
