@@ -1,0 +1,1456 @@
+{
+  "issue": 213,
+  "run_id": "issue212-20261119-required01",
+  "base": "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01",
+  "integration_commit": "0ef34155d365660f99b4c05a4a45ead90c549ce4",
+  "manifest_sha256": "08eab0a5dc68b59d862aebd51b98996be5a69d47e8605cb1bdda47c4507098ef",
+  "frozen_sources": {
+    "contract.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\contract.json",
+      "sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252"
+    },
+    "protocol.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\protocol-212.json",
+      "sha256": "9419f9ce56b026090f1a69f70d7d4992b503a4f96f9de9230d4ed82fe6470dd8"
+    },
+    "diagnostic-history.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verification.json",
+      "sha256": "bc0f1c04827c788e044eff4a4596fce530ce0cc14d09e08571bc9fb95e226ee6"
+    },
+    "offline-requirements.txt": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\offline-requirements.txt",
+      "sha256": "a1a05d31698285c6f74565afefa6c2705d94be66488f5469e2ff465d41fb746e"
+    },
+    "code/cas12a/__init__.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\cas12a\\__init__.py",
+      "sha256": "2fcd84c077432d03bdb495b6cf2d3cc6f01dd79fef6a1feb94be7b92a0cd0a67"
+    },
+    "code/cas12a/features.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\cas12a\\features.py",
+      "sha256": "f810b92bc4af09818c956813ddd5d7078ebc4b3f10c44a2f0628c412ad44b85e"
+    },
+    "code/docs/runtime/assemble_verification.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\assemble_verification.py",
+      "sha256": "227270df789e0d7bb0ce79b3597343ea146b044f94d0c92db63fa9c185375209"
+    },
+    "code/docs/runtime/candidate_investigation.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\candidate_investigation.py",
+      "sha256": "6595d7917f57b5d0cdd84e1084d8fb1af66c207db9afd47e6f22ad511a536343"
+    },
+    "code/docs/runtime/candidate_policy.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\candidate_policy.py",
+      "sha256": "a21493bb430d1776028ffc4aad26f45a39792dfa7009ea9ae4ace99c5dfd4784"
+    },
+    "code/docs/runtime/gradient_diagnostics.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\gradient_diagnostics.py",
+      "sha256": "0a0f9160caf7a36c4692266cb8278d66f98a47336b24799a4604b6af754b9349"
+    },
+    "code/docs/runtime/offline_policy.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\offline_policy.py",
+      "sha256": "63d4210b135045ca6343bc672e9893b147737eb27e5b26bc02c015af1a2cef1f"
+    },
+    "code/docs/runtime/offline_runner.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\offline_runner.py",
+      "sha256": "b35d7c136f5afa1152c2ed88ebae7ac8722bc0e23a5990485df47751710711dc"
+    },
+    "code/docs/runtime/run_required_212.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\run_required_212.py",
+      "sha256": "49d3ba3760994319a722e331275e7b6d27a5e2b2293fe5ce2105beeef0fb33ca"
+    },
+    "code/docs/runtime/stage_offline.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\stage_offline.py",
+      "sha256": "7c474a86b49595467d722c58b5bac731dd0db88824c962b47c12fcde968eb47b"
+    },
+    "code/docs/runtime/verification_bundle.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verification_bundle.py",
+      "sha256": "ddf18f550ddd52e8bc8a87b7606e34900f14b7e1810c535509f4fc06e2dbc8b0"
+    },
+    "code/docs/runtime/verification_policy.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verification_policy.py",
+      "sha256": "c974cda21a3e7c45e6e3cc939bfa345a57f0479e2b2ab457ba765aad92788946"
+    },
+    "code/docs/runtime/verify_contract.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+      "sha256": "4b34ec9777d416e9816d395e385f50ab883cf33f2b2173714a1cf73792dd278c"
+    },
+    "code/model_source.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\model_source.py",
+      "sha256": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba"
+    },
+    "code/non_nt_runtime.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\non_nt_runtime.py",
+      "sha256": "f9ebc241b21b5e2d3581718ebf173cc0dac72b6a5beb771ae5c2f57737d39f74"
+    },
+    "code/pam_scanner.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\pam_scanner.py",
+      "sha256": "fc64062f13f1fbcb387432ae950cf81ad98862e559338da612dde958a4c63d16"
+    },
+    "code/predict.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\predict.py",
+      "sha256": "8a359891d802dfe840245b913861e3a72994ddd08eb40d132a5d78e52d4268a9"
+    },
+    "code/xai/__init__.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\xai\\__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "code/xai/explain.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\xai\\explain.py",
+      "sha256": "622527e1d02c9bce5ba69745d0dd5d61491f2f868ad4954718babef2cef41104"
+    },
+    "code/xai/identity.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\xai\\identity.py",
+      "sha256": "516ba33211217ce6bd1bffe7d9a925a32b992b21e8664e2d3c55416648f2ad06"
+    },
+    "code/xai/shap_cache.py": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\xai\\shap_cache.py",
+      "sha256": "e669ac2ae339764f5fcd613194d3142753ffe983e1ebd33740d539fd2ade375c"
+    },
+    "extra/0/preregistration.json": {
+      "source": "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\preregistration.json",
+      "sha256": "3bf78539e8451937e3d40a9dfc0b37c081b2536500dbe5c1d22328aefc9d9722"
+    },
+    "extra/1/model-vault.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\docs\\preservation\\model-vault.json",
+      "sha256": "c6e48d3255718d8226e570ce992794cc3d352a30b19c42836d87a25bd56c0aaa"
+    },
+    "assets/models/non_nt/manifest.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\models\\non_nt\\manifest.json",
+      "sha256": "bb66b688a630fc5c85c5a30b3ae890f169e551688ca361abbde7dc39cb65fb5c"
+    },
+    "assets/models/non_nt/spcas9-9hydra-v2/export-manifest.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\models\\non_nt\\spcas9-9hydra-v2\\export-manifest.json",
+      "sha256": "9f05f38ac36e85e7187625b39f4188294d8e8ae827ecef6b5c69fd4e38845b37"
+    },
+    "assets/models/non_nt/cas12a-cnn-20261102/checkpoint.json": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\models\\non_nt\\cas12a-cnn-20261102\\checkpoint.json",
+      "sha256": "eb7cdc6a819ae5e570f96e6be502bdd4a738cdb82b85d6f89843141023eca403"
+    },
+    "assets/models/non_nt/spcas9-9hydra-v2/model.keras": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\models\\non_nt\\spcas9-9hydra-v2\\model.keras",
+      "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65"
+    },
+    "assets/models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras": {
+      "source": "C:\\project\\MC_project\\dashboard_v3\\models\\non_nt\\cas12a-cnn-20261102\\cas12a_cnn_manifest.keras",
+      "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f"
+    }
+  },
+  "canonical_inputs_sha256": "3c6bd0c23fea7bcef12129ea8a1b4228d620f2702ff9ba69dd96813d70bb475e",
+  "journal": {
+    "state": "ready",
+    "completed": [
+      "reference",
+      "verify",
+      "diagnose",
+      "float32",
+      "ram",
+      "offline",
+      "investigation"
+    ],
+    "active": null
+  },
+  "commands": [
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "init",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--run-id",
+        "issue212-20261119-required01",
+        "--protocol",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\protocol-212.json",
+        "--extra-code",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\preregistration.json",
+        "--extra-code",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\preservation\\model-vault.json"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:36:25.622636+00:00",
+      "ended_at": "2026-11-19T00:36:27.208097+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "reference",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:36:27.213639+00:00",
+      "ended_at": "2026-11-19T00:36:49.508167+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "verify",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:36:49.524732+00:00",
+      "ended_at": "2026-11-19T00:41:46.533638+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "diagnose",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:41:46.540962+00:00",
+      "ended_at": "2026-11-19T00:49:42.265716+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "float32",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:49:42.283243+00:00",
+      "ended_at": "2026-11-19T00:53:55.078199+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "ram",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:53:55.091382+00:00",
+      "ended_at": "2026-11-19T00:54:40.194170+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\stage_offline.py",
+        "prepare",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--wheelhouse",
+        "C:\\project-backups\\dashboard-v3\\issue209\\wheels",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\prepared"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:54:40.212012+00:00",
+      "ended_at": "2026-11-19T00:54:46.748582+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-S",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\prepared\\payload\\docs\\runtime\\stage_offline.py",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\restored",
+        "--prepared",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\prepared",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle\\staged.json",
+        "--snapshot-only"
+      ],
+      "cwd": "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\prepared",
+      "started_at": "2026-11-19T00:54:46.751891+00:00",
+      "ended_at": "2026-11-19T00:57:54.784622+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\assemble_verification.py",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\summary.json"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:57:54.812124+00:00",
+      "ended_at": "2026-11-19T00:58:06.524986+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\assemble_verification.py",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\summary-replayed.json"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T00:58:54.209243+00:00",
+      "ended_at": "2026-11-19T00:59:04.398275+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/runtime/evidence/run_followup_213.py",
+        "C:/project-backups/dashboard-v3/issue205/issue212-20261119-required01"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "pid": 12880,
+      "started_at": "2026-11-19T01:08:01.769966+00:00",
+      "ended_at": "2026-11-19T01:44:14.117950+00:00",
+      "exit_code": 1,
+      "end_time_scope": "observed after process exit; exact measurement-stage times are in individual stage commands"
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\verify_contract.py",
+        "investigation",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T01:08:03.328765+00:00",
+      "ended_at": "2026-11-19T01:42:57.595628+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/runtime/evidence/observe_followup_213.py",
+        "12880",
+        "C:/project-backups/dashboard-v3/issue205/issue212-20261119-required01/process-rss-213.jsonl"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "pid": 23060,
+      "started_at": "2026-11-19T01:09:17.910453+00:00",
+      "sampling_interval_seconds": 0.25,
+      "scope": "external process RSS/OS peak working set; observer started after candidate warm-up/initial calls, before float64; short-lived subprocesses may be missed",
+      "observer_version": "7.2.2",
+      "ended_at": "2026-11-19T01:44:14.133482+00:00",
+      "exit_code": 0,
+      "end_time_scope": "observed after process exit; exact measurement-stage times are in individual stage commands"
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\assemble_verification.py",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\summary-final.json"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T01:43:01.265644+00:00",
+      "ended_at": "2026-11-19T01:43:19.289491+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\docs\\runtime\\assemble_verification.py",
+        "--work",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\bundle",
+        "--output",
+        "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\summary-final-replayed.json"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T01:43:19.292174+00:00",
+      "ended_at": "2026-11-19T01:43:40.156474+00:00",
+      "exit_code": 1
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-m",
+        "pytest",
+        "test/test_candidate_selection.py",
+        "-q",
+        "-rs"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T01:43:25.186971+00:00",
+      "ended_at": "2026-11-19T01:44:56.566086+00:00",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-m",
+        "pytest",
+        "test/test_runtime_verification.py",
+        "test/test_gradient_diagnostics.py",
+        "test/test_runtime_handoff.py",
+        "-q",
+        "-rs"
+      ],
+      "cwd": "C:\\project\\MC_project\\dashboard_v3",
+      "started_at": "2026-11-19T01:46:00.209578+00:00",
+      "ended_at": "2026-11-19T01:50:42.335470+00:00",
+      "exit_code": 0
+    }
+  ],
+  "followup": {
+    "run_id": "issue212-20261119-required01",
+    "ended_at": "2026-11-19T01:43:42.733758+00:00",
+    "journal": {
+      "state": "ready",
+      "completed": [
+        "reference",
+        "verify",
+        "diagnose",
+        "float32",
+        "ram",
+        "offline",
+        "investigation"
+      ],
+      "active": null
+    },
+    "required_boundary_preserved": true,
+    "byte_identical_replay": true,
+    "manifest_sha256": "08eab0a5dc68b59d862aebd51b98996be5a69d47e8605cb1bdda47c4507098ef",
+    "summary_sha256": "374fe1f2eece0781c0a80cf5bcbde240f365435d9edb57d8c8b9941d375f130f",
+    "summary_exit_codes": [
+      1,
+      1
+    ],
+    "status": {
+      "overall": "fail",
+      "core": "fail",
+      "core_checks": 583,
+      "core_failed": 40,
+      "offline_staged_run": "pass",
+      "diagnostics": "fail",
+      "diagnostic_checks": 65,
+      "diagnostic_failed": 3
+    }
+  },
+  "status": {
+    "overall": "fail",
+    "core": "fail",
+    "core_checks": 583,
+    "core_failed": 40,
+    "offline_staged_run": "pass",
+    "diagnostics": "fail",
+    "diagnostic_checks": 65,
+    "diagnostic_failed": 3
+  },
+  "candidate_budget": {
+    "seconds": 5400,
+    "exhausted": false,
+    "exhausted_offset": null
+  },
+  "candidate_summary": {
+    "unstarted_calls": [],
+    "shap_calls": 184,
+    "planned_calls": 216,
+    "budget_seconds": 5400
+  },
+  "investigation_counts": {
+    "ig_spcas9": {
+      "completed": 16,
+      "incomplete": 0
+    },
+    "ig_cas12a": {
+      "completed": 16,
+      "incomplete": 0
+    },
+    "shap_screen_spcas9": {
+      "completed": 92,
+      "incomplete": 0
+    },
+    "shap_screen_cas12a": {
+      "completed": 92,
+      "incomplete": 0
+    },
+    "shap_confirmation_spcas9": {
+      "completed": 0,
+      "incomplete": 28
+    },
+    "shap_confirmation_cas12a": {
+      "completed": 0,
+      "incomplete": 28
+    },
+    "float32_spcas9": {
+      "completed": 1,
+      "incomplete": 0
+    },
+    "float32_cas12a": {
+      "completed": 1,
+      "incomplete": 0
+    },
+    "float64_spcas9": {
+      "completed": 1,
+      "incomplete": 0
+    },
+    "float64_cas12a": {
+      "completed": 1,
+      "incomplete": 0
+    }
+  },
+  "artifact_inventory": {
+    "archive-copy.json": {
+      "sha256": "3318559b71c23d568fcd8bfe628ad00660ec2c21e2171b730a64816787db11d2",
+      "bytes": 686
+    },
+    "archive-index.json": {
+      "sha256": "7a65e2387b0d75fb5997266c32735793277795449b14968082e90dfb41d9816e",
+      "bytes": 28961
+    },
+    "archive_boundary_212.py": {
+      "sha256": "60c53fce6e5758d0d50b1248e165ae9dec088125dcab8d713e3596e04f3a05d2",
+      "bytes": 5587
+    },
+    "archive_followup_213.py": {
+      "sha256": "d6681ce7b63b1f1e23f8b219c5495c1033f4a1d2d65f875531e3d9f133484cf6",
+      "bytes": 5639
+    },
+    "assemble-213.command.json": {
+      "sha256": "091042e507acf48803360b8b84318d4b23393c01544859951398e24cfcc3c377",
+      "bytes": 617
+    },
+    "assemble-213.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "assemble-213.stdout.txt": {
+      "sha256": "dcf545fd1aaa903cad25bc9e1d7fab4cd44756313f385ec528ff0b5e6ab87bd7",
+      "bytes": 178
+    },
+    "assemble.command.json": {
+      "sha256": "ff5a8208ea3d56dacfaf5dab0cfc9bbd757b3ba83cda0b457aeed77fb21fa2c7",
+      "bytes": 611
+    },
+    "assemble.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "assemble.stdout.txt": {
+      "sha256": "dcf545fd1aaa903cad25bc9e1d7fab4cd44756313f385ec528ff0b5e6ab87bd7",
+      "bytes": 178
+    },
+    "boundary-regression-213.command.json": {
+      "sha256": "63e36e7670149257007f355aa0780a9e2d9b23399d6d91578e9c78c718503667",
+      "bytes": 452
+    },
+    "boundary-regression-213.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "boundary-regression-213.stdout.txt": {
+      "sha256": "fd5d0cd1a27b69f24bd37be7ee517ce8b4b25c3c381196bb9b0f6c225465fdf6",
+      "bytes": 2718
+    },
+    "bundle/core-raw.npz": {
+      "sha256": "fa766683756161e2545dc7ef38c581a3896046269e3023f37d62c904c6118161",
+      "bytes": 8762627
+    },
+    "bundle/diagnose-raw.npz": {
+      "sha256": "01583b493b9e5fa39ef52b6945febac370b480e496d7d7780a63c8c0d198baef",
+      "bytes": 77234980
+    },
+    "bundle/diagnose.json": {
+      "sha256": "712466066fb134304d39fdacf701c4297dffcc5bbefcfe5fc4e5fd7d0d39d47f",
+      "bytes": 25193
+    },
+    "bundle/diagnose.receipt.json": {
+      "sha256": "3c3317bd010d043a346ac34e5ca9b39b8ecf4a1cce9128efffd213be24e2c309",
+      "bytes": 1896
+    },
+    "bundle/diagnostic-plan.json": {
+      "sha256": "05e6051007d448e6fe41ea0549af520f46cc850e2fa36fe78ec918d7bfb5bc19",
+      "bytes": 14985
+    },
+    "bundle/float32-cas12a/progress.json": {
+      "sha256": "b850a661d659aa701e2ebc56c76c7d25845fd62c058976e1b532a9be7196f2c7",
+      "bytes": 38578
+    },
+    "bundle/float32-cas12a/raw.npz": {
+      "sha256": "896a97c49a0b3c329ac828209ec50c5868561c14d69e1036b6b27a21c60f4b90",
+      "bytes": 30835327
+    },
+    "bundle/float32-raw.npz": {
+      "sha256": "08c46bd3ad9bcdf94f2fd467dabbb7d9769745436fd6bc520de32eaae7549f96",
+      "bytes": 62504584
+    },
+    "bundle/float32-spcas9/progress.json": {
+      "sha256": "fe46b11e0741c65b6e38e068464c8520a4e7b13936a0ba4a6a9f5f088f1b7103",
+      "bytes": 108657
+    },
+    "bundle/float32-spcas9/raw.npz": {
+      "sha256": "99d49b35d0498cda75ef5650a788ee010c78f686e5155b6154e91c069b7ef4b4",
+      "bytes": 31668869
+    },
+    "bundle/float32.json": {
+      "sha256": "a9fe9ce5b73a4a7a776a2b4b2182621841bede838d896b155257b317a0fbf7c5",
+      "bytes": 337462
+    },
+    "bundle/float32.receipt.json": {
+      "sha256": "f1723a75a1c8986d187609e44cd094813032d67d9987da92ffa44e8b4fbdec8e",
+      "bytes": 2074
+    },
+    "bundle/float64-cas12a/completed.json": {
+      "sha256": "98c3b1afe9c0bb8026f1e798fd557258ecf21f7b5acf8de656df68ada44393d1",
+      "bytes": 26307
+    },
+    "bundle/float64-cas12a/progress.json": {
+      "sha256": "98c3b1afe9c0bb8026f1e798fd557258ecf21f7b5acf8de656df68ada44393d1",
+      "bytes": 26307
+    },
+    "bundle/float64-cas12a/qualification.json": {
+      "sha256": "c2d1eca753a7efeb6f5bc2147ef5e85e575470cc825f8898468f7be31215f65e",
+      "bytes": 16020
+    },
+    "bundle/float64-cas12a/raw.npz": {
+      "sha256": "4821ecee39ea5615622e41db877b008685c5abf16c122806d8239f4c998eadde",
+      "bytes": 26526178
+    },
+    "bundle/float64-cas12a/start-diagnosis": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/float64-cas12a/stderr.txt": {
+      "sha256": "ce5d0ff5fa8cd654eb791390f7125dc25c95e3428fdf71493eaf65faf77ff945",
+      "bytes": 736
+    },
+    "bundle/float64-cas12a/stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/float64-cas12a/targets.json": {
+      "sha256": "c9d60f267926b45d04112c7e7d8f61ddf25593e3dbfa64ebb1317ed5c71447e9",
+      "bytes": 2037
+    },
+    "bundle/float64-spcas9/completed.json": {
+      "sha256": "3a388bbd742ee653e9fe98470f73e5e51a24ca984fdf0bfaeea411c7bcd9755f",
+      "bytes": 113129
+    },
+    "bundle/float64-spcas9/progress.json": {
+      "sha256": "3a388bbd742ee653e9fe98470f73e5e51a24ca984fdf0bfaeea411c7bcd9755f",
+      "bytes": 113129
+    },
+    "bundle/float64-spcas9/qualification.json": {
+      "sha256": "488f3ffbcf64932d0471a683a0fa2e2c377a1b7df3263a793bd71f636a7cbe80",
+      "bytes": 24524
+    },
+    "bundle/float64-spcas9/raw.npz": {
+      "sha256": "d271cc3feba890b1614331ca0d886306f614f668657ce99e8d3840c6de89198f",
+      "bytes": 70905261
+    },
+    "bundle/float64-spcas9/start-diagnosis": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/float64-spcas9/stderr.txt": {
+      "sha256": "da553fa923c4ae3793435f73d2c03d204769711cc26585d040b0a5b7e766a678",
+      "bytes": 1010
+    },
+    "bundle/float64-spcas9/stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/float64-spcas9/targets.json": {
+      "sha256": "3c5eb73f248184d49efc74e793ded6ce71377de35e5a746f2c31f3dd2c11efb8",
+      "bytes": 8910
+    },
+    "bundle/investigation-raw.npz": {
+      "sha256": "8a70c98b0d690f6954657c3e33a07e3ececc37b26a90744d0deae5d15b1a4427",
+      "bytes": 160112576
+    },
+    "bundle/investigation-stderr.txt": {
+      "sha256": "af3e66e2c4023b2e41051b31c68a3049052cee1d16ad3db54349964e0c0da939",
+      "bytes": 1255
+    },
+    "bundle/investigation-stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/investigation.receipt.json": {
+      "sha256": "84cd902b930b51a5df32916b91f91f7f1cf742652b42dae18aaf28829e3b9f53",
+      "bytes": 2214
+    },
+    "bundle/investigations.json": {
+      "sha256": "fb8917474149721f48a037e341c09fea0082eace560b241c07e9ad33526538f4",
+      "bytes": 927173
+    },
+    "bundle/journal.json": {
+      "sha256": "7f72792cd41ada8ea2d781f423fb97c632054c3b4cddc0794cfe16f10e0c2bdf",
+      "bytes": 182
+    },
+    "bundle/manifest.json": {
+      "sha256": "08eab0a5dc68b59d862aebd51b98996be5a69d47e8605cb1bdda47c4507098ef",
+      "bytes": 77101
+    },
+    "bundle/manifest.sha256": {
+      "sha256": "e343161eded4479be259776bafd5071290efeeae399647e835670905dc4ce5ac",
+      "bytes": 64
+    },
+    "bundle/offline-install-stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/offline-install-stdout.txt": {
+      "sha256": "e22ffdc6a9acbafab719e89c31c58fc2cc0d539c4635db8dab5aa66637471182",
+      "bytes": 8798
+    },
+    "bundle/offline-raw.npz": {
+      "sha256": "2be0ad1d95d38e0f156cad0bee4ed990a20759eae33b18c28263cc0f722a2a72",
+      "bytes": 3927
+    },
+    "bundle/offline-run-stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/offline-run-stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/offline.receipt.json": {
+      "sha256": "02979c5cad9136841f8564f2251c22acd276cbe53ea565b96ffe9197ddd72eff",
+      "bytes": 2686
+    },
+    "bundle/ram.json": {
+      "sha256": "62137a6134ef3b7d376e54daad399f33160da2b4a7d63be1502a5d8757f5b563",
+      "bytes": 4035
+    },
+    "bundle/ram.receipt.json": {
+      "sha256": "8782cfcf31da1234e1567ef7487fe948a2745339b30bdff3dac98555b60889d8",
+      "bytes": 1696
+    },
+    "bundle/reference.json": {
+      "sha256": "c8ab4be52beb2e6c844e3f9cfc722af660787b1f83a45de2e2bea51431b9e5a0",
+      "bytes": 19557
+    },
+    "bundle/reference.npz": {
+      "sha256": "6a45b55bec4e282f615b0defd339e6c58d8321b83e3191dfd274ff3a105f8026",
+      "bytes": 476019
+    },
+    "bundle/reference.receipt.json": {
+      "sha256": "50144a528de8134057aea9a0321fb513d5f5697968a7939eb7da062492b04c06",
+      "bytes": 1817
+    },
+    "bundle/snapshot/assets/models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras": {
+      "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+      "bytes": 1261811
+    },
+    "bundle/snapshot/assets/models/non_nt/cas12a-cnn-20261102/checkpoint.json": {
+      "sha256": "eb7cdc6a819ae5e570f96e6be502bdd4a738cdb82b85d6f89843141023eca403",
+      "bytes": 5588
+    },
+    "bundle/snapshot/assets/models/non_nt/manifest.json": {
+      "sha256": "bb66b688a630fc5c85c5a30b3ae890f169e551688ca361abbde7dc39cb65fb5c",
+      "bytes": 6541
+    },
+    "bundle/snapshot/assets/models/non_nt/spcas9-9hydra-v2/export-manifest.json": {
+      "sha256": "9f05f38ac36e85e7187625b39f4188294d8e8ae827ecef6b5c69fd4e38845b37",
+      "bytes": 9927
+    },
+    "bundle/snapshot/assets/models/non_nt/spcas9-9hydra-v2/model.keras": {
+      "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+      "bytes": 396500
+    },
+    "bundle/snapshot/code/cas12a/__init__.py": {
+      "sha256": "2fcd84c077432d03bdb495b6cf2d3cc6f01dd79fef6a1feb94be7b92a0cd0a67",
+      "bytes": 337
+    },
+    "bundle/snapshot/code/cas12a/features.py": {
+      "sha256": "f810b92bc4af09818c956813ddd5d7078ebc4b3f10c44a2f0628c412ad44b85e",
+      "bytes": 3678
+    },
+    "bundle/snapshot/code/docs/runtime/assemble_verification.py": {
+      "sha256": "227270df789e0d7bb0ce79b3597343ea146b044f94d0c92db63fa9c185375209",
+      "bytes": 23320
+    },
+    "bundle/snapshot/code/docs/runtime/candidate_investigation.py": {
+      "sha256": "6595d7917f57b5d0cdd84e1084d8fb1af66c207db9afd47e6f22ad511a536343",
+      "bytes": 7874
+    },
+    "bundle/snapshot/code/docs/runtime/candidate_policy.py": {
+      "sha256": "a21493bb430d1776028ffc4aad26f45a39792dfa7009ea9ae4ace99c5dfd4784",
+      "bytes": 22588
+    },
+    "bundle/snapshot/code/docs/runtime/gradient_diagnostics.py": {
+      "sha256": "0a0f9160caf7a36c4692266cb8278d66f98a47336b24799a4604b6af754b9349",
+      "bytes": 46784
+    },
+    "bundle/snapshot/code/docs/runtime/offline_policy.py": {
+      "sha256": "63d4210b135045ca6343bc672e9893b147737eb27e5b26bc02c015af1a2cef1f",
+      "bytes": 5157
+    },
+    "bundle/snapshot/code/docs/runtime/offline_runner.py": {
+      "sha256": "b35d7c136f5afa1152c2ed88ebae7ac8722bc0e23a5990485df47751710711dc",
+      "bytes": 8396
+    },
+    "bundle/snapshot/code/docs/runtime/run_required_212.py": {
+      "sha256": "49d3ba3760994319a722e331275e7b6d27a5e2b2293fe5ce2105beeef0fb33ca",
+      "bytes": 5099
+    },
+    "bundle/snapshot/code/docs/runtime/stage_offline.py": {
+      "sha256": "7c474a86b49595467d722c58b5bac731dd0db88824c962b47c12fcde968eb47b",
+      "bytes": 12919
+    },
+    "bundle/snapshot/code/docs/runtime/verification_bundle.py": {
+      "sha256": "ddf18f550ddd52e8bc8a87b7606e34900f14b7e1810c535509f4fc06e2dbc8b0",
+      "bytes": 16954
+    },
+    "bundle/snapshot/code/docs/runtime/verification_policy.py": {
+      "sha256": "c974cda21a3e7c45e6e3cc939bfa345a57f0479e2b2ab457ba765aad92788946",
+      "bytes": 10617
+    },
+    "bundle/snapshot/code/docs/runtime/verify_contract.py": {
+      "sha256": "4b34ec9777d416e9816d395e385f50ab883cf33f2b2173714a1cf73792dd278c",
+      "bytes": 48790
+    },
+    "bundle/snapshot/code/model_source.py": {
+      "sha256": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba",
+      "bytes": 7855
+    },
+    "bundle/snapshot/code/non_nt_runtime.py": {
+      "sha256": "f9ebc241b21b5e2d3581718ebf173cc0dac72b6a5beb771ae5c2f57737d39f74",
+      "bytes": 19592
+    },
+    "bundle/snapshot/code/pam_scanner.py": {
+      "sha256": "fc64062f13f1fbcb387432ae950cf81ad98862e559338da612dde958a4c63d16",
+      "bytes": 11612
+    },
+    "bundle/snapshot/code/predict.py": {
+      "sha256": "8a359891d802dfe840245b913861e3a72994ddd08eb40d132a5d78e52d4268a9",
+      "bytes": 31661
+    },
+    "bundle/snapshot/code/xai/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "bundle/snapshot/code/xai/explain.py": {
+      "sha256": "622527e1d02c9bce5ba69745d0dd5d61491f2f868ad4954718babef2cef41104",
+      "bytes": 12587
+    },
+    "bundle/snapshot/code/xai/identity.py": {
+      "sha256": "516ba33211217ce6bd1bffe7d9a925a32b992b21e8664e2d3c55416648f2ad06",
+      "bytes": 4483
+    },
+    "bundle/snapshot/code/xai/shap_cache.py": {
+      "sha256": "e669ac2ae339764f5fcd613194d3142753ffe983e1ebd33740d539fd2ade375c",
+      "bytes": 5433
+    },
+    "bundle/snapshot/contract.json": {
+      "sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+      "bytes": 11688
+    },
+    "bundle/snapshot/diagnostic-history.json": {
+      "sha256": "bc0f1c04827c788e044eff4a4596fce530ce0cc14d09e08571bc9fb95e226ee6",
+      "bytes": 127071
+    },
+    "bundle/snapshot/extra/0/preregistration.json": {
+      "sha256": "3bf78539e8451937e3d40a9dfc0b37c081b2536500dbe5c1d22328aefc9d9722",
+      "bytes": 7399
+    },
+    "bundle/snapshot/extra/1/model-vault.json": {
+      "sha256": "c6e48d3255718d8226e570ce992794cc3d352a30b19c42836d87a25bd56c0aaa",
+      "bytes": 895
+    },
+    "bundle/snapshot/inputs.npz": {
+      "sha256": "3c6bd0c23fea7bcef12129ea8a1b4228d620f2702ff9ba69dd96813d70bb475e",
+      "bytes": 2922
+    },
+    "bundle/snapshot/offline-requirements.txt": {
+      "sha256": "a1a05d31698285c6f74565afefa6c2705d94be66488f5469e2ff465d41fb746e",
+      "bytes": 781
+    },
+    "bundle/snapshot/protocol.json": {
+      "sha256": "9419f9ce56b026090f1a69f70d7d4992b503a4f96f9de9230d4ed82fe6470dd8",
+      "bytes": 45699
+    },
+    "bundle/staged.json": {
+      "sha256": "dc5a67a7027d975e5686433c107518d11b59feea70da76bd8472bb1e10e4b42b",
+      "bytes": 1066901
+    },
+    "bundle/verification-core.json": {
+      "sha256": "230b7d513787e30dbf11e0728f2cfa4e3378e3704c8f65b9f4ee9bf7fa608c24",
+      "bytes": 211424
+    },
+    "bundle/verify.receipt.json": {
+      "sha256": "39a2ee80a4784c5b1d0698d498ef43cd1e791e35b41c773a8b25c5f49c093476",
+      "bytes": 1897
+    },
+    "candidate-analysis-213.json": {
+      "sha256": "d80a4bd3d158e84a490b43f1c81eda87a75ae63ebbd0d13b561ee5c8acc7a31d",
+      "bytes": 9336
+    },
+    "candidate-regression-213.command.json": {
+      "sha256": "17c5a1c78a26b4a9d4a2a949cf937d3e878faf49442713ef486b2091453e7d96",
+      "bytes": 372
+    },
+    "candidate-regression-213.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "candidate-regression-213.stdout.txt": {
+      "sha256": "b384d2b1a6198a088edd0d9ac76f2b9571c78f17752f25f690ca844b196931ec",
+      "bytes": 112
+    },
+    "controller-213-start.json": {
+      "sha256": "a00641e9c8d2781bf6b15a9328d296ee7a26914e3684bc2bd6c23c7c6a49a6ae",
+      "bytes": 379
+    },
+    "controller-213.command.json": {
+      "sha256": "fc11519ebf07f75877542ba7c625b5b17040de5ac6d09e230db5f478caf98729",
+      "bytes": 565
+    },
+    "diagnose.command.json": {
+      "sha256": "ece819c2c0cecce4ede312fbe644ebf931771477de7cc5747e8ff38de1bd4953",
+      "bytes": 509
+    },
+    "diagnose.stderr.txt": {
+      "sha256": "83d9ff47ac5d8ceb89ee5412217fea1c31b426d2d0a4b6c72966da812c3b4c7e",
+      "bytes": 1014
+    },
+    "diagnose.stdout.txt": {
+      "sha256": "3e8547026f4646fe0c8f986901d008892daef78f1a5c6cc21741011327cd6150",
+      "bytes": 176
+    },
+    "float32.command.json": {
+      "sha256": "c14171567847fc8ae047a9572b9757db5c32fc3d7f02e80890b24516ec9b2f4d",
+      "bytes": 508
+    },
+    "float32.stderr.txt": {
+      "sha256": "839f7fb069572b243fb7ade9bda2fee1acf41a6df227a700f69fe4d29af70dd3",
+      "bytes": 740
+    },
+    "float32.stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "followup-213-start.json": {
+      "sha256": "38452143a15f132ce69759b6a071f586b8fa153494cce066bcecbaeff4a32d22",
+      "bytes": 7398
+    },
+    "followup-213.json": {
+      "sha256": "fe70569fcb60fb130a4f2c49748db6b88ef29be162bcec5ef125592fe57ebfcf",
+      "bytes": 860
+    },
+    "handoff.json": {
+      "sha256": "a27f171c155605e449593b451fa03d9fcb83163877777cf971332f97ec32eca3",
+      "bytes": 840
+    },
+    "init.command.json": {
+      "sha256": "27554622380aa1ecd27c45f5749de6111882e2dd0ab9aae4881fc7a9f921f7ac",
+      "bytes": 888
+    },
+    "init.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "init.stdout.txt": {
+      "sha256": "709bcbf2fc67bec5a677983e2f7b16d5c2d08e3e13b866efb19f5b0b69b7202a",
+      "bytes": 137
+    },
+    "investigation-213.command.json": {
+      "sha256": "530e093c91812b84abf930de2b10eb996a851c1541e30d72753ef2b9f2b6eb89",
+      "bytes": 514
+    },
+    "investigation-213.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "investigation-213.stdout.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "observe_followup_213.py": {
+      "sha256": "83a0c76e85a98da40bebe648ed9a84df0d7c8e93648154a904f27781e7b39be1",
+      "bytes": 1514
+    },
+    "offline.command.json": {
+      "sha256": "bfd081a9838df1776533d5d24966a252969a4e63f4e21139262c9b389d7f7de2",
+      "bytes": 949
+    },
+    "offline.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "offline.stdout.txt": {
+      "sha256": "f8968478a110167336df751007ec928172a1afa8fde0cf096342df9caee6d4a9",
+      "bytes": 142
+    },
+    "precision-analysis-213.json": {
+      "sha256": "c991ac4bbc636843de548e95279bd4e96ca689bfa2c0604e801c49c0b862bcec",
+      "bytes": 11546
+    },
+    "precision-timing-213.json": {
+      "sha256": "6692b27269927010b6aa375fe53440122356b185800b09c326c52f80be5cf9c7",
+      "bytes": 1064
+    },
+    "prepare.command.json": {
+      "sha256": "782eddc2892c825e689523b5309a78e24065a0e6a9d4d0dfe4e6fe30ef2ab243",
+      "bytes": 696
+    },
+    "prepare.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "prepare.stdout.txt": {
+      "sha256": "a797a74974d4adc9c8feef8066aaf52f17bd5e8db09665c9c93db20a5beebd4a",
+      "bytes": 235
+    },
+    "prepared/payload/cas12a/__init__.py": {
+      "sha256": "2fcd84c077432d03bdb495b6cf2d3cc6f01dd79fef6a1feb94be7b92a0cd0a67",
+      "bytes": 337
+    },
+    "prepared/payload/cas12a/features.py": {
+      "sha256": "f810b92bc4af09818c956813ddd5d7078ebc4b3f10c44a2f0628c412ad44b85e",
+      "bytes": 3678
+    },
+    "prepared/payload/docs/runtime/assemble_verification.py": {
+      "sha256": "227270df789e0d7bb0ce79b3597343ea146b044f94d0c92db63fa9c185375209",
+      "bytes": 23320
+    },
+    "prepared/payload/docs/runtime/candidate_investigation.py": {
+      "sha256": "6595d7917f57b5d0cdd84e1084d8fb1af66c207db9afd47e6f22ad511a536343",
+      "bytes": 7874
+    },
+    "prepared/payload/docs/runtime/candidate_policy.py": {
+      "sha256": "a21493bb430d1776028ffc4aad26f45a39792dfa7009ea9ae4ace99c5dfd4784",
+      "bytes": 22588
+    },
+    "prepared/payload/docs/runtime/gradient_diagnostics.py": {
+      "sha256": "0a0f9160caf7a36c4692266cb8278d66f98a47336b24799a4604b6af754b9349",
+      "bytes": 46784
+    },
+    "prepared/payload/docs/runtime/offline_policy.py": {
+      "sha256": "63d4210b135045ca6343bc672e9893b147737eb27e5b26bc02c015af1a2cef1f",
+      "bytes": 5157
+    },
+    "prepared/payload/docs/runtime/offline_runner.py": {
+      "sha256": "b35d7c136f5afa1152c2ed88ebae7ac8722bc0e23a5990485df47751710711dc",
+      "bytes": 8396
+    },
+    "prepared/payload/docs/runtime/run_required_212.py": {
+      "sha256": "49d3ba3760994319a722e331275e7b6d27a5e2b2293fe5ce2105beeef0fb33ca",
+      "bytes": 5099
+    },
+    "prepared/payload/docs/runtime/stage_offline.py": {
+      "sha256": "7c474a86b49595467d722c58b5bac731dd0db88824c962b47c12fcde968eb47b",
+      "bytes": 12919
+    },
+    "prepared/payload/docs/runtime/verification_bundle.py": {
+      "sha256": "ddf18f550ddd52e8bc8a87b7606e34900f14b7e1810c535509f4fc06e2dbc8b0",
+      "bytes": 16954
+    },
+    "prepared/payload/docs/runtime/verification_policy.py": {
+      "sha256": "c974cda21a3e7c45e6e3cc939bfa345a57f0479e2b2ab457ba765aad92788946",
+      "bytes": 10617
+    },
+    "prepared/payload/docs/runtime/verify_contract.py": {
+      "sha256": "4b34ec9777d416e9816d395e385f50ab883cf33f2b2173714a1cf73792dd278c",
+      "bytes": 48790
+    },
+    "prepared/payload/model_source.py": {
+      "sha256": "e277c90666b5d04ffd90c0568d38117a538413866cdd1672c188f5f4a5ccbcba",
+      "bytes": 7855
+    },
+    "prepared/payload/models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras": {
+      "sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+      "bytes": 1261811
+    },
+    "prepared/payload/models/non_nt/cas12a-cnn-20261102/checkpoint.json": {
+      "sha256": "eb7cdc6a819ae5e570f96e6be502bdd4a738cdb82b85d6f89843141023eca403",
+      "bytes": 5588
+    },
+    "prepared/payload/models/non_nt/manifest.json": {
+      "sha256": "bb66b688a630fc5c85c5a30b3ae890f169e551688ca361abbde7dc39cb65fb5c",
+      "bytes": 6541
+    },
+    "prepared/payload/models/non_nt/spcas9-9hydra-v2/export-manifest.json": {
+      "sha256": "9f05f38ac36e85e7187625b39f4188294d8e8ae827ecef6b5c69fd4e38845b37",
+      "bytes": 9927
+    },
+    "prepared/payload/models/non_nt/spcas9-9hydra-v2/model.keras": {
+      "sha256": "ddbf86aa34fe12cd6b63a1a556e602e9ef34275a9356fb57ae99247c4472ce65",
+      "bytes": 396500
+    },
+    "prepared/payload/non_nt_runtime.py": {
+      "sha256": "f9ebc241b21b5e2d3581718ebf173cc0dac72b6a5beb771ae5c2f57737d39f74",
+      "bytes": 19592
+    },
+    "prepared/payload/pam_scanner.py": {
+      "sha256": "fc64062f13f1fbcb387432ae950cf81ad98862e559338da612dde958a4c63d16",
+      "bytes": 11612
+    },
+    "prepared/payload/predict.py": {
+      "sha256": "8a359891d802dfe840245b913861e3a72994ddd08eb40d132a5d78e52d4268a9",
+      "bytes": 31661
+    },
+    "prepared/payload/recovery/contract.json": {
+      "sha256": "8c172c0865a9ef4138bbdaeed0f6e8f191eb117cd9e77c281710497512aea252",
+      "bytes": 11688
+    },
+    "prepared/payload/recovery/diagnostic-history.json": {
+      "sha256": "bc0f1c04827c788e044eff4a4596fce530ce0cc14d09e08571bc9fb95e226ee6",
+      "bytes": 127071
+    },
+    "prepared/payload/recovery/extra/0/preregistration.json": {
+      "sha256": "3bf78539e8451937e3d40a9dfc0b37c081b2536500dbe5c1d22328aefc9d9722",
+      "bytes": 7399
+    },
+    "prepared/payload/recovery/extra/1/model-vault.json": {
+      "sha256": "c6e48d3255718d8226e570ce992794cc3d352a30b19c42836d87a25bd56c0aaa",
+      "bytes": 895
+    },
+    "prepared/payload/recovery/inputs.npz": {
+      "sha256": "3c6bd0c23fea7bcef12129ea8a1b4228d620f2702ff9ba69dd96813d70bb475e",
+      "bytes": 2922
+    },
+    "prepared/payload/recovery/offline-requirements.txt": {
+      "sha256": "a1a05d31698285c6f74565afefa6c2705d94be66488f5469e2ff465d41fb746e",
+      "bytes": 781
+    },
+    "prepared/payload/recovery/protocol.json": {
+      "sha256": "9419f9ce56b026090f1a69f70d7d4992b503a4f96f9de9230d4ed82fe6470dd8",
+      "bytes": 45699
+    },
+    "prepared/payload/xai/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "prepared/payload/xai/explain.py": {
+      "sha256": "622527e1d02c9bce5ba69745d0dd5d61491f2f868ad4954718babef2cef41104",
+      "bytes": 12587
+    },
+    "prepared/payload/xai/identity.py": {
+      "sha256": "516ba33211217ce6bd1bffe7d9a925a32b992b21e8664e2d3c55416648f2ad06",
+      "bytes": 4483
+    },
+    "prepared/payload/xai/shap_cache.py": {
+      "sha256": "e669ac2ae339764f5fcd613194d3142753ffe983e1ebd33740d539fd2ade375c",
+      "bytes": 5433
+    },
+    "prepared/preparation.json": {
+      "sha256": "d9ec8d99fdc193c60a10ca098568bc5b12b99c2f0b4415b09ea0feafd9354e37",
+      "bytes": 16367
+    },
+    "prepared/wheels/absl_py-2.4.0-py3-none-any.whl": {
+      "sha256": "88476fd881ca8aab94ffa78b7b6c632a782ab3ba1cd19c9bd423abc4fb4cd28d",
+      "bytes": 135750
+    },
+    "prepared/wheels/cloudpickle-3.1.2-py3-none-any.whl": {
+      "sha256": "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a",
+      "bytes": 22228
+    },
+    "prepared/wheels/colorama-0.4.6-py2.py3-none-any.whl": {
+      "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+      "bytes": 25335
+    },
+    "prepared/wheels/filelock-3.29.0-py3-none-any.whl": {
+      "sha256": "96f5f6344709aa1572bbf631c640e4ebeeb519e08da902c39a001882f30ac258",
+      "bytes": 39812
+    },
+    "prepared/wheels/fsspec-2026.4.0-py3-none-any.whl": {
+      "sha256": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+      "bytes": 203402
+    },
+    "prepared/wheels/h5py-3.14.0-cp313-cp313-win_amd64.whl": {
+      "sha256": "ae18e3de237a7a830adb76aaa68ad438d85fe6e19e0d99944a3ce46b772c69b3",
+      "bytes": 2852929
+    },
+    "prepared/wheels/jinja2-3.1.6-py3-none-any.whl": {
+      "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+      "bytes": 134899
+    },
+    "prepared/wheels/joblib-1.5.2-py3-none-any.whl": {
+      "sha256": "4e1f0bdbb987e6d843c70cf43714cb276623def372df3c22fe5266b2670bc241",
+      "bytes": 308396
+    },
+    "prepared/wheels/keras-3.14.1-py3-none-any.whl": {
+      "sha256": "ebd2c14d2af3c9de18083604d408483996407fc7d2f9ebd1d565961f96608c29",
+      "bytes": 1628606
+    },
+    "prepared/wheels/llvmlite-0.50.0-cp313-cp313-win_amd64.whl": {
+      "sha256": "266a6a29be71c3e3a22960ddcedf66b4e0388e5abb6cc4991cc093d6df402ad7",
+      "bytes": 41865552
+    },
+    "prepared/wheels/markdown_it_py-4.2.0-py3-none-any.whl": {
+      "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a",
+      "bytes": 91687
+    },
+    "prepared/wheels/markupsafe-3.0.3-cp313-cp313-win_amd64.whl": {
+      "sha256": "9a1abfdc021a164803f4d485104931fb8f8c1efd55bc6b748d2f5774e78b62c5",
+      "bytes": 15113
+    },
+    "prepared/wheels/mdurl-0.1.2-py3-none-any.whl": {
+      "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8",
+      "bytes": 9979
+    },
+    "prepared/wheels/ml_dtypes-0.5.4-cp313-cp313-win_amd64.whl": {
+      "sha256": "f21c9219ef48ca5ee78402d5cc831bd58ea27ce89beda894428bc67a52da5328",
+      "bytes": 212224
+    },
+    "prepared/wheels/mpmath-1.3.0-py3-none-any.whl": {
+      "sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c",
+      "bytes": 536198
+    },
+    "prepared/wheels/namex-0.1.0-py3-none-any.whl": {
+      "sha256": "e2012a474502f1e2251267062aae3114611f07df4224b6e06334c57b0f2ce87c",
+      "bytes": 5905
+    },
+    "prepared/wheels/networkx-3.6.1-py3-none-any.whl": {
+      "sha256": "d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762",
+      "bytes": 2068504
+    },
+    "prepared/wheels/numba-0.68.0-cp313-cp313-win_amd64.whl": {
+      "sha256": "bf7435c81912e271a28a19c348ada5b3986e2409f95a067533c5f4aab8709295",
+      "bytes": 2830730
+    },
+    "prepared/wheels/numpy-2.3.2-cp313-cp313-win_amd64.whl": {
+      "sha256": "c63d95dc9d67b676e9108fe0d2182987ccb0f11933c1e8959f42fa0da8d4fa56",
+      "bytes": 12782876
+    },
+    "prepared/wheels/optree-0.19.1-cp313-cp313-win_amd64.whl": {
+      "sha256": "aa0845b725bcd0029e179cf9b4bc2cc016c7358e56fc7c0d2c43bf4d514c96cf",
+      "bytes": 343906
+    },
+    "prepared/wheels/packaging-25.0-py3-none-any.whl": {
+      "sha256": "29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484",
+      "bytes": 66469
+    },
+    "prepared/wheels/pandas-2.3.3-cp313-cp313-win_amd64.whl": {
+      "sha256": "f8bfc0e12dc78f777f323f55c58649591b2cd0c43534e8355c51d3fede5f4dee",
+      "bytes": 10993991
+    },
+    "prepared/wheels/psutil-7.2.2-cp37-abi3-win_amd64.whl": {
+      "sha256": "eb7e81434c8d223ec4a219b5fc1c47d0417b12be7ea866e24fb5ad6e84b3d988",
+      "bytes": 137737
+    },
+    "prepared/wheels/pygments-2.20.0-py3-none-any.whl": {
+      "sha256": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+      "bytes": 1231151
+    },
+    "prepared/wheels/python_dateutil-2.9.0.post0-py2.py3-none-any.whl": {
+      "sha256": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427",
+      "bytes": 229892
+    },
+    "prepared/wheels/pytz-2025.2-py2.py3-none-any.whl": {
+      "sha256": "5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00",
+      "bytes": 509225
+    },
+    "prepared/wheels/rich-15.0.0-py3-none-any.whl": {
+      "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb",
+      "bytes": 310654
+    },
+    "prepared/wheels/scikit_learn-1.7.1-cp313-cp313-win_amd64.whl": {
+      "sha256": "ca6d31fb10e04d50bfd2b50d66744729dbb512d4efd0223b864e2fdbfc4cee11",
+      "bytes": 8707418
+    },
+    "prepared/wheels/scipy-1.16.1-cp313-cp313-win_amd64.whl": {
+      "sha256": "81929ed0fa7a5713fcdd8b2e6f73697d3b4c4816d090dd34ff937c20fa90e8ab",
+      "bytes": 38479462
+    },
+    "prepared/wheels/setuptools-80.9.0-py3-none-any.whl": {
+      "sha256": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922",
+      "bytes": 1201486
+    },
+    "prepared/wheels/shap-0.52.0-cp312-abi3-win_amd64.whl": {
+      "sha256": "07d44ace491ca6204dac6ce4fda128bcaeff27553a279bca67c55a14987cc957",
+      "bytes": 499853
+    },
+    "prepared/wheels/six-1.17.0-py2.py3-none-any.whl": {
+      "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+      "bytes": 11050
+    },
+    "prepared/wheels/slicer-0.0.8-py3-none-any.whl": {
+      "sha256": "6c206258543aecd010d497dc2eca9d2805860a0b3758673903456b7df7934dc3",
+      "bytes": 15251
+    },
+    "prepared/wheels/sympy-1.14.0-py3-none-any.whl": {
+      "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5",
+      "bytes": 6299353
+    },
+    "prepared/wheels/threadpoolctl-3.6.0-py3-none-any.whl": {
+      "sha256": "43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb",
+      "bytes": 18638
+    },
+    "prepared/wheels/torch-2.12.0-cp313-cp313-win_amd64.whl": {
+      "sha256": "3fee918902090ade827643e758e98363278815de583c75d111fdd665ebffde9f",
+      "bytes": 122987706
+    },
+    "prepared/wheels/tqdm-4.67.1-py3-none-any.whl": {
+      "sha256": "26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2",
+      "bytes": 78540
+    },
+    "prepared/wheels/typing_extensions-4.15.0-py3-none-any.whl": {
+      "sha256": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+      "bytes": 44614
+    },
+    "prepared/wheels/tzdata-2025.2-py2.py3-none-any.whl": {
+      "sha256": "1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8",
+      "bytes": 347839
+    },
+    "preregistration.json": {
+      "sha256": "3bf78539e8451937e3d40a9dfc0b37c081b2536500dbe5c1d22328aefc9d9722",
+      "bytes": 7399
+    },
+    "process-rss-213.jsonl": {
+      "sha256": "95d2ee96fb2c84a2e83658d377674648818bff3e6546c004c119d4eef2731921",
+      "bytes": 11369348
+    },
+    "process-rss-summary-213.json": {
+      "sha256": "faa1d5b9d69dd3311225c1c765e7a20d27cc1b5b5107aefd1c0c360f5b6696af",
+      "bytes": 5115
+    },
+    "ram.command.json": {
+      "sha256": "14f10f5ed561eb3517f71a259d14adfb54e6f03fc37940e42c5887a36f69d731",
+      "bytes": 504
+    },
+    "ram.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "ram.stdout.txt": {
+      "sha256": "840a7adff07be41026d8b7ba6136290db598cdcb092c271baad338d89dca8253",
+      "bytes": 3830
+    },
+    "reassembly-check.json": {
+      "sha256": "48251efa87dd92e396f98b1a2c91503e0e67780c1457ebe924769f51eee21ec1",
+      "bytes": 200
+    },
+    "reference.command.json": {
+      "sha256": "b38bc624dd9f9e9691aa3a8c0ce9196531ea02e9af2ef5d388560b4b824eb55e",
+      "bytes": 510
+    },
+    "reference.stderr.txt": {
+      "sha256": "7ee7bb8875cecb2b3497e18b7cdcf36c0bffac1175597c9edb9be9e6aa9f430d",
+      "bytes": 1543
+    },
+    "reference.stdout.txt": {
+      "sha256": "156e0783c3edfdfe500a1a58086cb2aa7144c91a27075377637787c24e741873",
+      "bytes": 97
+    },
+    "replay-213.command.json": {
+      "sha256": "474405f8f58d4efdef8a5bcfdf0f472dd19366d38e3d78a34b8a6689e70909d2",
+      "bytes": 626
+    },
+    "replay-213.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "replay-213.stdout.txt": {
+      "sha256": "dcf545fd1aaa903cad25bc9e1d7fab4cd44756313f385ec528ff0b5e6ab87bd7",
+      "bytes": 178
+    },
+    "replay.command.json": {
+      "sha256": "de6d4a2049055a58a7fbc8a412ad3718d8cea51e7a17bdea652a4322f3268923",
+      "bytes": 620
+    },
+    "replay.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "replay.stdout.txt": {
+      "sha256": "dcf545fd1aaa903cad25bc9e1d7fab4cd44756313f385ec528ff0b5e6ab87bd7",
+      "bytes": 178
+    },
+    "rss-observer-213-start.json": {
+      "sha256": "ce09e2a309af07b465f5fe5375ea124b51fa7252cf2068d2d19834b538848b44",
+      "bytes": 657
+    },
+    "rss-observer-213.command.json": {
+      "sha256": "fbf276e1c50bc62575d61429350a6793a232b2a2637767a937eac342c826b6c6",
+      "bytes": 843
+    },
+    "run_followup_213.py": {
+      "sha256": "884e6fb963f72fbb934633c0e8292438fb497b62973e233d059d810c9797c8de",
+      "bytes": 4037
+    },
+    "summary-final-replayed.json": {
+      "sha256": "374fe1f2eece0781c0a80cf5bcbde240f365435d9edb57d8c8b9941d375f130f",
+      "bytes": 2256254
+    },
+    "summary-final.json": {
+      "sha256": "374fe1f2eece0781c0a80cf5bcbde240f365435d9edb57d8c8b9941d375f130f",
+      "bytes": 2256254
+    },
+    "summary-replayed.json": {
+      "sha256": "87c9c293c7697336b064a7bbc2b4a22a7f946146a95da9c3621c9776fb9fc5c8",
+      "bytes": 1709114
+    },
+    "summary.json": {
+      "sha256": "87c9c293c7697336b064a7bbc2b4a22a7f946146a95da9c3621c9776fb9fc5c8",
+      "bytes": 1709114
+    },
+    "verify.command.json": {
+      "sha256": "a74c92b27211a9e25ef5550b8148f42ec4260d0ffdc777018960320c7e921b3b",
+      "bytes": 507
+    },
+    "verify.stderr.txt": {
+      "sha256": "9d35f8ac8a2684a0fd7f5a397dee1e87b2c9f45bda468b9e595f079bf48da90c",
+      "bytes": 1803
+    },
+    "verify.stdout.txt": {
+      "sha256": "99673934fdf13438c9c2bb24cd9299d9ec2a61fc30f8c30560d591151f4ada4f",
+      "bytes": 1893
+    }
+  },
+  "archive": {
+    "paths": [
+      "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\issue212-20261119-required01-investigation-evidence.zip",
+      "D:\\MC_project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\issue212-20261119-required01-investigation-evidence.zip"
+    ],
+    "sha256": "601bee0c02af0fd35e7e8baec4349eda92b6caa7037ecbee755ad5fdfd783ff1",
+    "bytes": 657774005,
+    "verified_entries": 226,
+    "scope": "complete bundle, prepared dependencies, required and final reports, commands/logs, external RSS observations and recording tools",
+    "independence": "two local volumes; no off-host or physical independence established"
+  },
+  "previous_archive": {
+    "paths": [
+      "C:\\project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\issue212-20261119-required01-required-evidence.zip",
+      "D:\\MC_project-backups\\dashboard-v3\\issue205\\issue212-20261119-required01\\issue212-20261119-required01-required-evidence.zip"
+    ],
+    "sha256": "64523d30c54892cca632636c90e0a12581dc5754b37b529819b8007f3d72915b",
+    "bytes": 412698030,
+    "verified_entries": 172,
+    "scope": "bundle snapshots, raw arrays, receipts, diagnostic checkpoints, commands/logs/summary and prepared wheels/assets; installed tree reproducible from wheels",
+    "independence": "two local volumes; no off-host or physical independence established"
+  }
+}
