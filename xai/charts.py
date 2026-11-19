@@ -1,6 +1,6 @@
 """IG / SHAP 그래프 (Matplotlib). 입력은 모두 위치별 배열이라 Cas 종류와 무관하게 쓴다.
 
-값 단위는 '효율 %p'(모델 원출력 × 100)로 받는다. 그래프 글자는 영어로 둔다(한글 폰트 문제 회피).
+입력은 변환된 표시 단위(검증된 효율 %p 또는 원출력)다. 그래프 글자는 영어로 둔다.
 """
 
 import matplotlib
@@ -51,7 +51,7 @@ def _position_axis(ax, sequence: str) -> None:
     ax.set_xlabel("Position / base in the model input window")
 
 
-def attribution_logo(ig_pct: np.ndarray, sequence: str, layout):
+def attribution_logo(ig_pct: np.ndarray, sequence: str, layout, *, efficiency: bool = True):
     """실제 염기만 그리고, 글자 높이 = 부호 있는 IG 기여도 (효율 %p)"""
     n = len(sequence)
     matrix = pd.DataFrame(0.0, index=range(n), columns=list(BASES))
@@ -66,12 +66,13 @@ def attribution_logo(ig_pct: np.ndarray, sequence: str, layout):
     ax.set_ylim(lo - (pad if lo < 0 else 0), hi + pad)
     _mark_segments(ax, layout)
     _position_axis(ax, sequence)
-    ax.set_ylabel("IG attribution (%p)\n(up = raises efficiency,\ndown = lowers it)", fontsize=8)
+    ax.set_ylabel("IG attribution (%p)\n(up = raises efficiency,\ndown = lowers it)" if efficiency
+                  else "IG attribution (raw output)", fontsize=8)
     fig.subplots_adjust(**_margins(n))
     return fig
 
 
-def shap_bars(values_pct: np.ndarray, sequence: str, layout):
+def shap_bars(values_pct: np.ndarray, sequence: str, layout, *, efficiency: bool = True):
     """위치별 SHAP 값 (빨강 = 효율 상승, 파랑 = 하락)"""
     n = len(sequence)
     fig, ax = plt.subplots(figsize=(FIG_WIDTH, 2.6))
@@ -80,7 +81,7 @@ def shap_bars(values_pct: np.ndarray, sequence: str, layout):
     ax.axhline(0, color="#333", lw=0.8)
     _mark_segments(ax, layout)
     _position_axis(ax, sequence)
-    ax.set_ylabel("SHAP value (%p)", fontsize=8)
+    ax.set_ylabel("SHAP value (%p)" if efficiency else "SHAP value (raw output)", fontsize=8)
     fig.subplots_adjust(**_margins(n))
     return fig
 

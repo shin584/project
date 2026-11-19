@@ -1,0 +1,419 @@
+{
+  "issue": 201,
+  "cas": "Cas12a",
+  "sequence": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT",
+  "contract_sha256": "eddfe4f82e866f1c40c4128f8e231cf436f6a8aaf88f89069ddbb43aeddc32c9",
+  "source_sha256": {
+    "predict.py": "397e90c8dca5174a90e02cbc85f3ccae239f81d0d2fe74e1de4c6921d7b92b02",
+    "xai/explain.py": "166d876863bdef406bb225dee8b7a974f81dd4bdc69eeb6282dc2ccef0757123",
+    "xai/units.py": "c620585db0a284cac7f4912bd528412d5d506a722a6db308ecf8753dad69e23a",
+    "xai/quality.py": "444104627d87db02aa7a11b6a5dfd4d94d7ade414cd15124a3baeac6306e6960",
+    "xai/explain_cache.py": "f1cef2da8ff64e2125cda5a9af89dc14e669c4101545de18beab10d784a86556",
+    "xai/shap_cache.py": "0fbe4202039ff375c55d51dbe327339e5d50befb2db405184dc2cc40636a747d",
+    "xai/charts.py": "378ea03f1d1d94e52c84aa94ca22aa41283beabab07dd83e3cee34326a1ed31a",
+    "desktop/xai_view.py": "9211dee5ed84d837259d59d7fd7d525f69e8d708224316fd9f458d5d4e034983",
+    "docs/nt-xai/contract.json": "eddfe4f82e866f1c40c4128f8e231cf436f6a8aaf88f89069ddbb43aeddc32c9",
+    "docs/nt-xai/verify.py": "f48c64b4e8fc679d48f87b5147be445d1a6872718f14a11ea9522c3e37db8faf"
+  },
+  "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "environment": {
+    "numpy": "2.3.2",
+    "torch": "2.12.0",
+    "transformers": "5.8.1",
+    "shap": "0.52.0",
+    "safetensors": "0.7.0"
+  },
+  "checks": [
+    {
+      "name": "prediction_finite",
+      "status": "pass"
+    },
+    {
+      "name": "rollout_finite",
+      "status": "pass"
+    },
+    {
+      "name": "rollout_nonnegative",
+      "status": "pass"
+    },
+    {
+      "name": "rollout_row_sums",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/specials_fixed",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/raw_function",
+      "status": "pass",
+      "raw_fn": 0.35913217067718506,
+      "prediction": 0.35913217067718506
+    },
+    {
+      "name": "Cas12a/ig_function",
+      "status": "pass",
+      "ig": 0.35913217067718506,
+      "prediction": 0.35913217067718506
+    },
+    {
+      "name": "Cas12a/ig32/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/ig32/completeness",
+      "status": "pass",
+      "error_pp": 0.004439330298006139,
+      "limit_pp": 1.894631266593933
+    },
+    {
+      "name": "Cas12a/ig64/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/ig64/completeness",
+      "status": "pass",
+      "error_pp": 0.005991034811136942,
+      "limit_pp": 1.894631266593933
+    },
+    {
+      "name": "Cas12a/ig256/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/ig256/completeness",
+      "status": "pass",
+      "error_pp": 0.00035868486687462564,
+      "limit_pp": 1.894631266593933
+    },
+    {
+      "name": "Cas12a/ig32-64/stability",
+      "status": "pass",
+      "max_difference_pp": 0.007016591778263859,
+      "limit_pp": 2.0586124801991716
+    },
+    {
+      "name": "Cas12a/ig64-256/stability",
+      "status": "pass",
+      "max_difference_pp": 0.0009778443768677647,
+      "limit_pp": 2.058544536551688
+    },
+    {
+      "name": "Cas12a/shap64-4-0-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4-0-0/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 1.1142374873161316
+    },
+    {
+      "name": "Cas12a/shap64-4-0-1/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4-0-1/additivity",
+      "status": "pass",
+      "error_pp": 5.551115123125783e-15,
+      "limit_pp": 1.1142374873161316
+    },
+    {
+      "name": "Cas12a/shap64-4-0-2/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4-0-2/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 1.1142374873161316
+    },
+    {
+      "name": "Cas12a/shap64-4-1-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4-1-0/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 0.9070959985256195
+    },
+    {
+      "name": "Cas12a/shap64-4-2-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4-2-0/additivity",
+      "status": "pass",
+      "error_pp": 5.551115123125783e-15,
+      "limit_pp": 1.8469815254211426
+    },
+    {
+      "name": "Cas12a/shap64-4/same_seed_repeat",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap64-4/seed0-1/stability",
+      "status": "fail",
+      "max_difference_pp": 21.936532217683627,
+      "limit_pp": 5.250020034170877
+    },
+    {
+      "name": "Cas12a/shap64-4/seed0-2/stability",
+      "status": "fail",
+      "max_difference_pp": 24.58525246281946,
+      "limit_pp": 5.250020034170877
+    },
+    {
+      "name": "Cas12a/shap64-4/seed1-0/stability",
+      "status": "fail",
+      "max_difference_pp": 15.61747154471997,
+      "limit_pp": 5.250020034170877
+    },
+    {
+      "name": "Cas12a/shap64-4/seed2-0/stability",
+      "status": "fail",
+      "max_difference_pp": 25.776927479616717,
+      "limit_pp": 5.250020034170877
+    },
+    {
+      "name": "Cas12a/shap128-8-0-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8-0-0/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 0.876645028591156
+    },
+    {
+      "name": "Cas12a/shap128-8-0-1/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8-0-1/additivity",
+      "status": "pass",
+      "error_pp": 5.551115123125783e-15,
+      "limit_pp": 0.876645028591156
+    },
+    {
+      "name": "Cas12a/shap128-8-0-2/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8-0-2/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 0.876645028591156
+    },
+    {
+      "name": "Cas12a/shap128-8-1-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8-1-0/additivity",
+      "status": "pass",
+      "error_pp": 0.0,
+      "limit_pp": 0.9468029737472534
+    },
+    {
+      "name": "Cas12a/shap128-8-2-0/finite",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8-2-0/additivity",
+      "status": "pass",
+      "error_pp": 5.551115123125783e-15,
+      "limit_pp": 1.337518572807312
+    },
+    {
+      "name": "Cas12a/shap128-8/same_seed_repeat",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/shap128-8/seed0-1/stability",
+      "status": "fail",
+      "max_difference_pp": 8.355464310853659,
+      "limit_pp": 4.319696273512833
+    },
+    {
+      "name": "Cas12a/shap128-8/seed0-2/stability",
+      "status": "fail",
+      "max_difference_pp": 7.324416012152087,
+      "limit_pp": 4.319696273512833
+    },
+    {
+      "name": "Cas12a/shap128-8/seed1-0/stability",
+      "status": "fail",
+      "max_difference_pp": 9.541086079903419,
+      "limit_pp": 4.319696273512833
+    },
+    {
+      "name": "Cas12a/shap128-8/seed2-0/stability",
+      "status": "fail",
+      "max_difference_pp": 9.38250882252261,
+      "limit_pp": 4.319696273512833
+    },
+    {
+      "name": "Cas12a/cache_roundtrip",
+      "status": "pass"
+    },
+    {
+      "name": "Cas12a/ig/display",
+      "status": "pass",
+      "png_count": 1
+    },
+    {
+      "name": "Cas12a/shap/display",
+      "status": "pass",
+      "png_count": 2
+    },
+    {
+      "name": "Cas12a/rollout/display",
+      "status": "pass",
+      "png_count": 2
+    },
+    {
+      "name": "source_unchanged",
+      "status": "pass"
+    }
+  ],
+  "results": [
+    {
+      "head": "Cas12a",
+      "units": {
+        "scale": 100.0,
+        "offset": 0.0,
+        "efficiency": true,
+        "source": "NT registered fraction output after output_mode"
+      },
+      "ig": {
+        "32": {
+          "pred_raw": 0.35913217067718506,
+          "baseline_raw": 0.6380584239959717,
+          "pred_display": 35.913217067718506,
+          "baseline_display": 63.80584239959717,
+          "sum_pp": -27.89706466217664,
+          "error_pp": 0.004439330298006139
+        },
+        "64": {
+          "pred_raw": 0.35913217067718506,
+          "baseline_raw": 0.6380584239959717,
+          "pred_display": 35.913217067718506,
+          "baseline_display": 63.80584239959717,
+          "sum_pp": -27.898616366689772,
+          "error_pp": 0.005991034811136942
+        },
+        "256": {
+          "pred_raw": 0.35913217067718506,
+          "baseline_raw": 0.6380584239959717,
+          "pred_display": 35.913217067718506,
+          "baseline_display": 63.80584239959717,
+          "sum_pp": -27.892984016745537,
+          "error_pp": 0.00035868486687462564
+        }
+      },
+      "shap": {
+        "64-4-0-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.4819796681404114,
+          "error_pp": 0.0,
+          "sum_pp": -12.284749746322623
+        },
+        "64-4-0-1": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.4819796681404114,
+          "error_pp": 5.551115123125783e-15,
+          "sum_pp": -12.284749746322627
+        },
+        "64-4-0-2": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.4819796681404114,
+          "error_pp": 0.0,
+          "sum_pp": -12.284749746322628
+        },
+        "64-4-1-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.44055137038230896,
+          "error_pp": 0.0,
+          "sum_pp": -8.141919970512383
+        },
+        "64-4-2-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.6285284757614136,
+          "error_pp": 5.551115123125783e-15,
+          "sum_pp": -26.93963050842285
+        },
+        "128-8-0-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.43446117639541626,
+          "error_pp": 0.0,
+          "sum_pp": -7.532900571823119
+        },
+        "128-8-0-1": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.43446117639541626,
+          "error_pp": 5.551115123125783e-15,
+          "sum_pp": -7.532900571823114
+        },
+        "128-8-0-2": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.43446117639541626,
+          "error_pp": 0.0,
+          "sum_pp": -7.532900571823117
+        },
+        "128-8-1-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.44849276542663574,
+          "error_pp": 0.0,
+          "sum_pp": -8.93605947494507
+        },
+        "128-8-2-0": {
+          "pred_raw": 0.35913217067718506,
+          "base_raw": 0.5266358852386475,
+          "error_pp": 5.551115123125783e-15,
+          "sum_pp": -16.750371456146244
+        }
+      },
+      "cache": {
+        "file": "evidence\\shap-cache\\b822a0d75e6fd862.npz",
+        "sha256": "d80eb69364e59dc1e2b3a8eb5622603e6883dbc9a6c5e798a5e112e377756f42"
+      }
+    }
+  ],
+  "status": "numerical_failures_recorded",
+  "identity": {
+    "family": "nt",
+    "model": "A/Cas12a",
+    "checkpoints": [
+      "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969"
+    ],
+    "protocol": "nt-affine-units-fixed-specials-esm-input-v2",
+    "configuration": "{\"batch_size\": 8, \"dtype\": \"float32\", \"spec\": {\"cas\": \"Cas12a\", \"model\": \"A\", \"output_mode\": \"raw\", \"paths\": [\"models/Cas12a.safetensors\"], \"target_mean\": null, \"target_std\": null}}"
+  },
+  "rollout": {
+    "n_layers": 24,
+    "labels": [
+      "special",
+      "0-5",
+      "6-11",
+      "12-17",
+      "18-23",
+      "24-29",
+      "30-30",
+      "31-31",
+      "32-32",
+      "33-33"
+    ],
+    "meaning": "attention information dependency, not efficiency attribution"
+  },
+  "elapsed_seconds": 1012.993,
+  "source_unchanged": true,
+  "counts": {
+    "pass": 42,
+    "fail": 8,
+    "skip": 0
+  },
+  "raw_sha256": "9425d534dbf1413ac8c7d05b069d5b08ec406cff62d8e947dec6fa596766ab74"
+}

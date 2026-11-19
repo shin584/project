@@ -24,6 +24,7 @@ predict.py
 import importlib
 import logging
 import math
+import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cache
@@ -35,6 +36,7 @@ import model_source
 
 if TYPE_CHECKING:
     from xai.identity import ExplanationIdentity
+    from xai.units import ExplanationUnits
 from model_source import configure_offline, is_packaged, resource_root
 from pam_scanner import (
     CAS_CONFIGS,
@@ -69,9 +71,8 @@ NT_DTYPE = "float32"
 
 #: NT 설명의 계산 프로토콜 식별자 (#208). XAI 메모리 캐시·사전계산 SHAP 캐시의
 #: 재사용은 이 값까지 같아야 한다.
-#: 지금 값은 유지 중인 계산 정의를 가리킬 뿐, 예전 기여도 단위가 맞다는 주장이
-#: 아니다. 단위를 교정하는 #201이 이 값을 올리면 이전 결과는 재사용되지 않는다.
-NT_EXPLANATION_PROTOCOL = "nt-legacy-calculation-v1-units-pending-201"
+#: #201 교정: 헤드별 affine 표시, 특수 토큰 고정 기준, 원함수와 같은 ESM 경로.
+NT_EXPLANATION_PROTOCOL = "nt-affine-units-fixed-specials-esm-input-v2"
 
 
 #: 식별 memo. 키는 (설정, 프로토콜, 파일별 경로·크기·mtime)이다. 파일이나
@@ -350,6 +351,10 @@ class ExplainHandle:
     #: None이면 조회하지 않고 계산한다.
     model_key: "ExplanationIdentity | str | None" = None
     head:      str | None = None
+    #: Optional IG reference; NT keeps special tokens and zeros sequence embeddings.
+    ig_baseline: Callable | None = None
+    #: Raw result fields remain in model units. Views apply this affine conversion.
+    units: "ExplanationUnits | None" = None
 
 
 class BasePredictor(ABC):
@@ -471,6 +476,7 @@ class NTClassifierPredictor(BasePredictor):
         self._model = None
         self._num_labels = None
         self._tokenizer = None
+        self._forward_lock = threading.RLock()
 
     def explanation_identity(self):
         """이 예측기가 든 모델의 계산 식별 (#208). 부를 때마다 현재 파일·프로토콜을
@@ -598,7 +604,7 @@ class NTClassifierPredictor(BasePredictor):
         out = []
         for i in range(0, total, NT_BATCH_SIZE):
             enc = self._encode(seqs[i:i + NT_BATCH_SIZE])
-            with torch.no_grad():
+            with self._forward_lock, torch.no_grad():
                 logits = _apply_output_mode(self.model(**enc).logits, torch,
                                             self.spec.output_mode)
             out.append(logits.detach().float().numpy())   # bfloat16은 numpy가 못 받는다
@@ -657,8 +663,10 @@ class NTClassifierPredictor(BasePredictor):
 
     def explain_handle(self, head: str) -> ExplainHandle:
         import torch
+        from xai.units import nt_units
         model = self.model
         idx = self._head_index(head)
+        context = {}
 
         def raw_fn(X, on_batch: Callable | None = None):
             """[N, L, 4] 원핫 → [N]. SHAP이 섞어 만든 원핫을 서열로 되돌려 넣는다.
@@ -669,34 +677,46 @@ class NTClassifierPredictor(BasePredictor):
             return self._logits(seqs, on_batch=on_batch)[:, idx]
 
         def ig_inputs(seq: str):
-            """IG 입력 = 토큰 임베딩 [T, H]. 기준 입력은 explain.py가 0으로 만든다."""
+            """IG 입력 = 토큰 임베딩 [T, H]. 기준은 서열만 0, 특수 토큰은 고정."""
             enc = self._encode([seq])
-            with torch.no_grad():
+            with self._forward_lock, torch.no_grad():
                 emb = model.esm.embeddings.word_embeddings(enc["input_ids"])
-            self._ig_mask = enc["attention_mask"]
-            self._ig_spans = self._token_spans(seq)
-            self._ig_len = len(seq)
+            context.update(encoding=enc, spans=self._token_spans(seq), length=len(seq))
+            reference = emb[0].detach().float().numpy().copy()
+            for i, (start, end) in enumerate(context["spans"]):
+                if end > start:
+                    reference[i] = 0
+            context["reference"] = reference
             return [emb[0].detach().float().numpy()]
 
         def ig_grad_fn(batch):
             """임베딩 [N, T, H] → (출력 [N], 임베딩 기울기 [N, T, H])"""
             x = torch.tensor(np.asarray(batch[0], dtype=np.float32),
                              dtype=self._dtype).requires_grad_(True)
-            mask = self._ig_mask.expand(x.shape[0], -1)
-            y = _apply_output_mode(
-                model(inputs_embeds=x, attention_mask=mask).logits, torch,
-                self.spec.output_mode)[:, idx]
-            y.sum().backward()      # 샘플끼리 독립이라 합의 기울기 = 샘플별 기울기
+            enc = {k: v.expand(x.shape[0], -1) for k, v in context["encoding"].items()}
+            # Inject at the word-embedding boundary and keep the ordinary input-id
+            # forward path. ESM versions differ in which stages inputs_embeds skips;
+            # this preserves mask-dropout, positions and layer normalization exactly.
+            # The predictor's shared forward lock also excludes prediction/Rollout
+            # while the temporary hook is installed. Always remove it on error.
+            with self._forward_lock:
+                hook = model.esm.embeddings.word_embeddings.register_forward_hook(
+                    lambda module, args, output: x)
+                try:
+                    y = _apply_output_mode(model(**enc).logits, torch, self.spec.output_mode)[:, idx]
+                    y.sum().backward()
+                finally:
+                    hook.remove()
             return (y.detach().float().numpy(),
                     [x.grad.detach().float().numpy()])
 
         def project(attrs):
             """토큰별 기여도 [T, H] → 위치별 [L]. 토큰 값을 덮는 염기 수로 나눠 배분."""
             per_token = np.asarray(attrs[0]).sum(axis=-1)      # [T]
-            pos = np.zeros(self._ig_len, dtype=np.float64)
-            for value, (start, end) in zip(per_token, self._ig_spans):
+            pos = np.zeros(context["length"], dtype=np.float64)
+            for value, (start, end) in zip(per_token, context["spans"]):
                 if end > start:
-                    stop = min(end, self._ig_len)
+                    stop = min(end, context["length"])
                     if stop > start:
                         pos[start:stop] += value / (end - start)
             return pos
@@ -704,13 +724,15 @@ class NTClassifierPredictor(BasePredictor):
         def attention_fn(seq: str):
             """층별 attention 행렬을 그대로 돌려준다. 추론 1회면 끝난다."""
             enc = self._encode([seq])
-            with torch.no_grad():
+            with self._forward_lock, torch.no_grad():
                 out = model(**enc, output_attentions=True)
             layers = [a[0].detach().float().numpy() for a in out.attentions]  # [H,T,T]
             return layers, self._token_spans(seq), len(seq)
 
         return ExplainHandle(raw_fn, ig_inputs, ig_grad_fn, project, attention_fn,
-                             model_key=self.explanation_identity(), head=head)
+                             model_key=self.explanation_identity(), head=head,
+                             ig_baseline=lambda inputs: [context["reference"].copy()],
+                             units=nt_units(self.spec, idx))
 
 
 # 앱 시작 때 미리 데울 모델 (시연용). 여기 없는 모델은 계속 지연 로딩된다.

@@ -40,9 +40,10 @@ def predictor(request):
             embedding = torch.nn.Embedding.from_pretrained(
                 torch.arange(8, dtype=torch.float32).reshape(4, 2) / 8,
             )
-            self.esm = SimpleNamespace(embeddings=SimpleNamespace(word_embeddings=embedding))
+            self.esm = SimpleNamespace(embeddings=SimpleNamespace(
+                word_embeddings=embedding, token_dropout=False, padding_idx=1))
 
-        def __call__(self, input_ids=None, inputs_embeds=None, attention_mask=None):
+        def __call__(self, input_ids=None, inputs_embeds=None, attention_mask=None, position_ids=None):
             x = self.esm.embeddings.word_embeddings(input_ids) if inputs_embeds is None else inputs_embeds
             output = (x.square().sum(dim=-1) * attention_mask).sum(dim=-1) / 100
             return SimpleNamespace(logits=output[:, None].repeat(1, labels))

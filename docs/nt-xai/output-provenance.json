@@ -1,0 +1,36 @@
+{
+  "issue": 201,
+  "cas12a": {
+    "checkpoint_sha256": "eae04f4ff269bd4cf8973b1a219019e6e349272555359878f7ac4ee9f6471969",
+    "output_interpretation": "regression on clipped background-subtracted indel percentage / 100; unbounded linear model prediction in fraction units",
+    "target_preparation": "nt_data.prepare_data: target = clip(target / PERCENT_PER_UNIT, SCORE_MIN, SCORE_MAX); PERCENT_PER_UNIT = 100.0",
+    "source_model": {
+      "kind": "production",
+      "repository": "InstaDeepAI/nucleotide-transformer-500m-human-ref",
+      "revision": "f87b5d7233295242e79c951873d290f4cf992045"
+    },
+    "export_validated": true,
+    "sources": {
+      "cas12a\\nt_data.py": "bcd7ecfca1cb409c3a9960ec3ee872483eaa1fc1de62aac7c03f23d890ad9620",
+      "cas12a\\units.py": "e22f1062f352ec5f8b5866f3e27fcdbd3fcc69663d92c6e894b8959b75f72ce0",
+      "cas12a\\docs\\nt-preparation.md": "e3b743f42d692700e4683c9f78cb9dbc288808b028d3ccf6ebe92e628175ec37",
+      "cas12a\\models\\NT_cas12a\\result\\20261101-nt500m-full\\export.json": "98db192a2ef6436f8ce03de1caf3f116455aeb06bd0333b642681d7ee33cb77b"
+    },
+    "verification": "matches docs/preservation/resources.json models/Cas12a.safetensors; audit_evidence.py also matches measured checkpoint"
+  },
+  "spcas9": {
+    "source": "SpCas9/SpCas9_v3.ipynb standardizes train targets in fraction units, no validation/test statistics",
+    "head_mapping": [
+      "SpCas9 -> SpCas9(WT)",
+      "SpCas9-NG -> SpCas9-NG",
+      "VRQR variant -> VRQR",
+      "xCas -> xCas9",
+      "Sniper-Cas9 -> Sniper",
+      "SpCas9-HF.1 -> SpCas9-HF1",
+      "eSpCas9(1.1) -> eSpCas9(1.1)",
+      "HypaCas9 -> HypaCas9",
+      "evoCas9 -> evoCas9"
+    ],
+    "verification": "train source hashes, original means/std and registered values in evidence/SpCas9.json"
+  }
+}

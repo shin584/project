@@ -1,0 +1,384 @@
+{
+  "issue": 201,
+  "contract_sha256": "eddfe4f82e866f1c40c4128f8e231cf436f6a8aaf88f89069ddbb43aeddc32c9",
+  "cases": {
+    "SpCas9": {
+      "counts": {
+        "display": {
+          "pass": 27,
+          "fail": 0,
+          "skip": 0
+        },
+        "numerical": {
+          "pass": 334,
+          "fail": 39,
+          "skip": 0
+        },
+        "provenance": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "numerical_failures": [
+        {
+          "name": "SpCas9(WT)/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 29.14373986491748,
+          "limit_pp": 8.171651174380019
+        },
+        {
+          "name": "SpCas9(WT)/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 11.726155236428518,
+          "limit_pp": 8.171651174380019
+        },
+        {
+          "name": "SpCas9(WT)/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 21.199582521321215,
+          "limit_pp": 8.171651174380019
+        },
+        {
+          "name": "SpCas9(WT)/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 9.884738417685465,
+          "limit_pp": 8.171651174380019
+        },
+        {
+          "name": "SpCas9(WT)/shap128-8/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 5.266375586596087,
+          "limit_pp": 5.115899080335945
+        },
+        {
+          "name": "SpCas9(WT)/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 11.630824887928775,
+          "limit_pp": 5.115899080335945
+        },
+        {
+          "name": "SpCas9-NG/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 10.337554303315777,
+          "limit_pp": 4.218765437066441
+        },
+        {
+          "name": "SpCas9-NG/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 15.157835211469573,
+          "limit_pp": 4.218765437066441
+        },
+        {
+          "name": "SpCas9-NG/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 7.94946421684756,
+          "limit_pp": 4.218765437066441
+        },
+        {
+          "name": "SpCas9-NG/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 7.038428956502607,
+          "limit_pp": 4.218765437066441
+        },
+        {
+          "name": "SpCas9-NG/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 3.9656427807239942,
+          "limit_pp": 3.8402947961360163
+        },
+        {
+          "name": "VRQR/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 13.784313434828317,
+          "limit_pp": 4.844781155111367
+        },
+        {
+          "name": "VRQR/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 11.95083377351302,
+          "limit_pp": 4.844781155111367
+        },
+        {
+          "name": "VRQR/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 11.177841268970651,
+          "limit_pp": 4.844781155111367
+        },
+        {
+          "name": "VRQR/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 8.66199362476569,
+          "limit_pp": 4.844781155111367
+        },
+        {
+          "name": "xCas9/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 15.496943232621298,
+          "limit_pp": 4.791262954774162
+        },
+        {
+          "name": "xCas9/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 17.195756384800035,
+          "limit_pp": 4.791262954774162
+        },
+        {
+          "name": "xCas9/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 9.673083379147435,
+          "limit_pp": 4.791262954774162
+        },
+        {
+          "name": "xCas9/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 12.339455830249305,
+          "limit_pp": 4.791262954774162
+        },
+        {
+          "name": "xCas9/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 3.9882067846014886,
+          "limit_pp": 3.5850129478786554
+        },
+        {
+          "name": "Sniper/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 26.9109116385507,
+          "limit_pp": 7.905268775445774
+        },
+        {
+          "name": "Sniper/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 11.423795592758045,
+          "limit_pp": 7.905268775445774
+        },
+        {
+          "name": "Sniper/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 20.024794660996456,
+          "limit_pp": 7.905268775445774
+        },
+        {
+          "name": "Sniper/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 9.159415214422244,
+          "limit_pp": 7.905268775445774
+        },
+        {
+          "name": "Sniper/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 11.32835863721406,
+          "limit_pp": 5.04672908617684
+        },
+        {
+          "name": "SpCas9-HF1/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 5.740419709524371,
+          "limit_pp": 4.767415405839481
+        },
+        {
+          "name": "SpCas9-HF1/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 10.435545590311282,
+          "limit_pp": 4.767415405839481
+        },
+        {
+          "name": "SpCas9-HF1/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 4.995345708921969,
+          "limit_pp": 4.767415405839481
+        },
+        {
+          "name": "SpCas9-HF1/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 5.529583404012635,
+          "limit_pp": 3.3336237138387004
+        },
+        {
+          "name": "eSpCas9(1.1)/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 12.257585489754135,
+          "limit_pp": 6.744551943747322
+        },
+        {
+          "name": "eSpCas9(1.1)/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 7.4187894975099065,
+          "limit_pp": 6.744551943747322
+        },
+        {
+          "name": "eSpCas9(1.1)/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 16.77277882782079,
+          "limit_pp": 6.744551943747322
+        },
+        {
+          "name": "eSpCas9(1.1)/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 7.8564273350050176,
+          "limit_pp": 4.065886310282432
+        },
+        {
+          "name": "HypaCas9/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 10.401689312204876,
+          "limit_pp": 6.273371122219571
+        },
+        {
+          "name": "HypaCas9/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 7.118930775001959,
+          "limit_pp": 6.273371122219571
+        },
+        {
+          "name": "HypaCas9/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 14.94106473177429,
+          "limit_pp": 6.273371122219571
+        },
+        {
+          "name": "HypaCas9/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 6.993282362451364,
+          "limit_pp": 3.843268070770078
+        },
+        {
+          "name": "evoCas9/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 3.5090960924830825,
+          "limit_pp": 2.946612011379622
+        },
+        {
+          "name": "evoCas9/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 3.6842145960393777,
+          "limit_pp": 2.946612011379622
+        }
+      ],
+      "fixed_case_prediction_parity": {
+        "status": "pass",
+        "raw": 1.6856820583343506,
+        "preserved_raw": 1.6856821775436401,
+        "atol": 1e-08,
+        "rtol": 1e-05
+      },
+      "report_sha256": "181e2b31bcaaa48f79e3260dcab36d62446c0d49bb22ccf893a3eea1fb9f5cdf",
+      "raw_sha256": "976f836e8be167fadd2ec2d70fb23945c77a229d5cedb8eecc0b5f97082c22c1",
+      "elapsed_seconds": 1415.943,
+      "report_status": "numerical_failures_recorded"
+    },
+    "Cas12a": {
+      "counts": {
+        "display": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        "numerical": {
+          "pass": 37,
+          "fail": 8,
+          "skip": 0
+        },
+        "provenance": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "numerical_failures": [
+        {
+          "name": "Cas12a/shap64-4/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 21.936532217683627,
+          "limit_pp": 5.250020034170877
+        },
+        {
+          "name": "Cas12a/shap64-4/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 24.58525246281946,
+          "limit_pp": 5.250020034170877
+        },
+        {
+          "name": "Cas12a/shap64-4/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 15.61747154471997,
+          "limit_pp": 5.250020034170877
+        },
+        {
+          "name": "Cas12a/shap64-4/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 25.776927479616717,
+          "limit_pp": 5.250020034170877
+        },
+        {
+          "name": "Cas12a/shap128-8/seed0-1/stability",
+          "status": "fail",
+          "max_difference_pp": 8.355464310853659,
+          "limit_pp": 4.319696273512833
+        },
+        {
+          "name": "Cas12a/shap128-8/seed0-2/stability",
+          "status": "fail",
+          "max_difference_pp": 7.324416012152087,
+          "limit_pp": 4.319696273512833
+        },
+        {
+          "name": "Cas12a/shap128-8/seed1-0/stability",
+          "status": "fail",
+          "max_difference_pp": 9.541086079903419,
+          "limit_pp": 4.319696273512833
+        },
+        {
+          "name": "Cas12a/shap128-8/seed2-0/stability",
+          "status": "fail",
+          "max_difference_pp": 9.38250882252261,
+          "limit_pp": 4.319696273512833
+        }
+      ],
+      "fixed_case_prediction_parity": {
+        "status": "pass",
+        "raw": 0.35913217067718506,
+        "preserved_raw": 0.3591322898864746,
+        "atol": 1e-08,
+        "rtol": 1e-05
+      },
+      "report_sha256": "99de0e2489e607a7de49a3e62ac1b0ebf0b345290f17e48dacc6ad83069e265e",
+      "raw_sha256": "9425d534dbf1413ac8c7d05b069d5b08ec406cff62d8e947dec6fa596766ab74",
+      "elapsed_seconds": 1012.993,
+      "report_status": "numerical_failures_recorded"
+    }
+  },
+  "repeat_scope": "SHAP estimator repeatability over memoized real deterministic model outputs",
+  "source_archive_sha256": "7104b7a46489d899ca98ff431027c70c4ac7e11997b13bd358e7303a87726af8",
+  "post_measurement_source_changes": {
+    "xai/charts.py": {
+      "measured": "378ea03f1d1d94e52c84aa94ca22aa41283beabab07dd83e3cee34326a1ed31a",
+      "final": "8f6fc89434421077781ae8fe3e0f8c70520212594af6de9419b08ec7f200a08d"
+    },
+    "desktop/xai_view.py": {
+      "measured": "9211dee5ed84d837259d59d7fd7d525f69e8d708224316fd9f458d5d4e034983",
+      "final": "de187f9d58c9562d9878191be361adef81b97c9cb152d35abe8147f8b3cdca65"
+    },
+    "docs/nt-xai/verify.py": {
+      "measured": "f48c64b4e8fc679d48f87b5147be445d1a6872718f14a11ea9522c3e37db8faf",
+      "final": "457ca735e6a6fd6ae115d3faf2a4a40cdc3413fe90ef7a0de7fd4c90f284e314"
+    }
+  },
+  "internal_log": {
+    "exists": true,
+    "bytes": 193656,
+    "methods_by_checkpoint": {
+      "SpCas9": [
+        "ig",
+        "rollout",
+        "shap"
+      ],
+      "Cas12a": [
+        "ig",
+        "rollout",
+        "shap"
+      ]
+    }
+  }
+}

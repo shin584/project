@@ -10,8 +10,9 @@
 Cas12a 사이트의 모델 입력 윈도우에 대해 SHAP을 계산한다.
 
 키는 예측기의 계산 식별(checkpoint sha256·계열·설명 프로토콜, #208)과 seed까지
-포함한다. 저장소의 legacy 파일 4개는 이 식별이 없어 조회에서 거부된다. NT의 단위
-교정 프로토콜과 재생성은 #201 소관이므로, 그 전에 이 스크립트로 다시 만들지 않는다.
+포함한다. 저장소의 legacy 파일 4개는 이 식별이 없어 조회에서 거부된다. #201의
+교정 프로토콜로 원출력·단위 메타데이터를 함께 저장한다. 같은 seed의 재현성은
+seed 간 안정성 통과를 뜻하지 않는다. 수치 검증 범위는 docs/nt-xai/README.md에 있다.
 """
 
 import sys
@@ -33,7 +34,7 @@ def main(seqs: list[str]) -> int:
         print(__doc__)
         return 1
 
-    predictors = predict.load_predictors()
+    predictors = predict.load_predictors(family="nt")
     made = skipped = failed = 0
 
     for n, raw in enumerate(seqs, 1):

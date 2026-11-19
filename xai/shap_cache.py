@@ -87,6 +87,9 @@ def load(key, root: Path | str | None = None):
                 return None
             values = np.asarray(f["values"], dtype=np.float64)
             scalars = [float(f[name]) for name in ("base_value", "pred", "additivity_error")]
+            from xai.units import ExplanationUnits
+            units = (ExplanationUnits(**json.loads(str(f["units"]))) if "units" in f.files
+                     else ExplanationUnits())
     except Exception:
         return None
     if values.shape != (len(record["window_seq"]),) or not (
@@ -96,7 +99,7 @@ def load(key, root: Path | str | None = None):
     return SHAPResult(values=values, base_value=base_value, pred=pred,
                       additivity_error=additivity_error,
                       background_seed=record["background_seed"],
-                      subset_seed=record["subset_seed"])
+                      subset_seed=record["subset_seed"], units=units)
 
 
 def save(key, result, root: Path | str | None = None) -> Path:
@@ -110,7 +113,9 @@ def save(key, result, root: Path | str | None = None) -> Path:
         raise ValueError(f"결과의 seed {seeds}가 키의 seed와 다릅니다.")
     path = _path(key, DEFAULT_DIR if root is None else root)
     path.parent.mkdir(parents=True, exist_ok=True)
+    from dataclasses import asdict
     np.savez(path, schema=np.array(SCHEMA), key=np.array(key),
+             units=np.array(json.dumps(asdict(result.units), sort_keys=True)),
              values=np.asarray(result.values, dtype=np.float64),
              base_value=result.base_value, pred=result.pred,
              additivity_error=result.additivity_error)

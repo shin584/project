@@ -162,58 +162,62 @@ def render_header(site, head: str, efficiency_pct: float, layout,
 
 
 def render_ig(result, sequence: str, layout) -> None:
+    units = result.units
+    st.caption("설명은 표의 0~100 제한 전 출력입니다. NT 특수 토큰은 IG 기준에서도 고정합니다.")
     st.markdown("#### 글자별 기여도 (Attribution Logo, IG)")
     st.markdown(
-        "**한 줄 요약 — 어느 글자가 효율을 올렸고, 어느 글자가 깎아먹었는지 보여줍니다.**\n\n"
+        f"**한 줄 요약 — 어느 글자가 {units.target}을 올렸고, 어느 글자가 깎아먹었는지 보여줍니다.**\n\n"
         "모델에게 *\"이 서열의 글자를 하나도 모르는 상태에서 시작해 지금 서열까지 "
         "조금씩 채워 넣으면, 점수가 어떻게 변하나?\"* 를 물어본 결과입니다. "
         "그 변화량을 글자마다 나눠 가진 것이 아래 그래프입니다.\n\n"
         "**읽는 법** · 각 자리에 그 자리의 실제 염기가 글자로 그려집니다. "
-        "**글자가 위로 클수록 효율을 많이 올린 자리**, **아래로 클수록 깎아먹은 자리**입니다. "
+        f"**글자가 위로 클수록 {units.target}을 많이 올린 자리**, **아래로 클수록 깎아먹은 자리**입니다. "
         "글자가 거의 안 보이면 있으나 없으나 비슷했다는 뜻입니다."
     )
-    pct = result.attribution * 100
-    show_figure(charts.attribution_logo(pct, sequence, layout))
+    pct = units.contribution(result.attribution)
+    show_figure(charts.attribution_logo(pct, sequence, layout, efficiency=units.efficiency))
     up, down = int(np.argmax(pct)), int(np.argmin(pct))
     seg = charts.segment_of
     st.success(
         "**이 그래프가 말하는 것**\n\n"
-        f"- 효율을 **가장 많이 올린 자리**: {up}번째 글자 `{sequence[up]}` "
-        f"({seg(up, layout)} 구간) → {pct[up]:+.2f}%p\n"
-        f"- 효율을 **가장 많이 깎은 자리**: {down}번째 글자 `{sequence[down]}` "
-        f"({seg(down, layout)} 구간) → {pct[down]:+.2f}%p"
+        f"- {units.target}을 **가장 많이 올린 자리**: {up}번째 글자 `{sequence[up]}` "
+        f"({seg(up, layout)} 구간) → {pct[up]:+.2f}{units.delta_unit}\n"
+        f"- {units.target}을 **가장 많이 깎은 자리**: {down}번째 글자 `{sequence[down]}` "
+        f"({seg(down, layout)} 구간) → {pct[down]:+.2f}{units.delta_unit}"
     )
     with st.expander("기술적 참고"):
         st.markdown(
-            "- 기준 입력은 **빈 서열(모든 염기 값 0)** 이고, 기준 대비 변화를 위치별로 나눈 값입니다.\n"
+            "- 기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다.\n"
             "- 기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사)."
         )
         st.caption(
-            f"예측 {result.pred * 100:.2f}% − 기준 {result.baseline_pred * 100:.2f}% "
-            f"= {(result.pred - result.baseline_pred) * 100:+.3f}%p, "
-            f"기여도 합 {pct.sum():+.3f}%p, 완결성 오차 {result.completeness_error * 100:.4f}%p"
+            f"예측 {units.prediction(result.pred):.2f}{units.value_unit} − 기준 {units.prediction(result.baseline_pred):.2f}{units.value_unit} "
+            f"= {units.contribution((result.pred - result.baseline_pred)):+.3f}{units.delta_unit}, "
+            f"기여도 합 {pct.sum():+.3f}{units.delta_unit}, 완결성 오차 {units.contribution(result.completeness_error):.4f}{units.delta_unit}"
         )
 
 
 def render_shap(result, sequence: str, layout) -> None:
+    units = result.units
+    st.caption("설명은 표의 0~100 제한 전 출력입니다. NT 특수 토큰은 IG 기준에서도 고정합니다.")
     st.markdown("#### 위치별 기여분 (SHAP)")
     st.markdown(
         "**한 줄 요약 — 평범한 서열과 비교해서, 이 서열의 각 자리가 점수를 얼마나 올리고 내렸는지입니다.**\n\n"
         "IG가 \"아무것도 없는 상태\"와 비교한다면, SHAP은 **\"무작위로 만든 평범한 서열들의 평균\"** "
         "과 비교합니다. 기준점이 다르니 강조하는 자리도 다를 수 있습니다.\n\n"
-        "**읽는 법** · 막대그래프에서 **빨강은 효율을 올린 자리, 파랑은 내린 자리**입니다. "
+        f"**읽는 법** · 막대그래프에서 **빨강은 {units.target}을 올린 자리, 파랑은 내린 자리**입니다. "
         "그 아래 워터폴 그래프는 기준점에서 출발해 각 자리의 기여를 하나씩 더해 "
         "최종 예측값에 도달하는 과정을 계단식으로 보여줍니다."
     )
-    pct = result.values * 100
-    show_figure(charts.shap_bars(pct, sequence, layout))
-    show_figure(charts.shap_waterfall(pct, result.base_value * 100, sequence, layout))
+    pct = units.contribution(result.values)
+    show_figure(charts.shap_bars(pct, sequence, layout, efficiency=units.efficiency))
+    show_figure(charts.shap_waterfall(pct, units.prediction(result.base_value), sequence, layout))
     top = np.argsort(-np.abs(pct))[:3]
     st.success(
         "**영향이 가장 컸던 자리 3곳**\n\n"
         + "\n".join(
             f"- {i}번째 글자 `{sequence[i]}` ({charts.segment_of(int(i), layout)} 구간) → "
-            f"효율을 {'올림' if pct[i] > 0 else '깎음'} ({pct[i]:+.2f}%p)" for i in top)
+            f"{units.target}을 {'올림' if pct[i] > 0 else '깎음'} ({pct[i]:+.2f}{units.delta_unit})" for i in top)
     )
     with st.expander("기술적 참고 (기준값 · 합산값)"):
         st.markdown(
@@ -222,10 +226,11 @@ def render_shap(result, sequence: str, layout) -> None:
             "- 추정에 샘플링을 쓰므로 계산 설정(샘플 수)을 바꾸면 값이 조금 달라질 수 있습니다."
         )
         st.caption(
-            f"기준값 {result.base_value * 100:.2f}% + SHAP 합 {pct.sum():+.2f}%p "
-            f"= {(result.base_value + result.values.sum()) * 100:.2f}% "
-            f"(실제 예측 {result.pred * 100:.2f}%, 가법성 오차 {result.additivity_error * 100:.4f}%p)"
+            f"기준값 {units.prediction(result.base_value):.2f}{units.value_unit} + SHAP 합 {pct.sum():+.2f}{units.delta_unit} "
+            f"= {units.prediction((result.base_value + result.values.sum())):.2f}{units.value_unit} "
+            f"(실제 예측 {units.prediction(result.pred):.2f}{units.value_unit}, 가법성 오차 {units.contribution(result.additivity_error):.4f}{units.delta_unit})"
         )
+
 
 
 def render_rollout(result, sequence: str, layout) -> None:

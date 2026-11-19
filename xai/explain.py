@@ -1,15 +1,16 @@
 """연결된 실제 모델에서 XAI 값(IG, SHAP)을 계산한다. 화면 코드와 분리된 순수 계산부.
 
 모델 접근은 predict.ExplainHandle로만 한다. 여기서는 TensorFlow/PyTorch를 직접 쓰지 않는다.
-모든 값은 모델 원출력(0~1 비율, clip 전) 기준이고, 화면에서 ×100(%p)으로 바꿔 보여준다.
+결과 필드는 모델 원출력 단위를 보존한다. 화면은 result.units로 표시 단위를 바꾼다.
 """
 
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
 from xai import identity
+from xai.units import ExplanationUnits
 
 
 @dataclass
@@ -18,6 +19,7 @@ class IGResult:
     pred: float                # f(x)
     baseline_pred: float       # f(기준 입력)
     completeness_error: float  # |Σ기여도 − (f(x) − f(기준))|
+    units: ExplanationUnits = field(default_factory=ExplanationUnits)
 
 
 @dataclass
@@ -29,6 +31,7 @@ class SHAPResult:
     # 값을 만든 두 seed (provenance). kernel_shap은 항상 채운다. 직접 만든 결과는 None.
     background_seed: int | None = None   # 배경 서열 seed
     subset_seed: int | None = None       # 부분집합 표본추출 seed
+    units: ExplanationUnits = field(default_factory=ExplanationUnits)
 
 
 #: IG 적분 단계를 한 번에 몇 개씩 역전파할지. 메모리가 부족하면 줄인다.
@@ -38,7 +41,7 @@ IG_CHUNK_SIZE = 8
 
 def integrated_gradients(handle, window_seq: str, steps: int = 64,
                          chunk_size: int = IG_CHUNK_SIZE, on_batch=None) -> IGResult:
-    """Integrated Gradients. 기준 입력은 전부 0(빈 서열), 구간 적분은 중점법.
+    """Integrated Gradients. 기본 기준 입력은 0, NT는 특수 토큰 고정. 중점법 적분.
 
     적분 단계를 한 배치에 모두 올리면 역전파 그래프가 steps배로 커져 메모리를 많이 쓴다.
     청크로 나눠 기울기 '합'을 누적하고 마지막에 steps로 나누면
@@ -48,28 +51,33 @@ def integrated_gradients(handle, window_seq: str, steps: int = 64,
     콜백 예외는 호출자에게 전파되며 남은 청크와 완결성 평가를 실행하지 않는다.
     """
     inputs = handle.ig_inputs(window_seq)
+    reference_fn = getattr(handle, "ig_baseline", None)
+    baseline = reference_fn(inputs) if reference_fn else [np.zeros_like(x) for x in inputs]
+    delta = [x - b for x, b in zip(inputs, baseline)]
     alphas = (np.arange(steps) + 0.5) / steps
 
     chunk = max(1, int(chunk_size))
     sums = [np.zeros(np.shape(x), dtype=np.float64) for x in inputs]
     for i in range(0, steps, chunk):
         a = alphas[i:i + chunk]
-        batch = [a.reshape((-1,) + (1,) * x.ndim) * x[None] for x in inputs]
+        batch = [b[None] + a.reshape((-1,) + (1,) * d.ndim) * d[None]
+                 for b, d in zip(baseline, delta)]
         _, grads = handle.ig_grad_fn(batch)
         for s, g in zip(sums, grads):
             s += np.asarray(g, dtype=np.float64).sum(axis=0)
         if on_batch is not None:
             on_batch(min(i + chunk, steps), steps)
 
-    attrs = [x * (s / steps) for x, s in zip(inputs, sums)]
+    attrs = [d * (s / steps) for d, s in zip(delta, sums)]
 
     f_x = float(handle.ig_grad_fn([x[None] for x in inputs])[0][0])
-    f_0 = float(handle.ig_grad_fn([np.zeros_like(x)[None] for x in inputs])[0][0])
+    f_0 = float(handle.ig_grad_fn([b[None] for b in baseline])[0][0])
     total = float(sum(a.sum() for a in attrs))
     return IGResult(
         attribution=np.asarray(handle.project(attrs), dtype=np.float64),
         pred=f_x, baseline_pred=f_0,
         completeness_error=abs(total - (f_x - f_0)),
+        units=getattr(handle, "units", None) or ExplanationUnits(),
     )
 
 
@@ -146,7 +154,7 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
             model_identity, head, window_seq, nsamples, n_background,
             background_seed, subset_seed))
         if hit is not None:
-            return hit
+            return replace(hit, units=getattr(handle, "units", None) or ExplanationUnits())
 
     import shap
 
@@ -196,7 +204,8 @@ def kernel_shap(handle, window_seq: str, nsamples: int = 512,
     pred = float(handle.raw_fn(onehot[None])[0])
     return SHAPResult(values=values, base_value=base, pred=pred,
                       additivity_error=abs(base + values.sum() - pred),
-                      background_seed=int(background_seed), subset_seed=int(subset_seed))
+                      background_seed=int(background_seed), subset_seed=int(subset_seed),
+                      units=getattr(handle, "units", None) or ExplanationUnits())
 
 @dataclass
 class RolloutResult:

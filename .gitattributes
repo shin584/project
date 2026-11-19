@@ -6,3 +6,5 @@ docs/runtime/protocol-206.json -text whitespace=cr-at-eol
 # #195 registration and evidence checksums bind exact bytes across checkouts.
 docs/runtime/cas12a-ig-contract.json -text whitespace=cr-at-eol
 docs/runtime/evidence/issue195-comparison01/** -text whitespace=cr-at-eol
+# #201 frozen contract and measurement artifacts bind exact bytes on every OS.
+docs/nt-xai/** -text whitespace=cr-at-eol

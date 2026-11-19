@@ -1,0 +1,120 @@
+{
+  "issue": 201,
+  "source_test": "tests/test_nt_process.py",
+  "reused_test_fixture_issue": 194,
+  "pytest_counts": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pytest_seconds": 209.64,
+  "raw_test_evidence": {
+    "issue": 194,
+    "baseline": "docs/equivalence-baseline/capture.json",
+    "prediction_tolerance": "CSV byte equality; baseline already rounds raw to 4 and score to 2 decimals",
+    "xai_quality": "Execution/PNG/cache only; units and numerical quality are #201",
+    "operations": [
+      {
+        "stage": "startup",
+        "seconds": 28.322,
+        "progress_events": 1
+      },
+      {
+        "stage": "scan",
+        "seconds": 0.002,
+        "progress_events": 0
+      },
+      {
+        "stage": "prediction",
+        "seconds": 34.468,
+        "progress_events": 3
+      },
+      {
+        "stage": "csv",
+        "seconds": 0.018,
+        "progress_events": 0
+      },
+      {
+        "stage": "SpCas9/ig",
+        "seconds": 24.243,
+        "progress_events": 4
+      },
+      {
+        "stage": "SpCas9/ig/resize",
+        "seconds": 0.003,
+        "progress_events": 0
+      },
+      {
+        "stage": "SpCas9/shap",
+        "seconds": 31.277,
+        "progress_events": 34
+      },
+      {
+        "stage": "SpCas9/shap/resize",
+        "seconds": 0.003,
+        "progress_events": 0
+      },
+      {
+        "stage": "SpCas9/rollout",
+        "seconds": 1.046,
+        "progress_events": 0
+      },
+      {
+        "stage": "SpCas9/rollout/resize",
+        "seconds": 0.002,
+        "progress_events": 0
+      },
+      {
+        "stage": "Cas12a/ig",
+        "seconds": 28.939,
+        "progress_events": 4
+      },
+      {
+        "stage": "Cas12a/ig/resize",
+        "seconds": 0.02,
+        "progress_events": 0
+      },
+      {
+        "stage": "Cas12a/shap",
+        "seconds": 57.89,
+        "progress_events": 34
+      },
+      {
+        "stage": "Cas12a/shap/resize",
+        "seconds": 0.026,
+        "progress_events": 0
+      },
+      {
+        "stage": "Cas12a/rollout",
+        "seconds": 1.934,
+        "progress_events": 0
+      },
+      {
+        "stage": "Cas12a/rollout/resize",
+        "seconds": 0.003,
+        "progress_events": 0
+      }
+    ],
+    "status": "pass",
+    "child_pid": 18220,
+    "generation": 1,
+    "csv_bytes": 3877,
+    "csv_base_columns_byte_equal": true,
+    "ui_has_no_computation_imports": true,
+    "process_tree_peak_rss_bytes": {
+      "startup": 2367397888,
+      "prediction": 3169722368,
+      "csv": 2889420800,
+      "SpCas9/ig": 2883452928,
+      "SpCas9/shap": 2190458880,
+      "SpCas9/rollout": 2039996416,
+      "Cas12a/ig": 2770292736,
+      "Cas12a/ig/resize": 2409672704,
+      "Cas12a/shap": 2358157312,
+      "Cas12a/rollout": 2128572416,
+      "Cas12a/rollout/resize": 2131423232
+    },
+    "after_close_ui_rss_bytes": 11538432,
+    "child_exited": true
+  }
+}

@@ -97,7 +97,7 @@ def explanation_fragment(
         indices = np.argsort(-np.abs(values) if signed else -values)[:3]
         lines = []
         for i in indices:
-            suffix = (f" → 효율을 {'올림' if values[i] > 0 else '깎음'} ({values[i]:+.2f}%p)"
+            suffix = (f" → {units.target}을 {'올림' if values[i] > 0 else '깎음'} ({values[i]:+.2f}{units.delta_unit})"
                       if signed else "")
             lines.append(f'<li>{position(int(i))}{suffix}</li>')
         return f'<div class="success"><strong>{title}</strong><ul>' + ''.join(lines) + '</ul></div>'
@@ -107,43 +107,45 @@ def explanation_fragment(
         result = cache.integrated_gradients(
             predictor, model_key, head, window, steps, on_batch=on_batch
         )
+        units = result.units
         body = '<h3>글자별 기여도 (Attribution Logo, IG)</h3>'
-        body += '<p>글자가 위로 클수록 효율을 많이 올린 자리, 아래로 클수록 깎아먹은 자리입니다.</p>'
-        body += _figure(core.attribution_logo(result.attribution * 100, window, layout),
+        body += f'<p>글자가 위로 클수록 {units.target}을 많이 올린 자리, 아래로 클수록 깎아먹은 자리입니다.</p>'
+        body += _figure(core.attribution_logo(units.contribution(result.attribution), window, layout, efficiency=units.efficiency),
                         "글자별 기여도 (Attribution Logo, IG)", size)
-        pct = result.attribution * 100
+        pct = units.contribution(result.attribution)
         up, down = int(np.argmax(pct)), int(np.argmin(pct))
         body += ('<div class="success"><strong>이 그래프가 말하는 것</strong>'
-                 f'<p>효율을 <strong>가장 많이 올린 자리</strong>: {position(up)} → {pct[up]:+.2f}%p</p>'
-                 f'<p>효율을 <strong>가장 많이 깎은 자리</strong>: {position(down)} → {pct[down]:+.2f}%p</p></div>')
+                 f'<p>{units.target}을 <strong>가장 많이 올린 자리</strong>: {position(up)} → {pct[up]:+.2f}{units.delta_unit}</p>'
+                 f'<p>{units.target}을 <strong>가장 많이 깎은 자리</strong>: {position(down)} → {pct[down]:+.2f}{units.delta_unit}</p></div>')
         body += ('<details><summary>기술적 참고</summary>'
-                 '<p>기준 입력은 빈 서열(모든 염기 값 0)이고, 기준 대비 변화를 위치별로 나눈 값입니다. '
+                 '<p>기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. '
                  '기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).</p>'
-                 f'<p class="caption">예측 {result.pred * 100:.2f}% − '
-                 f'기준 {result.baseline_pred * 100:.2f}% · '
-                 f'기여도 합 {result.attribution.sum() * 100:+.3f}%p · '
-                 f'완결성 오차 {result.completeness_error * 100:.4f}%p</p></details>')
+                 f'<p class="caption">예측 {units.prediction(result.pred):.2f}{units.value_unit} − '
+                 f'기준 {units.prediction(result.baseline_pred):.2f}{units.value_unit} · '
+                 f'기여도 합 {units.contribution(result.attribution).sum():+.3f}{units.delta_unit} · '
+                 f'완결성 오차 {units.contribution(result.completeness_error):.4f}{units.delta_unit}</p></details>')
     elif method == "shap":
         nsamples = _setting(params, "nsamples", 16, 1024)
         background = _setting(params, "n_background", 2, 32)
         result = cache.kernel_shap(
             predictor, model_key, head, window, nsamples, background, on_batch=on_batch
         )
-        values = result.values * 100
+        units = result.units
+        values = units.contribution(result.values)
         body = '<h3>위치별 기여분 (SHAP)</h3>'
-        body += '<p>빨강은 효율을 올린 자리, 파랑은 내린 자리입니다. 워터폴은 기준점에서 각 기여를 더해 최종 예측값에 도달하는 과정입니다.</p>'
-        body += _figure(core.shap_bars(values, window, layout), "위치별 기여분 (SHAP)", size)
-        body += _figure(core.shap_waterfall(values, result.base_value * 100, window, layout),
+        body += f'<p>빨강은 {units.target}을 올린 자리, 파랑은 내린 자리입니다. 워터폴은 기준점에서 각 기여를 더해 최종 예측값에 도달하는 과정입니다.</p>'
+        body += _figure(core.shap_bars(values, window, layout, efficiency=units.efficiency), "위치별 기여분 (SHAP)", size)
+        body += _figure(core.shap_waterfall(values, units.prediction(result.base_value), window, layout),
                         "SHAP 워터폴", size)
         body += top_positions("영향이 가장 컸던 자리 3곳", values, signed=True)
         body += ('<details><summary>기술적 참고 (기준값 · 합산값)</summary>'
                  '<p>위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. '
                  '배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.</p>'
-                 f'<p class="caption">기준값 {result.base_value * 100:.2f}% + '
-                 f'SHAP 합 {values.sum():+.2f}%p = '
-                 f'{(result.base_value + result.values.sum()) * 100:.2f}% · '
-                 f'실제 예측 {result.pred * 100:.2f}% · '
-                 f'가법성 오차 {result.additivity_error * 100:.4f}%p</p></details>')
+                 f'<p class="caption">기준값 {units.prediction(result.base_value):.2f}{units.value_unit} + '
+                 f'SHAP 합 {values.sum():+.2f}{units.delta_unit} = '
+                 f'{units.prediction((result.base_value + result.values.sum())):.2f}{units.value_unit} · '
+                 f'실제 예측 {units.prediction(result.pred):.2f}{units.value_unit} · '
+                 f'가법성 오차 {units.contribution(result.additivity_error):.4f}{units.delta_unit}</p></details>')
     elif method == "rollout":
         result = cache.attention_rollout(predictor, model_key, head, window)
         body = '<h3>위치별 정보 의존도 (Attention Rollout)</h3>'
@@ -158,6 +160,14 @@ def explanation_fragment(
         body += f'<p class="caption">{result.n_layers}개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다.</p>'
     else:
         raise ValueError(f"모르는 XAI 기법: {method}")
+
+    if method in ("ig", "shap"):
+        note = ("설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다."
+                if units.efficiency else "설명은 모델 원출력 단위이며 효율이나 백분위 기여도가 아닙니다.")
+        body += f'<p class="caption">{note}</p>'
+        body += (f'<details><summary>출력 단위 참고</summary><p>{html.escape(units.source)}</p>'
+                 f'<p>raw 예측 {result.pred:.8g} · 표시 배율 {units.scale:.8g} · '
+                 f'예측/기준 오프셋 {units.offset:.8g}</p></details>')
 
     sequence = "".join(
         f'<span style="background-color:{core.SEGMENT_COLORS[core.segment_of(i, layout)]}55">'

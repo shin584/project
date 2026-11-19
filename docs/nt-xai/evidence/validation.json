@@ -1,0 +1,193 @@
+{
+  "issue": 201,
+  "first_execution": [
+    {
+      "stage": "regression",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "test/test_nt_explain.py",
+        "test/test_predict.py",
+        "test/test_explain.py",
+        "test/test_explain_cache.py",
+        "test/test_cache_identity.py",
+        "test/test_shap_rng.py",
+        "test/test_core_facade.py",
+        "tests/test_desktop_xai.py",
+        "tests/test_nt_cancellation.py",
+        "tests/test_nt_xai_view.py",
+        "tests/test_progress_callback.py",
+        "tests/test_shap_cache.py",
+        "tests/test_worker_cache.py",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0
+    },
+    {
+      "stage": "SpCas9",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/nt-xai/verify.py",
+        "SpCas9"
+      ],
+      "exit_code": 1
+    },
+    {
+      "stage": "Cas12a",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/nt-xai/verify.py",
+        "Cas12a"
+      ],
+      "exit_code": 1
+    },
+    {
+      "stage": "process",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "tests/test_nt_process.py",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "final_execution": [
+    {
+      "stage": "audit",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/nt-xai/audit_evidence.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "stage": "display",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/nt-xai/render_evidence.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "stage": "regression",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "test/test_nt_explain.py",
+        "test/test_predict.py",
+        "test/test_explain.py",
+        "test/test_explain_cache.py",
+        "test/test_cache_identity.py",
+        "test/test_shap_rng.py",
+        "test/test_core_facade.py",
+        "tests/test_desktop_xai.py",
+        "tests/test_nt_cancellation.py",
+        "tests/test_nt_xai_view.py",
+        "tests/test_progress_callback.py",
+        "tests/test_shap_cache.py",
+        "tests/test_worker_cache.py",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0
+    },
+    {
+      "stage": "shared_ig",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "test/test_cas12a_ig.py::test_selected_handle_explains_the_composed_model_through_the_existing_loop",
+        "test/test_cas12a_ig.py::test_path_protocol_prevents_cross_path_memory_and_disk_cache_hits",
+        "test/test_cas12a_ig.py::test_selected_path_keeps_progress_and_callback_cancellation",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "final_pytest_counts": {
+    "passed": 193,
+    "failed": 0,
+    "skipped": 0
+  },
+  "final_pytest_scopes": [
+    {
+      "stage": "regression",
+      "passed": 189,
+      "seconds": 89.48,
+      "warnings": 4
+    },
+    {
+      "stage": "shared_ig",
+      "passed": 3,
+      "seconds": 28.33
+    },
+    {
+      "stage": "process",
+      "passed": 1,
+      "seconds": 209.64
+    }
+  ],
+  "numerical_exit_codes": "1 is expected for the recorded SHAP seed-stability failures; not a numerical pass",
+  "display_checks": {
+    "initial_all_heads": 30,
+    "final_saved_arrays": 6
+  },
+  "visual_review": "Opened final SpCas9-NG and Cas12a IG, SHAP waterfall and Rollout PNGs; existing graph composition retained. Cas12a segment coloring is not corrected.",
+  "development_failures": [
+    {
+      "passed": 92,
+      "failed": 1,
+      "reason": "Tiny ESM fixture dropout typed as int; changed to float"
+    },
+    {
+      "passed": 7,
+      "failed": 1,
+      "reason": "ESM inputs_embeds function mismatch; corrected via ordinary input-id forward hook"
+    },
+    {
+      "passed": 8,
+      "failed": 0,
+      "reason": "Focused NT units/function/reference/cancellation after repair"
+    }
+  ],
+  "post_collection_audit": [
+    {
+      "stage": "audit",
+      "command": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "docs/nt-xai/audit_evidence.py"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

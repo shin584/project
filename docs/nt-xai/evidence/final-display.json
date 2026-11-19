@@ -1,0 +1,53 @@
+{
+  "issue": 201,
+  "scope": "final renderer over saved real arrays, no model inference",
+  "observations": [
+    {
+      "cas": "SpCas9",
+      "head": "SpCas9-NG",
+      "method": "ig",
+      "pngs": 1,
+      "status": "pass"
+    },
+    {
+      "cas": "SpCas9",
+      "head": "SpCas9-NG",
+      "method": "shap",
+      "pngs": 2,
+      "status": "pass"
+    },
+    {
+      "cas": "SpCas9",
+      "head": "SpCas9-NG",
+      "method": "rollout",
+      "pngs": 2,
+      "status": "pass"
+    },
+    {
+      "cas": "Cas12a",
+      "head": "Cas12a",
+      "method": "ig",
+      "pngs": 1,
+      "status": "pass"
+    },
+    {
+      "cas": "Cas12a",
+      "head": "Cas12a",
+      "method": "shap",
+      "pngs": 2,
+      "status": "pass"
+    },
+    {
+      "cas": "Cas12a",
+      "head": "Cas12a",
+      "method": "rollout",
+      "pngs": 2,
+      "status": "pass"
+    }
+  ],
+  "renderer_sha256": "de187f9d58c9562d9878191be361adef81b97c9cb152d35abe8147f8b3cdca65",
+  "charts_sha256": "8f6fc89434421077781ae8fe3e0f8c70520212594af6de9419b08ec7f200a08d",
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0
+}

@@ -42,6 +42,7 @@ from collections.abc import Callable
 from typing import Any
 
 from xai import explain, identity
+from xai.quality import record_quality
 
 #: 입증된 계산 식별, 또는 예측기가 식별을 대야 하는 이름 문자열 ("A/Cas12a").
 ModelKey = identity.ExplanationIdentity | str
@@ -134,7 +135,9 @@ class ExplainCache:
         model_identity = self._identity(model_key, predictor)
         if model_identity is None:
             # 식별을 입증할 수 없다: 적중으로 처리하지도, 저장하지도 않는다.
-            return compute(predictor.explain_handle(head))
+            result = compute(predictor.explain_handle(head))
+            record_quality(result, None, request)
+            return result
 
         key = (request[0], model_identity) + request[1:]
         with self._lock:
@@ -144,6 +147,7 @@ class ExplainCache:
 
         # 미적중일 때만 handle을 만든다 (모델을 올릴 수 있다).
         result = compute(predictor.explain_handle(head))
+        record_quality(result, model_identity, request)
 
         with self._lock:
             self._entries[key] = result
