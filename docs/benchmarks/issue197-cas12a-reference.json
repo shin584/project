@@ -1,0 +1,62 @@
+{
+  "issue": 197,
+  "backend": "tensorflow",
+  "versions": {
+    "keras": "3.14.1",
+    "tensorflow": "2.21.0",
+    "numpy": "2.3.2"
+  },
+  "checkpoint_sha256": "94ac977865efa1cdad734ae05e033cbaf40b38e109013a6d2fe2b9361aa8b28f",
+  "training_feature_source_sha256": "e2fe038ed210edf346e70b04ecf5dc978f1ba15677a613cdc1f68feca2897bfa",
+  "source_snapshot_sha256": "376a42838d9f118a4f7cf952fb95a00901134c3dbf65d07e9eba456ecb44c046",
+  "tolerance": {
+    "what": "Same .keras bytes under the torch backend vs the tensorflow backend, inference mode, float32, every fixed case, every output head.",
+    "max_abs_diff": 0.0001,
+    "max_rel_diff": 0.001,
+    "rationale": "float32 eps is about 1.2e-7 and both graphs accumulate over a 30-34 step recurrence plus convolution reductions, so a few hundred eps of reordering noise is expected. 1e-4 raw is still below the 0.01 %p resolution the screen can show for the Cas12a probability, and far below the 0.5 %p a SpCas9 z-score moves per 1e-4."
+  },
+  "cases": [
+    {
+      "window": "TCGCTTTAAGAATAAATAAAAGCGCCACAGGATT",
+      "sequence_input_sha256": "567897b0e7d9cf2041841cbca066ffcb2ab61c8b2f8038f31324058a63332b2d",
+      "feature_input_sha256": "31b8686cb3c0fbc172316ff796c45766099a99ddeed84ef83386c70c234e0e03",
+      "raw_score": 0.7750159502029419
+    },
+    {
+      "window": "GTGGTTTAGTCAATCCTGTGGCGCTTTTATTTAT",
+      "sequence_input_sha256": "d7e3dd03083dd3f2ed0afbacf4af67e72e8143b63c0b150579fc501179ee5148",
+      "feature_input_sha256": "96fe5c4a1455bcd7a9113c8406b3004baec6c3b51a6ec04ce2f04c14df657a31",
+      "raw_score": 0.6304842233657837
+    },
+    {
+      "window": "AAAATTTAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "sequence_input_sha256": "e78535f019840ec6ff1e47b8086117fe8f3f393ffafa7c9542ab6a517c7c4b41",
+      "feature_input_sha256": "2973c5129dad2f0fd2de8620e89b937dd89492c52f691044a53a3f39caa8babc",
+      "raw_score": 0.5579425692558289
+    },
+    {
+      "window": "TTTAAGAATAAATAAAAGCGCCACAGGATTGACT",
+      "sequence_input_sha256": "4487ffe29d993030f21ead44b55f970fc2dcb2e49d930c32eb93c9bd988e9787",
+      "feature_input_sha256": "19d5de4f0c709aaaa150613314144bbce914a81ccbc252e2f4f824d09697e36a",
+      "raw_score": 0.7837454080581665
+    },
+    {
+      "window": "TTTATAAAGTTTTGGCTCCTTACCTGGTTCCCCT",
+      "sequence_input_sha256": "da70fe4ef0e1495bc9276dae70aad3e047a73b8fde188d4f37febf88902bbb5a",
+      "feature_input_sha256": "82d6996ff5fd10347f4a462abb2a7447a9c0a173c6ac002ec0a87b90b7dc0201",
+      "raw_score": 0.4164644181728363
+    },
+    {
+      "window": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "sequence_input_sha256": "e8fa3bb9712740c1c41fee09546a51994c604625c91de8bea5847c15fed59b0b",
+      "feature_input_sha256": "2973c5129dad2f0fd2de8620e89b937dd89492c52f691044a53a3f39caa8babc",
+      "raw_score": 0.6199269890785217
+    },
+    {
+      "window": "GCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC",
+      "sequence_input_sha256": "16db24a9b1bcd2d3b70a25a21f08a6d601e82fc6bc0bae4d45275924ed8f3d53",
+      "feature_input_sha256": "f19a56fdbee6f94d40f9eb19658df491ca4200bc57d5cd6f32ee050a62b85085",
+      "raw_score": 0.06784102320671082
+    }
+  ]
+}

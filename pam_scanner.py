@@ -25,6 +25,7 @@ class CasConfig:
     cut_offset:      int
     model_input_len: int
     pam_report_len:  int = 0    # 저장·표시할 PAM 길이 (0이면 pam_iupac 길이)
+    window_upstream: int = 0    # 5prime PAM 앞의 모델 문맥 (기존 NT=0, manifest CNN=4)
 
 
 # SpCas9는 SpCas9-NG(2bp NG)까지 잡기 위해 NG로 탐색하되,
@@ -203,7 +204,7 @@ def extract_model_input_window(search_seq: str, pam_start: int,
     if cfg.pam_position == "3prime":
         window_start = pam_start - cfg.guide_len - WINDOW_UPSTREAM
     else:
-        window_start = pam_start
+        window_start = pam_start - cfg.window_upstream
     window_end = window_start + cfg.model_input_len
     if window_start < 0 or window_end > len(search_seq):
         return ""
@@ -252,11 +253,11 @@ def scan_pam(seq: str, cfg: CasConfig,
     return sites
 
 
-def scan_all(input_dna: str) -> ScanResult:
+def scan_all(input_dna: str, *, configs: list[CasConfig] | None = None) -> ScanResult:
     """검증 → 모든 Cas 설정에 대해 PAM 탐색 (출력 없음)"""
     clean  = validate_sequence(input_dna)
     result = ScanResult(input_seq=clean)
-    for cfg in CAS_CONFIGS:
+    for cfg in CAS_CONFIGS if configs is None else configs:
         result.sites.extend(scan_pam(clean, cfg, center=result.center_idx))
     return result
 

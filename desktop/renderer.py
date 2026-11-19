@@ -41,6 +41,9 @@ class PredictionRenderer:
     def _model_key(self, cas: str) -> str:
         return f"A/{cas}"
 
+    def _scan(self, dna: str):
+        return core.scan_all(dna)
+
     def warm_up(self, on_batch: OnBatch) -> str:
         if self._predictors is None:
             self._predictors = core.load_predictors()
@@ -52,7 +55,7 @@ class PredictionRenderer:
     ) -> list[core.VariantResult]:
         if self._predictors is None:
             self._predictors = core.load_predictors()
-        scan = core.scan_all(dna)
+        scan = self._scan(dna)
         total_sites = sum(
             sum(s.cas_type == cas and bool(s.model_input_seq) for s in scan.sites)
             for (_, cas), predictor in self._predictors.items()
@@ -72,7 +75,7 @@ class PredictionRenderer:
         return result.sorted_variant_results()
 
     def sites_fragment(self, dna: str, on_batch: OnBatch) -> str:
-        sites = core.scan_all(dna).sites
+        sites = self._scan(dna).sites
         metrics = '<div class="metrics">' + "".join(
             f'<div><span>{html.escape(config.name)}</span><strong>'
             f'{sum(s.cas_type == config.name for s in sites)}개 발견</strong></div>'
@@ -120,7 +123,7 @@ class PredictionRenderer:
             "variants": variant_comparison_fragment(rows),
             "detail": (
                 detail_fragment(rows)
-                + controls_template(core.scan_all(dna).sites, rows, self._explain_heads)
+                + controls_template(self._scan(dna).sites, rows, self._explain_heads)
             ),
         }
 
@@ -142,7 +145,7 @@ class PredictionRenderer:
         size: int,
         on_batch: OnBatch,
     ) -> str:
-        site = next((s for s in core.scan_all(dna).sites if s.site_key == site_key), None)
+        site = next((s for s in self._scan(dna).sites if s.site_key == site_key), None)
         if site is None:
             raise LookupError(f"그런 사이트가 없습니다: {site_key}")
         if self._predictors is None:

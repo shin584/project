@@ -1,0 +1,20 @@
+diff --git a/predict.py b/predict.py
+--- a/predict.py
++++ b/predict.py
+@@ -240 +240,4 @@
+-        "A", "Cas12a", (), family="non_nt", name="Cas12a CNN manifest"),
++        "A", "Cas12a", ("models/non_nt/cas12a-cnn-20261102/cas12a_cnn_manifest.keras",),
++        output_mode="raw", family="non_nt", name="Cas12a CNN+BiLSTM manifest",
++        asset_id="cas12a-cnn-20261102",
++        raw_unit="0~1 비율 — ×100이 예측 절단 효율(%)입니다"),
+@@ -730,0 +734 @@
++        ("A", "Cas12a"): "non_nt_cas12a_predict:NonNTCas12aPredictor",
+diff --git a/desktop/worker_renderer.py b/desktop/worker_renderer.py
+--- a/desktop/worker_renderer.py
++++ b/desktop/worker_renderer.py
+@@ -85,0 +86,5 @@
++    def _scan(self, dna):
++        from non_nt_cas12a_predict import MANIFEST_CAS_CONFIGS
++
++        return core.scan_all(dna, configs=MANIFEST_CAS_CONFIGS)
++
