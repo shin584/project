@@ -329,6 +329,7 @@ class DesktopApi:
     모든 메서드는 **즉시** `{"request_id": int}`을 돌려주고, 결과는 이벤트로 간다.
     `save_csv`는 저장 대화상자를 닫으면 `{"request_id": None}`을 돌려주고 아무
     작업도 맡기지 않는다. `cancel`도 `{"request_id": None}`이다.
+    `save_context`는 작업 없이 저장용 `{generation, revision}`만 반환한다.
     """
 
     def __init__(
@@ -349,7 +350,7 @@ class DesktopApi:
         한 번만 일어나고(ADR 0001의 모듈 수준 싱글턴), 그 뒤의 호출은 `ready`만
         다시 보낸다. 그래서 화면은 언제 불러도 신호를 받는다.
         """
-        return self._reply(self._dispatcher.submit_lifecycle(self._renderer.warm_up))
+        return self._submit(self._renderer.warm_up, lifecycle=True)
 
     def select_family(self, family: str) -> dict:
         """Switch both Cas predictors together; preparation reports `ready`."""
@@ -399,7 +400,13 @@ class DesktopApi:
 
         return self._submit(job)
 
-    def save_csv(self, dna: str, filters: dict[str, Any] | None = None) -> dict:
+    def save_context(self) -> dict:
+        """Capture a save's identity before releasing the JS submission queue."""
+        generation, revision = self._dispatcher.submission_identity()
+        return {"generation": generation, "revision": revision}
+
+    def save_csv(self, dna: str, filters: dict[str, Any] | None = None,
+                 generation: int | None = None, revision: int | None = None) -> dict:
         """CSV 한 장을 저장한다. Streamlit 화면과 같이 전체 상세 한 장뿐이다.
 
         `filters`는 '전체 상세 보기'가 지금 **검색해 둔** 조건이다. Streamlit의
@@ -409,7 +416,16 @@ class DesktopApi:
         """
         # 저장 대화상자는 계산이 아니라 사용자 선택이므로 작업자에 맡기지 않는다.
         # 닫으면 요청 자체가 생기지 않아 진행 중인 계산도 건드리지 않는다.
-        generation = getattr(self._dispatcher, "generation", None)
+        identity = getattr(self._dispatcher, "submission_identity", None)
+        current_generation, current_revision = identity() if identity else (None, None)
+        if generation is None:
+            generation = current_generation
+        elif generation != current_generation:
+            return {"request_id": None}
+        if revision is None:
+            revision = current_revision
+        elif revision != current_revision:
+            return {"request_id": None}
         chosen = self._ask_save_path(CSV_FILENAME)
         if not chosen:
             return {"request_id": None}
@@ -430,22 +446,20 @@ class DesktopApi:
             }
 
         if generation is not None:
-            rid = self._dispatcher.submit_for_generation(job, generation)
-            return {"request_id": None} if rid is None else self._reply(rid)
+            reply = self._dispatcher.submit_request(job, generation=generation, revision=revision)
+            return {"request_id": None} if reply is None else reply
         return self._submit(job)
 
     def cancel(self) -> dict:
         self._dispatcher.cancel()
         return {"request_id": None}
 
-    def _submit(self, job: Callable[[OnBatch], Fragments]) -> dict:
-        return self._reply(self._dispatcher.submit(job))
-
-    def _reply(self, request_id: int) -> dict:
-        reply = {"request_id": request_id}
-        if hasattr(self._dispatcher, "generation"):
-            reply.update(generation=self._dispatcher.generation, family=self._dispatcher.family)
-        return reply
+    def _submit(self, job: Callable[[OnBatch], Any], *, lifecycle: bool = False) -> dict:
+        submit_request = getattr(self._dispatcher, "submit_request", None)
+        if submit_request is not None:
+            return submit_request(job, lifecycle=lifecycle)
+        submit = self._dispatcher.submit_lifecycle if lifecycle else self._dispatcher.submit
+        return {"request_id": submit(job)}
 
 
 def webview_emitter(window) -> Callable[[dict], None]:

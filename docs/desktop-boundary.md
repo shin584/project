@@ -47,7 +47,8 @@ UI import 경로는 `desktop.renderer`, `desktop.fake`나 모델 런타임을 �
 | `scan_sites(dna)` | 사이트 탐색 | 조각 `sites` |
 | `predict(dna)` | 예측 | 조각 `best`, `variants`, `detail` |
 | `explain(dna, site_key, head, method, params, size)` | XAI 한 기법 | 조각 `xai` |
-| `save_csv(dna, filters)` | CSV 저장 | 조각 `notice` |
+| `save_context()` | 저장 대화상자의 세대·취소 상태 고정 | `{generation, revision}` |
+| `save_csv(dna, filters, generation, revision)` | CSV 저장 | 조각 `notice` |
 | `cancel()` | 진행 중·대기 중 요청 취소 | 없음 |
 
 - `dna` — 사용자가 넣은 81bp 서열 그대로. 검증은 파이썬이 한다 (실패는 `error` 이벤트).
@@ -79,6 +80,15 @@ CSV는 Streamlit 화면과 같이 **전체 상세 한 장뿐**이고, 파일 이
 (`crispr_prediction_results.csv`). `cancel()`도 `{"request_id": null}`이다.
 대화상자를 열었던 세대가 바뀌면 저장 요청을 폐기한다. 계산 중 전환·취소된 CSV도
 파일 쓰기 직전에 세대·요청 ID를 검사해 게시하지 않는다.
+화면은 저장 버튼을 눌렀던 `generation`을 함께 보내며, 이미 이전 세대라면
+대화상자를 열지 않는다. 이 인자를 생략한 기존 호출은 API 진입 시점의 세대를 쓴다.
+JS는 저장 대화상자 응답을 기다리는 동안에도 전환·취소 호출을 전달한다.
+대화상자 중 취소나 새 계산이 생긴 경우도 제출 시점의 요청 변경 여부를 검사해
+저장을 폐기한다.
+먼저 직렬 호출 큐에서 빠른 `save_context()` 응답을 기다려 `revision`을 고정한 뒤
+대화상자 호출만 분리한다. 취소·새 분석이 저장 API보다 먼저 Python에 도착하더라도
+오래된 저장이 새 요청의 revision을 채택할 수 없다. `save_context`는 작업을 제출하지
+않으며 대화상자 취소도 기존처럼 진행 중 계산을 취소하지 않는다.
 
 - `filters` — '전체 상세 보기'가 **검색해 둔** 조건. 생략하면 전부 통과다(= 화면의
   기본값). `{"cas_names": [이름...], "eff_range": [최소, 최대], "dist_range": [최소, 최대]}`

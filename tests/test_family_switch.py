@@ -79,7 +79,8 @@ def test_switch_during_work_discards_old_events_and_pending_csv(operation, tmp_p
         dispatcher.close()
 
 
-def test_save_dialog_from_previous_family_cannot_save_after_switch(tmp_path):
+@pytest.mark.parametrize("action", ["switch", "cancel"])
+def test_obsolete_save_dialog_cannot_save_after_switch_or_cancel(tmp_path, action):
     opened, release = threading.Event(), threading.Event()
     saved = tmp_path / "obsolete.csv"
     replies = []
@@ -95,7 +96,7 @@ def test_save_dialog_from_previous_family_cannot_save_after_switch(tmp_path):
     try:
         saving.start()
         assert opened.wait(5)
-        api.select_family("nt")
+        api.select_family("nt") if action == "switch" else api.cancel()
         release.set()
         saving.join(10)
         assert dispatcher.wait_idle(10)
@@ -104,4 +105,31 @@ def test_save_dialog_from_previous_family_cannot_save_after_switch(tmp_path):
     finally:
         release.set()
         saving.join(10)
+        dispatcher.close()
+
+
+def test_save_from_an_obsolete_view_does_not_even_open_a_dialog():
+    dialogs = []
+    dispatcher = ProcessDispatcher(lambda event: None, preview=True)
+    api = DesktopApi(dispatcher.renderer, dispatcher, lambda name: dialogs.append(name))
+    try:
+        old_generation = dispatcher.generation
+        api.select_family("nt")
+        assert api.save_csv(DNA, None, old_generation) == {"request_id": None}
+        assert dialogs == []
+    finally:
+        dispatcher.close()
+
+
+@pytest.mark.parametrize("new_intent", ["cancel", "predict"])
+def test_save_dispatched_late_cannot_adopt_a_newer_same_family_request(new_intent):
+    dialogs = []
+    dispatcher = ProcessDispatcher(lambda event: None, preview=True)
+    api = DesktopApi(dispatcher.renderer, dispatcher, lambda name: dialogs.append(name))
+    try:
+        context = api.save_context()
+        api.cancel() if new_intent == "cancel" else api.predict(DNA)
+        assert api.save_csv(DNA, None, context["generation"], context["revision"]) == {"request_id": None}
+        assert dialogs == []
+    finally:
         dispatcher.close()

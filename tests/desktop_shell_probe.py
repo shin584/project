@@ -59,9 +59,13 @@ def observe_window(*args, **kwargs):
     # The save dialog is a blocking OS window. Answer it with a fixed path so
     # the CSV path is driven end to end without a human at the keyboard.
     csv_target = Path(sys.argv[1]).parent / "saved.csv"
+    hold_save, save_opened, release_save, save_returned = (threading.Event() for _ in range(4))
 
     def stub_file_dialog(*dialog_args, **dialog_kwargs):
         report["save_dialog"] = dialog_kwargs.get("save_filename")
+        if hold_save.is_set():
+            save_opened.set()
+            assert release_save.wait(30), "Save dialog was not released"
         return str(csv_target)
 
     window.create_file_dialog = stub_file_dialog
@@ -73,6 +77,8 @@ def observe_window(*args, **kwargs):
                 report.setdefault("bridge_calls", []).append({
                     "name": function.__name__, "args": args, "reply": reply,
                 })
+                if function.__name__ == "save_csv":
+                    save_returned.set()
                 return reply
 
             invoke.__name__ = function.__name__
@@ -367,6 +373,23 @@ runpy.run_module('desktop', run_name='__main__')
             window.evaluate_js("document.getElementById('model-family').dispatchEvent(new Event('change'))")
             time.sleep(.2)
             report["same_family_no_request"] = len(report["bridge_calls"]) == before_repeat
+            saved_mtime = csv_target.stat().st_mtime_ns
+            hold_save.set()
+            save_returned.clear()
+            window.evaluate_js("document.getElementById('detail-search').click(); document.getElementById('detail-csv').click()")
+            assert save_opened.wait(10), "CSV dialog did not open"
+            window.evaluate_js("""
+              const family = document.getElementById('model-family');
+              family.value = 'non_nt'; family.dispatchEvent(new Event('change'));
+            """)
+            wait_for("""!document.getElementById('analyze').disabled &&
+              document.getElementById('task-state').hidden &&
+              document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            report["switch_during_save_dialog"] = True
+            release_save.set()
+            assert save_returned.wait(10)
+            report["obsolete_dialog_did_not_write"] = csv_target.stat().st_mtime_ns == saved_mtime
+            assert [call for call in report["bridge_calls"] if call["name"] == "save_csv"][-1]["reply"]["request_id"] is None
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port
@@ -379,6 +402,7 @@ runpy.run_module('desktop', run_name='__main__')
             report["error"] = traceback.format_exc()
         finally:
             release_prepare.set()
+            release_save.set()
             Path(sys.argv[1]).write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
             window.destroy()
 

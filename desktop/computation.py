@@ -216,24 +216,42 @@ class ProcessDispatcher(Dispatcher):
 
         return tagged
 
-    def _submit_process(self, job, *, lifecycle, expected_generation=None):
+    def _submit_process(self, job, *, lifecycle, expected_generation=None,
+                        expected_revision=None, receipt=False):
         with self._submissions:
             if self._closed:
                 raise RuntimeError("Computation dispatcher is closed")
             if expected_generation is not None and expected_generation != self.generation:
+                return None
+            if expected_revision is not None and expected_revision != self._latest:
                 return None
             if self.renderer.exited:
                 self._restart()
                 if expected_generation is not None:
                     return None
             submit = super().submit_lifecycle if lifecycle else super().submit
-            return submit(self._tag(job))
+            rid = submit(self._tag(job))
+            if receipt:
+                return {"request_id": rid, "generation": self.generation, "family": self.family}
+            return rid
 
     def submit(self, job):
         return self._submit_process(job, lifecycle=False)
 
-    def submit_for_generation(self, job, generation):
-        return self._submit_process(job, lifecycle=False, expected_generation=generation)
+    def submit_request(self, job, *, lifecycle=False, generation=None, revision=None):
+        """Return ID and generation atomically with scheduling, even on bridge threads."""
+        return self._submit_process(job, lifecycle=lifecycle,
+                                    expected_generation=generation,
+                                    expected_revision=revision, receipt=True)
+
+    def submission_identity(self):
+        """Bind a save dialog to the current generation and cancellation state."""
+        with self._submissions:
+            return self.generation, self._latest
+
+    def cancel(self):
+        with self._submissions:
+            super().cancel()
 
     def submit_lifecycle(self, job):
         return self._submit_process(job, lifecycle=True)

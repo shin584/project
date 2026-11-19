@@ -1,0 +1,201 @@
+{
+  "issue": 198,
+  "status": "pass",
+  "stages": [
+    {
+      "family": "non_nt",
+      "pid": 18900,
+      "generation": 1,
+      "seconds": 18.449
+    },
+    {
+      "family": "nt",
+      "pid": 23732,
+      "generation": 2,
+      "seconds": 73.732
+    },
+    {
+      "family": "non_nt",
+      "pid": 22208,
+      "generation": 3,
+      "seconds": 37.578
+    }
+  ],
+  "peak_tree_rss_bytes": {
+    "startup": 471834624,
+    "1-non_nt": 1066344448,
+    "2-nt": 2869874688,
+    "3-non_nt": 2838196224
+  },
+  "source_sha256": {
+    "desktop/api.py": "88cc82054a3de3d9963d975885865feb35315eb41acd61b5a01d5ce34f648caa",
+    "desktop/computation.py": "6a25a5405da460b3e17cf1287246d0a403bb7e7e701572694ca947fab2c6a2a3",
+    "desktop/app.py": "dce04a388e2b6d865fd3376903eb7275ca53a37b29589abb7a00ae7fe4a0302e",
+    "desktop/screen.py": "2a2aecd2e4a0f230e322d402dcbf7d5dc244457105c34a610f5f3ad01bd5eb01"
+  },
+  "nt_csv_base_columns_byte_equal": true,
+  "non_nt_return_csv_byte_equal": true,
+  "ui_has_no_model_imports": true,
+  "events": [
+    {
+      "type": "progress",
+      "request_id": 1,
+      "done": 1,
+      "total": 1,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "ready",
+      "request_id": 1,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 2,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 11,
+      "total": 13,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 3,
+      "done": 13,
+      "total": 13,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 3,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 4,
+      "generation": 1,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 6,
+      "done": 1,
+      "total": 1,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "ready",
+      "request_id": 6,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "result",
+      "request_id": 7,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 8,
+      "done": 8,
+      "total": 13,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 8,
+      "done": 11,
+      "total": 13,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 8,
+      "done": 13,
+      "total": 13,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "result",
+      "request_id": 8,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "result",
+      "request_id": 9,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "result",
+      "request_id": 10,
+      "generation": 2,
+      "family": "nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 12,
+      "done": 1,
+      "total": 1,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "ready",
+      "request_id": 12,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 13,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 14,
+      "done": 11,
+      "total": 13,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "progress",
+      "request_id": 14,
+      "done": 13,
+      "total": 13,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 14,
+      "generation": 3,
+      "family": "non_nt"
+    },
+    {
+      "type": "result",
+      "request_id": 15,
+      "generation": 3,
+      "family": "non_nt"
+    }
+  ],
+  "child_closed": true,
+  "after_close_ui_rss_bytes": 43724800
+}

@@ -61,6 +61,7 @@ def main(*, preview: bool = False) -> int:
             api.scan_sites,
             api.predict,
             api.explain,
+            api.save_context,
             api.save_csv,
             api.cancel,
         )

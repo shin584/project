@@ -6,6 +6,7 @@ python -X utf8 tests/family_window_probe.py OUTPUT_DIRECTORY
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 import threading
 import time
@@ -27,7 +28,10 @@ def run(output):
     configure_offline()
     output.mkdir(parents=True, exist_ok=True)
     dna = json.loads((ROOT / "docs/equivalence-baseline/capture.json").read_text(encoding="utf-8"))["input_seq"]
-    report = {"issue": 198, "status": "fail", "stages": [], "peak_tree_rss_bytes": {}}
+    report = {"issue": 198, "status": "fail", "stages": [], "peak_tree_rss_bytes": {},
+              "source_sha256": {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+                                for name in ("desktop/api.py", "desktop/computation.py",
+                                             "desktop/app.py", "desktop/screen.py")}}
     owners = []
     events = []
     stage = "startup"
@@ -157,7 +161,7 @@ def run(output):
         monitor.join(2)
         report["events"] = [{k: v for k, v in event.items() if k not in {"fragments", "html"}} for event in events]
         report["child_closed"] = bool(owners) and owners[0].pid is None
-        report["after_close_tree_rss_bytes"] = psutil.Process().memory_info().rss
+        report["after_close_ui_rss_bytes"] = psutil.Process().memory_info().rss
         (output / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return 0 if report["status"] == "pass" else 1
 

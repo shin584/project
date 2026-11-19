@@ -141,6 +141,7 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["default_family"] == "non_nt"
     assert report["switch_cleared"] and report["switch_input_preserved"]
     assert report["switch_no_stale"] and report["same_family_no_request"]
+    assert report["switch_during_save_dialog"] and report["obsolete_dialog_did_not_write"]
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []

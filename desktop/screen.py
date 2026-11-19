@@ -237,8 +237,7 @@ SCREEN_HTML = r"""<!doctype html>
         updateButton();
         // Bridge calls can arrive on different Python threads. Preserve intent
         // order and buffer events that arrive before the request-id reply.
-        submissions = submissions.then(() => window.pywebview.api[name](...args))
-          .then(reply => {
+        const acceptReply = reply => {
             if (token !== serial) return;
             activeId = reply.request_id;
             if (reply.generation !== undefined) generation = reply.generation;
@@ -248,7 +247,19 @@ SCREEN_HTML = r"""<!doctype html>
             const events = earlyEvents;
             earlyEvents = [];
             events.forEach(event => window.xaiDesktop.onEvent(event));
-          }).catch(error => { if (token === serial) showError(error); });
+        };
+        const failed = error => { if (token === serial) showError(error); };
+        submissions = submissions.then(async () => {
+          if (name === "save_csv") {
+            const context = await window.pywebview.api.save_context();
+            if (token !== serial) return;
+            args.push(context.revision);
+          }
+          const response = window.pywebview.api[name](...args).then(acceptReply).catch(failed);
+          // A save dialog can stay open indefinitely. Later switches/cancel must
+          // reach Python to invalidate it without waiting for its reply.
+          if (name !== "save_csv") return response;
+        }).catch(failed);
         return submissions;
       };
 
@@ -432,7 +443,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("task-label").textContent = "CSV 저장 준비 중...";
         byId("task-progress").removeAttribute("value");
         byId("task-state").hidden = false;
-        request("save_csv", analysisDna, detailSearched);
+        request("save_csv", analysisDna, detailSearched, generation);
       }
 
       byId("view-detail").addEventListener("submit", event => {
