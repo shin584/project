@@ -199,7 +199,36 @@ python -X utf8 -m pytest \
 기준 CSV와 기존 9열이 바이트로 같고**, 더해진 모델 열이 NT 계열의 모델을 가리킨다.
 `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1`로 돌렸다.
 
-저장소 전체 스위트는 실행하지 않았다 (`AGENTS.md`의 #191 범위 규칙).
+### 전체 스위트를 한 프로세스에서 돌릴 때 — 메모리 때문에 자식이 죽는다
+
+`AGENTS.md`의 #191 범위 규칙대로 전체 스위트는 기본 범위가 아니다. #197이 끝난 뒤
+한 번 확인해 본 결과를 남긴다. **코드 결함이 아니라 이 PC의 메모리 한계다.**
+
+| 실행 | 결과 |
+| --- | --- |
+| `pytest test tests` (NT·창 제외) | 530 통과 / **2 실패 / 6 에러** |
+| `pytest test tests/test_non_nt_process.py` | 369 통과 / 0 실패 |
+| `pytest test tests` + Streamlit AppTest 3개 파일 제외 | **528 통과 / 0 실패** |
+| `pytest tests/test_non_nt_cas12a_process.py tests/test_non_nt_process.py` | 10 통과 / 0 실패 |
+
+에러 6개와 실패 1개는 모두 `tests/test_non_nt_process.py`의 모듈 fixture에서 나는
+`Computation process exited; retry the request`다. 그 파일은 **단독으로, #197의
+프로세스 시험과 함께, `test/` 전체 뒤에서 모두 통과한다.** AppTest를 쓰는 세 파일
+(`test_dashboard_integration.py`, `test_shap_progress_view.py`,
+`test_xai_cache_view.py`)만 빼면 전체 스위트에서도 통과한다.
+
+이 PC는 물리 메모리 **7.8 GiB**에 가용 **약 1.6~1.8 GiB**뿐이고(파이썬 외 프로세스가
+약 6 GiB 점유), 한 pytest 프로세스에 streamlit·keras·torch·tensorflow·shap·matplotlib가
+모두 올라간 뒤 Keras를 다시 올리는 자식을 spawn하면 그 자식이 시작하지 못한다.
+프로세스 트리 RAM 실측은 #203의 범위다.
+
+남은 실패 1개는 `tests/test_shap_progress_view.py::test_callback_does_not_break_the_cache`이며
+**#195·#196·#197 이전인 `93d1115`에서도 똑같이 실패한다** (별도 워크트리로 확인).
+Streamlit 화면이 이름 문자열 `"A/Cas12a"`로 XAI 메모리 캐시를 조회하는데, #208이
+입증되지 않은 식별의 적중을 막았기 때문이다. 이 티켓의 변경과 무관한 기존 문제다.
+
+따라서 전체 스위트를 한 프로세스에서 돌리는 것은 이 PC에서 신뢰할 수 있는 신호가
+아니다. 티켓 범위의 선택 실행을 기준으로 삼는다.
 
 ## 7. 독립 리뷰 (Standards · Spec 2축)
 
