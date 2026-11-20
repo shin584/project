@@ -100,7 +100,7 @@ def test_the_four_views_arrive_with_non_nt_predictions(run):
     assert "후보 사이트" in fragments["sites"]
     # 예측 행이 실제로 있어야 '예측 결과가 없습니다'가 아니다.
     assert '<p class="empty">예측 결과가 없습니다.</p>' not in fragments["best"]
-    assert "9-Hydra v2" in fragments["best"], "원출력 단위 안내가 이 계열의 모델을 가리켜야 한다"
+    assert "9-Hydra v2" in fragments["detail"]
     assert "SpCas9 PAM 사이트가 발견되지 않았습니다" not in fragments["variants"]
 
 

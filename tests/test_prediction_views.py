@@ -3,7 +3,7 @@
 from html.parser import HTMLParser
 
 import pytest
-from core import VariantResult
+from core import ModelIdentity, VariantResult
 from desktop.api import Cancelled
 from desktop.prediction_views import (
     best_candidates_fragment,
@@ -85,12 +85,12 @@ def test_best_selects_one_per_site_by_display_score_then_raw_and_ranks_sites():
         "가닥",
         "거리 (bp)",
         "예측 절단 효율 (%)",
-        "원출력",
     ]
     assert table[1:] == [
-        ["1", "xCas9", "AGG", "AUCG", "+", "3", "80.00%", "1.0000"],
-        ["2", "SpCas9-NG", "AGG", "AUCG", "+", "3", "80.00%", "-1.0000"],
+        ["1", "xCas9", "AGG", "AUCG", "+", "3", "80.00%"],
+        ["2", "SpCas9-NG", "AGG", "AUCG", "+", "3", "80.00%"],
     ]
+    assert "원출력" not in fragment
 
 
 def test_best_separates_score_kinds_and_keeps_cas12a_prediction():
@@ -101,9 +101,9 @@ def test_best_separates_score_kinds_and_keeps_cas12a_prediction():
         ]
     )
     sp, cas12a = Tables(fragment).tables
-    assert sp[0][-2] == "학습 분포 백분위 (%)"
+    assert sp[0][-1] == "학습 분포 백분위 (%)"
     assert sp[1][1] == "SpCas9(WT)"
-    assert cas12a[0][-2] == "예측 절단 효율 (%)"
+    assert cas12a[0][-1] == "예측 절단 효율 (%)"
     assert cas12a[1][1] == "Cas12a"
     assert "서로 다른 표의 숫자는 직접 비교할 수 없습니다." in fragment
 
@@ -150,7 +150,7 @@ def test_each_view_limits_to_twenty_after_sorting():
         (table,) = Tables(fragment).tables
         assert len(table) == 21  # header plus 20 displayed sites
         assert "상위 20개만 표시합니다. (전체 21개)" in fragment
-        assert "20.0" in table[1][-2 if render is best_candidates_fragment else -1]
+        assert "20.0" in table[1][-1]
 
 
 def test_empty_views_and_cas12a_only_comparison_have_reference_messages():
@@ -234,27 +234,15 @@ def test_real_renderer_propagates_progress_cancellation():
         renderer.prediction_fragments(DNA, cancel)
 
 
-# ── 원출력 단위 안내 (#196) ───────────────────────────────────
-
-
-def test_the_raw_unit_note_comes_from_the_model_that_made_the_rows():
-    """계열마다 원출력 단위가 다르므로 안내 문구를 코드에 적어 두지 않는다."""
-    from core import ModelIdentity
-
-    nt = ModelIdentity(family="nt", cas="SpCas9", name="NT SpCas9", version="v",
-                       raw_unit="z-score (학습 분포 표준화)")
-    non_nt = ModelIdentity(family="non_nt", cas="SpCas9", name="9-Hydra v2", version="v",
-                           raw_unit="공개 효율(%) ÷ 100 비율")
-    for identity in (nt, non_nt):
-        fragment = best_candidates_fragment([row("s", "SpCas9(WT)", 40, identity=identity)])
-        assert identity.name in fragment
-        assert identity.raw_unit in fragment
-    # 다른 계열의 단위 설명이 섞이지 않는다.
-    only_non_nt = best_candidates_fragment([row("s", "SpCas9(WT)", 40, identity=non_nt)])
-    assert "z-score" not in only_non_nt
-
-
-def test_rows_without_an_identity_claim_no_raw_unit():
-    fragment = best_candidates_fragment([row("s", "SpCas9(WT)", 40)])
-    assert "'원출력'은 모델이 낸 값 그대로입니다." in fragment
-    assert "z-score" not in fragment and "raw-units" not in fragment
+def test_best_hides_raw_score_notes_for_identified_models():
+    identity = ModelIdentity(
+        family="nt",
+        cas="SpCas9",
+        name="NT SpCas9",
+        version="v",
+        raw_unit="z-score (학습 분포 표준화)",
+    )
+    fragment = best_candidates_fragment([row("s", "SpCas9(WT)", 40, identity=identity)])
+    assert "원출력" not in fragment
+    assert identity.name not in fragment
+    assert identity.raw_unit not in fragment

@@ -46,7 +46,7 @@ def test_real_cas12a_only_child_loads_lazily_and_connects_views_selection_and_cs
         event, progress = run(lambda: api.predict(DNA))
         fragments = event["fragments"]
         assert set(fragments) == {"best", "variants", "detail"}
-        assert "Cas12a CNN+BiLSTM manifest" in fragments["best"]
+        assert "Cas12a CNN+BiLSTM manifest" in fragments["detail"]
         assert 'data-site-key="Cas12a|+|16"' in fragments["detail"]
         assert 'data-heads="[&quot;Cas12a&quot;]"' in fragments["detail"]
         assert 'data-head="Cas12a"' in fragments["best"]
