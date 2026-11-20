@@ -13,35 +13,6 @@ import core
 
 from desktop.api import OnBatch
 
-def _non_nt_reference(predictor, site, result) -> str:
-    """Explain the proven ratio conversion without treating attribution as causality."""
-    if getattr(getattr(predictor, "spec", None), "family", None) != "non_nt":
-        return ""
-    note = (f'<p class="caption">설명 대상은 제한 전 예측 절단 효율 {result.pred * 100:.2f}% '
-            f'(원출력 {result.pred:.8g} × 100)이며 기여도 단위는 %p입니다. '
-            '기여도는 모델 출력의 분해이며 생물학적 인과관계를 뜻하지 않습니다.</p>')
-    if not 0 <= result.pred <= 1:
-        note += ('<p class="caption">표의 점수는 0~100%로 제한되지만, '
-                 '이 설명은 제한 전 출력을 대상으로 하므로 표와 다릅니다.</p>')
-    return note
-
-
-def _cas12a_reference(predictor, site, method) -> str:
-    if (getattr(getattr(predictor, "spec", None), "family", None) != "non_nt"
-            or site.cas_type != "Cas12a"):
-        return ""
-    if method == "ig":
-        return ('<p>합성 경로 F(x)=M(x,D(x))의 서열 기여도입니다. '
-                'GC·인접 염기쌍 354개 파생 특징 경로를 포함하며, '
-                '특징의 독립적인 생물학적 중요도 비율이 아닙니다. '
-                '기준은 서열 영벡터와 파생 특징 0입니다. '
-                'GC는 보간 계수에, 인접 염기쌍은 그 제곱에 비례합니다. '
-                '영벡터와 중간 soft input은 실제 DNA가 아니며 PAM도 보간됩니다. '
-                '기여도는 이 기준 입력과 경로에 의존합니다.</p>')
-    return ('<p>변경된 모든 서열에서 GC·인접 염기쌍 354개 파생 특징을 함께 재계산합니다. '
-            '무작위 ACGT 배경은 실제 DNA 분포를 대표하지 않으며 PAM도 바뀔 수 있습니다. '
-            '기여도는 배경과 표본추출에 의존하며 생물학적 인과관계를 뜻하지 않습니다.</p>')
-
 
 def controls_template(
     sites: Sequence[core.CandidateSite],
@@ -83,17 +54,18 @@ def controls_template(
     )
 
 
-def _figure(fig, caption: str, size: int) -> str:
+def _figure(fig, label: str, size: int, *, show_caption: bool = True) -> str:
     import matplotlib.pyplot as plt
 
     try:
         buffer = io.BytesIO()
         fig.savefig(buffer, format="png", dpi=100)
         uri = "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+        escaped_label = html.escape(label)
+        caption = f'<figcaption>{escaped_label}</figcaption>' if show_caption else ""
         return (
             f'<figure class="xai" style="width:{size}%">'
-            f'<img src="{uri}" alt="{html.escape(caption)}">'
-            f'<figcaption>{html.escape(caption)}</figcaption></figure>'
+            f'<img src="{uri}" alt="{escaped_label}">{caption}</figure>'
         )
     finally:
         plt.close(fig)
@@ -136,53 +108,32 @@ def explanation_fragment(
         result = cache.integrated_gradients(
             predictor, model_key, head, window, steps, on_batch=on_batch
         )
-        reference = _non_nt_reference(predictor, site, result)
         units = result.units
-        body = '<h3>글자별 기여도 (Attribution Logo, IG)</h3>'
-        body += reference
-        body += f'<p>글자가 위로 클수록 {units.target}을 많이 올린 자리, 아래로 클수록 깎아먹은 자리입니다.</p>'
-        body += _figure(core.attribution_logo(units.contribution(result.attribution), window, layout, efficiency=units.efficiency),
-                        "글자별 기여도 (Attribution Logo, IG)", size)
         pct = units.contribution(result.attribution)
+        body = _figure(
+            core.attribution_logo(pct, window, layout, efficiency=units.efficiency),
+            "IG 기여도 로고", size, show_caption=False,
+        )
         up, down = int(np.argmax(pct)), int(np.argmin(pct))
         body += ('<div class="success"><strong>이 그래프가 말하는 것</strong>'
                  f'<p>{units.target}을 <strong>가장 많이 올린 자리</strong>: {position(up)} → {pct[up]:+.2f}{units.delta_unit}</p>'
                  f'<p>{units.target}을 <strong>가장 많이 깎은 자리</strong>: {position(down)} → {pct[down]:+.2f}{units.delta_unit}</p></div>')
-        body += ('<details><summary>기술적 참고</summary>'
-                 '<p>기준 입력은 서열 값 0이며 NT 특수 토큰은 고정합니다. 기준 대비 변화를 위치별로 나눈 값입니다. '
-                 '기여도 합이 (이 서열의 예측 − 기준의 예측)과 같아야 계산이 맞습니다 (완결성 검사).</p>'
-                 + _cas12a_reference(predictor, site, method) +
-                 f'<p class="caption">예측 {units.prediction(result.pred):.2f}{units.value_unit} − '
-                 f'기준 {units.prediction(result.baseline_pred):.2f}{units.value_unit} · '
-                 f'기여도 합 {units.contribution(result.attribution).sum():+.3f}{units.delta_unit} · '
-                 f'완결성 오차 {units.contribution(result.completeness_error):.4f}{units.delta_unit}</p></details>')
     elif method == "shap":
         nsamples = _setting(params, "nsamples", 16, 1024)
         background = _setting(params, "n_background", 2, 32)
         result = cache.kernel_shap(
             predictor, model_key, head, window, nsamples, background, on_batch=on_batch
         )
-        reference = _non_nt_reference(predictor, site, result)
         units = result.units
         values = units.contribution(result.values)
-        body = '<h3>위치별 기여분 (SHAP)</h3>'
-        body += reference
-        body += f'<p>빨강은 {units.target}을 올린 자리, 파랑은 내린 자리입니다. 워터폴은 기준점에서 각 기여를 더해 최종 예측값에 도달하는 과정입니다.</p>'
-        body += _figure(core.shap_bars(values, window, layout, efficiency=units.efficiency), "위치별 기여분 (SHAP)", size)
+        body = f'<p>빨강은 {units.target}을 올린 자리, 파랑은 내린 자리입니다. 워터폴은 기준점에서 각 기여를 더해 최종 예측값에 도달하는 과정입니다.</p>'
+        body += _figure(
+            core.shap_bars(values, window, layout, efficiency=units.efficiency),
+            "SHAP 위치별 기여도", size, show_caption=False,
+        )
         body += _figure(core.shap_waterfall(values, float(units.prediction(result.base_value)), window, layout),
                         "SHAP 워터폴", size)
         body += top_positions("영향이 가장 컸던 자리 3곳", values, signed=True)
-        body += ('<details><summary>기술적 참고 (기준값 · 합산값)</summary>'
-                 '<p>위치별 KernelSHAP입니다. 어떤 자리를 끈다는 것은 무작위 배경 서열의 염기로 바꾼다는 뜻입니다. '
-                 '배경에는 PAM 자리도 포함됩니다. 샘플 수를 바꾸면 추정값이 달라질 수 있습니다.</p>'
-                 + _cas12a_reference(predictor, site, method) +
-                 f'<p class="caption">배경 seed {result.background_seed} · 부분집합 seed {result.subset_seed} · '
-                 f'무작위 ACGT 배경 {background}개 · 샘플 {nsamples}개</p>'
-                 f'<p class="caption">기준값 {units.prediction(result.base_value):.2f}{units.value_unit} + '
-                 f'SHAP 합 {values.sum():+.2f}{units.delta_unit} = '
-                 f'{units.prediction((result.base_value + result.values.sum())):.2f}{units.value_unit} · '
-                 f'실제 예측 {units.prediction(result.pred):.2f}{units.value_unit} · '
-                 f'가법성 오차 {units.contribution(result.additivity_error):.4f}{units.delta_unit}</p></details>')
     elif method == "rollout":
         result = cache.attention_rollout(predictor, model_key, head, window)
         body = '<h3>위치별 정보 의존도 (Attention Rollout)</h3>'
@@ -197,15 +148,6 @@ def explanation_fragment(
         body += f'<p class="caption">{result.n_layers}개 층의 attention 누적 · 모델 내부의 정보 의존성이지 물리적 결합이 아닙니다.</p>'
     else:
         raise ValueError(f"모르는 XAI 기법: {method}")
-
-    if isinstance(result, (core.IGResult, core.SHAPResult)):
-        units = result.units
-        note = ("설명은 0~100으로 제한하기 전 효율을 대상으로 합니다. 표는 0~100%로 제한합니다."
-                if units.efficiency else "설명은 모델 원출력 단위이며 효율이나 백분위 기여도가 아닙니다.")
-        body += f'<p class="caption">{note}</p>'
-        body += (f'<details><summary>출력 단위 참고</summary><p>{html.escape(units.source)}</p>'
-                 f'<p>raw 예측 {result.pred:.8g} · 표시 배율 {units.scale:.8g} · '
-                 f'예측/기준 오프셋 {units.offset:.8g}</p></details>')
 
     sequence = "".join(
         f'<span style="background-color:{core.SEGMENT_COLORS[core.segment_of(i, layout)]}55">'

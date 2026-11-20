@@ -30,13 +30,9 @@ def test_nt_keeps_finite_graphs_with_failed_quality_and_labels_the_actual_units(
                                     cache=cache)
     assert fragment.count('src="data:image/png;base64,') == (1 if method == 'ig' else 2)
     assert 'class="warning"' not in fragment and 'class="error"' not in fragment
-    assert 'raw 예측 2' in fragment
+    assert '출력 단위 참고' not in fragment and '기술적 참고' not in fragment
     if efficiency:
-        assert '140.00%' in fragment
-        assert '50.00%' in fragment  # baseline uses offset exactly once
         assert '+60.00%p' in fragment or '+60.000%p' in fragment
-        assert '0~100%로 제한' in fragment
     else:
         assert '%p' not in fragment
         assert '2.00 (raw)' in fragment
-        assert '효율이나 백분위 기여도가 아닙니다' in fragment

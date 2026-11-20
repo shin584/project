@@ -87,7 +87,6 @@ SCREEN_HTML = r"""<!doctype html>
       <option value="non_nt" selected>기본 (non-NT)</option>
       <option value="nt">NT</option>
     </select>
-    <p class="caption">SpCas9과 Cas12a를 함께 바꿉니다. 모델 계열에 따라 예측 점수와 후보 순위가 달라질 수 있습니다.</p>
     <form id="analysis-form">
       <label for="dna">81bp DNA 서열</label>
       <input id="dna" type="text" placeholder="ATCG..." autocomplete="off" spellcheck="false">
@@ -97,10 +96,8 @@ SCREEN_HTML = r"""<!doctype html>
     <button id="retry-prepare" type="button" hidden>모델 준비 다시 시도</button>
     <hr>
     <label for="graph-size">XAI 그래프 크기</label>
-    <input id="graph-size" type="range" min="40" max="100" value="80" step="5"
-      aria-describedby="graph-size-help">
+    <input id="graph-size" type="range" min="40" max="100" value="80" step="5">
     <output id="graph-size-value" for="graph-size">80%</output>
-    <p id="graph-size-help" class="caption">XAI 탭의 그래프 가로 폭입니다. 줄이면 그래프 높이도 함께 줄어듭니다.</p>
   </aside>
   <main>
     <h1>CRISPR PAM Scanner + XAI</h1>
@@ -123,12 +120,7 @@ SCREEN_HTML = r"""<!doctype html>
       <section id="results" hidden>
         <h2>PAM 탐색 결과</h2>
         <div data-slot="sites"></div>
-        <p class="caption">모델 입력 윈도우가 서열 밖으로 나가는 사이트는 예측할 수 없어 제외됩니다.</p>
         <h2>절단 효율 예측 결과</h2>
-        <p id="score-help" class="caption">점수의 의미는 Cas 종류마다 다릅니다 — Cas12a는 <strong>예측 절단 효율(%)</strong>,
-          SpCas9은 <strong>학습 분포 백분위(%)</strong> 입니다. 자세한 내용은 아래
-          '모델 출력 해석 상태'를 펼쳐 보세요. 거리 보정은 적용하지 않았고,
-          변이와의 거리는 '거리 (bp)' 열에서 확인할 수 있습니다.</p>
       </section>
       <div data-slot="best"><p>예측 결과가 없습니다.</p></div>
     </section>
@@ -164,7 +156,6 @@ SCREEN_HTML = r"""<!doctype html>
         <details>
           <summary>계산 설정</summary>
           <p class="caption">IG는 단계 수만큼, SHAP은 (샘플 수 × 배경 수)만큼 추론을 반복합니다.</p>
-          <p class="caption">정밀 계산은 아래 값을 높인 뒤 설명 계산을 누르세요. 계산 중 진행률을 확인하고 취소할 수 있습니다.</p>
           <label for="ig-steps">IG 적분 단계 수</label>
           <input id="ig-steps" type="number" min="8" max="256" value="32" step="8">
           <label for="shap-n">SHAP 샘플 수</label>
@@ -175,12 +166,11 @@ SCREEN_HTML = r"""<!doctype html>
         </details>
         <fieldset>
           <legend>XAI 분석 기법 선택</legend>
-          <label><input type="radio" name="xai-method" value="rollout" checked>Attention Rollout</label>
-          <label><input type="radio" name="xai-method" value="ig">Integrated Gradients (IG)</label>
+          <label id="rollout-option" hidden><input type="radio" name="xai-method" value="rollout" disabled>Attention Rollout</label>
+          <label><input type="radio" name="xai-method" value="ig" checked>Integrated Gradients (IG)</label>
           <label><input type="radio" name="xai-method" value="shap">SHAP (Shapley Additive exPlanations)</label>
-          <p id="rollout-reason" class="caption" hidden>non-NT 모델은 attention 층이 없어 Attention Rollout을 지원하지 않습니다.</p>
         </fieldset>
-        <button type="submit">설명 계산</button>
+        <button id="retry-explain" type="submit" hidden>다시 계산</button>
       </form>
       <div data-slot="xai"><p>예측 결과가 없습니다.</p></div>
     </section>
@@ -195,23 +185,16 @@ SCREEN_HTML = r"""<!doctype html>
       let generation = 0;
       let family = "non_nt";
       let reanalyze = false;
-      const preview = document.body.dataset.preview === "true";
       const familyLabel = () => family === "nt" ? "NT" : "기본 (non-NT)";
-      const ntScoreHelp = byId("score-help").innerHTML;
-      const updateScoreHelp = () => {
-        byId("score-help").innerHTML = family === "nt" ? ntScoreHelp :
-          "SpCas9과 Cas12a 모두 예측 절단 효율(%)을 표시합니다. 변이와의 거리는 거리 (bp) 열에서 확인할 수 있습니다.";
-      };
-      updateScoreHelp();
       function updateMethodSupport() {
-        const rollout = document.querySelector('[name="xai-method"][value="rollout"]');
-        rollout.disabled = family === "non_nt" && !preview;
-        byId("rollout-reason").hidden = !rollout.disabled;
+        const option = byId("rollout-option");
+        const rollout = option.querySelector("input");
+        option.hidden = family !== "nt";
+        rollout.disabled = option.hidden;
         if (rollout.disabled && rollout.checked) {
           document.querySelector('[name="xai-method"][value="ig"]').checked = true;
         }
       }
-      updateMethodSupport();
       let started = false;
       let busy = false;
       let analysisDna = "";
@@ -233,11 +216,22 @@ SCREEN_HTML = r"""<!doctype html>
         byId("task-progress").removeAttribute("value");
         updateButton();
       };
+      function offerExplanationRetry() {
+        slot("xai").textContent = "";
+        byId("retry-explain").hidden = false;
+      }
+      const finishError = () => {
+        if (operation === "explain") {
+          offerExplanationRetry();
+        } else {
+          if (!ready) byId("model-status").textContent = "모델 준비 실패";
+          byId("retry-prepare").hidden = false;
+        }
+        finish();
+      };
       const showError = (error) => {
         byId("notice").textContent = `오류: ${error.message || error}`;
-        if (!ready) byId("model-status").textContent = "모델 준비 실패";
-        byId("retry-prepare").hidden = false;
-        finish();
+        finishError();
       };
       const request = (name, ...args) => {
         const token = ++serial;
@@ -301,10 +295,9 @@ SCREEN_HTML = r"""<!doctype html>
         ready = false;
         reanalyze = Boolean(byId("dna").value.trim());
         clearResults();
-        updateScoreHelp();
         updateMethodSupport();
         byId("retry-prepare").hidden = true;
-        byId("model-status").textContent = `${familyLabel()} 다시 불러오는 중...`;
+        byId("model-status").textContent = `${familyLabel()} 다시 불러오는 중... 0%`;
         byId("notice").textContent = "이전 작업과 결과를 지우고 선택한 모델을 준비합니다.";
         request("select_family", family);
       });
@@ -312,6 +305,7 @@ SCREEN_HTML = r"""<!doctype html>
       function explain() {
         if (!ready || !analysisDna) return;
         if (!byId("xai-controls").reportValidity()) return;
+        byId("retry-explain").hidden = true;
         if (byId("xai-window").firstElementChild?.dataset.siteKey !== byId("xai-site").value) {
           byId("xai-window").replaceChildren();
         }
@@ -351,19 +345,22 @@ SCREEN_HTML = r"""<!doctype html>
       }
 
       function cancelTask() {
-        ++serial;
+        const token = ++serial;
         activeId = -1;
         earlyEvents = [];
-        submissions = submissions.then(() => window.pywebview.api.cancel()).catch(showError);
+        submissions = submissions.then(() => window.pywebview.api.cancel()).catch(error => {
+          if (token === serial) showError(error);
+        });
         finish();
       }
       byId("cancel-task").addEventListener("click", () => {
+        if (busy && operation === "explain") offerExplanationRetry();
         cancelTask();
         byId("notice").textContent = "계산을 취소했습니다.";
       });
       byId("xai-controls").addEventListener("submit", event => {
         event.preventDefault();
-        explain();
+        if (!byId("retry-explain").hidden) explain();
       });
       byId("xai-controls").addEventListener("change", event => {
         if (event.target.id === "xai-site") {
@@ -384,10 +381,8 @@ SCREEN_HTML = r"""<!doctype html>
         Array.from(document.querySelectorAll("#detail-results tbody tr"));
       const detailFilters = () => ({
         cas_names: detailBoxes().filter(box => box.checked).map(box => box.value),
-        eff_range: [Number(byId("detail-eff-low").value),
-          Number(byId("detail-eff-high").value)],
-        dist_range: [Number(byId("detail-dist-low").value),
-          Number(byId("detail-dist-high").value)],
+        eff_range: [Number(byId("detail-eff-low").value), Number(byId("detail-eff-low").max)],
+        dist_range: [Number(byId("detail-dist-high").min), Number(byId("detail-dist-high").value)],
       });
 
       function highlightDetail() {
@@ -402,18 +397,11 @@ SCREEN_HTML = r"""<!doctype html>
         if (counter) counter.textContent = selected;
       }
 
-      // Each end bounds the other so paired range sliders cannot cross.
-      function detailBounds() {
-        const [effLow, effHigh] = [byId("detail-eff-low"), byId("detail-eff-high")];
-        const [distLow, distHigh] = [byId("detail-dist-low"), byId("detail-dist-high")];
-        effLow.max = effHigh.value;
-        effHigh.min = effLow.value;
-        distLow.max = distHigh.value;
-        distHigh.min = distLow.value;
+      function updateDetailLabels() {
         byId("detail-eff-caption").textContent =
-          `선택 범위: ${Number(effLow.value).toFixed(1)}% ~ ${Number(effHigh.value).toFixed(1)}%`;
+          `${byId("detail-eff-low").value}% 이상`;
         byId("detail-dist-caption").textContent =
-          `변이로부터 ${distLow.value} ~ ${distHigh.value} bp 이내`;
+          `${byId("detail-dist-high").value} bp 이하`;
       }
 
       function detailSearch() {
@@ -459,7 +447,7 @@ SCREEN_HTML = r"""<!doctype html>
         detailSearch();
       });
       byId("view-detail").addEventListener("input", event => {
-        if (event.target.type === "range") detailBounds();
+        if (event.target.type === "range") updateDetailLabels();
       });
       byId("view-detail").addEventListener("click", event => {
         const id = event.target.id;
@@ -506,6 +494,7 @@ SCREEN_HTML = r"""<!doctype html>
       function clearResults() {
         byId("results").hidden = true;
         byId("xai-controls").hidden = true;
+        byId("retry-explain").hidden = true;
         byId("xai-site").replaceChildren();
         byId("xai-head").replaceChildren();
         byId("xai-window").replaceChildren();
@@ -514,7 +503,6 @@ SCREEN_HTML = r"""<!doctype html>
         byId("task-label").textContent = "";
         byId("task-progress").removeAttribute("value");
         detailSearched = null;  // the new analysis brings its own detail fragment
-        byId('model-diagnostics')?.remove();
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
@@ -559,7 +547,11 @@ SCREEN_HTML = r"""<!doctype html>
           if (event.type === "ready") {
             ready = true;
             byId("retry-prepare").hidden = true;
-            byId("model-status").innerHTML = event.html;
+            const status = byId("model-status");
+            status.innerHTML = event.html;
+            if (operation === "select_family") {
+              (status.querySelector("p") || status).append(" · 100%");
+            }
             finish();
             if (reanalyze) {
               reanalyze = false;
@@ -568,7 +560,12 @@ SCREEN_HTML = r"""<!doctype html>
             return;
           }
           if (event.type === "progress") {
-            if (operation === "predict" || operation === "explain" || operation === "save_csv") {
+            if (operation === "select_family") {
+              if (event.total !== 3 || (event.done !== 1 && event.done !== 2)) return;
+              const stage = event.done === 1 ? "이전 프로세스 종료" : "새 프로세스 시작";
+              const pct = Math.round(event.done / event.total * 100);
+              byId("model-status").textContent = `${familyLabel()} 다시 불러오는 중... ${pct}% · ${stage}`;
+            } else if (operation === "predict" || operation === "explain" || operation === "save_csv") {
               const pct = event.total > 0 ? Math.min(100, Math.max(0, event.done / event.total * 100)) : 0;
               byId("task-progress").value = pct;
               const method = document.querySelector('[name="xai-method"]:checked').value;
@@ -582,9 +579,7 @@ SCREEN_HTML = r"""<!doctype html>
           }
           if (event.type === "error") {
             byId("notice").innerHTML = event.html;
-            if (!ready) byId("model-status").textContent = "모델 준비 실패";
-            byId("retry-prepare").hidden = false;
-            finish();
+            finishError();
             return;
           }
           if (event.type !== "result") return;
@@ -602,8 +597,6 @@ SCREEN_HTML = r"""<!doctype html>
             request("predict", analysisDna);
           } else if (operation === "predict") {
             finish();
-            const diagnostics = byId("model-diagnostics");
-            if (diagnostics) byId("results").append(diagnostics);
             byId("welcome").hidden = true;
             byId("results").hidden = false;
             const template = byId("xai-sites-template");

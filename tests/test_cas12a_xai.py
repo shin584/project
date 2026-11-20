@@ -73,7 +73,8 @@ def test_actual_cas12a_charts_resize_reuse_and_path_cache_rejection(predictor, m
 
     first = render(40)
     assert len(pngs(first)) == count
-    assert "354" in first and "제한 전" in first and "%p" in first
+    assert "%p" in first
+    assert all(text not in first for text in ("제한 전", "기술적 참고", "출력 단위 참고"))
     assert progress and progress[-1][0] == progress[-1][1]
     assert all(a[0] / a[1] <= b[0] / b[1] for a, b in zip(progress, progress[1:]))
     progress.clear()
@@ -127,12 +128,8 @@ def test_cas12a_quality_failure_keeps_graphs_and_logs_frozen_absolute_limit(pred
                                     XAI_DEFAULTS[method], 80, lambda d, t: None, cache=cache)
     assert len(pngs(fragment)) == (1 if method == "ig" else 2)
     assert 'class="warning"' not in fragment and 'role="alert"' not in fragment
-    assert "120.00%" in fragment and "표와 다릅니다" in fragment
-    assert "354" in fragment and "PAM" in fragment and "인과관계" in fragment
-    if method == "ig":
-        assert "soft" in fragment and "영벡터" in fragment and "합성 경로" in fragment
-    else:
-        assert "무작위 ACGT" in fragment and "재계산" in fragment
+    assert "PAM" in fragment
+    assert all(text not in fragment for text in ("제한 전", "표와 다릅니다", "인과관계", "합성 경로", "무작위 ACGT"))
     bad = (replace(result, attribution=np.full(34, np.nan)) if method == "ig" else
            replace(result, values=np.full(34, np.inf)))
     with pytest.raises(ValueError, match="NaN/inf"):

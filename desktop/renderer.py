@@ -109,27 +109,8 @@ class PredictionRenderer:
 
     def prediction_fragments(self, dna: str, on_batch: OnBatch) -> dict[str, str]:
         rows = self._rows_with_progress(dna, on_batch)
-        diagnostics = []
-        for cas in sorted({row.cas_type for row in rows}):
-            items = [row for row in rows if row.cas_type == cas]
-            # The row carries which model and checkpoint produced it, so this
-            # block never has to guess from a registry key that is the same for
-            # every family. Rows made without a predictor claim no model (#196).
-            identity = next((row.identity for row in items if row.identity), None)
-            what = "효율(%)" if items[0].score_kind == "efficiency" else "백분위(%)"
-            # 식별이 없으면 모델 이름을 적지 않는다 — "?"를 적으면 모델을 못 찾은
-            # 것과 모델이 없는 것이 같아 보인다 (#196).
-            model = (f'모델 {html.escape(identity.name)} '
-                     f'<code>{html.escape(identity.version)}</code> · ' if identity else "")
-            diagnostics.append(
-                f'<li><strong>{html.escape(cas)}</strong> · {model}원출력 '
-                f'{min(r.raw_score for r in items):.3f} ~ {max(r.raw_score for r in items):.3f}'
-                f' → 화면 표시는 {what}</li>'
-            )
-        diagnostic_html = ('<details id="model-diagnostics"><summary>모델과 출력 범위</summary><ul>'
-                           + ''.join(diagnostics) + '</ul></details>')
         return {
-            "best": diagnostic_html + best_candidates_fragment(rows),
+            "best": best_candidates_fragment(rows),
             "variants": variant_comparison_fragment(rows),
             "detail": (
                 detail_fragment(rows)

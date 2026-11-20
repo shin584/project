@@ -193,7 +193,9 @@ runpy.run_module('desktop', run_name='__main__')
             report["xai_controls"] = window.evaluate_js("""({
               siteLabel: document.querySelector('label[for="xai-site"]').textContent,
               headLabel: document.querySelector('label[for="xai-head"]').textContent,
-              methods: Array.from(document.querySelectorAll('[name="xai-method"]')).map(e => e.parentElement.textContent),
+              methods: Array.from(document.querySelectorAll('[name="xai-method"]'))
+                .filter(e => !e.parentElement.hidden).map(e => e.parentElement.textContent),
+              retryHidden: document.getElementById('retry-explain').hidden,
               settings: ['ig-steps','shap-n','shap-bg'].map(id => {
                 const e = document.getElementById(id);
                 return ['min','max','step','value'].map(k => e[k]);
@@ -248,8 +250,25 @@ runpy.run_module('desktop', run_name='__main__')
               hidden: document.getElementById('task-state').hidden,
               notice: document.getElementById('notice').textContent,
               canAnalyze: !document.getElementById('analyze').disabled,
-              canRetry: !document.querySelector('#xai-controls button[type=submit]').disabled
+              canRetry: !document.getElementById('retry-explain').hidden
             })""")
+            window.evaluate_js("document.getElementById('retry-explain').click()")
+            wait_for("document.getElementById('retry-explain').hidden && document.querySelector('[data-slot=xai] img')?.naturalWidth > 0")
+            window.evaluate_js("""
+              const head = document.getElementById('xai-head');
+              head.dataset.previous = head.value;
+              head.add(new Option('invalid head', 'invalid'));
+              head.value = 'invalid';
+              head.dispatchEvent(new Event('change', {bubbles:true}));
+            """)
+            report["retry_visible_on_explain_error"] = wait_for("""!document.getElementById('retry-explain').hidden &&
+              document.querySelector('#notice .error') !== null""")
+            window.evaluate_js("""
+              const head = document.getElementById('xai-head');
+              head.lastElementChild.remove(); head.value = head.dataset.previous;
+              document.getElementById('retry-explain').click();
+            """)
+            wait_for("document.getElementById('retry-explain').hidden && document.querySelector('[data-slot=xai] img')?.naturalWidth > 0")
             # ── 전체 상세 보기: 필터 · 검색 · CSV 저장 (#185) ──
             window.evaluate_js("document.getElementById('tab-detail').click()")
             report["detail_before_search"] = window.evaluate_js("""({
@@ -271,7 +290,7 @@ runpy.run_module('desktop', run_name='__main__')
                 highlightCount: document.getElementById('detail-selected').textContent,
                 csvDisabled: document.getElementById('detail-csv').disabled};
             })()""")
-            # Deselect every variant but one and narrow both ranges.
+            # Deselect every variant but one and adjust both thresholds.
             report["detail_filtered"] = window.evaluate_js("""(() => {
               document.getElementById('detail-none').click();
               const boxes = Array.from(document.querySelectorAll('[name="detail-cas"]'));
@@ -280,6 +299,9 @@ runpy.run_module('desktop', run_name='__main__')
               const distHigh = document.getElementById('detail-dist-high');
               distHigh.value = 10;
               distHigh.dispatchEvent(new Event('input', {bubbles: true}));
+              const effLow = document.getElementById('detail-eff-low');
+              effLow.value = 30;
+              effLow.dispatchEvent(new Event('input', {bubbles: true}));
               document.getElementById('detail-search').click();
               const rows = Array.from(document.querySelectorAll('#detail-results tbody tr'));
               const shown = rows.filter(r => !r.hidden);
@@ -287,10 +309,9 @@ runpy.run_module('desktop', run_name='__main__')
                 ranks: shown.map(r => r.cells[0].textContent),
                 names: shown.map(r => r.cells[1].textContent),
                 distances: shown.map(r => Number(r.dataset.dist)),
+                scores: shown.map(r => Number(r.dataset.eff)),
                 distCaption: document.getElementById('detail-dist-caption').textContent,
-                effCaption: document.getElementById('detail-eff-caption').textContent,
-                // The upper handle now bounds the lower one, as a slider would.
-                lowMax: document.getElementById('detail-dist-low').max};
+                effCaption: document.getElementById('detail-eff-caption').textContent};
             })()""")
             window.evaluate_js("document.getElementById('detail-csv').click()")
             # "저장하는 중..." also contains 저장; wait for the saved-path notice.
@@ -316,6 +337,7 @@ runpy.run_module('desktop', run_name='__main__')
             window.evaluate_js("""
               document.getElementById('detail-all').click();
               document.getElementById('detail-dist-high').value = 15;
+              document.getElementById('detail-eff-low').value = 0;
               document.getElementById('detail-search').click();
             """)
             # Check the accessible tab keyboard interaction through DOM events.
@@ -343,10 +365,21 @@ runpy.run_module('desktop', run_name='__main__')
             report["retry_ready"] = window.evaluate_js("document.getElementById('model-status').textContent")
             report["default_family"] = window.evaluate_js("document.getElementById('model-family').value")
             previous = report["bridge_calls"][-1]["reply"]
+            window.evaluate_js("""
+              window.switchStatuses = [];
+              const original = window.xaiDesktop.onEvent;
+              window.xaiDesktop.onEvent = function(event) {
+                const status = document.getElementById('model-status');
+                const before = status.textContent;
+                original.call(this, event);
+                if (before !== status.textContent) window.switchStatuses.push(status.textContent);
+              };
+            """)
             report["switch_cleared"] = window.evaluate_js("""(() => {
               const family = document.getElementById('model-family');
               family.value = 'nt'; family.dispatchEvent(new Event('change'));
               return document.getElementById('analyze').disabled &&
+                document.getElementById('model-status').textContent.endsWith('0%') &&
                 document.getElementById('xai-controls').hidden &&
                 ['sites', 'best', 'variants', 'detail', 'xai'].every(name =>
                   document.querySelector(`[data-slot="${name}"]`).textContent === '');
@@ -369,6 +402,8 @@ runpy.run_module('desktop', run_name='__main__')
               document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
             report["switch_input_preserved"] = window.evaluate_js("document.getElementById('dna').value") == dna
             report["switch_no_stale"] = window.evaluate_js("!document.body.textContent.includes('STALE')")
+            report["switch_statuses"] = window.evaluate_js("window.switchStatuses")
+            report["nt_rollout_visible"] = window.evaluate_js("!document.getElementById('rollout-option').hidden")
             before_repeat = len(report["bridge_calls"])
             window.evaluate_js("document.getElementById('model-family').dispatchEvent(new Event('change'))")
             time.sleep(.2)
@@ -386,6 +421,7 @@ runpy.run_module('desktop', run_name='__main__')
               document.getElementById('task-state').hidden &&
               document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
             report["switch_during_save_dialog"] = True
+            report["rollout_hidden_again"] = window.evaluate_js("document.getElementById('rollout-option').hidden")
             release_save.set()
             assert save_returned.wait(10)
             report["obsolete_dialog_did_not_write"] = csv_target.stat().st_mtime_ns == saved_mtime

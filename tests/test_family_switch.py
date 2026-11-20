@@ -26,6 +26,9 @@ def test_family_switch_replaces_the_child_and_reselection_keeps_it():
         assert reply["family"] == "nt" and reply["changed"]
         assert events[-1]["type"] == "ready"
         assert events[-1]["generation"] == reply["generation"]
+        switch_events = [event for event in events if event["request_id"] == reply["request_id"]]
+        assert [event["type"] for event in switch_events] == ["progress", "progress", "ready"]
+        assert [(event["done"], event["total"]) for event in switch_events[:-1]] == [(1, 3), (2, 3)]
         nt = psutil.Process(dispatcher.pid)
         again = api.select_family("nt")
         assert dispatcher.wait_idle(10)

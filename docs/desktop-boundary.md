@@ -43,7 +43,7 @@ UI import 경로는 `desktop.renderer`, `desktop.fake`나 모델 런타임을 �
 | 함수 | 하는 일 | 결과 |
 |---|---|---|
 | `prepare()` | 모델 올리기 | `ready` 이벤트 |
-| `select_family(family)` | 두 Cas의 계열 전환 후 준비 | `ready` 이벤트 |
+| `select_family(family)` | 두 Cas의 계열 전환 후 준비 | 단계별 `progress`와 `ready` 이벤트 |
 | `scan_sites(dna)` | 사이트 탐색 | 조각 `sites` |
 | `predict(dna)` | 예측 | 조각 `best`, `variants`, `detail` |
 | `explain(dna, site_key, head, method, params, size)` | XAI 한 기법 | 조각 `xai` |
@@ -196,8 +196,10 @@ JS가 할 일은 슬롯 이름에 맞는 자리에 조각을 끼워 넣는 것�
 {"type": "error", "generation": 1, "request_id": 7, "html": "<p class=\"error\">…</p>"}
 ```
 
-- `progress` — `done`은 뒤로 가지 않고, 끝나면 `done == total`에 닿는다.
-  Rollout처럼 순전파 1회로 끝나는 계산은 진행률을 보내지 않는다.
+- `progress` — 배치 계산에서 `done`은 뒤로 가지 않고, 끝나면 `done == total`에 닿는다.
+  Rollout처럼 순전파 1회로 끝나는 계산은 진행률을 보내지 않는다. 계열을 전환할 때는
+  이전 프로세스 종료 확인 후 `done=1, total=3`, 새 프로세스 시작 후 `done=2, total=3`을
+  보낸다. 화면은 전환 시작을 0%, `ready`를 100%로 표시한다.
 - `result` — 요청당 최대 한 번. 취소되면 오지 않는다.
 - `ready` — `prepare()` 또는 `select_family()`가 끝났다. 화면은 다른 이벤트와
   마찬가지로 현재 요청 ID·세대·계열과 일치할 때만 분석 버튼을 연다.

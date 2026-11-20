@@ -73,9 +73,9 @@ def run(output, cas="SpCas9"):
         try:
             window.evaluate_js("window.xaiDesktop.start()")
             wait("!document.getElementById('analyze').disabled")
-            check("non_nt_rollout_disabled_with_reason", window.evaluate_js("""
+            check("non_nt_rollout_hidden", window.evaluate_js("""
               document.querySelector('[name=xai-method][value=rollout]').disabled &&
-              !document.getElementById('rollout-reason').hidden &&
+              document.getElementById('rollout-option').hidden &&
               document.querySelector('[name=xai-method]:checked').value === 'ig'
             """))
             check("defaults_unchanged", window.evaluate_js("""
@@ -98,8 +98,7 @@ def run(output, cas="SpCas9"):
                 check("single_cas12a_head_and_manifest_coordinates", window.evaluate_js("""
                   document.getElementById('xai-head').value === 'Cas12a' &&
                   document.getElementById('xai-head').options.length === 1 &&
-                  document.getElementById('xai-window').textContent.includes('PAM 4–7') &&
-                  document.querySelector('[data-slot=xai]').textContent.includes('합성 경로')
+                  document.getElementById('xai-window').textContent.includes('PAM 4–7')
                 """))
             before = len(events)
             first = capture("ig-before-resize")
@@ -115,16 +114,16 @@ def run(output, cas="SpCas9"):
             wait("document.querySelectorAll('[data-slot=xai] img').length === 2 && document.getElementById('task-state').hidden")
             check("shap_bars_and_waterfall_rendered", len(capture("shap")) == 2)
             text = window.evaluate_js("document.querySelector('[data-slot=xai]').textContent")
-            check("units_seeds_and_causality_reference", all(s in text for s in ("제한 전", "%p", "배경 seed 0", "인과관계")))
+            check("reference_sections_removed", all(s not in text for s in (
+                "제한 전", "배경 seed", "인과관계", "기술적 참고", "출력 단위 참고",
+            )))
             check("no_separate_quality_warning", window.evaluate_js("!document.querySelector('[data-slot=xai] .warning, [data-slot=xai] [role=alert]')"))
-            if cas == "Cas12a":
-                check("feature_recalculation_reference", "354" in text and "재계산" in text)
             check("explanations_preserve_prediction_table", prediction_table == window.evaluate_js(
                 "document.querySelector('[data-slot=best]').innerHTML"))
             window.evaluate_js("""
               document.getElementById('shap-n').value = 1024;
               document.getElementById('shap-bg').value = 32;
-              document.getElementById('xai-controls').requestSubmit();
+              document.getElementById('shap-bg').dispatchEvent(new Event('change', {bubbles:true}));
             """)
             wait("!document.getElementById('task-state').hidden && Number(document.getElementById('task-progress').value) > 0")
             old = events[-1]["request_id"]
@@ -154,7 +153,7 @@ def run(output, cas="SpCas9"):
             window.evaluate_js("""
               document.getElementById('shap-n').value = 1024;
               document.getElementById('shap-bg').value = 32;
-              document.getElementById('xai-controls').requestSubmit();
+              document.getElementById('shap-bg').dispatchEvent(new Event('change', {bubbles:true}));
             """)
             wait("!document.getElementById('task-state').hidden && Number(document.getElementById('task-progress').value) > 0")
             window.evaluate_js("document.getElementById('cancel-task').click()")
@@ -163,7 +162,7 @@ def run(output, cas="SpCas9"):
             window.evaluate_js("""
               document.getElementById('shap-n').value = 64;
               document.getElementById('shap-bg').value = 4;
-              document.getElementById('xai-controls').requestSubmit();
+              document.getElementById('shap-bg').dispatchEvent(new Event('change', {bubbles:true}));
             """)
             wait("document.querySelectorAll('[data-slot=xai] img').length === 2 && document.getElementById('task-state').hidden")
             check("can_reselect_cached_default_after_cancel", len(capture("shap-after-cancel")) == 2)

@@ -50,15 +50,22 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
         assert view["visible"] == ["view-" + panel]
         marker = "data:image/" if panel == "xai" else "<table"
         assert marker in view["content"]
+    assert all(text not in views[0]["content"] for text in (
+        "모델 입력 윈도우가 서열 밖", "score-help", "모델과 출력 범위", "대표로 표시합니다",
+    ))
+    assert all(text not in views[1]["content"] for text in (
+        "행: 가이드 서열", "Cas12a는 변종이 없어 비교할 대상이 없습니다",
+    ))
     assert report["resize"] == {"sameImage": True, "width": "40%", "label": "40%"}
     assert not report["display_changes_sent_requests"]
     controls = report["xai_controls"]
     assert controls["siteLabel"] == "분석 대상 사이트 (효율 높은 순)"
     assert controls["headLabel"] == "설명할 출력(변종)"
     assert controls["methods"] == [
-        "Attention Rollout", "Integrated Gradients (IG)",
+        "Integrated Gradients (IG)",
         "SHAP (Shapley Additive exPlanations)",
     ]
+    assert controls["retryHidden"]
     assert controls["settings"] == [["8", "256", "8", "32"], ["16", "1024", "16", "64"], ["2", "32", "2", "4"]]
     from core import scan_all
     from desktop.fake import heads_of
@@ -76,6 +83,7 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["cancelled_ui"] == {
         "hidden": True, "notice": "계산을 취소했습니다.", "canAnalyze": True, "canRetry": True,
     }
+    assert report["retry_visible_on_explain_error"]
     calls = [c for c in report["bridge_calls"] if c["name"] == "explain"]
     assert any(c["args"][3:5] == ["shap", {"nsamples": 80, "n_background": 6}] for c in calls)
     assert any(c["args"][3:5] == ["ig", {"steps": 40}] for c in calls)
@@ -110,15 +118,14 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert unfiltered["highlightCount"] == str(len(unfiltered["selected"]))
 
     filtered = report["detail_filtered"]
-    chosen = table({"cas_names": [filtered["variant"]], "dist_range": [0, 10]})
+    chosen = table({"cas_names": [filtered["variant"]], "eff_range": [30, 100], "dist_range": [0, 10]})
     assert set(filtered["names"]) == {filtered["variant"]}
     assert all(d <= 10 for d in filtered["distances"])
+    assert all(s >= 30 for s in filtered["scores"])
     assert filtered["ranks"] == [str(i) for i in range(1, len(chosen))]
     assert filtered["count"] == f"검색 결과: {len(chosen) - 1}개 / 전체 {len(full)}개"
-    # The captions echo the live values, as Streamlit's do (app.py:331, 335).
-    assert filtered["distCaption"] == "변이로부터 0 ~ 10 bp 이내"
-    assert filtered["effCaption"] == "선택 범위: 0.0% ~ 100.0%"
-    assert filtered["lowMax"] == "10"  # the pair cannot be crossed over
+    assert filtered["distCaption"] == "10 bp 이하"
+    assert filtered["effCaption"] == "30% 이상"
 
     # The saved file holds what the screen searched, byte for byte.
     assert report["save_dialog"] == CSV_FILENAME
@@ -140,6 +147,12 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["retry_ready"] == "모델 준비 완료"
     assert report["default_family"] == "non_nt"
     assert report["switch_cleared"] and report["switch_input_preserved"]
+    assert report["switch_statuses"][-3:] == [
+        "NT 다시 불러오는 중... 33% · 이전 프로세스 종료",
+        "NT 다시 불러오는 중... 67% · 새 프로세스 시작",
+        "모델 준비 완료 · 100%",
+    ]
+    assert report["nt_rollout_visible"] and report["rollout_hidden_again"]
     assert report["switch_no_stale"] and report["same_family_no_request"]
     assert report["switch_during_save_dialog"] and report["obsolete_dialog_did_not_write"]
     assert report["listeners"] == []

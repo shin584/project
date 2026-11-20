@@ -103,12 +103,7 @@ def best_candidates_fragment(rows: Sequence[VariantResult]) -> str:
         ):
             best[key] = row
 
-    parts = [
-        (
-            '<section id="best"><p>각 사이트에서 <strong>점수가 가장 높은 변종 1개</strong>만 '
-            "대표로 표시합니다. 변종별 비교는 '변종 비교' 탭을 확인하세요.</p>"
-        )
-    ]
+    parts = ['<section id="best">']
     if not best:
         return "".join(parts) + '<p class="empty">예측 결과가 없습니다.</p></section>'
     groups = _score_groups(list(best.values()))
@@ -202,14 +197,7 @@ def variant_comparison_fragment(rows: Sequence[VariantResult]) -> str:
     parts = ['<section id="variants">']
     for _, items in _score_groups(sp):
         label = SCORE_LABELS[items[0].score_kind]
-        parts.append(
-            f"<p>행: 가이드 서열 / 열: SpCas9 변종. 값은 <strong>{label}</strong> 이며, "
-            "<strong>초록에 가까울수록 높고, 빨강에 가까울수록 낮습니다.</strong> "
-            "색이 칠해지지 않고 <strong>'None'</strong> 으로 표시된 칸은 "
-            "그 변종이 인식하지 않는 PAM이라 예측 자체가 없는 자리입니다.</p>"
-            '<p class="caption">Cas12a는 변종이 없어 비교할 대상이 없습니다. '
-            "결과는 'Best Candidates'와 '전체 상세 보기' 탭에서 확인하세요.</p>"
-        )
+        parts.append(f"<h3>{_esc(label)}</h3>")
         data = pd.DataFrame(
             [
                 {

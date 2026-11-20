@@ -279,12 +279,12 @@ def test_fragment_offers_a_checkbox_per_variant_in_sorted_order():
     rows = [row("SpCas9-NG", 9.0), row("Cas12a", 8.0, cas="Cas12a"),
             row("SpCas9(WT)", 7.0), row("SpCas9-NG", 6.0)]
     fragment = detail_fragment(rows)
-    for text in ("원하는 조건을 설정한 뒤", "필터 설정", "Cas 변종 선택", "전체 선택",
-                 "전체 해제", "효율 범위 및 거리 설정", "점수 범위 (%)",
-                 "거리 범위 (bp)", "검색", "CSV 다운로드",
-                 "선택 범위: 0.0% ~ 100.0%",    # app.py:331의 캡션
-                 "변이로부터 0 ~ 15 bp 이내"):  # app.py:335의 캡션
+    for text in ("필터 설정", "Cas 변종 선택", "전체 선택", "전체 해제",
+                 "효율 범위 및 거리 설정", "최소 점수 (%)", "최대 거리 (bp)",
+                 "검색", "CSV 다운로드", "0% 이상", "15 bp 이하"):
         assert text in fragment
+    assert "원하는 조건을 설정한 뒤" not in fragment and "<h2>전체 상세 보기</h2>" not in fragment
+    assert fragment.count('type="range"') == 2
     boxes = [part.split('"', 1)[0] for part in fragment.split('name="detail-cas" value="')[1:]]
     assert boxes == ["Cas12a", "SpCas9(WT)", "SpCas9-NG"]
 

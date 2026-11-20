@@ -266,20 +266,14 @@ def _filters_html(rows: Sequence[VariantResult]) -> str:
         '<button type="button" id="detail-none">전체 해제</button></p>'
         f'<div class="checklist">{boxes}</div></fieldset>'
         "<fieldset><legend>효율 범위 및 거리 설정</legend>"
-        '<label for="detail-eff-low">점수 범위 (%)</label>'
-        f'<p><input id="detail-eff-low" type="range" aria-label="최소 점수 (%)" min="{eff_low}" max="{eff_high}"'
-        f' step="0.5" value="{eff_low}"> ~ '
-        f'<input id="detail-eff-high" type="range" aria-label="최대 점수 (%)" min="{eff_low}" max="{eff_high}"'
-        f' step="0.5" value="{eff_high}"></p>'
-        f'<p class="caption" id="detail-eff-caption">선택 범위: {eff_low:.1f}% ~ '
-        f"{eff_high:.1f}%</p>"
-        '<label for="detail-dist-low">거리 범위 (bp)</label>'
-        f'<p><input id="detail-dist-low" type="range" aria-label="최소 거리 (bp)" min="{dist_low}"'
-        f' max="{dist_high}" step="1" value="{dist_low}"> ~ '
-        f'<input id="detail-dist-high" type="range" aria-label="최대 거리 (bp)" min="{dist_low}"'
-        f' max="{dist_high}" step="1" value="{dist_high}"></p>'
-        f'<p class="caption" id="detail-dist-caption">변이로부터 {dist_low} ~ '
-        f"{dist_high} bp 이내</p></fieldset></div>"
+        '<label for="detail-eff-low">최소 점수 (%)</label>'
+        f'<input id="detail-eff-low" type="range" min="{eff_low:g}" max="{eff_high:g}"'
+        f' step="0.5" value="{eff_low:g}" aria-describedby="detail-eff-caption">'
+        f'<div class="caption" id="detail-eff-caption">{eff_low:g}% 이상</div>'
+        '<label for="detail-dist-high">최대 거리 (bp)</label>'
+        f'<input id="detail-dist-high" type="range" min="{dist_low}" max="{dist_high}"'
+        f' step="1" value="{dist_high}" aria-describedby="detail-dist-caption">'
+        f'<div class="caption" id="detail-dist-caption">{dist_high} bp 이하</div></fieldset></div>'
         '<p><button type="submit" id="detail-search">검색</button> '
         # Streamlit은 검색을 누른 뒤에야 다운로드 버튼을 그린다 (`app.py:385`).
         '<button type="button" id="detail-csv" disabled>CSV 다운로드</button></p>'
@@ -294,10 +288,7 @@ def detail_fragment(rows: Sequence[VariantResult]) -> str:
     drop and renumbers what is left, so searching never asks Python to predict
     again — only '저장' does, and it re-applies the same filter there.
     """
-    parts = [
-        '<section id="detail"><h2>전체 상세 보기</h2>',
-        "<p>원하는 조건을 설정한 뒤 <strong>검색 버튼</strong>을 눌러 결과를 확인하세요.</p>",
-    ]
+    parts = ['<section id="detail">']
     if not rows:
         return "".join(parts) + '<p class="empty">예측 결과가 없습니다.</p></section>'
     head = "".join(f'<th scope="col">{_esc(name)}</th>' for name in DETAIL_COLUMNS)

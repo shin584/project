@@ -38,7 +38,8 @@ def test_actual_non_nt_charts_resize_and_protocol_cache(predictor, method, count
 
     first = render(size=40)
     assert len(pngs(first)) == count
-    assert "제한 전" in first and "%p" in first and "인과관계" in first
+    assert "%p" in first
+    assert all(text not in first for text in ("제한 전", "인과관계", "기술적 참고", "출력 단위 참고"))
     assert progress and progress[-1][0] == progress[-1][1]
     assert all(a[0] / a[1] <= b[0] / b[1] for a, b in zip(progress, progress[1:]))
     progress.clear()
@@ -93,9 +94,7 @@ def test_finite_quality_failure_keeps_graphs(predictor, method):
     assert len(pngs(fragment)) == (1 if method == "ig" else 2)
     assert 'class="warning"' not in fragment and 'role="alert"' not in fragment
     assert "품질 경고" not in fragment
-    assert "120.00%" in fragment and "표와 다릅니다" in fragment
-    if method == "shap":
-        assert "배경 seed 0" in fragment and "PAM" in fragment
+    assert all(text not in fragment for text in ("제한 전", "표와 다릅니다", "배경 seed"))
 
 
 @pytest.mark.parametrize("method", ["ig", "shap"])

@@ -103,9 +103,12 @@ class ProcessRenderer:
             self._process = self._connection = self._cancellation = None
             self._broken = False
 
-    def _call(self, operation, args, on_batch):
+    def _call(self, operation, args, on_batch, *, switching=False):
         context = self._owner._context
         generation, rid = context.generation, context.request_id
+        if switching:
+            # Selection has already waited for the previous process to exit.
+            on_batch(1, 3)
         with self._state:
             if generation != self._owner.generation:
                 raise Cancelled()
@@ -132,6 +135,8 @@ class ProcessRenderer:
         try:
             cancellation.clear()
             _send(connection, {**identity, "operation": operation, "args": args})
+            if switching:
+                on_batch(2, 3)
             while True:
                 if generation != self._owner.generation:
                     raise Cancelled()
@@ -144,7 +149,7 @@ class ProcessRenderer:
                 if any(message.get(k) != v for k, v in identity.items()):
                     continue
                 if message["type"] == "progress":
-                    if not cancelled:
+                    if not cancelled and not switching:
                         try:
                             on_batch(message["done"], message["total"])
                         except Cancelled:
@@ -162,8 +167,8 @@ class ProcessRenderer:
             self._broken = True
             raise RuntimeError("Computation process exited; retry the request") from exc
 
-    def warm_up(self, on_batch):
-        return self._call("warm_up", {}, on_batch)
+    def warm_up(self, on_batch, *, switching=False):
+        return self._call("warm_up", {}, on_batch, switching=switching)
 
     def sites_fragment(self, dna, on_batch):
         return self._call("sites_fragment", {"dna": dna}, on_batch)
@@ -301,7 +306,9 @@ class ProcessDispatcher(Dispatcher):
                 self._restart()
             self.family = family
             self.renderer._factory_name = self._factory_override or FAMILY_FACTORIES[family]
-            rid = super().submit_lifecycle(self._tag(self.renderer.warm_up))
+            rid = super().submit_lifecycle(self._tag(
+                lambda on_batch: self.renderer.warm_up(on_batch, switching=changed)
+            ))
             return {"request_id": rid, "generation": self.generation,
                     "family": self.family, "changed": changed}
 

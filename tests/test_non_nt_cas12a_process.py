@@ -95,7 +95,7 @@ def test_mixed_cas_input_keeps_cas12a_scores_filters_ranks_and_head_selection():
     dna = json.loads((ROOT / "docs/equivalence-baseline/capture.json").read_text())["input_seq"]
     renderer = NonNTComputationRenderer()
     fragments = renderer.prediction_fragments(dna, lambda d, t: None)
-    assert "Cas12a는 변종이 없어" in fragments["variants"]
+    assert "Cas12a는 변종이 없어" not in fragments["variants"]
     selectors = Options(fragments["detail"]).sites
     table = renderer.csv_table(dna, lambda d, t: None, {"cas_names": ["Cas12a"]})
     assert [row[0] for row in table[1:]] == [1, 2]

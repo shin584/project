@@ -353,7 +353,7 @@ class DesktopApi:
         return self._submit(self._renderer.warm_up, lifecycle=True)
 
     def select_family(self, family: str) -> dict:
-        """Switch both Cas predictors together; preparation reports `ready`."""
+        """Switch both Cas predictors and report lifecycle progress before `ready`."""
         return self._dispatcher.select_family(family)
 
     def scan_sites(self, dna: str) -> dict:
