@@ -31,7 +31,7 @@ SCREEN_HTML = r"""<!doctype html>
     button:disabled { opacity: .5; cursor: default; }
     #analyze { display: block; width: 100%; margin-top: 16px; color: white;
       border-color: #245fa6; background: #245fa6; }
-    #model-status { min-height: 48px; margin: 20px 0; }
+    #model-status { margin: 12px 0 20px; }
     #model-status p { margin: 0; }
     .caption { font-size: 13px; color: #58677c; }
     .metrics { display: flex; flex-wrap: wrap; gap: 30px; margin: 20px 0; }
@@ -92,7 +92,6 @@ SCREEN_HTML = r"""<!doctype html>
       <input id="dna" type="text" placeholder="ATCG..." autocomplete="off" spellcheck="false">
       <button id="analyze" type="submit" disabled>분석 시작</button>
     </form>
-    <div id="model-status" role="status" aria-live="polite">모델 준비 중</div>
     <button id="retry-prepare" type="button" hidden>모델 준비 다시 시도</button>
     <hr>
     <label for="graph-size">XAI 그래프 크기</label>
@@ -105,6 +104,7 @@ SCREEN_HTML = r"""<!doctype html>
     <p class="demo">화면 미리보기 · 예측 점수와 XAI는 가짜 값입니다. 실제 분석에 사용하지 마세요.</p>
     <p id="welcome">왼쪽 사이드바에 81bp DNA 서열을 입력하고 <strong>분석 시작</strong>을 눌러 주세요.</p>
     <div id="notice" data-slot="notice" role="alert" aria-live="polite"></div>
+    <div id="model-status" role="status" aria-live="polite">모델 준비 중</div>
     <div id="task-state" role="status" aria-live="polite" hidden>
       <span id="task-label"></span>
       <progress id="task-progress" max="100"></progress>
