@@ -103,7 +103,11 @@ def test_obsolete_save_dialog_cannot_save_after_switch_or_cancel(tmp_path, actio
         release.set()
         saving.join(10)
         assert dispatcher.wait_idle(10)
-        assert replies == [{"request_id": None}]
+        if action == "switch":
+            assert replies == [{"request_id": None, "reason": "restarted",
+                                "generation": dispatcher.generation, "family": "nt"}]
+        else:
+            assert replies == [{"request_id": None}]
         assert not saved.exists()
     finally:
         release.set()
@@ -118,7 +122,9 @@ def test_save_from_an_obsolete_view_does_not_even_open_a_dialog():
     try:
         old_generation = dispatcher.generation
         api.select_family("nt")
-        assert api.save_csv(DNA, None, old_generation) == {"request_id": None}
+        assert api.save_csv(DNA, None, old_generation) == {
+            "request_id": None, "reason": "restarted",
+            "generation": dispatcher.generation, "family": "nt"}
         assert dialogs == []
     finally:
         dispatcher.close()
@@ -134,5 +140,46 @@ def test_save_dispatched_late_cannot_adopt_a_newer_same_family_request(new_inten
         api.cancel() if new_intent == "cancel" else api.predict(DNA)
         assert api.save_csv(DNA, None, context["generation"], context["revision"]) == {"request_id": None}
         assert dialogs == []
+    finally:
+        dispatcher.close()
+
+
+def test_save_after_the_idle_child_died_is_refused_then_succeeds_after_reanalysis(tmp_path):
+    """#217: a replaced child refuses the save visibly; the reply carries the new generation."""
+    events = []
+    saved = tmp_path / "results.csv"
+    dialogs = []
+
+    def choose(name):
+        dialogs.append(name)
+        return str(saved)
+
+    dispatcher = ProcessDispatcher(events.append, preview=True)
+    api = DesktopApi(dispatcher.renderer, dispatcher, choose)
+    try:
+        api.prepare()
+        assert dispatcher.wait_idle(10)
+        child = psutil.Process(dispatcher.pid)
+        child.kill()
+        child.wait(10)
+        # The screen sends the generation it last saw, plus save_context's revision.
+        seen = dispatcher.generation
+        context = api.save_context()
+        reply = api.save_csv(DNA, None, seen, context["revision"])
+        assert reply == {"request_id": None, "reason": "restarted",
+                         "generation": seen + 1, "family": "non_nt"}
+        assert dialogs == [], "a refused save must not ask for a path"
+        assert dispatcher.wait_idle(10)
+        assert not saved.exists()
+        # Reanalysis in the new generation, then saving with the refreshed one.
+        rid = api.predict(DNA)["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(rid) == "delivered"
+        context = api.save_context()
+        assert context["generation"] == reply["generation"]
+        rid = api.save_csv(DNA, None, context["generation"], context["revision"])["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(rid) == "delivered"
+        assert saved.read_bytes().startswith(b"\xef\xbb\xbf")
     finally:
         dispatcher.close()

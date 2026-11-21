@@ -63,10 +63,11 @@ def observe_window(*args, **kwargs):
 
     def stub_file_dialog(*dialog_args, **dialog_kwargs):
         report["save_dialog"] = dialog_kwargs.get("save_filename")
+        report["save_dialogs"] = report.get("save_dialogs", 0) + 1
         if hold_save.is_set():
             save_opened.set()
             assert release_save.wait(30), "Save dialog was not released"
-        return str(csv_target)
+        return None if report.get("dialog_closes") else str(csv_target)
 
     window.create_file_dialog = stub_file_dialog
 
@@ -426,6 +427,48 @@ runpy.run_module('desktop', run_name='__main__')
             assert save_returned.wait(10)
             report["obsolete_dialog_did_not_write"] = csv_target.stat().st_mtime_ns == saved_mtime
             assert [call for call in report["bridge_calls"] if call["name"] == "save_csv"][-1]["reply"]["request_id"] is None
+            # #217: closing the dialog ends quietly; a save into a replaced
+            # computation process is refused visibly and refreshes the generation.
+            hold_save.clear()
+            report["dialog_closes"] = True
+            save_returned.clear()
+            window.evaluate_js("document.getElementById('detail-search').click(); document.getElementById('detail-csv').click()")
+            assert save_returned.wait(10)
+            wait_for("document.getElementById('task-state').hidden")
+            report["dialog_closed_ui"] = window.evaluate_js("""({
+              notice: document.getElementById('notice').textContent,
+              canAnalyze: !document.getElementById('analyze').disabled})""")
+            report["dialog_closed_error"] = window.evaluate_js("document.querySelector('#notice .error') !== null")
+            report["dialog_closes"] = False
+            computation = [child for child in psutil.Process().children(recursive=True)
+                           if "multiprocessing" in " ".join(child.cmdline())]
+            assert len(computation) == 1, computation
+            computation[0].kill()
+            computation[0].wait(10)
+            saved_mtime = csv_target.stat().st_mtime_ns
+            dialogs_before = report["save_dialogs"]
+            save_returned.clear()
+            window.evaluate_js("document.getElementById('detail-csv').click()")
+            assert save_returned.wait(10)
+            wait_for("document.querySelector('#notice .error')")
+            refusal = [call for call in report["bridge_calls"] if call["name"] == "save_csv"][-1]["reply"]
+            report["restarted_refusal"] = refusal
+            report["restarted_ui"] = window.evaluate_js("""({
+              notice: document.getElementById('notice').textContent,
+              taskHidden: document.getElementById('task-state').hidden,
+              canAnalyze: !document.getElementById('analyze').disabled})""")
+            report["restarted_did_not_write"] = csv_target.stat().st_mtime_ns == saved_mtime
+            report["restarted_dialog_opened"] = report["save_dialogs"] != dialogs_before
+            window.evaluate_js("document.getElementById('analyze').click()")
+            wait_for("""!document.getElementById('analyze').disabled &&
+              document.getElementById('task-state').hidden &&
+              document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            window.evaluate_js("document.getElementById('detail-search').click(); document.getElementById('detail-csv').click()")
+            wait_for("""document.getElementById('task-state').hidden &&
+              document.getElementById('notice').textContent.includes('저장했습니다')""")
+            report["saved_after_reanalysis"] = csv_target.stat().st_mtime_ns != saved_mtime
+            report["save_generation_after_reanalysis"] = [
+                call for call in report["bridge_calls"] if call["name"] == "save_csv"][-1]["args"][2]
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port

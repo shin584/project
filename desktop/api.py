@@ -62,6 +62,9 @@ Fragments = dict[str, str]
 #: 요청 하나가 어떻게 끝났는지. `Dispatcher.outcome()`이 돌려준다.
 Outcome = Literal["delivered", "cancelled", "superseded", "stale", "failed"]
 
+# 요청 기록에 남기는 최대 건수. 오래된 것부터 지운다 (#217).
+OUTCOME_LIMIT = 256
+
 
 class Cancelled(Exception):
     """진행 중인 계산을 접으라는 신호. 진행률 콜백이 던진다."""
@@ -132,6 +135,7 @@ class Dispatcher:
         self._pending: tuple[int, Callable] | None = None
         self._lifecycle: deque[tuple[int, Callable]] = deque()
         self._running: int | None = None
+        # 요청 기록. 시험·종료용 `outcome()`만 읽으므로 최근 것만 남긴다 (#217).
         self._outcomes: dict[int, Outcome] = {}
         self._closed = False
         self._worker = threading.Thread(
@@ -146,7 +150,7 @@ class Dispatcher:
         with self._lock:
             rid = next(self._ids)
             if self._pending is not None:
-                self._outcomes.setdefault(self._pending[0], "superseded")
+                self._record(self._pending[0], "superseded", keep=True)
             self._pending = (rid, job)
             self._latest = rid  # 진행 중인 작업의 다음 on_batch가 취소된다
             self._cv.notify_all()
@@ -170,7 +174,7 @@ class Dispatcher:
         """진행 중·대기 중인 요청을 모두 접는다. 새 작업은 맡기지 않는다."""
         with self._lock:
             if self._pending is not None:
-                self._outcomes.setdefault(self._pending[0], "superseded")
+                self._record(self._pending[0], "superseded", keep=True)
                 self._pending = None
             self._latest = next(self._ids)
             self._cv.notify_all()
@@ -202,6 +206,17 @@ class Dispatcher:
             self._cv.notify_all()
         self._worker.join(timeout=5)
 
+    def _record(self, rid: int, outcome: Outcome, *, keep: bool = False) -> None:
+        """요청 기록에 적는다(잠금 안에서). `keep`이면 이미 적힌 것을 두고, 가장
+        최근 `OUTCOME_LIMIT`건만 남긴다."""
+        if rid in self._outcomes:
+            if not keep:
+                self._outcomes[rid] = outcome
+            return
+        self._outcomes[rid] = outcome
+        while len(self._outcomes) > OUTCOME_LIMIT:
+            del self._outcomes[next(iter(self._outcomes))]
+
     # ── 작업자 ─────────────────────────────────────
 
     def _serve(self) -> None:
@@ -219,7 +234,7 @@ class Dispatcher:
                     rid, job = self._pending
                     self._pending = None
                     if rid != self._latest:
-                        self._outcomes.setdefault(rid, "superseded")
+                        self._record(rid, "superseded", keep=True)
                         self._cv.notify_all()
                         continue
                     run = self._execute
@@ -237,7 +252,7 @@ class Dispatcher:
                 result = "failed"
             with self._lock:
                 self._running = None
-                self._outcomes[rid] = result
+                self._record(rid, result)
                 self._cv.notify_all()
 
     def _execute(self, rid: int, job: Callable[[OnBatch], Fragments]) -> Outcome:
@@ -328,7 +343,10 @@ class DesktopApi:
 
     모든 메서드는 **즉시** `{"request_id": int}`을 돌려주고, 결과는 이벤트로 간다.
     `save_csv`는 저장 대화상자를 닫으면 `{"request_id": None}`을 돌려주고 아무
-    작업도 맡기지 않는다. `cancel`도 `{"request_id": None}`이다.
+    작업도 맡기지 않는다. 화면이 본 세대가 이미 교체됐으면(#217) 저장을 거부하고
+    `{"request_id": None, "reason": "restarted", "generation", "family"}`로 새
+    세대를 알린다. 새 세대에서 자동으로 다시 저장하지 않는다.
+    `cancel`도 `{"request_id": None}`이다.
     `save_context`는 작업 없이 저장용 `{generation, revision}`만 반환한다.
     """
 
@@ -421,7 +439,8 @@ class DesktopApi:
         if generation is None:
             generation = current_generation
         elif generation != current_generation:
-            return {"request_id": None}
+            refusal = getattr(self._dispatcher, "restarted_refusal", None)
+            return refusal() if refusal else {"request_id": None}
         if revision is None:
             revision = current_revision
         elif revision != current_revision:
@@ -446,8 +465,7 @@ class DesktopApi:
             }
 
         if generation is not None:
-            reply = self._dispatcher.submit_request(job, generation=generation, revision=revision)
-            return {"request_id": None} if reply is None else reply
+            return self._dispatcher.submit_request(job, generation=generation, revision=revision)
         return self._submit(job)
 
     def cancel(self) -> dict:

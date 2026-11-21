@@ -155,6 +155,21 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["nt_rollout_visible"] and report["rollout_hidden_again"]
     assert report["switch_no_stale"] and report["same_family_no_request"]
     assert report["switch_during_save_dialog"] and report["obsolete_dialog_did_not_write"]
+    # #217
+    # Closing the dialog stays quiet, as before: no error, the task ends.
+    assert report["dialog_closed_ui"]["canAnalyze"]
+    assert "오류" not in report["dialog_closed_ui"]["notice"]
+    assert not report["dialog_closed_error"]
+    assert not report["restarted_dialog_opened"]
+    refusal = report["restarted_refusal"]
+    assert refusal["request_id"] is None and refusal["reason"] == "restarted"
+    assert report["restarted_ui"] == {
+        "notice": "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요",
+        "taskHidden": True, "canAnalyze": True,
+    }
+    assert report["restarted_did_not_write"]
+    assert report["saved_after_reanalysis"]
+    assert report["save_generation_after_reanalysis"] == refusal["generation"]
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []

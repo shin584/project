@@ -551,3 +551,20 @@ def test_webview_emitter_calls_the_js_entry_point():
     assert script.startswith("window.xaiDesktop.onEvent(")
     payload = script[len("window.xaiDesktop.onEvent(") : -2]
     assert json.loads(payload)["fragments"]["xai"] == '<p>"</p>'
+
+
+def test_request_records_keep_only_the_latest_256():
+    """#217: 요청 10만 건 뒤에도 요청 기록은 256건 이하다."""
+    dispatcher = Dispatcher(lambda event: None)
+    try:
+        noop = lambda on_batch: {}
+        ids = [dispatcher.submit(noop) for _ in range(100_000)]
+        assert dispatcher.wait_idle(60)
+        last = dispatcher.submit(noop)
+        assert dispatcher.wait_idle(10)
+        assert dispatcher.outcome(last) == "delivered"
+        kept = [rid for rid in [*ids, last] if dispatcher.outcome(rid) is not None]
+        assert 0 < len(kept) <= 256
+        assert dispatcher.outcome(ids[0]) is None
+    finally:
+        dispatcher.close()

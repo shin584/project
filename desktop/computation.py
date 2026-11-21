@@ -227,31 +227,51 @@ class ProcessDispatcher(Dispatcher):
             if self._closed:
                 raise RuntimeError("Computation dispatcher is closed")
             if expected_generation is not None and expected_generation != self.generation:
-                return None
+                return self.restarted_refusal()
             if expected_revision is not None and expected_revision != self._latest:
-                return None
+                return {"request_id": None}
             if self.renderer.exited:
                 self._restart()
                 if expected_generation is not None:
-                    return None
+                    return self.restarted_refusal()
             submit = super().submit_lifecycle if lifecycle else super().submit
             rid = submit(self._tag(job))
             if receipt:
                 return {"request_id": rid, "generation": self.generation, "family": self.family}
             return rid
 
+    def restarted_refusal(self):
+        """Refuse work bound to a replaced generation and name the current one.
+
+        Callers must not retry it in the new generation: invalidation has no
+        exceptions.
+        """
+        return {"request_id": None, "reason": "restarted",
+                "generation": self.generation, "family": self.family}
+
     def submit(self, job):
         return self._submit_process(job, lifecycle=False)
 
     def submit_request(self, job, *, lifecycle=False, generation=None, revision=None):
-        """Return ID and generation atomically with scheduling, even on bridge threads."""
+        """Return ID and generation atomically with scheduling, even on bridge threads.
+
+        A request bound to a replaced generation is refused with
+        `{"request_id": None, "reason": "restarted", "generation", "family"}`;
+        one bound to a superseded revision gets a bare `{"request_id": None}`.
+        """
         return self._submit_process(job, lifecycle=lifecycle,
                                     expected_generation=generation,
                                     expected_revision=revision, receipt=True)
 
     def submission_identity(self):
-        """Bind a save dialog to the current generation and cancellation state."""
+        """Bind a save dialog to the current generation and cancellation state.
+
+        A child that died while idle is replaced here, before any dialog opens,
+        so a save bound to its generation is refused without asking for a path.
+        """
         with self._submissions:
+            if not self._closed and self.renderer.exited:
+                self._restart()
             return self.generation, self._latest
 
     def cancel(self):
@@ -273,9 +293,9 @@ class ProcessDispatcher(Dispatcher):
         with self._lock:
             self.generation += 1
             if self._pending:
-                self._outcomes[self._pending[0]] = "superseded"
+                self._record(self._pending[0], "superseded")
             for rid, _ in self._lifecycle:
-                self._outcomes[rid] = "superseded"
+                self._record(rid, "superseded")
             self._pending = None
             self._lifecycle.clear()
             self._latest = next(self._ids)

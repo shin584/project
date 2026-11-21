@@ -248,7 +248,18 @@ SCREEN_HTML = r"""<!doctype html>
             if (reply.generation !== undefined) generation = reply.generation;
             // save_csv answers null when the user closes the save dialog: no
             // request was made, so no event will ever arrive to end this one.
-            if (activeId === null) { finish(); return; }
+            // A "restarted" reason means the computation process was replaced:
+            // the save was refused (never retried) and `generation` is the new one.
+            if (activeId === null) {
+              if (reply.reason === "restarted") {
+                const error = document.createElement("p");
+                error.className = "error";
+                error.textContent = "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요";
+                byId("notice").replaceChildren(error);
+              }
+              finish();
+              return;
+            }
             const events = earlyEvents;
             earlyEvents = [];
             events.forEach(event => window.xaiDesktop.onEvent(event));
