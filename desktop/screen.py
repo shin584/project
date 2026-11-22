@@ -186,6 +186,9 @@ SCREEN_HTML = r"""<!doctype html>
       let family = "non_nt";
       let reanalyze = false;
       let reexplain = false;
+      // #219: after a stalled computation nothing replays the analysis, not
+      // even "모델 준비 다시 시도", until the user starts one.
+      let replayBlocked = false;
       const familyLabel = () => family === "nt" ? "NT" : "기본 (non-NT)";
       function updateMethodSupport() {
         const option = byId("rollout-option");
@@ -296,7 +299,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("retry-prepare").hidden = true;
         byId("notice").textContent = "";
         byId("model-status").textContent = "모델 준비 중";
-        if (analysisDna) reanalyze = true;
+        if (analysisDna && !replayBlocked) reanalyze = true;
         request("prepare");
       });
 
@@ -524,6 +527,7 @@ SCREEN_HTML = r"""<!doctype html>
       }
 
       function analyze() {
+        replayBlocked = false;
         analysisDna = byId("dna").value;
         clearResults();
         byId("notice").textContent = "PAM 탐색 중...";
@@ -558,9 +562,22 @@ SCREEN_HTML = r"""<!doctype html>
             // follow the new preparation and lock analysis until its ready.
             if (event.family !== family || event.generation < generation) return;
             generation = event.generation;
-            if (busy && (operation === "scan_sites" || operation === "predict")) reanalyze = true;
-            if (busy && operation === "explain") reexplain = true;
-            if (busy && operation === "save_csv") {
+            if (event.reason === "no_progress") {
+              // #219: a stalled computation. Never re-run it on its own — an
+              // input that always stalls would restart the process forever.
+              reanalyze = false;
+              reexplain = false;
+              replayBlocked = true;
+              if (busy && operation === "explain") offerExplanationRetry();
+              const error = document.createElement("p");
+              error.className = "error";
+              error.textContent = "계산이 응답하지 않아 계산 프로세스를 다시 시작했습니다";
+              byId("notice").replaceChildren(error);
+            } else if (busy && (operation === "scan_sites" || operation === "predict")) {
+              reanalyze = true;
+            } else if (busy && operation === "explain") {
+              reexplain = true;
+            } else if (busy && operation === "save_csv") {
               const error = document.createElement("p");
               error.className = "error";
               error.textContent = "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요";

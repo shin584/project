@@ -60,3 +60,28 @@ class HangsRenderer(FakeRenderer):
     def explanation_fragment(self, dna, site_key, head, method, params, size, on_batch):
         on_batch(1, 10)
         time.sleep(3600)
+
+
+class SteadyRenderer(FakeRenderer):
+    """#219: a long computation that keeps reporting progress."""
+
+    def explanation_fragment(self, dna, site_key, head, method, params, size, on_batch):
+        for done in range(1, 11):
+            time.sleep(0.2)
+            on_batch(done, 10)
+        return super().explanation_fragment(dna, site_key, head, method, params, size,
+                                            lambda *_: None)
+
+
+class HangsOnceWhileLoadingRenderer(FakeRenderer):
+    """#219: the first child's model load never ends; later children load normally.
+
+    The marker path comes from the environment the spawned child inherits.
+    """
+
+    def warm_up(self, on_batch):
+        marker = os.environ["DASHBOARD_TEST_LOAD_MARKER"]
+        if not os.path.exists(marker):
+            open(marker, "w").close()
+            time.sleep(3600)
+        return super().warm_up(on_batch)

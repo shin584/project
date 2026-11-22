@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skipif(sys.platform != "win32", reason="Windows desktop
 
 def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     pytest.importorskip("webview")
-    pytest.importorskip("psutil")
+    psutil = pytest.importorskip("psutil")
     from desktop.instance import SingleInstance
 
     with SingleInstance() as instance:
@@ -30,6 +30,8 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     report = json.loads(output.read_text(encoding="utf-8"))
     assert "error" not in report, report.get("error")
+    for pid, created in report["final_children"]:  # none outlive the shell (#219)
+        assert not (psutil.pid_exists(pid) and psutil.Process(pid).create_time() == created)
     assert report["html_string"] and report["url"] is None
     assert report["shown_before_prepare"]
     assert report["initial"] == {"status": "모델 준비 중", "disabled": True}
@@ -184,6 +186,20 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["restart_after_new_request_completed"]
     assert report["restart_after_new_request_old_child_gone"]
     assert report["restart_children"] == 1
+    # #219
+    stalled = {"status": "계산 프로세스를 다시 시작하는 중...",
+               "notice": "계산이 응답하지 않아 계산 프로세스를 다시 시작했습니다", "disabled": True}
+    assert report["stall_restart_ui"] == stalled
+    assert report["stall_ready_ui"] == {**stalled, "status": "모델 준비 완료", "disabled": False}
+    assert report["stall_retry_explain_offered"]
+    assert report["stall_requests_after_ready"] == []  # the stalled request is not re-run
+    assert report["stall_old_child_gone"]
+    assert report["stall_family"] == "non_nt"
+    assert report["load_limit_ui"]["status"] == "모델 준비 실패"
+    assert "적재 한도" in report["load_limit_ui"]["notice"]
+    assert report["load_limit_ui"]["disabled"]
+    assert report["load_limit_recovered"] == {
+        "status": "모델 준비 완료", "family": "nt", "retryHidden": True}
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []

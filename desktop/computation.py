@@ -27,6 +27,21 @@ FAMILY_FACTORIES = {
 #: the final value is a separate ticket. Tests inject `cancel_grace`.
 CANCEL_GRACE = 15.0
 
+#: No-progress limit in seconds (#219). A request that nobody cancelled and
+#: whose child sends no progress report for this long is a stalled computation
+#: and is force-restarted. Measured from the request and from each report, so a
+#: long job that keeps reporting (Cas12a SHAP, about 62 s) never hits it; the
+#: job's total time has no limit. It also covers non-NT's lazy model load
+#: inside the first prediction. Provisional; tests inject `no_progress_limit`.
+NO_PROGRESS_LIMIT = 120.0
+
+#: Load limit in seconds (#219). Model loading sends no progress from inside
+#: the load, so the whole preparation has this limit. Past it the child is
+#: stopped and preparation fails, so the screen offers "모델 준비 다시 시도"
+#: (`retry-prepare`), which replaces the child. Provisional;
+#: tests inject `load_limit`.
+LOAD_LIMIT = 300.0
+
 
 def _send(connection, message):
     connection.send_bytes(json.dumps(message, ensure_ascii=False).encode("utf-8"))
@@ -142,6 +157,10 @@ class ProcessRenderer:
         cancellable = not getattr(context, "lifecycle", False)
         cancelled = False
         deadline = None  # cancel grace: the child must answer before this
+        # A request must keep reporting (no-progress limit); preparation must
+        # finish as a whole (load limit), whatever it reports on the way.
+        limit = self._owner.no_progress_limit if cancellable else self._owner.load_limit
+        silence_deadline = time.monotonic() + limit
         try:
             cancellation.clear()
             _send(connection, {**identity, "operation": operation, "args": args})
@@ -161,14 +180,30 @@ class ProcessRenderer:
                     if not process.is_alive():
                         self._broken = True
                         raise RuntimeError("Computation process exited; retry the request")
-                    if deadline is not None and time.monotonic() >= deadline:
+                    now = time.monotonic()
+                    if deadline is not None and now >= deadline:
                         self._owner._force_restart(generation)
+                        raise Cancelled()
+                    if deadline is None and now >= silence_deadline:
+                        if not cancellable:
+                            # Stop the stuck load; the failed preparation offers
+                            # "모델 준비 다시 시도", whose submission replaces the
+                            # child in the same family with a new generation.
+                            self._broken = True
+                            process.kill()
+                            process.join(3)
+                            raise RuntimeError(
+                                f"모델 적재가 적재 한도({limit:g}초)를 넘겨 계산 프로세스를 "
+                                "멈췄습니다. 모델 준비를 다시 시도하세요")
+                        self._owner._force_restart(generation, reason="no_progress")
                         raise Cancelled()
                     continue
                 message = _receive(connection)
                 if any(message.get(k) != v for k, v in identity.items()):
                     continue
                 if message["type"] == "progress":
+                    if cancellable:
+                        silence_deadline = time.monotonic() + limit
                     if cancelled:
                         # The child still answers; give it until its next report.
                         deadline = time.monotonic() + self._owner.cancel_grace
@@ -212,13 +247,16 @@ class ProcessDispatcher(Dispatcher):
     """Existing latest-request scheduler with a replaceable child lifetime."""
 
     def __init__(self, emit, *, preview=False, factory_name=None, family="non_nt",
-                 cancel_grace=None):
+                 cancel_grace=None, no_progress_limit=None, load_limit=None):
         if family not in FAMILY_FACTORIES:
             raise ValueError(f"Unknown model family: {family}")
         self.family = family
         self._factory_override = factory_name or ("desktop.fake:FakeRenderer" if preview else None)
         self.generation = 1
         self.cancel_grace = CANCEL_GRACE if cancel_grace is None else float(cancel_grace)
+        self.no_progress_limit = (NO_PROGRESS_LIMIT if no_progress_limit is None
+                                  else float(no_progress_limit))
+        self.load_limit = LOAD_LIMIT if load_limit is None else float(load_limit)
         self._context = threading.local()
         self._submissions = threading.Lock()
         self._sink = emit
@@ -314,8 +352,11 @@ class ProcessDispatcher(Dispatcher):
         self._context.request_id, self._context.lifecycle = rid, True
         return super()._execute_lifecycle(rid, job)
 
-    def _force_restart(self, generation):
-        """Replace a child that did not answer a cancel, in the same family (#218).
+    def _force_restart(self, generation, reason="cancel_grace"):
+        """Replace an unresponsive child in the same family (#218, #219).
+
+        `reason` is "cancel_grace" (it did not answer a cancel) or "no_progress"
+        (it stopped reporting with nobody cancelling: a stalled computation).
 
         Runs on the worker thread. Everything of the old generation is
         invalidated, including a request queued behind the unresponsive one;
@@ -335,7 +376,7 @@ class ProcessDispatcher(Dispatcher):
             with self._lock:
                 # The worker's own context still names the old generation, so
                 # this bypasses `_emit_current`; the ready that follows is current.
-                self._sink({"type": "restarting", "reason": "cancel_grace", "request_id": rid,
+                self._sink({"type": "restarting", "reason": reason, "request_id": rid,
                             "generation": self.generation, "family": self.family})
         finally:
             self._submissions.release()

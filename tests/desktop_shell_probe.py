@@ -6,6 +6,7 @@ prepare are forwarded unchanged after recording the initial visible state.
 
 from __future__ import annotations
 
+import gc
 import importlib.abc
 import json
 import subprocess
@@ -524,6 +525,51 @@ runpy.run_module('desktop', run_name='__main__')
                 "document.querySelector('#detail-results tbody tr') !== null")
             report["restart_after_new_request_old_child_gone"] = not frozen.is_running()
             report["restart_children"] = len([computation_child()])
+            # #219: a computation that stops reporting with nobody cancelling is
+            # replaced after the no-progress limit and is not re-run.
+            frozen = freeze_long_shap()
+            requests_before = [call["name"] for call in report["bridge_calls"]]
+            wait_for("document.getElementById('model-status').textContent.includes('다시 시작하는')")
+            report["stall_restart_ui"] = restart_ui()
+            wait_for("!document.getElementById('analyze').disabled")
+            report["stall_ready_ui"] = restart_ui()
+            report["stall_retry_explain_offered"] = window.evaluate_js(
+                "!document.getElementById('retry-explain').hidden")
+            time.sleep(0.5)  # a re-run would be requested right after ready
+            report["stall_requests_after_ready"] = [
+                call["name"] for call in report["bridge_calls"]][len(requests_before):]
+            report["stall_old_child_gone"] = not frozen.is_running()
+            report["stall_family"] = window.evaluate_js(
+                "document.getElementById('model-family').value")
+            # #219: a model load past the load limit fails with "다시 준비",
+            # and retrying it recovers. Every child start exceeds 1 ms.
+            from desktop import computation as lifetime
+
+            dispatcher = next(obj for obj in gc.get_objects()
+                              if isinstance(obj, lifetime.ProcessDispatcher))
+            dispatcher.load_limit = 0.001
+            window.evaluate_js("""const family = document.getElementById('model-family');
+              family.value = 'nt'; family.dispatchEvent(new Event('change'))""")
+            wait_for("!document.getElementById('retry-prepare').hidden")
+            report["load_limit_ui"] = window.evaluate_js("""({
+              status: document.getElementById('model-status').textContent,
+              notice: document.getElementById('notice').textContent,
+              disabled: document.getElementById('analyze').disabled})""")
+            dispatcher.load_limit = lifetime.LOAD_LIMIT
+            # The retry re-runs the analysis, which explains again; keep it short.
+            window.evaluate_js("""document.getElementById('shap-n').value = '16';
+              document.getElementById('shap-bg').value = '2';
+              document.getElementById('retry-prepare').click()""")
+            wait_for("""!document.getElementById('analyze').disabled &&
+              document.getElementById('task-state').hidden &&
+              document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            report["load_limit_recovered"] = window.evaluate_js("""({
+              status: document.getElementById('model-status').textContent,
+              family: document.getElementById('model-family').value,
+              retryHidden: document.getElementById('retry-prepare').hidden})""")
+            report["final_children"] = [
+                [child.pid, child.create_time()]
+                for child in psutil.Process().children(recursive=True)]
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port
@@ -555,5 +601,6 @@ if __name__ == "__main__":
     from desktop.app import main
 
     computation.CANCEL_GRACE = 1.0  # #218: keep the probe's forced restarts short
+    computation.NO_PROGRESS_LIMIT = 3.0  # #219: above a fresh child's first import
 
     raise SystemExit(main(preview=True))

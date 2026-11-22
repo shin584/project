@@ -296,3 +296,100 @@ def test_cooperative_cancel_within_the_grace_keeps_the_generation_and_child():
         assert not any(e["type"] == "restarting" for e in events)
     finally:
         dispatcher.close()
+
+
+def test_stalled_computation_without_cancel_is_force_restarted_after_the_no_progress_limit():
+    import psutil
+
+    events = []
+    # Above a fresh child's first-request import time, which sends no progress.
+    dispatcher = ProcessDispatcher(events.append, no_progress_limit=2.0,
+                                   factory_name="process_fixtures:HangsRenderer")
+    api = DesktopApi(dispatcher.renderer, dispatcher)
+    try:
+        assert api.prepare()["request_id"] and dispatcher.wait_idle(20)
+        family = dispatcher.family
+        stuck = _hang(dispatcher, api, events)
+        old = psutil.Process(dispatcher.pid)
+        checkpoint = len(events)
+        assert dispatcher.wait_idle(20)
+        assert not old.is_running()
+        # Not re-run: the stuck request ends here and nothing replays it.
+        assert dispatcher.outcome(stuck) == "cancelled"
+        after = events[checkpoint:]
+        restarting = [e for e in after if e["type"] == "restarting"]
+        assert restarting == [{"type": "restarting", "reason": "no_progress",
+                               "request_id": restarting[0]["request_id"],
+                               "generation": 2, "family": family}], after
+        assert [e["type"] for e in after if e["type"] != "progress"] == \
+            ["restarting", "ready"], after
+        assert after[-1]["request_id"] == restarting[0]["request_id"]
+        assert dispatcher.generation == 2 and dispatcher.family == family
+        # Recovery, not the limit, is checked now: a fresh child's first request
+        # imports before its first report, which a busy machine can stretch.
+        dispatcher.no_progress_limit = 120.0
+        rid = api.predict(DNA)["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(rid) == "delivered"
+        child = psutil.Process(dispatcher.pid)
+    finally:
+        dispatcher.close()
+    assert not child.is_running()
+    assert dispatcher.pid is None
+
+
+def test_long_computation_that_keeps_reporting_is_not_a_stalled_one():
+    events = []
+    dispatcher = ProcessDispatcher(events.append, no_progress_limit=0.6,
+                                   factory_name="process_fixtures:SteadyRenderer")
+    api = DesktopApi(dispatcher.renderer, dispatcher)
+    try:
+        assert api.prepare()["request_id"] and dispatcher.wait_idle(20)
+        pid = dispatcher.pid
+        started = time.monotonic()
+        rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig")["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert time.monotonic() - started > 1.5  # well past the limit in total
+        assert dispatcher.outcome(rid) == "delivered"
+        assert dispatcher.pid == pid and dispatcher.generation == 1
+        assert not any(e["type"] in {"restarting", "error"} for e in events)
+    finally:
+        dispatcher.close()
+
+
+def test_model_load_past_the_load_limit_reports_an_error_and_retry_recovers(tmp_path, monkeypatch):
+    import psutil
+
+    monkeypatch.setenv("DASHBOARD_TEST_LOAD_MARKER", str(tmp_path / "loaded-once"))
+    events = []
+    dispatcher = ProcessDispatcher(events.append, load_limit=1.0,
+                                   factory_name="process_fixtures:HangsOnceWhileLoadingRenderer")
+    api = DesktopApi(dispatcher.renderer, dispatcher)
+    try:
+        first = api.prepare()["request_id"]
+        deadline = time.monotonic() + 20
+        while dispatcher.pid is None:
+            assert time.monotonic() < deadline
+            time.sleep(0.02)
+        old = psutil.Process(dispatcher.pid)
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(first) == "failed"
+        error = [e for e in events if e["request_id"] == first][-1]
+        assert error["type"] == "error" and error["generation"] == 1, events
+        assert "적재 한도" in error["html"]
+        assert not old.is_running()
+        assert not any(e["type"] == "restarting" for e in events)
+        # "다시 준비" (retry-prepare) submits preparation again.
+        retry = api.prepare()
+        assert retry["generation"] == 2
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(retry["request_id"]) == "delivered"
+        assert events[-1]["type"] == "ready" and events[-1]["generation"] == 2
+        rid = api.predict(DNA)["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(rid) == "delivered"
+        child = psutil.Process(dispatcher.pid)
+    finally:
+        dispatcher.close()
+    assert not child.is_running()
+    assert dispatcher.pid is None
