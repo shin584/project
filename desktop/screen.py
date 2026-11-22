@@ -185,6 +185,7 @@ SCREEN_HTML = r"""<!doctype html>
       let generation = 0;
       let family = "non_nt";
       let reanalyze = false;
+      let reexplain = false;
       const familyLabel = () => family === "nt" ? "NT" : "기본 (non-NT)";
       function updateMethodSupport() {
         const option = byId("rollout-option");
@@ -445,7 +446,9 @@ SCREEN_HTML = r"""<!doctype html>
       }
 
       function saveCsv() {
-        if (!detailSearched) return;
+        // While the process restarts, a save would take over the preparation's
+        // request ID and its ready would never unlock analysis (#218).
+        if (!detailSearched || !ready) return;
         byId("notice").textContent = "CSV를 저장하는 중...";
         byId("task-label").textContent = "CSV 저장 준비 중...";
         byId("task-progress").removeAttribute("value");
@@ -514,6 +517,7 @@ SCREEN_HTML = r"""<!doctype html>
         byId("task-label").textContent = "";
         byId("task-progress").removeAttribute("value");
         detailSearched = null;  // the new analysis brings its own detail fragment
+        reexplain = false;  // no explanation is pending for cleared results
         for (const name of ["sites", "best", "variants", "detail", "xai"]) {
           slot(name).textContent = "";
         }
@@ -548,6 +552,31 @@ SCREEN_HTML = r"""<!doctype html>
           setTimeout(prepare, 250);
         },
         onEvent(event) {
+          if (event.type === "restarting") {
+            // #218: the computation process did not answer a cancel and is being
+            // replaced in the same family. Its old requests will never answer;
+            // follow the new preparation and lock analysis until its ready.
+            if (event.family !== family || event.generation < generation) return;
+            generation = event.generation;
+            if (busy && (operation === "scan_sites" || operation === "predict")) reanalyze = true;
+            if (busy && operation === "explain") reexplain = true;
+            if (busy && operation === "save_csv") {
+              const error = document.createElement("p");
+              error.className = "error";
+              error.textContent = "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요";
+              byId("notice").replaceChildren(error);
+            }
+            ++serial;  // an in-flight reply belongs to the replaced generation
+            ready = false;
+            finish();
+            busy = true;
+            operation = "prepare";
+            activeId = event.request_id;
+            byId("retry-prepare").hidden = true;
+            byId("model-status").textContent = "계산 프로세스를 다시 시작하는 중...";
+            updateButton();
+            return;
+          }
           if (activeId === null) {
             earlyEvents.push(event);
             return;
@@ -566,7 +595,11 @@ SCREEN_HTML = r"""<!doctype html>
             finish();
             if (reanalyze) {
               reanalyze = false;
+              reexplain = false;
               analyze();
+            } else if (reexplain) {
+              reexplain = false;
+              explain();
             }
             return;
           }

@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -207,5 +208,91 @@ def test_close_stops_a_child_during_preparation_and_suppresses_late_ready():
         assert not child.is_running()
         assert not any(e["type"] == "ready" for e in events)
         assert dispatcher.wait_idle(5)
+    finally:
+        dispatcher.close()
+
+
+def _await_progress(events, rid, timeout=20):
+    deadline = time.monotonic() + timeout
+    while not any(e["type"] == "progress" and e["request_id"] == rid for e in events):
+        assert time.monotonic() < deadline, events
+        time.sleep(0.02)
+
+
+def _hang(dispatcher, api, events):
+    """Start an explanation in a child that reports once, then never answers."""
+    rid = api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig")["request_id"]
+    _await_progress(events, rid)
+    return rid
+
+
+@pytest.mark.parametrize("then", ["cancel", "new-request"])
+def test_unresponsive_child_is_force_restarted_in_the_same_family_after_the_grace(then):
+    import psutil
+
+    events = []
+    dispatcher = ProcessDispatcher(events.append, cancel_grace=0.5,
+                                   factory_name="process_fixtures:HangsRenderer")
+    api = DesktopApi(dispatcher.renderer, dispatcher)
+    try:
+        assert api.prepare()["request_id"] and dispatcher.wait_idle(20)
+        family = dispatcher.family
+        stuck = _hang(dispatcher, api, events)
+        old = psutil.Process(dispatcher.pid)
+        checkpoint = len(events)
+        if then == "cancel":
+            api.cancel()
+        else:
+            superseded = api.predict(DNA)["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert not old.is_running()
+        assert dispatcher.outcome(stuck) == "cancelled"
+        if then == "new-request":
+            # The pending request belonged to the replaced generation; the
+            # screen asks again once the new process is ready.
+            assert dispatcher.outcome(superseded) == "superseded"
+        after = events[checkpoint:]
+        restarting = [e for e in after if e["type"] == "restarting"]
+        assert len(restarting) == 1, after
+        assert restarting[0] == {"type": "restarting", "reason": "cancel_grace",
+                                 "request_id": restarting[0]["request_id"],
+                                 "generation": 2, "family": family}
+        assert after[-1]["type"] == "ready"
+        assert after[-1]["request_id"] == restarting[0]["request_id"]
+        assert all(e["generation"] == 2 for e in after)
+        assert dispatcher.generation == 2 and dispatcher.family == family
+        rid = api.predict(DNA)["request_id"]
+        assert dispatcher.wait_idle(20)
+        assert dispatcher.outcome(rid) == "delivered"
+        child = psutil.Process(dispatcher.pid)
+        assert child.pid != old.pid
+    finally:
+        dispatcher.close()
+    assert not child.is_running()
+    assert dispatcher.pid is None
+
+
+def test_cooperative_cancel_within_the_grace_keeps_the_generation_and_child():
+    events = []
+    dispatcher = ProcessDispatcher(events.append, preview=True, cancel_grace=0.5)
+    api = DesktopApi(dispatcher.renderer, dispatcher)
+    calls = {
+        "predict": lambda: api.predict(DNA),
+        "ig": lambda: api.explain(DNA, "Cas12a|+|16", "Cas12a", "ig", {"steps": 2048}),
+        "shap": lambda: api.explain(DNA, "Cas12a|+|16", "Cas12a", "shap",
+                                    {"nsamples": 1024, "n_background": 32}),
+    }
+    try:
+        assert api.prepare()["request_id"] and dispatcher.wait_idle(20)
+        pid = dispatcher.pid
+        for call in calls.values():
+            rid = call()["request_id"]
+            _await_progress(events, rid)
+            api.cancel()
+            assert dispatcher.wait_idle(20)
+            assert dispatcher.outcome(rid) == "cancelled"
+        time.sleep(1)  # longer than the grace: an answered cancel never restarts
+        assert dispatcher.pid == pid and dispatcher.generation == 1
+        assert not any(e["type"] == "restarting" for e in events)
     finally:
         dispatcher.close()

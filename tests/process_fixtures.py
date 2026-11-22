@@ -52,3 +52,11 @@ class SlowFamilyRenderer(SlowReadyRenderer):
     def csv_table(self, dna, on_batch, filters=None):
         self._pause(on_batch)
         return super().csv_table(dna, on_batch, filters)
+
+
+class HangsRenderer(FakeRenderer):
+    """#218: a computation that reports once, then never answers again."""
+
+    def explanation_fragment(self, dna, site_key, head, method, params, size, on_batch):
+        on_batch(1, 10)
+        time.sleep(3600)

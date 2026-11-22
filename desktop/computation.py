@@ -10,6 +10,7 @@ import importlib
 import json
 import multiprocessing as mp
 import threading
+import time
 
 from desktop.api import Cancelled, Dispatcher
 
@@ -19,6 +20,12 @@ FAMILY_FACTORIES = {
     "non_nt": "desktop.worker_renderer:NonNTComputationRenderer",
     "nt": "desktop.worker_renderer:ComputationRenderer",
 }
+
+#: Cancel grace in seconds (#218). A child that does not answer a cancel or a
+#: newer request within it is force-restarted in the same family. Provisional:
+#: it only has to exceed one normal batch (a Rollout counts as one); measuring
+#: the final value is a separate ticket. Tests inject `cancel_grace`.
+CANCEL_GRACE = 15.0
 
 
 def _send(connection, message):
@@ -131,7 +138,10 @@ class ProcessRenderer:
             connection, process = self._connection, self._process
             cancellation = self._cancellation
         identity = {"generation": generation, "request_id": rid}
+        # Preparation is never cancelled, so only requests start the grace.
+        cancellable = not getattr(context, "lifecycle", False)
         cancelled = False
+        deadline = None  # cancel grace: the child must answer before this
         try:
             cancellation.clear()
             _send(connection, {**identity, "operation": operation, "args": args})
@@ -140,16 +150,29 @@ class ProcessRenderer:
             while True:
                 if generation != self._owner.generation:
                     raise Cancelled()
+                if not cancelled and cancellable and rid != self._owner._latest:
+                    # Cancelled or superseded: tell the child now, without
+                    # waiting for a progress report that may never come.
+                    cancelled = True
+                    cancellation.set()
+                if cancelled and deadline is None:
+                    deadline = time.monotonic() + self._owner.cancel_grace
                 if not connection.poll(0.05):
                     if not process.is_alive():
                         self._broken = True
                         raise RuntimeError("Computation process exited; retry the request")
+                    if deadline is not None and time.monotonic() >= deadline:
+                        self._owner._force_restart(generation)
+                        raise Cancelled()
                     continue
                 message = _receive(connection)
                 if any(message.get(k) != v for k, v in identity.items()):
                     continue
                 if message["type"] == "progress":
-                    if not cancelled and not switching:
+                    if cancelled:
+                        # The child still answers; give it until its next report.
+                        deadline = time.monotonic() + self._owner.cancel_grace
+                    elif not switching:
                         try:
                             on_batch(message["done"], message["total"])
                         except Cancelled:
@@ -188,12 +211,14 @@ class ProcessRenderer:
 class ProcessDispatcher(Dispatcher):
     """Existing latest-request scheduler with a replaceable child lifetime."""
 
-    def __init__(self, emit, *, preview=False, factory_name=None, family="non_nt"):
+    def __init__(self, emit, *, preview=False, factory_name=None, family="non_nt",
+                 cancel_grace=None):
         if family not in FAMILY_FACTORIES:
             raise ValueError(f"Unknown model family: {family}")
         self.family = family
         self._factory_override = factory_name or ("desktop.fake:FakeRenderer" if preview else None)
         self.generation = 1
+        self.cancel_grace = CANCEL_GRACE if cancel_grace is None else float(cancel_grace)
         self._context = threading.local()
         self._submissions = threading.Lock()
         self._sink = emit
@@ -282,12 +307,38 @@ class ProcessDispatcher(Dispatcher):
         return self._submit_process(job, lifecycle=True)
 
     def _execute(self, rid, job):
-        self._context.request_id = rid
+        self._context.request_id, self._context.lifecycle = rid, False
         return super()._execute(rid, job)
 
     def _execute_lifecycle(self, rid, job):
-        self._context.request_id = rid
+        self._context.request_id, self._context.lifecycle = rid, True
         return super()._execute_lifecycle(rid, job)
+
+    def _force_restart(self, generation):
+        """Replace a child that did not answer a cancel, in the same family (#218).
+
+        Runs on the worker thread. Everything of the old generation is
+        invalidated, including a request queued behind the unresponsive one;
+        nothing is re-run here. The screen learns of the restart from a
+        `restarting` event whose `request_id` is the new preparation, so it
+        can keep analysis locked until that preparation's `ready`.
+        """
+        while not self._submissions.acquire(timeout=0.05):
+            # A switch, restart or close already replaced this generation.
+            if generation != self.generation:
+                return
+        try:
+            if self._closed or generation != self.generation:
+                return
+            self._restart()
+            rid = super().submit_lifecycle(self._tag(self.renderer.warm_up))
+            with self._lock:
+                # The worker's own context still names the old generation, so
+                # this bypasses `_emit_current`; the ready that follows is current.
+                self._sink({"type": "restarting", "reason": "cancel_grace", "request_id": rid,
+                            "generation": self.generation, "family": self.family})
+        finally:
+            self._submissions.release()
 
     def _restart(self):
         with self._lock:

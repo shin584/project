@@ -469,6 +469,61 @@ runpy.run_module('desktop', run_name='__main__')
             report["saved_after_reanalysis"] = csv_target.stat().st_mtime_ns != saved_mtime
             report["save_generation_after_reanalysis"] = [
                 call for call in report["bridge_calls"] if call["name"] == "save_csv"][-1]["args"][2]
+            # #218: a child that stops answering is replaced in the same family
+            # after the cancel grace, both after a bare cancel and when a new
+            # analysis was requested behind the cancel.
+            def computation_child():
+                found = [child for child in psutil.Process().children(recursive=True)
+                         if "multiprocessing" in " ".join(child.cmdline())]
+                assert len(found) == 1, found
+                return found[0]
+
+            def freeze_long_shap():
+                window.evaluate_js("""
+                  document.getElementById('shap-n').value = '1024';
+                  document.getElementById('shap-bg').value = '32';
+                  document.querySelector('[name="xai-method"][value="shap"]').checked = true;
+                  document.getElementById('xai-controls').dispatchEvent(new Event('change'));
+                """)
+                wait_for("document.getElementById('task-progress').value > 0")
+                child = computation_child()
+                child.suspend()
+                return child
+
+            def restart_ui():
+                return window.evaluate_js("""({
+                  status: document.getElementById('model-status').textContent,
+                  notice: document.getElementById('notice').textContent,
+                  disabled: document.getElementById('analyze').disabled})""")
+
+            frozen = freeze_long_shap()
+            window.evaluate_js("document.getElementById('cancel-task').click()")
+            wait_for("document.getElementById('model-status').textContent.includes('다시 시작하는')")
+            report["restart_after_cancel_ui"] = restart_ui()
+            saves_before = sum(call["name"] == "save_csv" for call in report["bridge_calls"])
+            window.evaluate_js("document.getElementById('detail-csv').click()")
+            wait_for("!document.getElementById('analyze').disabled")
+            report["restart_after_cancel_ready"] = restart_ui()
+            report["restart_ignored_csv"] = saves_before == sum(
+                call["name"] == "save_csv" for call in report["bridge_calls"])
+            report["restart_after_cancel_old_child_gone"] = not frozen.is_running()
+            report["restart_after_cancel_family"] = window.evaluate_js(
+                "document.getElementById('model-family').value")
+            frozen = freeze_long_shap()
+            # The re-run analysis explains again; keep that explanation short.
+            window.evaluate_js("""document.getElementById('cancel-task').click();
+              document.getElementById('shap-n').value = '16';
+              document.getElementById('shap-bg').value = '2';
+              document.getElementById('analyze').click()""")
+            wait_for("document.getElementById('model-status').textContent.includes('다시 시작하는')")
+            report["restart_after_new_request_locked"] = restart_ui()["disabled"]
+            wait_for("""!document.getElementById('analyze').disabled &&
+              document.getElementById('task-state').hidden &&
+              document.querySelector('[data-slot="xai"] img')?.naturalWidth > 0""")
+            report["restart_after_new_request_completed"] = window.evaluate_js(
+                "document.querySelector('#detail-results tbody tr') !== null")
+            report["restart_after_new_request_old_child_gone"] = not frozen.is_running()
+            report["restart_children"] = len([computation_child()])
             process = psutil.Process()
             report["listeners"] = [
                 conn.laddr.port
@@ -496,6 +551,9 @@ runpy.run_module('desktop', run_name='__main__')
 
 if __name__ == "__main__":
     webview.create_window = observe_window
+    from desktop import computation
     from desktop.app import main
+
+    computation.CANCEL_GRACE = 1.0  # #218: keep the probe's forced restarts short
 
     raise SystemExit(main(preview=True))

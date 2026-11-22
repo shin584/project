@@ -170,6 +170,20 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["restarted_did_not_write"]
     assert report["saved_after_reanalysis"]
     assert report["save_generation_after_reanalysis"] == refusal["generation"]
+    # #218
+    restarting = {"status": "계산 프로세스를 다시 시작하는 중...",
+                  "notice": "계산을 취소했습니다.", "disabled": True}
+    assert report["restart_after_cancel_ui"] == restarting
+    assert report["restart_after_cancel_ready"]["status"] == "모델 준비 완료"
+    assert report["restart_after_cancel_ready"]["notice"] == "계산을 취소했습니다."
+    assert not report["restart_after_cancel_ready"]["disabled"]
+    assert report["restart_after_cancel_old_child_gone"]
+    assert report["restart_ignored_csv"]
+    assert report["restart_after_cancel_family"] == "non_nt"
+    assert report["restart_after_new_request_locked"]
+    assert report["restart_after_new_request_completed"]
+    assert report["restart_after_new_request_old_child_gone"]
+    assert report["restart_children"] == 1
     assert report["listeners"] == []
     assert not report["server_created"]
     assert report.get("network_attempts", []) == []
