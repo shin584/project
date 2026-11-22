@@ -125,6 +125,22 @@ def window_owner(process, timeout=60):
     raise TimeoutError("The app window did not appear")
 
 
+def freeze_first_worker(process, timeout=60):
+    """Suspend the first computation process as soon as it exists, before its
+    model load can finish; return it with the time it was frozen."""
+    from measure_package import worker
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            child = worker(process)
+        except (RuntimeError, psutil.Error):
+            time.sleep(.01)
+            continue
+        child.suspend()
+        return child, time.monotonic()
+    raise TimeoutError("The computation process did not start")
+
+
 def close_window(pid):
     """Post WM_CLOSE to the app's top-level window, as the title-bar X does."""
     windows = _title_windows({pid})
@@ -152,7 +168,7 @@ def identity(mode, exe, source_python):
     return found
 
 
-def drive(page, process, ui_pid, desktop, output, report, skip_load):
+def drive(page, process, ui_pid, desktop, output, report, frozen):
     from measure_package import IDLE, worker
     fixture = json.loads((ROOT / "docs/equivalence-baseline/capture.json").read_text(encoding="utf-8"))
     dna = fixture["input_seq"]
@@ -204,23 +220,18 @@ def drive(page, process, ui_pid, desktop, output, report, skip_load):
                                timeout=60000)
         page.evaluate(OBSERVE)
 
-    if skip_load:
+    if frozen is None:
         # Probe development only: the run then cannot pass.
         ready_bridge()
         idle()
         record("load_limit_scenario_run", False)
     else:
-        # 1. Load limit: freeze the first computation process before it is ready.
-        deadline = time.monotonic() + 60
-        child = None
-        while child is None and time.monotonic() < deadline:
-            try:
-                child = worker(process)
-            except RuntimeError:
-                time.sleep(.01)
-        child.suspend()
-        frozen_at = time.monotonic()
+        # 1. Load limit: the first computation process was frozen at launch.
+        child, frozen_at = frozen
         ready_bridge()
+        record("frozen_before_ready", "준비" in page.locator("#model-status").inner_text()
+               and page.locator("#analyze").is_disabled(),
+               status=page.locator("#model-status").inner_text())
         page.wait_for_selector("#notice .error", timeout=(LIMITS["load_limit"] + 60) * 1000)
         seconds = time.monotonic() - frozen_at
         record("load_limit_error_and_retry", page.locator("#retry-prepare").is_visible()
@@ -403,6 +414,7 @@ def run(output, mode, exe, source_python, automation_site, skip_load=False):
         process = subprocess.Popen(command, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT)
         sampler = executor.submit(sample_tree, process, output, 1.0, 3600)
         try:
+            frozen = None if skip_load else freeze_first_worker(process)
             ui_pid = window_owner(process)
             report["window_owner_pid"] = ui_pid
             desktop = application(backend="win32").connect(process=ui_pid, timeout=30)
@@ -415,7 +427,7 @@ def run(output, mode, exe, source_python, automation_site, skip_load=False):
                     "offline": True, "latency": 0, "downloadThroughput": 0, "uploadThroughput": 0})
                 page_errors = []
                 page.on("pageerror", lambda exc: page_errors.append(str(exc)))
-                drive(page, process, ui_pid, desktop, output, report, skip_load)
+                drive(page, process, ui_pid, desktop, output, report, frozen)
                 report["page_errors"] = page_errors
                 report["trace"] = page.evaluate("window.recheckTrace || []")
                 tree = psutil.Process(process.pid).children(recursive=True)
