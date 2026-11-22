@@ -5,8 +5,9 @@ python -X utf8 tests/stall_limit_probe.py OUTPUT_DIRECTORY
 With the default limits, each family's model load must end inside the load
 limit, and prediction, IG, SHAP (screen defaults, Cas12a head where there is
 one) and NT Rollout must never go a no-progress limit without reporting: no
-`restarting` event, every request delivered. The largest gap (from submission,
-between reports, and to the result) is recorded for the measurement ticket.
+`restarting` event, every request delivered. SHAP also runs at the screen
+maximums (1024 samples, 32 background), the longest normal job (#220). The
+largest gap (from submission, between reports, and to the result) is recorded.
 
 Then a real non-NT child is frozen mid-SHAP with a short injected no-progress
 limit: it must be replaced in the same family, reload its model, not re-run the
@@ -81,6 +82,9 @@ def check_family(family, dna, record):
         record["site"], record["head"] = site, head
         jobs = {method: (lambda m=method: api.explain(dna, site, head, m, XAI_DEFAULTS[m]))
                 for method in ("ig", "shap")}
+        # The longest normal job (#220): SHAP at the screen maximums.
+        jobs["shap_max"] = lambda: api.explain(dna, site, head, "shap",
+                                               {"nsamples": 1024, "n_background": 32})
         if family == "nt":
             jobs["rollout"] = lambda: api.explain(dna, site, head, "rollout")
         for name, call in jobs.items():
