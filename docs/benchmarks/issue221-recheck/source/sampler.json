@@ -1,0 +1,291 @@
+{
+  "root_pid": 4032,
+  "exit_code": 0,
+  "samples": 960,
+  "seconds": 959.6483485000026,
+  "max_sample_gap_seconds": 1.0634119999995164,
+  "access_errors": [],
+  "survivors": [],
+  "timed_out": false,
+  "process_inventory": {
+    "(4032, 1795349634.4391649)": {
+      "pid": 4032,
+      "created": 1795349634.4391649,
+      "ppid": 7216,
+      "name": "python.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-inputs\\venv\\Scripts\\python.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-inputs\\venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\desktop_entry.py"
+      ]
+    },
+    "(24860, 1795349634.4615889)": {
+      "pid": 24860,
+      "created": 1795349634.4615889,
+      "ppid": 4032,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-inputs\\venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\project\\MC_project\\dashboard_v3\\desktop_entry.py"
+      ]
+    },
+    "(21472, 1795349635.889305)": {
+      "pid": 21472,
+      "created": 1795349635.889305,
+      "ppid": 24860,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--embedded-browser-webview=1",
+        "--webview-exe-name=python.exe",
+        "--webview-exe-version=3.13.7",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "--noerrdialogs",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--allow-file-access-from-files",
+        "--disable-background-networking",
+        "--disable-features=ElasticOverscroll",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--proxy-server=http://127.0.0.1:9",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=51563",
+        "--mojo-named-platform-channel-pipe=24860.1320.15023998863702826477",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289"
+      ]
+    },
+    "(29536, 1795349635.9600677)": {
+      "pid": 29536,
+      "created": 1795349635.9600677,
+      "ppid": 21472,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--type=crashpad-handler",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "/prefetch:4",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289",
+        "--monitor-self-annotation=ptype=crashpad-handler",
+        "--user-stream-region=320,65568",
+        "--database=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView\\Crashpad",
+        "--annotation=IsOfficialBuild=1",
+        "--annotation=channel=",
+        "--annotation=chromium-version=157.0.8103.80",
+        "--annotation=exe=C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--annotation=plat=Win64",
+        "--annotation=prod=Edge WebView2",
+        "--annotation=ver=157.0.4341.60",
+        "--initial-client-data=0x184,0x188,0x18c,0x160,0x194,0x7fffdb79b3a0,0x7fffdb79b3b0,0x7fffdb79b3c0"
+      ]
+    },
+    "(13156, 1795349636.3370323)": {
+      "pid": 13156,
+      "created": 1795349636.3370323,
+      "ppid": 21472,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--type=gpu-process",
+        "--gpu-recent-crash-count=0",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "--webview-exe-name=python.exe",
+        "--webview-exe-version=3.13.7",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=1844,i,16444484122200070915,15700617115725555140,262144",
+        "--field-trial-handle=2016,i,15880620837147838959,7660896077922896889,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=2056,i,6226216515732665965,842987754067888486,4",
+        "--trace-process-track-uuid=3190708988185955192",
+        "--mojo-platform-channel-handle=2028",
+        "/prefetch:2",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289"
+      ]
+    },
+    "(316, 1795349636.3593068)": {
+      "pid": 316,
+      "created": 1795349636.3593068,
+      "ppid": 21472,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=network.mojom.NetworkService",
+        "--lang=ko",
+        "--service-sandbox-type=none",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "--webview-exe-name=python.exe",
+        "--webview-exe-version=3.13.7",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2340,i,17394050916236455276,3920328391459862699,524288",
+        "--field-trial-handle=2016,i,15880620837147838959,7660896077922896889,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=2056,i,6226216515732665965,842987754067888486,4",
+        "--trace-process-track-uuid=3190708989122997041",
+        "--mojo-platform-channel-handle=2368",
+        "/prefetch:11",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289"
+      ]
+    },
+    "(24368, 1795349636.4463427)": {
+      "pid": 24368,
+      "created": 1795349636.4463427,
+      "ppid": 21472,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=storage.mojom.StorageService",
+        "--lang=ko",
+        "--service-sandbox-type=service",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "--webview-exe-name=python.exe",
+        "--webview-exe-version=3.13.7",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2716,i,7898067914949904578,7019567297998430274,524288",
+        "--field-trial-handle=2016,i,15880620837147838959,7660896077922896889,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=2056,i,6226216515732665965,842987754067888486,4",
+        "--trace-process-track-uuid=3190708990060038890",
+        "--mojo-platform-channel-handle=2728",
+        "/prefetch:13",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289"
+      ]
+    },
+    "(29216, 1795349637.4118593)": {
+      "pid": 29216,
+      "created": 1795349637.4118593,
+      "ppid": 24860,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-c",
+        "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=24860, pipe_handle=1924)",
+        "--multiprocessing-fork"
+      ]
+    },
+    "(16432, 1795349636.7258675)": {
+      "pid": 16432,
+      "created": 1795349636.7258675,
+      "ppid": 21472,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\157.0.4341.60\\msedgewebview2.exe",
+        "--type=renderer",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\webview-profile\\EBWebView",
+        "--webview-exe-name=python.exe",
+        "--webview-exe-version=3.13.7",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--allow-file-access-from-files",
+        "--remote-debugging-port=51563",
+        "--video-capture-use-gpu-memory-buffer",
+        "--lang=ko",
+        "--device-scale-factor=1.25",
+        "--num-raster-threads=4",
+        "--enable-main-frame-before-activation",
+        "--renderer-client-id=5",
+        "--js-flags=--ms-user-locale=ko_KR",
+        "--ssd-no-pressure-read-main-dll",
+        "--launch-time-ticks=31976353387",
+        "--metrics-shmem-handle=4124,i,11586694568248903786,1897516159026710659,1048576",
+        "--field-trial-handle=2016,i,15880620837147838959,7660896077922896889,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=2056,i,6226216515732665965,842987754067888486,4",
+        "--trace-process-track-uuid=3190708990997080739",
+        "--mojo-platform-channel-handle=4140",
+        "/pfhostedapp:63f6f7bb263770fe9354912295ea9473b80cd289",
+        "/prefetch:1"
+      ]
+    },
+    "(20076, 1795349802.9583151)": {
+      "pid": 20076,
+      "created": 1795349802.9583151,
+      "ppid": 24860,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-c",
+        "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=24860, pipe_handle=2032)",
+        "--multiprocessing-fork"
+      ]
+    },
+    "(19612, 1795349837.5065079)": {
+      "pid": 19612,
+      "created": 1795349837.5065079,
+      "ppid": 24860,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-c",
+        "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=24860, pipe_handle=3744)",
+        "--multiprocessing-fork"
+      ]
+    },
+    "(29740, 1795350505.1349268)": {
+      "pid": 29740,
+      "created": 1795350505.1349268,
+      "ppid": 24860,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-c",
+        "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=24860, pipe_handle=68016)",
+        "--multiprocessing-fork"
+      ]
+    },
+    "(21272, 1795350576.3656988)": {
+      "pid": 21272,
+      "created": 1795350576.3656988,
+      "ppid": 24860,
+      "name": "python.exe",
+      "exe": "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "cmdline": [
+        "C:\\Users\\cmino\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-X",
+        "utf8",
+        "-c",
+        "from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=24860, pipe_handle=14936)",
+        "--multiprocessing-fork"
+      ]
+    }
+  }
+}

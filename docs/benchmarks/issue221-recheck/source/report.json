@@ -1,0 +1,4364 @@
+{
+  "issue": 221,
+  "mode": "source",
+  "started_at": "2026-11-22T12:13:54.203484+00:00",
+  "identity": {
+    "checkout_commit": "6bf4c2db885eea53257d6b94c47a1dbe79e3c19e",
+    "checkout_tracked_changes": false,
+    "host": "SJun",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "ram_bytes": 8373960704,
+    "logical_cpus": 8,
+    "source_python": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-inputs\\venv\\Scripts\\python.exe",
+    "source_commit": "6bf4c2db885eea53257d6b94c47a1dbe79e3c19e"
+  },
+  "command": [
+    "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue204-inputs\\venv\\Scripts\\python.exe",
+    "-X",
+    "utf8",
+    "C:\\project\\MC_project\\dashboard_v3\\desktop_entry.py"
+  ],
+  "cwd": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck\\source\\unrelated-cwd",
+  "limits_expected": {
+    "cancel_grace": 53.0,
+    "no_progress_limit": 105.0,
+    "load_limit": 165.0
+  },
+  "checks": [
+    {
+      "check": "frozen_before_ready",
+      "passed": true,
+      "elapsed_s": 0.1,
+      "status": "모델 준비 중"
+    },
+    {
+      "check": "load_limit_error_and_retry",
+      "passed": true,
+      "elapsed_s": 164.83,
+      "seconds_after_freeze": 165.5,
+      "errors": [
+        "모델 적재가 적재 한도(165초)를 넘겨 계산 프로세스를 멈췄습니다. 모델 준비를 다시 시도하세요"
+      ]
+    },
+    {
+      "check": "load_limit_retry_recovers",
+      "passed": true,
+      "elapsed_s": 165.36,
+      "worker_pid": 20076
+    },
+    {
+      "check": "non_nt_prediction",
+      "passed": true,
+      "elapsed_s": 191.97,
+      "rows": 38
+    },
+    {
+      "check": "csv_dialog_closed_is_silent",
+      "passed": true,
+      "elapsed_s": 194.13,
+      "notice": "CSV를 저장하는 중..."
+    },
+    {
+      "check": "csv_after_idle_exit_refused_visibly",
+      "passed": true,
+      "elapsed_s": 199.36,
+      "notice": "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요",
+      "dialog_opened": false
+    },
+    {
+      "check": "csv_reanalysis",
+      "passed": true,
+      "elapsed_s": 211.6,
+      "rows": 38
+    },
+    {
+      "check": "csv_saved_after_reanalysis",
+      "passed": true,
+      "elapsed_s": 212.95,
+      "rows": 38
+    },
+    {
+      "check": "request_burst_100k",
+      "passed": true,
+      "elapsed_s": 761.9,
+      "bursts": [
+        {
+          "replies": 100000,
+          "seconds": 263.8,
+          "ui_private_before_mib": 78.0,
+          "ui_private_after_mib": 125.9,
+          "ui_private_delta_mib": 48.0
+        },
+        {
+          "replies": 100000,
+          "seconds": 265.0,
+          "ui_private_before_mib": 125.9,
+          "ui_private_after_mib": 146.9,
+          "ui_private_delta_mib": 21.0
+        }
+      ]
+    },
+    {
+      "check": "stall_no_progress_restart",
+      "passed": true,
+      "elapsed_s": 872.63,
+      "seconds_after_freeze": 105.1,
+      "status_at_error": "계산 프로세스를 다시 시작하는 중...",
+      "locked_at_error": true,
+      "reruns": [],
+      "worker_pid": 29740
+    },
+    {
+      "check": "prediction_before_cancel_scenario",
+      "passed": true,
+      "elapsed_s": 884.03,
+      "rows": 38
+    },
+    {
+      "check": "stalled_cancel_then_new_analysis",
+      "passed": true,
+      "elapsed_s": 950.06,
+      "cancel_notice": "계산을 취소했습니다.",
+      "seconds_after_cancel": 53.1,
+      "status_at_restart": "계산 프로세스를 다시 시작하는 중...",
+      "notice_at_restart": "PAM 탐색 중...",
+      "rows": 38,
+      "worker_pid": 21272
+    },
+    {
+      "check": "native_close_after_forced_restarts",
+      "passed": true,
+      "exit_code": 0,
+      "survivors": []
+    }
+  ],
+  "status": "pass",
+  "window_owner_pid": 24860,
+  "page_errors": [],
+  "trace": [
+    {
+      "event": "error",
+      "reason": null,
+      "generation": 1,
+      "family": "non_nt",
+      "time": 1795349802.473
+    },
+    {
+      "call": "prepare",
+      "time": 1795349802.95
+    },
+    {
+      "event": "ready",
+      "reason": null,
+      "generation": 2,
+      "family": "non_nt",
+      "time": 1795349803.391
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795349803.497
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 2,
+      "family": "non_nt",
+      "time": 1795349803.503
+    },
+    {
+      "call": "predict",
+      "time": 1795349803.503
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 2,
+      "family": "non_nt",
+      "time": 1795349824.165
+    },
+    {
+      "call": "explain",
+      "time": 1795349824.168
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 2,
+      "family": "non_nt",
+      "time": 1795349829.948
+    },
+    {
+      "call": "save_context",
+      "time": 1795349830.164
+    },
+    {
+      "call": "save_csv",
+      "time": 1795349830.166
+    },
+    {
+      "call": "save_context",
+      "time": 1795349832.298
+    },
+    {
+      "call": "save_csv",
+      "time": 1795349832.304
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795349837.499
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349837.951
+    },
+    {
+      "call": "predict",
+      "time": 1795349837.951
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349847.269
+    },
+    {
+      "call": "explain",
+      "time": 1795349847.271
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349849.6
+    },
+    {
+      "call": "save_context",
+      "time": 1795349849.749
+    },
+    {
+      "call": "save_csv",
+      "time": 1795349849.751
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349850.997
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349851.097
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349851.812
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349852.957
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349853.668
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349854.71
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349856.067
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349856.834
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349857.502
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349858.638
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349858.892
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349860.143
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349861.24
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349863.445
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349864.04
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349865.196
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349865.533
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349866.478
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349866.727
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349869
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349869.488
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349871.67
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349872.098
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349873.015
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349874.043
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349874.623
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349876.834
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349877.425
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349878.484
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349879.188
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349879.87
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349880.876
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349882.061
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349882.398
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349883.415
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349883.87
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349884.677
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349884.896
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349885.441
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349886.161
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349887.195
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349889.448
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349889.929
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349892.061
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349892.55
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349895.45
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349898.646
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349901.355
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349902.802
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349904.334
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349904.674
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349906.604
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349907.448
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349908.439
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349908.974
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349909.652
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349909.956
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349911.243
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349911.554
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349912.317
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349913.26
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349914.707
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349917.135
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349917.597
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349919.406
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349920.15
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349921.076
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349922.367
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349922.756
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349925.051
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349927.357
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349927.839
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349928.107
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349929.121
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349929.709
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349930.385
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349931.003
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349931.16
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349932.76
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349934.563
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349934.924
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349935.4
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349935.597
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349937.854
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349939.104
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349939.54
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349940.263
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349940.759
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349941.798
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349942.683
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349943.191
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349945.621
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349946.005
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349948.204
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349948.614
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349949.958
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349951.057
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349951.878
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349952.07
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349953.112
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349953.545
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349953.729
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349956.012
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349957.837
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349958.921
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349959.196
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349961.864
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349964.841
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349967.714
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349969.166
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349969.935
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349970.262
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349970.634
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349971.88
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349972.885
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349973.222
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349974.396
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349974.902
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349975.537
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349976.911
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349977.668
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349978.139
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349979.495
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349980.44
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349981.178
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349982.95
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349984.684
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349985.628
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349986.515
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349987.481
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349988.129
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349988.76
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349989.325
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349990.618
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349991.575
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349991.736
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349992.452
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349992.763
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349993.272
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349994.44
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349995.795
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349996.64
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349996.777
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349997.476
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349997.749
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349998.421
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795349999.568
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350000.309
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350001.004
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350001.899
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350002.334
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350003.748
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350004.504
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350005.042
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350006.255
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350008.96
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350010.078
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350010.409
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350011.672
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350013.781
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350014.403
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350015.135
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350016.235
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350016.982
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350017.736
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350017.999
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350018.705
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350018.924
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350019.535
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350020.253
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350021.037
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350021.931
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350022.922
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350024.466
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350025.912
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350027.554
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350030.415
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350033.188
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350035.533
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350036.082
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350036.196
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350036.707
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350038.322
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350039.403
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350039.888
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350040.139
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350040.534
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350041.16
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350042.464
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350042.818
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350043.098
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350043.868
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350046.009
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350046.464
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350048.608
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350049.096
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350049.988
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350050.472
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350051.481
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350052.711
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350054.088
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350055.367
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350055.841
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350056.868
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350057.682
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350058.06
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350058.735
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350059.189
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350059.556
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350060.664
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350060.883
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350061.074
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350061.159
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350061.906
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350062.741
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350063.102
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350064.421
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350065.352
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350065.741
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350065.952
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350066.133
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350066.407
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350067.101
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350068.242
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350068.626
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350069.348
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350069.675
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350071.932
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350074.266
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350074.916
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350075.989
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350077.191
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350078.894
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350079.761
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350080.004
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350082.419
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350085.107
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350086.355
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350086.716
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350087.497
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350087.996
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350090.362
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350090.946
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350092.342
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350093.661
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350094.085
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350096.02
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350097.059
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350098.042
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350098.494
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350098.777
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350099.725
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350099.949
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350100.466
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350100.641
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350100.968
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350102.028
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350102.51
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350103.493
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350103.903
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350104.201
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350104.834
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350105.492
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350106.594
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350107.296
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350108.196
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350109.689
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350111.505
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350112.084
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350112.463
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350113.723
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350114.144
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350114.397
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350114.778
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350124.839
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350125.236
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350126.513
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350127.198
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350127.875
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350128.047
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350128.114
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350129.543
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350132.153
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350133.992
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350134.954
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350135.76
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350135.829
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350136.03
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350136.704
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350137.562
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350138.926
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350140.112
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350140.947
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350141.882
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350142.541
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350142.718
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350143.792
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350144.962
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350146.198
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350146.861
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350147.205
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350147.429
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350147.614
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350149.291
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350149.933
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350150.093
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350151.467
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350151.894
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350152.509
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350152.73
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350154.925
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350155.42
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350156.86
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350158.156
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350160.178
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350161.131
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350163.406
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350163.968
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350166.241
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350169.15
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350171.391
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350172.153
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350172.85
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350174.791
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350175.861
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350177.567
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350179.761
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350180.58
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350181.388
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350181.793
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350182.165
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350183.212
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350185.049
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350185.613
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350185.873
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350186.631
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350186.7
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350186.908
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350187.556
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350188.452
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350188.764
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350189.837
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350190.304
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350191.315
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350192.674
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350193.282
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350194.108
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350196.441
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350196.955
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350199.315
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350202.067
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350203.385
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350204.385
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350204.974
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350205.207
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350205.713
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350206.232
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350206.616
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350206.874
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350207.567
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350208.68
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350209.732
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350210.155
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350212.457
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350214.317
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350215.318
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350216.733
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350217.172
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350218.042
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350219.403
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350220.332
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350220.881
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350223.127
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350223.961
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350224.911
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350225.468
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350225.837
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350226.15
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350226.776
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350228.121
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350228.598
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350229.07
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350229.37
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350229.459
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350230.091
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350230.669
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350231.297
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350231.832
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350232.671
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350232.842
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350234.237
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350235.487
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350236.159
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350236.491
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350236.989
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350237.871
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350238.653
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350239.554
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350240.159
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350240.202
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350241.124
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350242.049
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350242.229
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350242.794
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350243.83
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350244.546
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350245.985
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350246.806
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350247.138
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350249.436
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350252.177
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350254.957
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350256.201
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350256.514
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350257.549
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350257.89
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350259.021
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350259.225
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350259.848
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350260.393
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350262.272
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350262.952
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350265.548
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350268.42
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350269.46
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350270.086
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350270.981
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350271.548
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350272.758
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350272.955
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350273.29
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350273.79
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350274.108
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350274.254
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350274.709
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350275.011
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350275.375
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350276.293
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350276.628
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350277.291
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350277.939
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350278.915
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350280.453
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350281.555
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350283.154
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350283.828
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350284.17
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350284.771
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350285.701
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350286.67
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350287.641
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350289.633
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350290.695
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350291.062
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350292.542
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350292.85
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350293.355
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350294.153
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350294.741
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350295.305
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350296.856
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350297.194
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350297.846
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350298.004
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350298.686
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350299.905
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350300.389
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350302.855
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350304.208
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350304.896
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350305.599
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350306.327
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350307.065
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350307.383
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350308.167
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350309.047
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350310.562
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350310.923
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350312.006
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350313.548
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350314.503
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350314.627
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350316.156
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350316.561
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350318.911
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350320.522
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350321.461
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350321.727
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350322.572
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350322.818
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350323.302
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350323.962
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350324.463
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350325.352
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350326.149
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350326.887
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350327.829
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350328.362
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350329.309
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350330.634
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350331.247
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350331.865
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350333.21
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350333.739
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350334.061
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350334.342
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350335.343
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350336.136
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350336.636
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350336.885
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350337.637
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350338.452
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350338.954
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350339.169
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350339.383
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350340.622
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350341.228
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350341.613
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350341.829
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350342.554
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350343.696
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350344.278
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350346.54
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350349.248
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350351
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350351.358
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350351.642
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350352.221
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350353.609
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350354.492
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350355.366
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350358.031
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350360.665
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350361.14
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350363.311
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350363.797
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350365.815
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350366.347
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350368.237
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350368.85
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350368.976
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350370.084
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350370.385
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350370.578
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350371.311
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350373.768
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350375.76
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350376.75
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350377.794
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350378.777
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350379.473
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350380.51
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350381.119
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350381.406
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350381.899
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350382.602
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350384.326
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350385.26
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350385.838
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350386.066
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350387.057
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350388.326
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350388.774
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350389.014
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350389.747
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795350399.838
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350399.845
+    },
+    {
+      "call": "predict",
+      "time": 1795350399.845
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350399.9
+    },
+    {
+      "call": "explain",
+      "time": 1795350399.901
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 3,
+      "family": "non_nt",
+      "time": 1795350399.911
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795350400.053
+    },
+    {
+      "event": "restarting",
+      "reason": "no_progress",
+      "generation": 4,
+      "family": "non_nt",
+      "time": 1795350505.13
+    },
+    {
+      "event": "ready",
+      "reason": null,
+      "generation": 4,
+      "family": "non_nt",
+      "time": 1795350505.584
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795350510.764
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 4,
+      "family": "non_nt",
+      "time": 1795350510.77
+    },
+    {
+      "call": "predict",
+      "time": 1795350510.77
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 4,
+      "family": "non_nt",
+      "time": 1795350519.752
+    },
+    {
+      "call": "explain",
+      "time": 1795350519.754
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 4,
+      "family": "non_nt",
+      "time": 1795350522.029
+    },
+    {
+      "call": "explain",
+      "time": 1795350522.179
+    },
+    {
+      "call": "cancel",
+      "time": 1795350523.233
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795350523.331
+    },
+    {
+      "event": "restarting",
+      "reason": "cancel_grace",
+      "generation": 5,
+      "family": "non_nt",
+      "time": 1795350576.361
+    },
+    {
+      "event": "ready",
+      "reason": null,
+      "generation": 5,
+      "family": "non_nt",
+      "time": 1795350576.788
+    },
+    {
+      "call": "scan_sites",
+      "time": 1795350576.788
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 5,
+      "family": "non_nt",
+      "time": 1795350576.792
+    },
+    {
+      "call": "predict",
+      "time": 1795350576.793
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 5,
+      "family": "non_nt",
+      "time": 1795350585.488
+    },
+    {
+      "call": "explain",
+      "time": 1795350585.49
+    },
+    {
+      "event": "result",
+      "reason": null,
+      "generation": 5,
+      "family": "non_nt",
+      "time": 1795350587.962
+    }
+  ],
+  "close_windows_posted": 1,
+  "app_exit_code": 0,
+  "survivors": [],
+  "sampler": {
+    "root_pid": 4032,
+    "exit_code": 0,
+    "samples": 960,
+    "seconds": 959.6483485000026,
+    "max_sample_gap_seconds": 1.0634119999995164,
+    "access_errors": [],
+    "survivors": [],
+    "timed_out": false
+  },
+  "summary": {
+    "passed": 13,
+    "failed": 0,
+    "failed_checks": []
+  }
+}

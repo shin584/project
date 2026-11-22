@@ -1,0 +1,26 @@
+{
+  "issue": 221,
+  "origin": {
+    "source": "checkout",
+    "commit": "c78832046e1ae260aac0dce30ad0ed39fc47429e"
+  },
+  "outcome_limit": 256,
+  "samples": [
+    {
+      "requests": 1000,
+      "records": 256,
+      "traced_bytes": 26224
+    },
+    {
+      "requests": 10000,
+      "records": 256,
+      "traced_bytes": 26316
+    },
+    {
+      "requests": 100000,
+      "records": 256,
+      "traced_bytes": 26376
+    }
+  ],
+  "passed": true
+}
