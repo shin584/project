@@ -46,9 +46,7 @@ from importlib import import_module
 from pathlib import Path
 
 import psutil
-from measure_package import IDLE, webview_endpoint, worker
 from measure_ram import ROOT, digest, sample_tree, save
-from playwright.sync_api import sync_playwright
 
 TITLE = "CRISPR PAM Scanner + XAI"
 EXE_NAME = "XaiDashboardV3.exe"
@@ -155,6 +153,7 @@ def identity(mode, exe, source_python):
 
 
 def drive(page, process, ui_pid, desktop, output, report, skip_load):
+    from measure_package import IDLE, worker
     fixture = json.loads((ROOT / "docs/equivalence-baseline/capture.json").read_text(encoding="utf-8"))
     dna = fixture["input_seq"]
     started = time.monotonic()
@@ -371,6 +370,10 @@ def drive(page, process, ui_pid, desktop, output, report, skip_load):
 
 
 def run(output, mode, exe, source_python, automation_site, skip_load=False):
+    # Window-only dependencies; `history` also runs in the build venv.
+    from measure_package import webview_endpoint
+    from playwright.sync_api import sync_playwright
+
     output.mkdir(parents=True, exist_ok=False)
     if mode == "exe":
         command = [str(exe)]
