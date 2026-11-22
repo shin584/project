@@ -221,7 +221,7 @@ JS가 할 일은 슬롯 이름에 맞는 자리에 조각을 끼워 넣는 것�
 
 **취소 유예**(#218): 취소 또는 새 요청으로 진행 중인 요청이 접히면, 부모는 다음
 진행률을 기다리지 않고 곧바로 자식에 취소를 알린다. 자식이 유예
-(`computation.CANCEL_GRACE`, 임시값 15초, `ProcessDispatcher(cancel_grace=)`로 주입)
+(`computation.CANCEL_GRACE`, 53초, `ProcessDispatcher(cancel_grace=)`로 주입)
 안에 그 요청으로 `cancelled`·`progress` 등 아무 응답도 하지 않으면 작업자 스레드가
 **같은 계열로 강제 재시작**한다: 이전 세대 무효화(뒤에 줄 선 요청 포함) → 멈춘 자식
 종료 확인 → 새 세대의 준비 작업을 줄 세움 → `restarting` 이벤트(그 준비의 `ready`보다
@@ -232,7 +232,7 @@ JS가 할 일은 슬롯 이름에 맞는 자리에 조각을 끼워 넣는 것�
 CSV 저장은 거부 오류로 보인다. 재시작 중에는 CSV 저장도 받지 않는다.
 
 **무진행 한도**(#219): 아무도 취소하지 않은 요청이 제출 또는 마지막 진행률 보고 뒤
-한도(`computation.NO_PROGRESS_LIMIT`, 임시값 120초, `ProcessDispatcher(no_progress_limit=)`로
+한도(`computation.NO_PROGRESS_LIMIT`, 105초, `ProcessDispatcher(no_progress_limit=)`로
 주입) 동안 아무것도 보내지 않으면 **멈춘 계산**으로 보고 위와 같은 강제 재시작을
 한다(`reason: "no_progress"`). 진행률이 올 때마다 다시 재므로 작업 전체 시간에는 상한이
 없다 — Cas12a SHAP처럼 오래 걸려도 보고가 이어지면 걸리지 않는다. Rollout처럼 진행률이
@@ -244,14 +244,51 @@ CSV 저장은 거부 오류로 보인다. 재시작 중에는 CSV 저장도 받�
 다시 돌리지 않는다. 설명이 멈췄으면 설명 패널의 `다시 계산` 버튼만 보인다.
 
 **적재 한도**(#219): 준비 작업(`warm_up`, 강제 재시작 뒤의 재적재 포함)은 적재 도중
-진행률이 없으므로 전체 시간에 한도(`computation.LOAD_LIMIT`, 임시값 300초,
+진행률이 없으므로 전체 시간에 한도(`computation.LOAD_LIMIT`, 165초,
 `ProcessDispatcher(load_limit=)`로 주입)를 둔다. 넘으면 자식을 종료하고 준비 오류
 ("모델 적재가 적재 한도(…초)를 넘겨 … 모델 준비를 다시 시도하세요")를 보낸다. 화면은 기존 준비 오류처럼 `모델 준비
 다시 시도`(`retry-prepare`)를 보이고, 그 재시도가 종료된 자식을 같은 계열의 새 세대로
 교체한다.
 
-세 한도 값은 모두 임시 상수다. 측정 기반 확정은 별도 티켓이며, 실제 모델에서의
-최대 진행률 간격과 적재 시간은 `tests/stall_limit_probe.py`(#219)가 기록한다.
+**세 한도의 확정값**(#220): 개발 PC에서 실제 모델로 오프라인 측정해 정했다. 전시장
+PC는 개발 PC와 사양·환경이 거의 같으므로 같은 값을 쓴다. 코드 상수이며 설정 파일·
+환경변수로 노출하지 않는다(테스트·프로브만 `ProcessDispatcher` 인자로 주입).
+
+- 측정 방법: `tests/limit_measurement_probe.py`가 세 한도를 닿지 않는 값으로 주입하고
+  계열(NT·non-NT)마다 새 자식 2개의 `warm_up` 전체 시간, 각 작업의 제출→첫 진행률·
+  진행률 사이·마지막 진행률→결과 간격, 첫 진행률 직후 취소했을 때 `cancelled`까지의
+  시간을 잰다. 작업은 예측(cold·warm·사이트 밀집 입력), CSV(캐시 없음·있음), IG/SHAP
+  (화면 기본값과 화면 최대값 IG 256·SHAP 1024/32, Cas12a·SpCas9 헤드 각 1개), NT
+  Rollout이다. 기록: `.packaging/issue220-limits/run01/report.json`.
+- 측정 범위: 2026-11-22 run01은 3라운드 예정이었으나 라운드 1의 NT 최대 SHAP(Cas12a)이
+  프로브의 대기 한도 3600초를 넘겨(한도 발동 아님, `restarting` 0건) 중단됐다. 라운드
+  0 전체와 라운드 1의 non-NT 전체, NT의 그 작업 전까지를 썼다. 빠진 것은 라운드 1 NT의
+  최대 SHAP(Cas12a)·Rollout(Cas12a)·취소·두 번째 적재와 라운드 2다. 측정·무진행 프로브의
+  작업당 대기는 4시간으로 늘렸다.
+  개발 PC(8 GiB, 여유 약 3 GiB)의 메모리 압박으로 라운드 간 시간이 최대 2배쯤 달랐다.
+- 측정값(최대): 적재 NT 54.6초 · non-NT 1.9초. 무보고 간격은 cold 첫 예측의 첫 구간이
+  가장 길다 — NT 35.1초 · non-NT 27.8초(지연 적재). 그 밖에는 IG 7.3초(마지막 진행률→
+  결과) · SHAP 9.3초(NT 최대값) · Rollout 0.8초 · warm 예측·CSV 0.8초 이하. 첫 진행률
+  뒤 취소는 NT 2.0초 · non-NT 0.14초 안에 `cancelled`, 진행 중 Rollout 취소는 0.15초.
+  작업 전체 시간은 화면 최대값 SHAP이 가장 길다 — NT Cas12a 3374초(라운드 1은 3600초
+  초과) · NT SpCas9 1855–2300초 · non-NT 26–66초. 진행률은 계속 오므로 무진행 한도와
+  무관하다.
+- 최대 배치: 취소는 진행률 보고에서만 받으므로, 끊을 수 없는 최장 구간인 cold 첫
+  예측의 첫 구간 35.1초를 최대 배치로 본다. 이것을 빼면 재시작 직후 첫 분석을 취소할
+  때 정상 취소가 강제 재시작으로 번진다. (프로브의 "cold 첫 예측 즉시 취소"는 요청이
+  자식에 닿기 전 대기 중에 접혀 `superseded` 0초로 끝나 이 구간을 재지 못했다. 그래서
+  첫 구간 간격으로 대신한다.)
+- 배수와 확정값: 무진행 한도 = 35.1초 × 3 ≈ **105초**, 적재 한도 = 54.6초 × 3 ≈
+  **165초**, 취소 유예 = 35.1초 × 1.5 ≈ **53초**.
+- 확정값 검증(주입 없음, 2026-11-22): `tests/cancel_grace_probe.py` 통과 — 예측·IG·SHAP·
+  Rollout의 정상 협력 취소가 모두 `cancelled`(NT 최대 0.94초, non-NT 0.08초)로 끝나고
+  같은 자식·세대 유지, 캐시 적중, `restarting` 0건, 남은 자식 0개
+  (`.packaging/issue220-limits/cancel/report.json`). `tests/stall_limit_probe.py`는 개발
+  PC 메모리 부족으로 중지되어 확정값으로는 **미검증**이다. 대신 run01에서 화면 최대값
+  SHAP의 최대 무보고 간격(NT 9.3초)이 무진행 한도 105초의 1/10 아래이고, 측정 적재 최대
+  54.6초가 적재 한도 165초 안임을 근거로 둔다. 메모리를 확보할 수 있으면
+  `python -X utf8 tests/stall_limit_probe.py .packaging/issue220-limits/stall`로 확인한다.
+
 #219 개발 PC 실측(오프라인, 화면 기본 설정, Cas12a 헤드, 2회 중 최대): 최대 무보고
 간격은 NT 첫 예측 29.0초 · non-NT 첫 예측 16.9초(지연 적재) · IG 8.9초 · SHAP 1.9초 ·
 Rollout 1.1초, NT `warm_up` 34.1초 · non-NT 0.5초. 실제 non-NT 자식을 SHAP 도중

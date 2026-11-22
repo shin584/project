@@ -51,7 +51,7 @@ def pick_site(events, rid):
     return site, ("Cas12a" if "Cas12a" in heads else heads[0])
 
 
-def measure(dispatcher, events, reply, timeout=1800):
+def measure(dispatcher, events, reply, timeout=4 * 3600):
     """Run one request to its end; return its duration and largest silent gap."""
     began = time.monotonic()
     rid = reply["request_id"]

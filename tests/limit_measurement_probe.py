@@ -63,7 +63,7 @@ class Session:
     def progress(self, rid):
         return [t for t, e in self.events if e["request_id"] == rid and e["type"] == "progress"]
 
-    def measure(self, reply, timeout=3600):
+    def measure(self, reply, timeout=4 * 3600):
         began = time.monotonic()
         rid = reply["request_id"]
         assert rid is not None, reply

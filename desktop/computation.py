@@ -21,26 +21,33 @@ FAMILY_FACTORIES = {
     "nt": "desktop.worker_renderer:ComputationRenderer",
 }
 
+# Measured on the development PC, offline, with real models (#220; the
+# exhibition PC matches it). Method, values and multiples are recorded in
+# docs/desktop-boundary.md section 3 and .packaging/issue220-limits/run01.
+
 #: Cancel grace in seconds (#218). A child that does not answer a cancel or a
-#: newer request within it is force-restarted in the same family. Provisional:
-#: it only has to exceed one normal batch (a Rollout counts as one); measuring
-#: the final value is a separate ticket. Tests inject `cancel_grace`.
-CANCEL_GRACE = 15.0
+#: newer request within it is force-restarted in the same family. A cancel is
+#: honoured only at a progress report, so the grace is about 1.5x the longest
+#: uninterruptible stretch: the first stretch of a cold first prediction (NT
+#: 35.1 s measured; non-NT loads its models lazily there). Tests inject
+#: `cancel_grace`.
+CANCEL_GRACE = 53.0
 
 #: No-progress limit in seconds (#219). A request that nobody cancelled and
 #: whose child sends no progress report for this long is a stalled computation
 #: and is force-restarted. Measured from the request and from each report, so a
-#: long job that keeps reporting (Cas12a SHAP, about 62 s) never hits it; the
-#: job's total time has no limit. It also covers non-NT's lazy model load
-#: inside the first prediction. Provisional; tests inject `no_progress_limit`.
-NO_PROGRESS_LIMIT = 120.0
+#: long job that keeps reporting (NT SHAP at the screen maximums, about an
+#: hour) never hits it; the job's total time has no limit. About 3x the largest
+#: measured silent gap, the same 35.1 s cold first stretch (SHAP 9.3 s at most).
+#: Tests inject `no_progress_limit`.
+NO_PROGRESS_LIMIT = 105.0
 
 #: Load limit in seconds (#219). Model loading sends no progress from inside
 #: the load, so the whole preparation has this limit. Past it the child is
 #: stopped and preparation fails, so the screen offers "모델 준비 다시 시도"
-#: (`retry-prepare`), which replaces the child. Provisional;
-#: tests inject `load_limit`.
-LOAD_LIMIT = 300.0
+#: (`retry-prepare`), which replaces the child. About 3x the largest measured
+#: load (NT `warm_up` 54.6 s). Tests inject `load_limit`.
+LOAD_LIMIT = 165.0
 
 
 def _send(connection, message):
