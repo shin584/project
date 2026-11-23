@@ -7,7 +7,8 @@ dialog and the computation process's OS state (suspend/kill). Scenarios, in orde
 1. load limit: the computation process is frozen during its first model load;
    past LOAD_LIMIT the screen shows the error and "모델 준비 다시 시도", whose
    click recovers in the same family.
-2. CSV dialog closed: closing the native save dialog ends silently.
+2. CSV dialog closed: closing the native save dialog ends silently and clears
+   "CSV를 저장하는 중...".
 3. CSV after an idle exit: the computation process is killed while idle; the
    next save is refused with a visible error, "CSV를 저장하는 중..." does not
    remain, and a save after reanalysis succeeds.
@@ -253,10 +254,9 @@ def drive(page, process, ui_pid, desktop, output, report, frozen):
     if dialog is not None:
         dismiss(dialog)
     idle(30)
-    # Pre-#215 behaviour, kept by #215: the task ends with no error and no file.
-    # The notice text is left as it was and only recorded.
-    record("csv_dialog_closed_is_silent", dialog is not None and not errors() and not target.exists(),
-           notice=notice())
+    # The task ends with no error and no file, and the saving notice is cleared.
+    record("csv_dialog_closed_is_silent", dialog is not None and not errors() and not target.exists()
+           and "저장하는 중" not in notice(), notice=notice())
 
     # 3. The computation process exits while idle, then the user saves.
     old = worker(process)
