@@ -158,9 +158,9 @@ def test_shell_startup_inputs_views_and_no_http_server(tmp_path):
     assert report["switch_no_stale"] and report["same_family_no_request"]
     assert report["switch_during_save_dialog"] and report["obsolete_dialog_did_not_write"]
     # #217
-    # Closing the dialog stays quiet, as before: no error, the task ends.
-    assert report["dialog_closed_ui"]["canAnalyze"]
-    assert "오류" not in report["dialog_closed_ui"]["notice"]
+    # Closing the dialog stays quiet: no error, the task ends, and the
+    # "CSV를 저장하는 중..." notice does not stay behind.
+    assert report["dialog_closed_ui"] == {"notice": "", "canAnalyze": True}
     assert not report["dialog_closed_error"]
     assert not report["restarted_dialog_opened"]
     refusal = report["restarted_refusal"]

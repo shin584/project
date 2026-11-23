@@ -260,6 +260,9 @@ SCREEN_HTML = r"""<!doctype html>
                 error.className = "error";
                 error.textContent = "계산 프로세스가 다시 시작되어 저장하지 못했습니다. 다시 분석한 뒤 저장하세요";
                 byId("notice").replaceChildren(error);
+              } else if (name === "save_csv") {
+                // Closed dialog: nothing was saved, so drop "CSV를 저장하는 중...".
+                byId("notice").textContent = "";
               }
               finish();
               return;
