@@ -22,3 +22,5 @@ docs/benchmarks/ram_worker.py -text whitespace=cr-at-eol
 # #204 package registration names the exact observer and retained evidence bytes.
 docs/benchmarks/measure_package.py -text whitespace=cr-at-eol
 docs/benchmarks/issue204-*/** -text whitespace=cr-at-eol
+# Release identity files must match the bundle byte-for-byte.
+release/** -text

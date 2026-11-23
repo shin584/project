@@ -1,0 +1,19 @@
+{
+  "issue": 221,
+  "rebuild": 2,
+  "bundle": ".packaging/issue221-build02/dist/XaiDashboardV3",
+  "source_commit": "63afa1168bfdf282136a82ee181268e80a0a046c",
+  "built_at": "2026-11-23T04:15:13.252119+00:00",
+  "build_host": "SJun",
+  "python": "3.13.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "release_manifest_sha256": "3e0e2d3343849d76d30a014d002ab9d7cfc5bf6edfc910dd3daa71f0d9237353",
+  "executable_sha256": "f3b7f1028140f5762e09a939a3aa8d8e8524aaa0f69c2de836532f8a224e4e0e",
+  "file_count": 6851,
+  "total_bytes": 5414867417,
+  "non_nt_archive_sha256": "4c0206782d9f7c1aacfeaa763376bf3624cf31f86338b659e0973fdc5bfcd21c",
+  "non_nt_manifest_sha256": "bb66b688a630fc5c85c5a30b3ae890f169e551688ca361abbde7dc39cb65fb5c",
+  "pyinstaller": "6.22.3",
+  "product_change_since_rebuild1": "desktop/screen.py (6d058e6: clear the CSV saving notice when the save dialog is closed)",
+  "verify_v3": "verified: packaging/verify-v3.ps1 -Bundle, 6851 files, 5414867417 bytes"
+}
