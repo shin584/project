@@ -1,0 +1,38 @@
+{
+  "issue": 221,
+  "origin": {
+    "source": "frozen EXE bytecode",
+    "checkout_commit": "63afa1168bfdf282136a82ee181268e80a0a046c",
+    "checkout_tracked_changes": false,
+    "host": "SJun",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "ram_bytes": 8373960704,
+    "logical_cpus": 8,
+    "executable": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+    "executable_sha256": "f3b7f1028140f5762e09a939a3aa8d8e8524aaa0f69c2de836532f8a224e4e0e",
+    "manifest_sha256": "3e0e2d3343849d76d30a014d002ab9d7cfc5bf6edfc910dd3daa71f0d9237353",
+    "source_commit": "63afa1168bfdf282136a82ee181268e80a0a046c",
+    "built_at": "2026-11-23T04:15:13.252119+00:00",
+    "file_count": 6851,
+    "total_bytes": 5414867417
+  },
+  "outcome_limit": 256,
+  "samples": [
+    {
+      "requests": 1000,
+      "records": 256,
+      "traced_bytes": 26224
+    },
+    {
+      "requests": 10000,
+      "records": 256,
+      "traced_bytes": 26316
+    },
+    {
+      "requests": 100000,
+      "records": 256,
+      "traced_bytes": 26376
+    }
+  ],
+  "passed": true
+}

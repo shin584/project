@@ -98,11 +98,48 @@ WebView2·할당기 쪽으로 보이며 원인은 확인하지 않았다. 10만 
   끝나지만 안내에 "CSV를 저장하는 중..."이 남았다(#215 이전 `a73d11b`과 같은 동작).
   이후 화면이 대화상자를 닫으면 이 안내를 지우도록 고쳤고
   (`tests/test_desktop_shell.py`의 `dialog_closed_ui == {"notice": "", ...}`),
-  위 EXE는 이 수정 전 빌드다. 수정을 담은 EXE 재빌드·재실행은 하지 않았다.
+  수정을 담은 재검사는 아래 "재빌드 2"에 있다.
 - **예비 실행.** 첫 정식 실행(`.packaging/issue221-recheck-attempt01`)에서 EXE는
   12/12 통과했으나 소스는 창 연결이 늦어 non-NT 적재가 정지 전에 끝나 적재 한도
   시나리오가 성립하지 않았다. 검사 스크립트가 계산 프로세스를 실행 직후 멈추도록
   고치고(`6bf4c2d`, 화면이 아직 "모델 준비 중"인지 확인 추가) 두 실행을 모두 다시 했다.
+
+## 재빌드 2 · 대화상자 닫음 안내 수정 반영
+
+대화상자를 닫으면 "CSV를 저장하는 중..."을 지우도록 화면을 고친 뒤(`6d058e6`),
+검사 스크립트의 `csv_dialog_closed_is_silent`가 이 안내의 잔존도 실패로 보게
+하고(`63afa11`) 같은 절차로 EXE를 다시 빌드해 검사했다. 위 빌드 대비 제품 코드
+차이는 `desktop/screen.py` 3줄뿐이다. 결과는
+[`benchmarks/issue221-recheck/rebuild02/`](benchmarks/issue221-recheck/rebuild02/).
+
+| 항목 | 값 |
+| --- | --- |
+| 빌드 소스 커밋 | `63afa1168bfdf282136a82ee181268e80a0a046c` |
+| release manifest SHA-256 | `3e0e2d3343849d76d30a014d002ab9d7cfc5bf6edfc910dd3daa71f0d9237353` |
+| `XaiDashboardV3.exe` SHA-256 | `f3b7f1028140f5762e09a939a3aa8d8e8524aaa0f69c2de836532f8a224e4e0e` |
+| 파일 / 바이트 | 6,851개 / 5,414,867,417 (`verify-v3.ps1` 검증 통과) |
+| 빌드 시각 | 2026-11-23T04:15:13Z |
+| 배포 폴더 | `.packaging/issue221-build02/dist/XaiDashboardV3` (git 미추적) |
+
+```powershell
+& $buildPython -X utf8 packaging/build_desktop.py .packaging/issue221-build02 ...  # 위와 같은 인자
+python -u -X utf8 docs/benchmarks/recheck_exhibition.py run .packaging/issue221-recheck02/exe exe `
+    --exe .packaging/issue221-build02/dist/XaiDashboardV3/XaiDashboardV3.exe
+& $buildPython -X utf8 docs/benchmarks/recheck_exhibition.py history .packaging/issue221-recheck02/history-exe.json `
+    --exe .packaging/issue221-build02/dist/XaiDashboardV3/XaiDashboardV3.exe
+```
+
+- **EXE: 13 통과 / 0 실패 / 0 건너뜀.** 대화상자 닫음 뒤 안내 `""`. 적재 한도 165.2초,
+  무진행 105.1초, 취소 유예 53.1초, 각 시나리오 38행. 강제 재시작 뒤 창 닫기 종료
+  코드 0, 남은 자식 0개. JS 오류 0건, 샘플러 시간 초과 없음(902표본, 최대 간격 1.05초).
+- 요청 기록(EXE 동결 바이트코드): 1천·1만·10만 건 뒤 256건, 26,224 → 26,376바이트.
+- UI private 메모리(MiB): 1회차 10만 건 80.1 → 141.5 (+61.4), 2회차 141.5 → 142.2 (+0.8).
+- **소스: 미완료.** `.packaging/issue221-recheck02/source` 실행은 8개 검사(적재 한도
+  165.1초, 대화상자 닫음 안내 `""`, 대기 중 종료 후 저장 거부, 재분석 뒤 저장)까지 모두
+  통과한 뒤 PC 메모리 부족으로 Claude Code가 중단시켰다
+  ([기록](benchmarks/issue221-recheck/rebuild02/source-interrupted.log)).
+  요청 10만 건·무진행·취소 유예·창 닫기는 이번 소스 커밋에서 다시 보지 않았다.
+  이 부분의 소스 결과는 위 첫 실행(`6bf4c2d`, 같은 계산 코드)을 따른다.
 
 ## 범위 밖과 남은 미검증
 

@@ -1,0 +1,260 @@
+{
+  "root_pid": 21144,
+  "exit_code": 0,
+  "samples": 902,
+  "seconds": 901.6551804999908,
+  "max_sample_gap_seconds": 1.0507348000101047,
+  "access_errors": [],
+  "survivors": [],
+  "timed_out": false,
+  "process_inventory": {
+    "(21144, 1795407399.0738513)": {
+      "pid": 21144,
+      "created": 1795407399.0738513,
+      "ppid": 23944,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe"
+      ]
+    },
+    "(29080, 1795407401.2868335)": {
+      "pid": 29080,
+      "created": 1795407401.2868335,
+      "ppid": 21144,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--embedded-browser-webview=1",
+        "--webview-exe-name=XaiDashboardV3.exe",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "--noerrdialogs",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--allow-file-access-from-files",
+        "--disable-background-networking",
+        "--disable-features=ElasticOverscroll",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--proxy-server=http://127.0.0.1:9",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=53475",
+        "--mojo-named-platform-channel-pipe=21144.29344.3261978002269211500",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916"
+      ]
+    },
+    "(19568, 1795407401.4043567)": {
+      "pid": 19568,
+      "created": 1795407401.4043567,
+      "ppid": 29080,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--type=crashpad-handler",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "/prefetch:4",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916",
+        "--monitor-self-annotation=ptype=crashpad-handler",
+        "--user-stream-region=320,65568",
+        "--database=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView\\Crashpad",
+        "--annotation=IsOfficialBuild=1",
+        "--annotation=channel=",
+        "--annotation=chromium-version=157.0.8103.80",
+        "--annotation=exe=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--annotation=plat=Win64",
+        "--annotation=prod=Edge WebView2",
+        "--annotation=ver=157.0.4341.60",
+        "--initial-client-data=0x188,0x18c,0x190,0x184,0x114,0x7fff8cddb3a0,0x7fff8cddb3b0,0x7fff8cddb3c0"
+      ]
+    },
+    "(18904, 1795407402.4969406)": {
+      "pid": 18904,
+      "created": 1795407402.4969406,
+      "ppid": 29080,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--type=gpu-process",
+        "--gpu-recent-crash-count=0",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "--webview-exe-name=XaiDashboardV3.exe",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--gpu-preferences=WAAAAAAAAABgAAACAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=1796,i,4563785739005011020,14744005786776431260,262144",
+        "--field-trial-handle=2028,i,16416979622064542245,5819141735833541652,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1872,i,17253525569301266910,13021542685414267892,4",
+        "--trace-process-track-uuid=3190708988185955192",
+        "--mojo-platform-channel-handle=2024",
+        "/prefetch:2",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916"
+      ]
+    },
+    "(21760, 1795407402.514038)": {
+      "pid": 21760,
+      "created": 1795407402.514038,
+      "ppid": 29080,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=network.mojom.NetworkService",
+        "--lang=ko",
+        "--service-sandbox-type=none",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "--webview-exe-name=XaiDashboardV3.exe",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2328,i,18443860480711499200,110768597435074808,524288",
+        "--field-trial-handle=2028,i,16416979622064542245,5819141735833541652,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1872,i,17253525569301266910,13021542685414267892,4",
+        "--trace-process-track-uuid=3190708989122997041",
+        "--mojo-platform-channel-handle=2324",
+        "/prefetch:11",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916"
+      ]
+    },
+    "(12940, 1795407402.614074)": {
+      "pid": 12940,
+      "created": 1795407402.614074,
+      "ppid": 29080,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=storage.mojom.StorageService",
+        "--lang=ko",
+        "--service-sandbox-type=service",
+        "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "--webview-exe-name=XaiDashboardV3.exe",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2712,i,2917246299150754318,3946860809778139713,524288",
+        "--field-trial-handle=2028,i,16416979622064542245,5819141735833541652,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1872,i,17253525569301266910,13021542685414267892,4",
+        "--trace-process-track-uuid=3190708990060038890",
+        "--mojo-platform-channel-handle=2728",
+        "/prefetch:13",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916"
+      ]
+    },
+    "(26772, 1795407402.907475)": {
+      "pid": 26772,
+      "created": 1795407402.907475,
+      "ppid": 29080,
+      "name": "msedgewebview2.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\_internal\\webview2\\msedgewebview2.exe",
+        "--type=renderer",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-recheck02\\exe\\webview-profile\\EBWebView",
+        "--webview-exe-name=XaiDashboardV3.exe",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=1",
+        "--allow-file-access-from-files",
+        "--remote-debugging-port=53475",
+        "--video-capture-use-gpu-memory-buffer",
+        "--lang=ko",
+        "--device-scale-factor=1.25",
+        "--num-raster-threads=4",
+        "--enable-main-frame-before-activation",
+        "--renderer-client-id=5",
+        "--js-flags=--ms-user-locale=ko_KR",
+        "--ssd-no-pressure-read-main-dll",
+        "--launch-time-ticks=89748600683",
+        "--metrics-shmem-handle=4076,i,5448621168269761308,18433349615920361058,1048576",
+        "--field-trial-handle=2028,i,16416979622064542245,5819141735833541652,262144",
+        "--disable-features=ElasticOverscroll",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1872,i,17253525569301266910,13021542685414267892,4",
+        "--trace-process-track-uuid=3190708990997080739",
+        "--mojo-platform-channel-handle=4084",
+        "/pfhostedapp:487a9689b65d032b8b69e25eb4c2a2d576c95916",
+        "/prefetch:1"
+      ]
+    },
+    "(16544, 1795407403.6364594)": {
+      "pid": 16544,
+      "created": 1795407403.6364594,
+      "ppid": 21144,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+        "--multiprocessing-fork",
+        "parent_pid=21144",
+        "pipe_handle=1304"
+      ]
+    },
+    "(17596, 1795407568.9148147)": {
+      "pid": 17596,
+      "created": 1795407568.9148147,
+      "ppid": 21144,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+        "--multiprocessing-fork",
+        "parent_pid=21144",
+        "pipe_handle=2068"
+      ]
+    },
+    "(15620, 1795407589.7311332)": {
+      "pid": 15620,
+      "created": 1795407589.7311332,
+      "ppid": 21144,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+        "--multiprocessing-fork",
+        "parent_pid=21144",
+        "pipe_handle=3784"
+      ]
+    },
+    "(27184, 1795408216.4152465)": {
+      "pid": 27184,
+      "created": 1795408216.4152465,
+      "ppid": 21144,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+        "--multiprocessing-fork",
+        "parent_pid=21144",
+        "pipe_handle=5160"
+      ]
+    },
+    "(24964, 1795408285.2429621)": {
+      "pid": 24964,
+      "created": 1795408285.2429621,
+      "ppid": 21144,
+      "name": "XaiDashboardV3.exe",
+      "exe": "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+      "cmdline": [
+        "C:\\project\\MC_project\\dashboard_v3\\.packaging\\issue221-build02\\dist\\XaiDashboardV3\\XaiDashboardV3.exe",
+        "--multiprocessing-fork",
+        "parent_pid=21144",
+        "pipe_handle=3712"
+      ]
+    }
+  }
+}
