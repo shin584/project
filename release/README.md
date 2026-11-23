@@ -27,11 +27,24 @@
 1. Release `dashboard-v4.0`에서 zip 3개를 받는다. 로컬 드라이브에 여유 공간이 약 10GB 필요하다(zip 4.5GB + 압축 해제 5.4GB).
 2. (선택) zip 해시를 위 표와 비교한다.
    `Get-FileHash .\XaiDashboardV3-part*.zip -Algorithm SHA256`
-3. 세 zip을 **같은 폴더에** 모두 푼다(Windows 기본 "압축 풀기" 가능). 결과는 `XaiDashboardV3\` 하나.
-4. 전체 파일을 검증한다.
+3. **압축을 풀기 전에 zip 3개의 차단을 해제한다.** 각 zip을 마우스 오른쪽 버튼 → 속성 → 아래쪽 "차단 해제" 체크 → 확인.
+   PowerShell로 한 번에: `Get-ChildItem .\XaiDashboardV3-part*.zip | Unblock-File`
+4. 세 zip을 **같은 폴더에** 모두 푼다(Windows 기본 "압축 풀기" 가능). 결과는 `XaiDashboardV3\` 하나.
+5. 전체 파일을 검증한다.
    `powershell -NoProfile -ExecutionPolicy Bypass -File .\XaiDashboardV3\verify-v3.ps1`
    출력의 `manifest_sha256`이 위 표의 값과 같아야 한다.
-5. `XaiDashboardV3\XaiDashboardV3.exe`를 실행한다. 자세한 안내는 `START-HERE.txt`.
+6. `XaiDashboardV3\XaiDashboardV3.exe`를 실행한다. 자세한 안내는 `START-HERE.txt`.
+
+### 실행 시 `Failed to resolve Python.Runtime.Loader.Initialize` 에러가 날 때
+
+3단계(차단 해제)를 건너뛰고 압축을 푼 경우다. 인터넷에서 받은 zip을 Windows 탐색기로 풀면
+"인터넷에서 받은 파일" 표시(`Zone.Identifier`)가 풀린 파일 전부에 복사되고, 창을 띄우는
+.NET Framework가 이 표시가 붙은 `Python.Runtime.dll`을 불러오지 않는다.
+압축을 다시 풀 필요 없이, 풀린 폴더에서 표시를 지우고 다시 실행하면 된다.
+
+`Get-ChildItem .\XaiDashboardV3 -Recurse -File | Unblock-File`
+
+표시만 지우므로 파일 내용과 `verify-v3.ps1` 결과는 바뀌지 않는다.
 
 ## 이 폴더의 파일
 
